@@ -267,17 +267,17 @@ export const niwasSalariedTemplate = (
           <td style="${valueCellStyle}" colspan="5">
             <table style="border-collapse:collapse;width:100%;margin:0;">
               <tr>
-                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Smartphone (Yes/No): ${assetRows[0]?.[1] || "Not provided"}</td>
-                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Washing Machine (Yes/No): ${assetRows[1]?.[1] || "Not provided"}</td>
-                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Car RC No. (Yes/No): ${assetRows[2]?.[1] || "Not provided"}</td>
-                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Two-Wheeler (Yes/No): ${assetRows[3]?.[1] || "Not provided"}</td>
-                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Auto/Cab (Yes/No): ${assetRows[4]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;"><b>Smartphone (Yes/No):</b> ${assetRows[0]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;"><b>Washing Machine (Yes/No):</b> ${assetRows[1]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;"><b>Car RC No. (Yes/No):</b> ${assetRows[2]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;"><b>Two-Wheeler (Yes/No):</b> ${assetRows[3]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;"><b>Auto/Cab (Yes/No):</b> ${assetRows[4]?.[1] || "Not provided"}</td>
               </tr>
               <tr>
-                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Computer / Laptop (Yes/No): ${assetRows[5]?.[1] || "Not provided"}</td>
-                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">AC (Yes/No): ${assetRows[6]?.[1] || "Not provided"}</td>
-                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Fridge (Yes/No): ${assetRows[7]?.[1] || "Not provided"}</td>
-                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Induction (Yes/No): ${assetRows[8]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;"><b>Computer / Laptop (Yes/No):</b> ${assetRows[5]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;"><b>AC (Yes/No):</b> ${assetRows[6]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;"><b>Fridge (Yes/No):</b> ${assetRows[7]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;"><b>Induction (Yes/No):</b> ${assetRows[8]?.[1] || "Not provided"}</td>
               </tr>
             </table>
           </td>
@@ -287,15 +287,15 @@ export const niwasSalariedTemplate = (
           <td style="${valueCellStyle}" colspan="5">
             <table style="border-collapse:collapse;width:100%;margin:0;">
               <tr>
-                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Property: ${assetRows[9]?.[1] || "Not provided"}</td>
-                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Insurance (LIC): ${assetRows[10]?.[1] || "Not provided"}</td>
-                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Fixed Deposit: ${assetRows[11]?.[1] || "Not provided"}</td>
-                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Chit Funds: ${assetRows[12]?.[1] || "Not provided"}</td>
-                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Post Office Savings: ${assetRows[13]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;"><b>Property:</b> ${assetRows[9]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;"><b>Insurance (LIC):</b> ${assetRows[10]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;"><b>Fixed Deposit:</b> ${assetRows[11]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;"><b>Chit Funds:</b> ${assetRows[12]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;"><b>Post Office Savings:</b> ${assetRows[13]?.[1] || "Not provided"}</td>
               </tr>
               <tr>
-                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Is Post Office savings monthly (Yes/No): ${assetRows[14]?.[1] || "Not provided"}</td>
-                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Any recurring deposit (Yes/No): ${assetRows[15]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;"><b>Is Post Office savings monthly (Yes/No):</b> ${assetRows[14]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;"><b>Any recurring deposit (Yes/No):</b> ${assetRows[15]?.[1] || "Not provided"}</td>
               </tr>
             </table>
           </td>
@@ -327,21 +327,21 @@ export const niwasSalariedTemplate = (
         )}
         <tr>
           <td style="${labelCellStyle}">Final Product/Service offered by Company</td>
-          <td style="${valueCellStyle}">${employment.finalProductServiceOffered}</td>
+          <td style="${valueCellStyle}">${employment.finalProductServiceOffered || "Not provided"}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">Number of Competitors in Nearby Market</td>
-          <td style="${valueCellStyle}">${employment.companyCompetitors}</td>
+          <td style="${valueCellStyle}">${employment.companyCompetitors || "Not provided"}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">Locality of Business Premises</td>
-            <td style="${valueCellStyle}">${ employment.localityOfBusinessPremises}</td>
+            <td style="${valueCellStyle}">${ employment.localityOfBusinessPremises || "Not provided"}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle}" colspan="2"></td>
         </tr>
-          ${renderKeyValue("Employee ID (Copy/Photograph Mandatory)", employment.employeeId)}
-          ${renderKeyValue("Designation", employment.designation)}
+          ${renderKeyValue("Employee ID (Copy/Photograph Mandatory)", employment.employeeId || "Not provided")}
+          ${renderKeyValue("Designation", employment.designation || "Not provided")}
         <tr>
           <td colspan="2" style="padding:0;">
             <table style="${tableStyle}">
@@ -353,11 +353,11 @@ export const niwasSalariedTemplate = (
                 <th style="${labelCellStyle}">Role</th>
               </tr>
               <tr>
-                <td style="${valueCellStyle}">${ companyDetails.modeOfSalary}</td>
-                <td style="${valueCellStyle}">${ companyDetails.typeOfEmployer}</td>
-                <td style="${valueCellStyle}">${ companyDetails.typeOfIndustry}</td>
-                <td style="${valueCellStyle}">${ companyDetails.department}</td>
-                <td style="${valueCellStyle}">${ companyDetails.role}</td>
+                <td style="${valueCellStyle}">${ companyDetails.modeOfSalary || "Not provided"}</td>
+                <td style="${valueCellStyle}">${ companyDetails.typeOfEmployer || "Not provided"}</td>
+                <td style="${valueCellStyle}">${ companyDetails.typeOfIndustry || "Not provided"}</td>
+                <td style="${valueCellStyle}">${ companyDetails.department || "Not provided"}</td>
+                <td style="${valueCellStyle}">${ companyDetails.role || "Not provided"}</td>
               </tr>
             </table>
           </td>
@@ -392,26 +392,26 @@ export const niwasSalariedTemplate = (
       <table style="${tableStyle}">
           <tr>
             <td style="${labelCellStyle}">Monthly Salary Income</td>
-            <td style="${valueCellStyle}">Cash Amount: ${formatCurrency(financialDetails?.monthlySalaryIncome?.cashAmount || 0)}</td>
-            <td style="${valueCellStyle}">Cheque Amount: ${formatCurrency(financialDetails?.monthlySalaryIncome?.chequeAmount || 0)}</td>
+            <td style="${valueCellStyle}">Cash Amount: ${formatCurrency(financialDetails?.monthlySalaryIncome?.cashAmount || "Not provided")}</td>
+            <td style="${valueCellStyle}">Cheque Amount: ${formatCurrency(financialDetails?.monthlySalaryIncome?.chequeAmount || "Not provided")}</td>
           </tr>
           <tr>
-            <td style="${labelCellStyle}" colspan="3">Other Monthly Income:- ${formatCurrency(financialDetails?.otherMonthlyIncome || 0)}</td> 
+            <td style="${labelCellStyle}" colspan="3">Other Monthly Income:- ${formatCurrency(financialDetails?.otherMonthlyIncome || "Not provided")}</td> 
           </tr>
           <tr>
             <td style="${labelCellStyle}">Rental Income (In Rs)</td>
-            <td style="${valueCellStyle}">Cash Amount: ${formatCurrency(financialDetails?.rentalIncome?.cashAmount || 0)}</td>
-            <td style="${valueCellStyle}">Cheque Amount: ${formatCurrency(financialDetails?.rentalIncome?.chequeAmount || 0)}</td>
+            <td style="${valueCellStyle}">Cash Amount: ${formatCurrency(financialDetails?.rentalIncome?.cashAmount || "Not provided")}</td>
+            <td style="${valueCellStyle}">Cheque Amount: ${formatCurrency(financialDetails?.rentalIncome?.chequeAmount || "Not provided")}</td>
           </tr>
           <tr>
             <td style="${labelCellStyle}">Incentives/Perks (In Rs)</td>
-            <td style="${valueCellStyle}">Cash Amount: ${formatCurrency(financialDetails?.incentives?.cashAmount || 0)}</td>
-            <td style="${valueCellStyle}">Cheque Amount: ${formatCurrency(financialDetails?.incentives?.chequeAmount || 0)}</td>
+            <td style="${valueCellStyle}">Cash Amount: ${formatCurrency(financialDetails?.incentives?.cashAmount || "Not provided")}</td>
+            <td style="${valueCellStyle}">Cheque Amount: ${formatCurrency(financialDetails?.incentives?.chequeAmount || "Not provided")}</td>
           </tr>
           <tr>
             <td style="${labelCellStyle}">Monthly Bonus (In Rs)</td>
-            <td style="${valueCellStyle}">Cash Amount: ${formatCurrency(financialDetails?.monthlyBonus?.cashAmount || 0)}</td>
-            <td style="${valueCellStyle}">Cheque Amount: ${formatCurrency(financialDetails?.monthlyBonus?.chequeAmount || 0)}</td>
+            <td style="${valueCellStyle}">Cash Amount: ${formatCurrency(financialDetails?.monthlyBonus?.cashAmount || "Not provided")}</td>
+            <td style="${valueCellStyle}">Cheque Amount: ${formatCurrency(financialDetails?.monthlyBonus?.chequeAmount || "Not provided")}</td>
           </tr>
           <tr>
             <td style="${labelCellStyle}">Others, please specify source type:</td>
@@ -419,8 +419,8 @@ export const niwasSalariedTemplate = (
           </tr>
           <tr>
             <td style="${labelCellStyle}">Monthly Income (In Rs):</td>
-            <td style="${valueCellStyle}">Cash Amount: ${formatCurrency(financialDetails?.monthlyIncome?.cashAmount || 0)}</td>
-            <td style="${valueCellStyle}">Cheque Amount: ${formatCurrency(financialDetails?.monthlyIncome?.chequeAmount || 0)}</td>
+            <td style="${valueCellStyle}">Cash Amount: ${formatCurrency(financialDetails?.monthlyIncome?.cashAmount || "Not provided")}</td>
+            <td style="${valueCellStyle}">Cheque Amount: ${formatCurrency(financialDetails?.monthlyIncome?.chequeAmount || "Not provided")}</td>
           </tr>
       </table>
 
@@ -492,7 +492,7 @@ export const niwasSalariedTemplate = (
             "Total Transaction Cost (Total of all the above)",
             costAndFunds.totalTransactionCost
           )}
-          ${renderKeyValue("Mode of Payment to Seller (Cash / Cheque)","Cash Amount:"+ formatCurrency(costAndFunds?.modeOfPaymentToSeller?.cashAmount || 0)+"<br>" +"Cheque Amount: "+ formatCurrency(costAndFunds?.modeOfPaymentToSeller?.chequeAmount || 0))}
+          ${renderKeyValue("Mode of Payment to Seller (Cash / Cheque)","Cash Amount:"+ formatCurrency(costAndFunds?.modeOfPaymentToSeller?.cashAmount || "Not provided")+"<br>" +"Cheque Amount: "+ formatCurrency(costAndFunds?.modeOfPaymentToSeller?.chequeAmount || "Not provided"))}
             </table>
 
       <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">

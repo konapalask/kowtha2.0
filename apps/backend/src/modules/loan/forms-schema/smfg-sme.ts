@@ -382,15 +382,14 @@ export const smfgSmeSchema = {
               type: "object",
               properties: {
                 bankName: { type: "string", title: "Bank Name" },
-                accountNumber: { type: "string", title: "Account Number" },
                 accountType: {
                   type: "string",
                   title: "Account Type",
                   enum: ["Current", "Savings", "CC/OD"],
                 },
                 vintage: { type: "string", title: "Vintage of account" },
-                minBalance: { type: "string", title: "CC/OD Min Balance" },
-                customerBehaviour: {
+                ifCcOdLimitWhatIsLimitMinBal: { type: "string", title: "CC/OD Min Balance" },
+                customerBehavior: {
                   type: "string",
                   title: "Customer Behaviour",
                 },

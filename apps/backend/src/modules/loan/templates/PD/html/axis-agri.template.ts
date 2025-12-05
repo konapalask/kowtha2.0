@@ -247,9 +247,9 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
         </tr>
         ${ensureArray(banking.facilities).map((facility: any) => `
           <tr>
-            <td style="${valueCellStyle}">${facility.bankName} || "Not provided"</td>
-            <td style="${valueCellStyle}">${facility.limitType} || "Not provided"</td>
-            <td style="${valueCellStyle}">${formatCurrency(facility.limitAmount) || "Not provided"}</td>
+            <td style="${valueCellStyle}">${facility.bankName || "Not provided"}</td>
+            <td style="${valueCellStyle}">${facility.limitType || "Not provided"}</td>
+            <td style="${valueCellStyle}">${formatCurrency(facility.limitAmount || "Not provided")}</td>
           </tr>
         `).join("")}
         </table>

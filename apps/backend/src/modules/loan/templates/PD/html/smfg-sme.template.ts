@@ -161,7 +161,7 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
     account.accountType || "",
     formatMultiline(account.vintage),
     formatMultiline(account.ifCcOdLimitWhatIsLimitMinBal),
-    formatMultiline(account.customerBehavior),
+    formatMultiline(account.customerBehaviour),
   ]);
 
   const generalTable = `
@@ -479,7 +479,7 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
        )}
       ${renderKeyValueRow(
         "Applied Loan Amount",
-        loanPurpose.appliedLoanAmount,
+        loanPurpose.loanAmountApplied,
         formatCurrency,
         { colSpan: 1 }
       )}

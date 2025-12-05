@@ -57,6 +57,9 @@ const ensureArray = <T>(value: T | T[] | undefined | null): T[] => {
   return [value];
 };
 
+const  SideHeading = (text: string) =>
+  `<p style="margin:8px 0;line-height:1.5;font-size:15px;color:#333"><strong>${text}</strong></p>`;
+
 const wrapParagraph = (content: string) =>
   `<p style="${paragraphStyle}">${content}</p>`;
 
@@ -589,10 +592,6 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
           : "") + wrapParagraph(""),
     },
     {
-      instruction: `<p style="${paragraphStyle}"><strong>PD Status</strong></p>`,
-      content: wrapParagraph(html_data.approvedStatus|| "Not provided"),
-    },
-    {
       instruction: `<p style="${paragraphStyle}"><strong>Overall outcome of the Personal Discussion</strong></p>`,
       content: wrapParagraph(
         formatMultiline(personalDiscussion.overallOutcome || "")
@@ -600,7 +599,7 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>Remarks</strong></p>`,
-      content: wrapParagraph(formatMultiline(personalDiscussion.remarks || "")),
+      content: wrapParagraph(html_data.approvedStatus|| "Not provided"),
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>PD Conducted by</strong></p>`,
@@ -635,46 +634,46 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
 return `
 ${pdBaseTemplate(html_data)}
 <div class="template-content">
-${wrapParagraph("<strong>IDFC Bank LTD – Personal Discussion Report</strong>")}
-${wrapParagraph("<strong>I] General Details:-</strong>")}
+<h1 style="margin:8px 0;line-height:1.5;font-size:20px;color:#333">IDFC Bank LTD – Personal Discussion Report</h1>
+${ SideHeading("I] General Details:-")}
 ${generalTable}
 
-${wrapParagraph("<strong>II] Personal Details:-</strong>")}
+${ SideHeading("II] Personal Details:-")}
       ${personalTable}
 
-      ${wrapParagraph("<strong>III] Business/ Work Details:-</strong>")}
+      ${ SideHeading("III] Business/ Work Details:-")}
       ${businessTable}
 
-      ${wrapParagraph("<strong>IV] Operational Details:-</strong>")}
+      ${ SideHeading("IV] Operational Details:-")}
       ${operationalTable}
 
-      ${wrapParagraph("<strong>V] Financial Details:-</strong>")}
+      ${ SideHeading("V] Financial Details:-")}
       ${financialTable}
 
-      ${wrapParagraph("<strong>Loans and Banking Details:</strong>")}
-      ${wrapParagraph("<strong>Term Loans:</strong>")}
+      ${ SideHeading("Loans and Banking Details:")}
+      <p style="margin:8px 0;line-height:1.5;font-size:15px;font-weight:bold;color:#333;align-items: center;">Term Loans:</p>
       ${termLoansTable}
-      ${wrapParagraph("<strong>Banking Details:</strong>")}
+      <p style="margin:8px 0;line-height:1.5;font-size:15px;font-weight:bold;color:#333;align-items: center;">Banking Details:</p>
       ${bankingTable}
-      ${wrapParagraph("<strong>Other Assets:</strong>")}
+      ${ SideHeading("Other Assets:")}
       ${wrapParagraph(
         termLoansSection?.otherAssets?.split("\n")
-          .map((line: string) => `<li style="margin-left: 20px;">${line}</li>`)
+          .map((line: string) => `<ul style="margin-left: 20px;"><li>${line}</li></ul>`)
           .join("") || "-"
       )}
-      ${wrapParagraph("<strong>Other Business if any:</strong>")}
+      ${ SideHeading("Other Business if any:")}
       ${wrapParagraph(
         termLoansSection?.otherBusiness?.split("\n")
-          .map((line: string) => `<li style="margin-left: 20px;">${line}</li>`)
+          .map((line: string) => `<ul style="margin-left: 20px;"><li>${line}</li></ul>`)
           .join("") || "-"
       )}
-      ${wrapParagraph("<strong>Rental Income If any:</strong>")}
+      ${ SideHeading("Rental Income If any:")}
       ${rentalTable}
 
-      ${wrapParagraph("<strong>VI] Loan Details:-</strong>")}
+      ${ SideHeading("VI] Loan Details:-")}
       ${loanDetailsTable}
 
-      ${wrapParagraph("<strong>VII] Personal Discussion Details:-</strong>")}
+      ${ SideHeading("VII] Personal Discussion Details:-")}
       ${personalDiscussionTable}
       ${detailsConfirmationRows}
 

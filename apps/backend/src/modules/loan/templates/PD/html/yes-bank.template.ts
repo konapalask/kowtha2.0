@@ -158,7 +158,7 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
           </td>
           <td style="${labelCellStyle}">Contact number</td>
           <td style="${valueCellStyle}">${formatMultiline(
-    general.contactNumber
+    general.applicantContactNumber
   )}</td>
         </tr>
         <tr>
