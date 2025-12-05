@@ -705,11 +705,12 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                           wordBreak: "break-word",
                           fontSize: 14,
                           lineHeight: 1.6,
+                          whiteSpace: "pre-wrap",
+                          color: "#333",
                         }}
-                        dangerouslySetInnerHTML={{ 
-                          __html: emailLog.body || "<p style='color: #999;'>No email body content</p>" 
-                        }}
-                      />
+                      >
+                        {emailLog.body || <span style={{ color: "#999" }}>No email body content</span>}
+                      </div>
                     </div>
                   ))}
                 </Card>

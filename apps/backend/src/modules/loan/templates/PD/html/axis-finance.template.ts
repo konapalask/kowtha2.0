@@ -174,7 +174,7 @@ const renderBusinessSection = (title: string, content: string) => {
   if (!content || !content.trim()) return "";
   return `
     <div style="margin: 15px 0;">
-      <div style="font-size:14px;font-weight:bold;color:#242424;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #bfbfbf;padding-bottom:4px;margin-bottom:8px;">${title}</div>
+      <div style="${sectionTitleStyle}">${title}</div>
       <div>${content}</div>
     </div>
   `;
@@ -454,7 +454,7 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
 
   const liabilitiesTable =`
     <div>
-      <p style="${paragraphStyle}"><strong><u>Other Liabilities Including CC Limits (Own/Co Applicants)</u></strong></p>
+      <p style="${sectionTitleStyle}"><strong><u>Other Liabilities Including CC Limits (Own/Co Applicants)</u></strong></p>
       <table style="${tableStyle}">
         <tr>
           <td style="${headerCellStyle};">From</td>
@@ -549,19 +549,21 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
 
   const endUseOfFundsTable = `
       <div>
-      <p style="${paragraphStyle}"><strong><u>End Use of Funds</u></strong><br>${formatMultiline(endUseOfFunds.endUseOfFunds)}</p> 
-        
+      <p style="${sectionTitleStyle}"><strong><u>End Use of Funds</u></strong></p> 
+      <p style="${paragraphStyle}">${formatMultiline(endUseOfFunds.endUseOfFunds)}</p> 
       </div>`;
 
   const otherObservationsTable = `
     <div>
-      <p style="${paragraphStyle}"><strong><u>Other Observations</u></strong><br>${otherObservations?.otherObservations?.split("\n").map(line => `<li style="margin-left:10px;">${line}</li>`).join("")}</p>
+      <p style="${sectionTitleStyle}"><strong><u>Other Observations</u></strong></p>
+      <ul>${otherObservations?.otherObservations?.split("\n").map(line => `<li style="margin:8px 0;">${line}</li>`).join("")}</ul>
     </div>
   `;
 
   const overallPositivesOrNegativesTable = `
     <div>
-      <p style="${paragraphStyle}"><strong><u>Overall Positives or Negatives</u></strong><br> ${formatMultiline(overallPositivesOrNegatives.overallPositivesOrNegatives)}</p>
+      <p style="${sectionTitleStyle}"><strong><u>Overall Positives or Negatives</u></strong></p>
+      <p style="${paragraphStyle}">${formatMultiline(overallPositivesOrNegatives.overallPositivesOrNegatives)}</p>
     </div>
   `;
   const tradeReferenceTable = renderMultiColumnTable(
@@ -590,13 +592,13 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
 
   const noteBlock = `
     <div style="font-size:12px;line-height:1.6;margin-top:16px;">
-      <p style="margin:8px 0;">
+      <p style="${paragraphStyle}">
         <strong>Note:</strong> The estimated financials and qualitative remarks furnished above are based on the applicant’s disclosures and on-site observations captured during the personal discussion.
       </p>
-      <p style="margin:8px 0;">
+      <p style="${paragraphStyle}">
         <strong>Disclaimer:</strong> The report contains information shared by the person contacted during the visit. Axis Finance will be solely responsible for decisions taken on the basis of this report and any liabilities directly or indirectly arising therefrom.
       </p>
-      <p style="margin:8px 0;">
+      <p style="${paragraphStyle}">
         TATA (Tata housing finance Ltd / Tata capital Ltd., will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions, efficient services will not be liable in any case.
       </p>
     </div>
@@ -604,7 +606,7 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
 
   const estimatedIncomeTable = `
     <div> 
-    <p style="font-size:18px;font-weight:bold;"><u>Estimated Income</u></p>
+    <p style="${sectionTitleStyle}"><strong><u>Estimated Income</u></strong></p>
     <p style="${paragraphStyle}">${formatMultiline(estimatedIncome?.estimatedIncomeDetails || "Not Provided")}</p>
     ${estimatedIncome?.patOfTheBusinessConcern ? `<p style="${paragraphStyle}"><strong>The PAT of the Business Concern (Rs.)</strong> ${formatCurrency(estimatedIncome?.patOfTheBusinessConcern)}</p>` : ""}
     </div>

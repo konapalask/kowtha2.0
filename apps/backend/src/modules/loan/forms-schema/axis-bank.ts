@@ -628,7 +628,7 @@ export const axisBankSchema = {
               },
               lessRentalExpenses: {
                 type: "number",
-                title: "Less: Indirect expenses",
+                title: "Less: Rental expenses",
                 formatter: {
                   useIndianFormat: true,
                   locale: "en-IN",
@@ -648,7 +648,7 @@ export const axisBankSchema = {
               },
               lessElectricity: {
                 type: "number",
-                title: "Less: Electricity/mobile/travelexpenses.",
+                title: "Less: Electricity/mobile/traveling expenses.",
                 formatter: {
                   useIndianFormat: true,
                   locale: "en-IN",

@@ -356,7 +356,7 @@ const VerificationItemScreen = () => {
       };
 
       console.log('Submitting form data:', finalData);
-      await submitVerification(finalData, item?.verificationId);
+      await submitVerification(finalData, item?.verificationId, 'FI');
 
       // Clear the saved data after successful submission
       await clearItem(`${item?.verificationId}_${verificationType}`);

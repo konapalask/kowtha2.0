@@ -4,6 +4,10 @@ const tableStyle =
   "border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0";
 const cellStyle =
   "border:1px solid #ccc;padding:8px;vertical-align:top;line-height:1.5";
+const labelCellStyle =
+  "border:1px solid #ccc;border-right:1px solid #ccc;padding:8px;width:40%;vertical-align:middle";
+const valueCellStyle =
+  "border:1px solid #ccc;padding:8px;width:60%;vertical-align:middle";
 const paragraphStyle = "margin:8px 0;line-height:1.5;font-size:12px;color:#333";
 
 const hasValue = (value: any): boolean => {
@@ -27,7 +31,7 @@ const displayValue = (value: any): string => {
 
 const formatMultiline = (value: any): string => {
   const rendered = displayValue(value);
-  if (!rendered) return "";
+  if (!rendered) return "Not provided";
   return rendered.replace(/\n+/g, "<br>");
 };
 
@@ -71,22 +75,84 @@ const optionalParagraph = (value: any, formatter?: (input: any) => string) =>
     : "";
 
 const renderInstructionTable = (
-  rows: Array<{ left: string; right: string }>
+  rows: Array<{ left: string; right: string | Array<{ label: string; value: any; formatter?: (value: any) => string }> }>
 ) => {
   if (!rows.length) return "";
-  return `
-    <table style="${tableStyle}">
-      ${rows
-        .map(
-          ({ left, right }) => `
+  
+  let html = `<table style="border-collapse:collapse;border:1px solid #ccc;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">`;
+  
+  rows.forEach((row, index) => {
+    const isLastRow = index === rows.length - 1;
+    
+    // Check if right is an array (field rows) or a string (single value)
+    if (Array.isArray(row.right)) {
+      // Section header row
+      html += `
         <tr>
-          <td style="${cellStyle}">${left}</td>
-          <td style="${cellStyle}">${right}</td>
-        </tr>`
-        )
-        .join("")}
-    </table>
-  `;
+          <td style="${labelCellStyle};border-bottom:none;vertical-align:top">${row.left}</td>
+          <td style="${valueCellStyle};border-bottom:none;vertical-align:top"></td>
+        </tr>`;
+      
+      // Field rows
+      row.right.forEach((field, fieldIndex) => {
+        const isLastField = fieldIndex === row.right.length - 1;
+        let value: string;
+        if (field.formatter) {
+          value = field.formatter(field.value);
+        } else if (typeof field.value === 'string' && field.value.includes('<table')) {
+          // Handle HTML table content (like family table or trade references)
+          value = field.value;
+        } else {
+          value = formatMultiline(field.value);
+        }
+        // Remove top border for all fields (they connect to section header)
+        // Remove bottom border for all fields except the last one in the section (which needs border to separate from next section)
+        const borderTopStyle = "border-top:none";
+        const borderBottomStyle = isLastField ? (isLastRow ? "border-bottom:none" : "") : "border-bottom:none";
+        
+        html += `
+        <tr>
+          <td style="${labelCellStyle};${borderTopStyle};${borderBottomStyle}">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>${field.label}</strong></li></ul>
+          </td>
+          <td style="${valueCellStyle};${borderTopStyle};${borderBottomStyle}">
+            ${typeof field.value === 'string' && field.value.includes('<table') 
+              ? value 
+              : `<ul><li style="margin:8px 0;line-height:1.5">${value}</li></ul>`}
+          </td>
+        </tr>`;
+      });
+    } else {
+      // String value - could be a table or simple text
+      // For tables and complex content, use section header style
+      const isTableOrComplex = typeof row.right === 'string' && (row.right.includes('<table') || row.right.includes('<div') || row.right.length > 100);
+      
+      if (isTableOrComplex && !isLastRow) {
+        // Section header row
+        html += `
+          <tr>
+            <td style="${labelCellStyle};border-bottom:none;vertical-align:top">${row.left}</td>
+            <td style="${valueCellStyle};border-bottom:none;vertical-align:top"></td>
+          </tr>`;
+        // Content row
+        html += `
+          <tr>
+            <td style="${labelCellStyle};border-top:none;border-bottom:none"></td>
+            <td style="${valueCellStyle};border-top:none;border-bottom:none">${row.right}</td>
+          </tr>`;
+      } else {
+        // Simple single row (like Final PD status)
+        html += `
+          <tr>
+            <td style="${labelCellStyle}">${row.left}</td>
+            <td style="${valueCellStyle}">${row.right}</td>
+          </tr>`;
+      }
+    }
+  });
+  
+  html += `</table>`;
+  return html;
 };
 
 const renderInnerTable = (headers: string[], rows: string[][]) => {
@@ -119,17 +185,12 @@ const renderInnerTable = (headers: string[], rows: string[][]) => {
 
 const joinDetails = (
   pairs: Array<[string, any, ((value: any) => string)?]>
-) => {
-  const items = pairs
-    .map(([label, value, formatter]) => {
-      if (!hasValue(value)) return null;
-      const rendered = formatter ? formatter(value) : formatMultiline(value);
-      return `&nbsp; ${rendered}`;
-    })
-    .filter(Boolean);
-  return items.length
-    ? wrapParagraph(items.join("<br>"))
-    : wrapParagraph("Not provided");
+): Array<{ label: string; value: any; formatter?: (value: any) => string }> => {
+  return pairs.map(([label, value, formatter]) => ({
+    label,
+    value,
+    formatter,
+  }));
 };
 
 const multiParagraph = (value: any) =>
@@ -319,11 +380,13 @@ export const heroHousingSelfTemplate = (
       : "",
   ].join("");
 
-  const familyValue = familyTableHtml;
+  const familyValue = familyTableHtml 
+    ? `${familyTableHtml}${familyAdditionalInfo}`
+    : familyAdditionalInfo || "Not provided";
 
   const borrowerValue = joinDetails([
     ["Qualification of customer", borrowerProfile.qualificationOfCustomer],
-    ["Professional journey", borrowerProfile.professionalJourney],
+    ["Complete professional journey (service/ business details of each activity post qualification to till date", borrowerProfile.professionalJourney],
   ]);
 
   const currentBusinessValue = joinDetails([
@@ -332,26 +395,21 @@ export const heroHousingSelfTemplate = (
       currentBusiness.currentBusinessName || currentBusiness.businessName,
     ],
     ["Constitution", currentBusiness.constitution],
-    ["Nature of business / services", currentBusiness.natureOfBusiness],
+    ["Nature of business/product or services details", currentBusiness.natureOfBusiness],
     ["Running since", currentBusiness.runningSince],
     [
-      "Experience in same line",
-      currentBusiness.industryExperienceYears,
-      (value) => `${value} years`,
-    ],
-    [
-      "Partners / directors / shareholders",
+      "Details of partners, director, shareholders with family background and other details (For each partner if constitution is other than proprietorship firm)",
       currentBusiness.detailspartnersDirectorsShareholdersWithFamilyBackground,
     ],
   ]);
 
   const businessPremisesValue = joinDetails([
     [
-      "Address of business premises",
+      "Address of business premises and additional places of business",
       businessPremises.addressOfBusinessPremises,
     ],
     [
-      "Ownership details",
+      "Ownership of all above business premises (Also mention rent amount and landlord name in case rented)",
       businessPremises.ownershipDetails ||
         businessPremises.ownershipOfAllAboveBusinessPremises,
     ],
@@ -362,16 +420,16 @@ export const heroHousingSelfTemplate = (
         businessPremises.sizeOfBusinessPremises,
     ],
     [
-      "Business operations / footfall / stock",
+      "Comment on the business operations/footfall of customer/stock etc and share observation if any",
       businessPremises.operationsAndFootfallObservation ||
         businessPremises.commentOnBusinessOperationsFootfallOfCustomerStock,
     ],
   ]);
 
   const businessOperationsValue = joinDetails([
-    ["Products / services dealing", businessOperations.productServiceDetails],
+    ["Brief about the products / services dealing", businessOperations.productServiceDetails],
     [
-      "No. of employees and salary details",
+      "No. of employee and salary details,",
       businessOperations.employeesAndSalaries ||
         businessOperations.noOfEmployeeAndSalaryDetails,
     ],
@@ -380,12 +438,12 @@ export const heroHousingSelfTemplate = (
       businessOperations.stockQuantum || businessOperations.quantumOfStock,
     ],
     [
-      "Machinery and assets seen",
+      "No of Machinery and assets seen",
       businessOperations.machineryAndAssets ||
         businessOperations.noOfMachineryAndAssetsSeen,
     ],
     [
-      "Turnover of last three years & current year till date",
+      "Turnover of last three years and current year till date (Total actual turnover of customer)",
       businessOperations.turnoverHistory ||
         businessOperations.turnoverOfLastThreeYears,
     ],
@@ -398,12 +456,12 @@ export const heroHousingSelfTemplate = (
       businessOperations.productServiceNetMarginRatio,
     ],
     [
-      "Expansion or new products/services introduced",
+      "Any expansion or new product or change in business line in last 2 Years including change in business premises and any expected impact on the current revenue",
       businessOperations.expansionOrChanges ||
         businessOperations.anyExpansionOrNewProductServices,
     ],
     [
-      "Locality / competitors / prospects feedback",
+      "Brief details about the locality of business, surrounding competitors, overall prospect of location etc and any negative feedback",
       businessOperations.localityFeedback ||
         businessOperations.briefAboutTheLocalityOfBusiness,
     ],
@@ -411,27 +469,25 @@ export const heroHousingSelfTemplate = (
 
   const supplierCustomerList = joinDetails([
     [
-      "Supplier and customer overview",
+      "Brief about supplier and customer and geographic reach/presence",
       supplierCustomer.supplierCustomerOverview ||
         supplierCustomer.briefAboutSupplierAndCustomer,
     ],
     [
-      "No. of suppliers",
+      "No. of total suppliers and details of terms for credit period",
       supplierCustomer.totalSuppliers ||
         supplierCustomer.noOfTotalSuppliersAndCustomers,
     ],
-    ["Supplier credit terms", supplierCustomer.supplierCreditTerms],
     [
-      "No. of customers",
+      "No. of total customers and details of terms for credit period",
       supplierCustomer.totalCustomers || supplierCustomer.noOfTotalCustomers,
     ],
-    ["Customer credit terms", supplierCustomer.customerCreditTerms],
     [
-      "Billing cycle / receipt mode",
+      "Billing period/cycle and receipt mode (Billing on consignment basis/monthly basis/progress of work basis) also comment if any advance is received",
       supplierCustomer.billingCycleAndReceiptMode ||
         supplierCustomer.billingPeriodAndReceiptMode,
     ],
-    ["Total debtors & creditors", supplierCustomer.totalDebtorsAndCreditors],
+    ["Total debtors and creditors as on date (mention defaults/write offs)", supplierCustomer.totalDebtorsAndCreditors],
   ]);
 
   const tradeReferences = ensureArray(
@@ -455,42 +511,42 @@ export const heroHousingSelfTemplate = (
       "Whether customer visited the property",
       propertyDetails.customerVisitedProperty,
     ],
-    ["Type of property", propertyDetails.propertyType],
-    ["Property occupancy / usage", propertyDetails.propertyOccupancy],
-    ["Source of property purchase", propertyDetails.propertyPurchaseSource],
-    ["Seller details", propertyDetails.sellerDetails],
-    ["Property structure & area", propertyDetails.structureAndArea],
-    ["Deal value vs sale deed value", propertyDetails.dealAndSaleDeedValue],
-    ["Existing loan on property (seller)", propertyDetails.sellerExistingLoan],
-    ["Seller purchase timeline", propertyDetails.sellerPurchaseTimeline],
+    ["Type of property (Ready/Plot/Self Construction/Under Construction/Vacant etc)", propertyDetails.propertyType],
+    ["Property is occupied by whom and reason if not self-occupied (Also mention stage in case self-construction/under construction and expected completion date, also mention rent amount and period of tenancy if the property is given on rent)", propertyDetails.propertyOccupancy],
+    ["Source of property purchase (through dealer, builder/reference/relative)", propertyDetails.propertyPurchaseSource],
+    ["Name of seller and any relationship with customer", propertyDetails.sellerDetails],
+    ["Type of property/structure and area", propertyDetails.structureAndArea],
+    ["What is actual deal value and sale deed value, OCR source", propertyDetails.dealAndSaleDeedValue],
+    ["Whether seller is having any loan on the property", propertyDetails.sellerExistingLoan],
+    ["When seller bought the property", propertyDetails.sellerPurchaseTimeline],
   ]);
 
   const investmentAssetsValue = joinDetails([
-    ["Investment habits & monthly savings", investmentAssets.investmentHabits],
-    ["Current residence ownership / rent", investmentAssets.residenceOwnership],
+    ["What is customer investment habits and he is doing any monthly saving in any of saving scheme, investment in properties, FD or any other nature of saving", investmentAssets.investmentHabits],
+    ["Whether current residence is owned or rented and rent amount if any", investmentAssets.residenceOwnership],
     [
-      "Assets built till date",
+      "Details of assets built till date (Including immovable properties, movable property, gold, FD, Equity investment, other savings)",
       investmentAssets.assetsBuilt ||
         investmentAssets.detailsOfAssetsBuiltTillDate,
     ],
   ]);
 
   const endUseValue = joinDetails([
-    ["Proposed end use of property", endUse.propertyEndUse],
-    ["Detailed end use of funds", endUse.fundUtilisation],
+    ["Proposed End use of property (self-occupation/investment etc) for HL/P+C/Self construction cases", endUse.propertyEndUse],
+    ["Clear and detailed end use of fund in LAP cases", endUse.fundUtilisation],
   ]);
 
   const loanObligationsValue = joinDetails([
-    ["Loans presently servicing", loanObligations.currentLoansServiced],
-    ["Repayment account details", loanObligations.repaymentAccount],
-    ["Past loan utilisation", loanObligations.pastLoanEndUse],
-    ["Mortgage property / facilities", loanObligations.mortgageOrFacilities],
-    ["Repayment behaviour", loanObligations.repaymentBehaviour],
+    ["Please check and provide the details of loan presently servicing and whether he will be closing such loans or going to continue", loanObligations.currentLoansServiced],
+    ["Repayment account from which all these EMI are getting paid", loanObligations.repaymentAccount],
+    ["What was the end use of fund of these loans (All BL/PL/LAP loan taken in last 3 years), also please check if there is any exceptional borrowing in last 12 months than exact use and impact on the business revenue", loanObligations.pastLoanEndUse],
+    ["Also check if any home loan/LAP than what is address of mortgage property, usage of such property, any CC/OD limit or any other facility in the name of customer", loanObligations.mortgageOrFacilities],
+    ["Comment whether there is any bouncing in loans and if yes, period and reason of such bounces", loanObligations.repaymentBehaviour],
   ]);
 
   const bankingValue = joinDetails([
-    ["Business banking details", banking.businessBanking],
-    ["Savings accounts", banking.savingsAccounts],
+    ["Please check and mention details of all his bank account, account open date, Name of bank account in which major business transactions are happening ", banking.businessBanking],
+    ["Please check any saving account of applicant and co applicant and provide the details of these accounts", banking.savingsAccounts],
     [
       "% of receipts routed through banking",
       hasValue(banking.receiptsRoutedThroughBanking)
@@ -501,24 +557,21 @@ export const heroHousingSelfTemplate = (
 
   const documentChecksValue = joinDetails([
     [
-      "Sale / purchase registers, kutcha records, inventory observations",
+      "Please check all relevant sale/purchase register/bills/Kutcha records, Inventory in line with those record, Payroll register and share observations",
       documentChecks.recordsAndInventoryObservation,
     ],
-    ["Neighbour / independent checks", documentChecks.thirdPartyChecks],
+    ["TPC from minimum 1 neighbour and 1 local independent party to be done (It should be done by showing the photo of customer and ownership to be confirmed in the name of customer with existence period", documentChecks.thirdPartyChecks],
     [
-      "Additional involvement checks",
+      "Additional check to be done from reference that any other person or family member involved in the business/manage the business",
       documentChecks.additionalInvolvementCheck,
     ],
     [
-      "Compliance & branding verification",
+      "Please check all QR code, license, permits, name board, contact number etc and all these belongs to customer and share observations",
       documentChecks.complianceAndBranding,
     ],
-    ["External / Google feedback", documentChecks.externalFeedback],
+    ["Google check and any negative observation/feedback/dedupe match or any other feedback", documentChecks.externalFeedback],
   ]);
 
-  const finalStatusValue = joinDetails([
-    ["Final PD status", html_data.approvedStatus|| "Not provided"],
-  ]);
 
   const incomeItems = ensureArray(incomeAssessment.lineItems).map(
     (item: any) => []
@@ -649,140 +702,58 @@ export const heroHousingSelfTemplate = (
     {
       left: `<p style="${paragraphStyle}"><strong>Borrower details ---</strong></p>${wrapParagraph(
         "<strong>It should include the</strong>"
-      )}${bulletList([
-        "Qualification of customer,",
-        "Complete professional journey (service/ business details of each activity post qualification to till date)",
-      ])}`,
+      )}`,
       right: borrowerValue,
     },
     {
-      left: `<p style="${paragraphStyle}"><strong>Family details</strong></p>${bulletList(
-        [
-          "Family details – Including dependents",
-          "Family background (Parents and siblings including all dependents)",
-        ]
-      )}`,
+      left: `<p style="${paragraphStyle}"><strong>Family details</strong></p><br><ul><li><strong>Family details – Including dependents</strong></li><li><strong>Family background (Parents and siblings including all dependents)</strong></li></ul>`,
       right: familyValue,
     },
     {
-      left: `<p style="${paragraphStyle}"><strong>Current business details: --</strong></p>${bulletList(
-        [
-          "Current business name",
-          "Constitution",
-          "Nature of business/product or services details",
-          "Running since",
-          "Details of partners, director, shareholders with family background and other details (For each partner if constitution is other than proprietorship firm)",
-        ]
-      )}`,
+      left: `<p style="${paragraphStyle}"><strong>Current business details: --</strong></p>`,
       right: currentBusinessValue,
     },
     {
-      left: `<p style="${paragraphStyle}"><strong>Details of business premises</strong></p>${bulletList(
-        [
-          "Address of business premises and additional places of business",
-          "Ownership of all above business premises (Also mention rent amount and landlord name in case rented)",
-          "Size/area of business premises",
-          "Comment on the business operations/footfall of customer/stock etc and share observation if any",
-        ]
-      )}`,
+      left: `<p style="${paragraphStyle}"><strong>Details of business premises</strong></p>`,
       right: businessPremisesValue,
     },
     {
-      left: `<p style="${paragraphStyle}"><strong>Details about business details</strong></p>${bulletList(
-        [
-          "Brief about the product/services dealing",
-          "No. of employee and salary details",
-          "Quantum of stock",
-          "No of Machinery and assets seen",
-          "Turnover of last three years and current year till date (Total actual turnover of customer)",
-          "Product/service Gross Margins ratio ",
-          "Product/service Net Margins ratio",
-          "Any expansion or new product or change in business line in last 2 Years including change in business premises and any expected impact on the current revenue",
-          "Brief details about the locality of business, surrounding competitors, overall prospect of location etc and any negative feedback",
-        ]
-      )}`,
+      left: `<p style="${paragraphStyle}"><strong>Details about business details</strong></p>`,
       right: businessOperationsValue,
     },
     {
-      left: `<p style="${paragraphStyle}"><strong>Details of supplier and customer</strong></p>${bulletList(
-        [
-          "Brief about supplier and customer and geographic reach/presence",
-          "No of total suppliers and details of terms for credit period",
-          "No of total customers and details of terms for credit period",
-          "Billing period/cycle and receipt mode (Billing on consignment basis/ monthly basis/ progress of work basis) also comment if any advance is received",
-          "Total debtors and creditors as on date and any default/write off in past",
-          "Please collect reference of min 2 suppliers and 2 customers with their phone no. and business name",
-        ]
-      )}`,
-      right: `${supplierCustomerList}${tradeReferenceValue}`,
+      left: `<p style="${paragraphStyle}"><strong>Details of supplier and customer</strong></p>`,
+      right: [
+        ...supplierCustomerList,
+        { 
+          label: "Please collect Reference of min 2 suppliers and 2 customers with their phone no. and business name)", 
+          value: tradeReferenceValue || "Not provided", 
+          formatter: undefined 
+        }
+      ],
     },
     {
-      left: `<p style="${paragraphStyle}"><strong>Details of Property –</strong></p>${bulletList(
-        [
-          "Whether customer visited the property",
-          "Type of property (Ready build/Plot/Self Construction/under construction/vacant etc)",
-          "Property is occupied by whom and reason if not self-occupied (Also mention stage in case self-construction/under construction and expected completion date, also mention rent amount and period of tenancy if the property is given on rent) ",
-          "Source of property purchase (through dealer, builder/reference/relative)",
-          "Name of seller and any relationship with customer",
-          "Type of property/structure and area",
-          "What is actual deal value and sale deed value, OCR source ",
-          "Whether seller is having any loan on the property",
-          "When seller bought the property",
-        ]
-      )}`,
+      left: `<p style="${paragraphStyle}"><strong>Details of Property –</strong></p>`,
       right: propertyDetailsValue,
     },
     {
-      left: `<p style="${paragraphStyle}"><strong>Investment and properties -</strong></p>${bulletList(
-        [
-          "What is customer investment habits and he is doing any monthly saving in any of saving scheme, investment in properties, FD or any other nature of saving",
-          "Whether current residence is owned or rented and rent amount if any",
-          "Details of assets built till date (Including immovable properties, movable property, gold, FD, Equity investment, other savings)",
-        ]
-      )}`,
+      left: `<p style="${paragraphStyle}"><strong>Investment and properties -</strong></p>`,
       right: investmentAssetsValue,
     },
     {
-      left: `<p style="${paragraphStyle}"><strong>End use of property/fund –</strong></p>${bulletList(
-        [
-          "Proposed End use of property (self-occupation/investment etc) for HL/P+C/Self construction cases ",
-          "Clear and detailed end use of fund in LAP cases",
-        ]
-      )}`,
+      left: `<p style="${paragraphStyle}"><strong>End use of property/fund –</strong></p>`,
       right: endUseValue,
     },
     {
-      left: `<p style="${paragraphStyle}"><strong>Details of loans –</strong></p>${bulletList(
-        [
-          "Please check and provide the details of loan presently servicing and whether he will be closing such loans or going to continue",
-          "Repayment account from which all these EMI are getting paid",
-          "What was the end use of fund of these loans (All BL/PL/LAP loan taken in last 3 years), also please check if there is any exceptional borrowing in last 12 months than exact use and impact on the business revenue",
-          "Also check if any home loan/LAP than what is address of mortgage property, usage of such property, any CC/OD limit or any other facility in the name of customer",
-          "Comment whether there is any bouncing in loans and if yes, period and reason of such bounces",
-        ]
-      )}`,
+      left: `<p style="${paragraphStyle}"><strong>Details of loans –</strong></p>`,
       right: loanObligationsValue,
     },
     {
-      left: `<p style="${paragraphStyle}"><strong>Banking –</strong></p>${bulletList(
-        [
-          "Please check and mention details of all his bank account, account open date, Name of bank account in which major business transactions are happening ",
-          "Please check any saving account of applicant and co applicant and provide the details of these accounts",
-          "% of total receipt routed through banking",
-        ]
-      )}`,
+      left: `<p style="${paragraphStyle}"><strong>Banking –</strong></p>`,
       right: bankingValue,
     },
     {
-      left: `<p style="${paragraphStyle}"><strong>Document verification and other checks</strong></p>${bulletList(
-        [
-          "Please check all relevant sale/purchase register/bills/Kutcha records, Inventory in line with those record, Payroll register and share observations",
-          "TPC from minimum 1 neighbour and 1 local independent party to be done (It should be done by showing the photo of customer and ownership to be confirmed in the name of customer with existence period",
-          "Additional check to be done from reference that any other person or family member involved in the business/manage the business",
-          "Please check all QR code, license, permits, name board, contact number etc and all these belongs to customer and share observations",
-          "Google check and any negative observation/feedback/dedupe match or any other feedback",
-        ]
-      )}`,
+      left: `<p style="${paragraphStyle}"><strong>Document verification and other checks</strong></p>`,
       right: documentChecksValue,
     },
     {

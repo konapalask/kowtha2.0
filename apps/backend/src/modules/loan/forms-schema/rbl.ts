@@ -175,6 +175,16 @@ export const rblSchema = {
                 relationship: {
                   type: "string",
                   title: "Relationship",
+                  enum: [
+                    "Father",
+                    "Mother",
+                    "Brother",
+                    "Sister",
+                    "Spouse",
+                    "Son",
+                    "Daughter",
+                    "Other",
+                  ],
                 },
                 age: {
                   type: "integer",
@@ -183,6 +193,14 @@ export const rblSchema = {
                 qualification: {
                   type: "string",
                   title: "Qualification",
+                  enum: [
+                    "Below 10th",
+                    "10th pass",
+                    "12th pass",
+                    "Diploma/ITI certification",
+                    "Graduate",
+                    "PG/Professional Certification",
+                  ],
                 },
                 occupation: {
                   type: "string",

@@ -69,7 +69,7 @@ const renderHeading = (text: string) =>
   `<h1 style="${headingStyle}">${text}</h1>`;
 
 const renderSubHeading = (text: string) =>
-  `<p style="${paragraphStyle}"><strong>${text}</strong></p>`;
+  `<p style="${paragraphStyle} text-align:center;"><strong>${text}</strong></p>`;
 
 const renderTwoColumnTable = (rows: KeyValueRow[]) => {
   if (!rows.length) return "";
@@ -285,19 +285,19 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
   const familySummary = [
     {
       label: "<strong>About Applicant:</strong>",
-      value: familyDetails.aboutApplicant
-        ? familyDetails.aboutApplicant.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("")
+      value: familyDetails?.aboutApplicant
+        ? familyDetails?.aboutApplicant.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("")
         : "",
     },
     {
       label: "<strong>About Co-applicant:</strong>",
-      value: familyDetails.aboutCoApplicant
+      value: familyDetails?.aboutCoApplicant
         ? familyDetails.aboutCoApplicant.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("")
         : "",
     },
     {
       label: "<strong>And their family details:</strong>",
-      value: formatMultiline(familyDetails.andTheirFamilyDetails),
+      value: familyDetails?.andTheirFamilyDetails,
     },
   ];
 
@@ -448,9 +448,7 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
                   <td style="${labelCellStyle}"><p style="${paragraphStyle}">Qualification</p></td>
                   <td style="${labelCellStyle}"><p style="${paragraphStyle}">Occupation</p></td>
                   </tr>
-                  ${ensureArray(familySummary[2].value)
-                    .map(
-                      (item: any) => `
+                  ${Array.isArray(familySummary[2].value) ? familySummary[2].value.map((item: any) => `
                     <tr>
                       <td style="${valueCellStyle}"><p style="${paragraphStyle}">${item.name}</p></td>
                       <td style="${valueCellStyle}"><p style="${paragraphStyle}">${item.relationship}</p></td>
@@ -459,12 +457,12 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
                       <td style="${valueCellStyle}"><p style="${paragraphStyle}">${item.occupation}</p></td>
                     </tr>
                   `
-                    )
-                    .join("")}
+                    ).join("") : `<tr><td style="${valueCellStyle}"><p style="${paragraphStyle}">Not provided</p></td></tr>`}
                   </table> 
                 </td>
-                </tr> `
-          : renderSingleColumnTable(["Family details not provided"])
+                </tr> 
+                </table>`
+          : `<tr><td style="${valueCellStyle}"><p style="${paragraphStyle}">Family details not provided</p></td></tr>`
       }
 
       ${renderSubHeading("Business Details (Separate for additional business)")}
@@ -492,7 +490,7 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
             "Product Details (please also comment on Vintage of the product deals by the firm & Future changes if any)",
           value: businessDetails.productDetails,
         },
-        { label: "Business Process", value: businessDetails.businessProcess },
+        { label: "Business Process", value: businessDetails.businessProcess.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("") },
         { label: "Margins", value: businessDetails.margins },
         {
           label: "Documents Observed",
