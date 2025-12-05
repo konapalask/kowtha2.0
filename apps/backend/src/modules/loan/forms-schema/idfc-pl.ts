@@ -31,11 +31,11 @@ export const idfcPlSchema = {
           dateOfVisitTimeOfVisit: {
             type: "string",
             title: "Date / Time of Visit",
+            format: "date-time",
           },
           alternateContactNumberOfTheCustomerMobileLandline: {
-            type: "string",
+            type: "integer",
             title: "Alternate Contact Number (Mobile / Landline)",
-            pattern: "^[0-9]{10}$",
           },
           maritalStatusMarriedDivorcedBachelor: {
             type: "string",
@@ -287,6 +287,7 @@ export const idfcPlSchema = {
                     locale: "en-IN",
                     maxDecimalPlaces: 2,
                   },
+                  readOnly: true,
                 },
               },
             },

@@ -526,8 +526,13 @@ export const indiaShelterSenpSchema = {
             type: "array",
             title: "Name of the Partners",
             items: {
-              type: "string",
-              title: "Partner Name",
+              type: "object",
+              properties: {
+                partnerName: {
+                  type: "string",
+                  title: "Partner Name",
+                },
+              },
             },
           },
           commencementDate: {
@@ -649,6 +654,7 @@ export const indiaShelterSenpSchema = {
           customerGeoTag: {
             type: "string",
             title: "Customer Location (Office / Business GEO Tag)",
+            readOnly: true,
           },
         },
       },
@@ -840,22 +846,18 @@ export const indiaShelterSenpSchema = {
         type: "object",
         properties: {
           purposes: {
-            type: "array",
             title: "Purpose of Loan",
-            uniqueItems: true,
-            items: {
-              type: "string",
-              enum: [
-                "Flat Purchase",
-                "House Purchase",
-                "Plot Purchase",
-                "Construction of Residential House Property",
-                "Business development",
-                "Improvement/Extension",
-                "Balance Transfer",
-                "Plot + Construction",
-              ],
-            },
+            type: "string",
+            enum: [
+              "Flat Purchase",
+              "House Purchase",
+              "Plot Purchase",
+              "Construction of Residential House Property",
+              "Business development",
+              "Improvement/Extension",
+              "Balance Transfer",
+              "Plot + Construction",
+            ],
           },
           minimumLoanAmount: {
             type: "number",
@@ -865,6 +867,7 @@ export const indiaShelterSenpSchema = {
               locale: "en-IN",
               maxDecimalPlaces: 2,
             },
+            readOnly: true,
           },
           tenureRequired: {
             type: "string",
@@ -1141,9 +1144,8 @@ export const indiaShelterSenpSchema = {
                   ],
                 },
                 contactNumber: {
-                  type: "string",
+                  type: "integer",
                   title: "Contact Number",
-                  pattern: "^[0-9]{10}$",
                 },
                 stayingWithApplicant: {
                   type: "string",
@@ -1184,9 +1186,8 @@ export const indiaShelterSenpSchema = {
                   title: "Relationship",
                 },
                 contactNumber: {
-                  type: "string",
+                  type: "integer",
                   title: "Contact Number",
-                  pattern: "^[0-9]{10}$",
                 },
                 email: {
                   type: "string",
@@ -1290,6 +1291,7 @@ export const indiaShelterSenpSchema = {
           visitTime: {
             type: "string",
             title: "Time of Visit",
+            format: "time",
           },
         },
       },
