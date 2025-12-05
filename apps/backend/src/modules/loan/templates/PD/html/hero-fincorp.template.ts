@@ -104,13 +104,11 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
   const basic = verificationData.basicDetails || {};
   const applicantProfile = verificationData.applicantProfile || {};
   // Handle nested structures for business profile
-  const businessProfileData =
-    verificationData.businessProfile || {};
+  const businessProfileData = verificationData.businessProfile || {};
   const financialSummary = verificationData.financialSummary || {};
   const relationships = verificationData.relationships || {};
   // Handle nested structures for existing loans
-  const existingLoansData =
-    verificationData.existingLoanDetails || {};
+  const existingLoansData = verificationData.existingLoanDetails || {};
 
   const loanAnalysis = verificationData.loanAnalysis || {};
   const generatedDate =
@@ -119,7 +117,10 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
     new Date().toISOString().split("T")[0];
 
   const generalTable = renderTwoColumnTable([
-    ["Name of Applicant / Contact person", basic.applicantName || "Not provided"],
+    [
+      "Name of Applicant / Contact person",
+      basic.applicantName || "Not provided",
+    ],
     ["Name of Concern", basic.concernName || "Not provided"],
     ["Office Address", basic.officeAddress || "Not provided"],
     ["Phone", basic.applicantPhoneNumber || "Not provided"],
@@ -167,7 +168,13 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
   );
 
   const documentsList = financialSummary?.documentsObserved
-    ? `<ul style="margin: 0; padding-left: 20px;">${financialSummary?.documentsObserved.split("\n").map((line: string) => line.trim()).map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("") || "Not provided"}
+    ? `<ul style="margin: 0; padding-left: 20px;">${
+        financialSummary?.documentsObserved
+          .split("\n")
+          .map((line: string) => line.trim())
+          .map((line: string) => `<li style="margin-left: 8px;">${line}</li>`)
+          .join("") || "Not provided"
+      }
     </ul>`
     : "Not provided";
 
@@ -204,12 +211,14 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
       )}</li>`
   );
 
-  const existingLoansRows = ensureArray(existingLoansData?.existingLoans).map((loan: any) => [
-    formatMultiline(loan?.financialInstitution || ""),
-    formatCurrency(loan?.loanAmount),
-    formatMultiline(loan?.natureOfLoan || ""),
-    formatCurrency(loan?.emi),
-  ]);
+  const existingLoansRows = ensureArray(existingLoansData?.existingLoans).map(
+    (loan: any) => [
+      formatMultiline(loan?.financialInstitution || ""),
+      formatCurrency(loan?.loanAmount),
+      formatMultiline(loan?.natureOfLoan || ""),
+      formatCurrency(loan?.emi),
+    ]
+  );
 
   const financialSummaryTable = renderInnerTable(
     ["AY", "Turnover", "Net Profit", "Net margin (%)"],
@@ -218,7 +227,7 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
         formatMultiline(financialSummary.assessmentYear || ""),
         formatCurrency(financialSummary.turnover),
         formatCurrency(financialSummary.netProfit),
-        formatMultiline(financialSummary.netMarginPercent+"%" || ""),
+        formatMultiline(financialSummary.netMarginPercent + "%" || ""),
       ],
     ]
   );
@@ -227,30 +236,55 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
     ensureArray(loanAnalysis.endUse).map((item: any) => formatMultiline(item))
   );
 
-  const securityList = loanAnalysis?.securityOffered?.length > 0
-    ? `<ul style="margin: 0; padding-left: 20px;">${ensureArray(loanAnalysis?.securityOffered)
+  const securityList =
+    loanAnalysis?.securityOffered?.length > 0
+      ? `<ul style="margin: 0; padding-left: 20px;">${ensureArray(
+          loanAnalysis?.securityOffered
+        )
           .map((line: string) => line.trim())
           .map((line: string) => `<li style="margin-left: 8px;">${line}</li>`)
           .join("")}</ul>`
-      : "Not provided"
+      : "Not provided";
 
+  // Handle observations - can be string or array
+  const observationsData = loanAnalysis.observations;
+  const observationsArray = Array.isArray(observationsData)
+    ? observationsData
+    : typeof observationsData === "string"
+      ? observationsData
+          .split(/\n+/)
+          .filter((line: string) => line.trim().length > 0)
+      : [];
   const observationList = renderList(
-    ensureArray(loanAnalysis.observations).map((item: any) =>
-      formatMultiline(item)
-    )
+    observationsArray.map((item: any) => formatMultiline(item))
   );
 
+  // Handle concerns - can be string or array
+  const concernsData = loanAnalysis.concerns;
+  const concernsArray = Array.isArray(concernsData)
+    ? concernsData
+    : typeof concernsData === "string"
+      ? concernsData
+          .split(/\n+/)
+          .filter((line: string) => line.trim().length > 0)
+      : [];
   const concernsList = renderList(
-    ensureArray(loanAnalysis.concerns).map((item: any) => formatMultiline(item))
+    concernsArray.map((item: any) => formatMultiline(item))
   );
 
   const otherBusinessList = loanAnalysis.otherBusinessIncome
-    ? `<ul style="margin: 0; padding-left: 20px;">${loanAnalysis?.otherBusinessIncome?.split("\n").map((line: string) => line.trim()).map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("") || "Not provided"}
+    ? `<ul style="margin: 0; padding-left: 20px;">${
+        loanAnalysis?.otherBusinessIncome
+          ?.split("\n")
+          .map((line: string) => line.trim())
+          .map((line: string) => `<li style="margin-left: 8px;">${line}</li>`)
+          .join("") || "Not provided"
+      }
     </ul>`
     : "Not provided";
 
   const statusTable = renderTwoColumnTable([
-    ["Status of this case", html_data.approvedStatus|| "Not provided"],
+    ["Status of this case", html_data.approvedStatus || "Not provided"],
     ["Place", loanAnalysis.place],
   ]);
 
@@ -268,7 +302,19 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
       ${generalTable}
 
       ${sectionTitle("About the Applicant")}
-      ${applicantProfile.applicantSummary ? `<ul style="margin: 0; padding-left: 20px;">${applicantProfile?.applicantSummary?.split("\n").map((line: string) => line.trim()).map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("") || "Not provided"}</ul>` : "Not provided"}
+      ${
+        applicantProfile.applicantSummary
+          ? `<ul style="margin: 0; padding-left: 20px;">${
+              applicantProfile?.applicantSummary
+                ?.split("\n")
+                .map((line: string) => line.trim())
+                .map(
+                  (line: string) => `<li style="margin-left: 8px;">${line}</li>`
+                )
+                .join("") || "Not provided"
+            }</ul>`
+          : "Not provided"
+      }
 
       <h3 style="margin:12px 0 6px;font-size:16px;font-weight:600;color:#1f2d3d;">Family Details</h3>
       ${familyTable}
@@ -276,8 +322,14 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
       ${sectionTitle("About the Business")}
       ${
         businessProfileData?.aboutTheBusiness
-          ? `<ul style="margin: 0; padding-left: 20px;">${formatMultiline(businessProfileData?.aboutTheBusiness)?.split("\n").map((line: string) => line.trim()).map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("")}
-            </ul>`
+          ? `${businessProfileData?.aboutTheBusiness
+              ?.split("\n")
+              .map((line: string) => line.trim())
+              .map(
+                (line: string) =>
+                  `<ul><li style="margin-left: 8px;">${line}</li></ul>`
+              )
+              .join("")}`
           : "Not provided"
       }
 
@@ -288,7 +340,19 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
       ${documentsList}
 
       <h3 style="margin:12px 0 6px;font-size:16px;font-weight:600;color:#1f2d3d;">Automation Level</h3>
-      ${financialSummary.automationLevel ? `<ul style="margin: 0; padding-left: 20px;">${financialSummary?.automationLevel?.split("\n").map((line: string) => line.trim()).map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("") || "Not provided"}</ul>` : "Not provided"}
+      ${
+        financialSummary.automationLevel
+          ? `<ul style="margin: 0; padding-left: 20px;">${
+              financialSummary?.automationLevel
+                ?.split("\n")
+                .map((line: string) => line.trim())
+                .map(
+                  (line: string) => `<li style="margin-left: 8px;">${line}</li>`
+                )
+                .join("") || "Not provided"
+            }</ul>`
+          : "Not provided"
+      }
 
       ${sectionTitle("Customers")}
       <ul>

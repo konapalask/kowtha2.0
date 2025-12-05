@@ -599,7 +599,7 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
         <strong>Disclaimer:</strong> The report contains information shared by the person contacted during the visit. Axis Finance will be solely responsible for decisions taken on the basis of this report and any liabilities directly or indirectly arising therefrom.
       </p>
       <p style="${paragraphStyle}">
-        TATA (Tata housing finance Ltd / Tata capital Ltd., will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions, efficient services will not be liable in any case.
+        Axis Finance will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. Kowtha & Co. will not be liable in any case.
       </p>
     </div>
   `;

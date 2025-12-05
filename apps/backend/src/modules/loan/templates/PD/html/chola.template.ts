@@ -139,13 +139,15 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
     verificationData.existingLoanDetails ||
     verificationData.existingLoans ||
     {};
-  const existingLoans = ensureArray(existingLoansData?.loanDetails).map((loan: any) => [
-    formatMultiline(loan?.bankName || loan?.bankOrNbfcName || ""),
-    formatMultiline(loan?.typeOfLoan || ""),
-    formatCurrency(loan?.loanAmount || loan?.sanctionedAmount),
-    formatCurrency(loan?.emiInterest || loan?.emi || loan?.emiAmount),
-    formatMultiline(loan?.tenureTotalCompleted || loan?.tenure || ""),
-  ]);
+  const existingLoans = ensureArray(existingLoansData?.loanDetails).map(
+    (loan: any) => [
+      formatMultiline(loan?.bankName || loan?.bankOrNbfcName || ""),
+      formatMultiline(loan?.typeOfLoan || ""),
+      formatCurrency(loan?.loanAmount || loan?.sanctionedAmount),
+      formatCurrency(loan?.emiInterest || loan?.emi || loan?.emiAmount),
+      formatMultiline(loan?.tenureTotalCompleted || loan?.tenure || ""),
+    ]
+  );
 
   // Handle nested structures for banking details
   const bankingDetailsData = verificationData.bankingDetails || {};
@@ -204,13 +206,29 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
   );
 
   const recom = verificationData.Recommendations || {};
-  
+
   const businessList = [
     hasValue(aboutBusiness?.aboutTheApplicant)
-      ? `<p style="${paragraphStyle}"><strong>About the Applicant:</strong><br>${aboutBusiness?.aboutTheApplicant?.split("\n").map((line: string) => `<ul style="margin-left: 8px;"><li>${line}</li></ul>`).join("") || ""}</p>`
+      ? `<p style="${paragraphStyle}"><strong>About the Applicant:</strong><br>${
+          aboutBusiness?.aboutTheApplicant
+            ?.split("\n")
+            .map(
+              (line: string) =>
+                `<ul style="margin-left: 8px;"><li>${line}</li></ul>`
+            )
+            .join("") || ""
+        }</p>`
       : "",
     hasValue(aboutBusiness?.aboutTheBusiness)
-      ? `<p style="${paragraphStyle}"><strong>About the Business:</strong><br>${aboutBusiness?.aboutTheBusiness?.split("\n").map((line: string) => `<ul style="margin-left: 8px;"><li>${line}</li></ul>`).join("") || ""}</p>`
+      ? `<p style="${paragraphStyle}"><strong>About the Business:</strong><br>${
+          aboutBusiness?.aboutTheBusiness
+            ?.split("\n")
+            .map(
+              (line: string) =>
+                `<ul style="margin-left: 8px;"><li>${line}</li></ul>`
+            )
+            .join("") || ""
+        }</p>`
       : "",
   ]
     .filter((item) => item !== "")
@@ -272,19 +290,14 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
       <p style="${paragraphStyle}"><strong>Customers - Reference numbers:</strong></p>
       <ul>
       ${ensureArray(customerReferences?.customerReferenceNumbers)
-        .map(
-          (item: any) =>
-            `<li>${item?.customerReferenceNumber || ""}</li>`
-        )
+        .map((item: any) => `<li>${item?.customerReferenceNumber || ""}</li>`)
         .join("")}
       </ul>
 
       <p style="${paragraphStyle}"><strong>Other incomes:</strong></p>
       <ul>
       ${ensureArray(otherIncomes?.otherIncomes)
-        .map(
-          (item: any) => `<li>${item?.otherIncome || ""}</li>`
-        )
+        .map((item: any) => `<li>${item?.otherIncome || ""}</li>`)
         .join("")}
       </ul>
 
@@ -320,12 +333,14 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
 
       <p style="${paragraphStyle}"><strong>Recommendations:-</strong></p>
       <ul>
-        ${ensureArray(recom?.recommendations)?.map((item: any) => `<li>${item?.recommendation || ""}</li>`).join("")}
+        ${ensureArray(recom?.recommendations)
+          ?.map((item: any) => `<li>${item?.recommendation || ""}</li>`)
+          .join("")}
       </ul>
 
-      <p style="${paragraphStyle}"><strong>PD Status:</strong> ${html_data.approvedStatus|| "Not provided"}</p>
+      <p style="${paragraphStyle}"><strong>PD Status:</strong> ${html_data.approvedStatus || "Not provided"}</p>
 
-      <p style="${paragraphStyle}"><strong>Disclaimer if any:</strong> We estimated financials, purely based on the valid documents provided by the applicant.</p>
+      <p style="${paragraphStyle}"><strong>Disclaimer if any:</strong> ${verificationData?.disclaimer?.disclaimer || "Not provided"}</p>
     </div>
     ${pdBaseTemplateFooter(html_data)}
 

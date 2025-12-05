@@ -381,6 +381,19 @@ export const cholaSchema = {
         },
       },
     },
+    {
+      id: "disclaimer",
+      label: "Disclaimer",
+      schema: {
+        type: "object",
+        properties: {
+          disclaimer: {
+            type: "string",
+            title: "Disclaimer",
+          },
+        },
+      },
+    },
 
     financialsSchema,
   ],
