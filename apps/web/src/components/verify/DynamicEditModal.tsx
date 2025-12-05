@@ -28,6 +28,36 @@ import {
 
 const { TextArea } = Input;
 
+const COORDINATE_FIELD_KEYS = [
+  'siteCoordinates',
+  'coordinates',
+  'latitude',
+  'longitude',
+  'latitudeLongitude',
+  'latitudeAndLongitude',
+  'officeGeoTag',
+  'customerGeoTag',
+  'geoTag',
+  'geoCoordinates',
+  'geoLocation',
+  'lat',
+  'lng',
+  'long',
+  'siteLatitude',
+  'siteLongitude',
+  'currentLatitude',
+  'currentLongitude',
+];
+
+const isCoordinateField = (fieldId: string): boolean => {
+  if (!fieldId) return false;
+  const fieldIdLower = fieldId.toLowerCase().trim();
+  return COORDINATE_FIELD_KEYS.some(key => {
+    const keyLower = key.toLowerCase().trim();
+    return fieldIdLower === keyLower;
+  });
+};
+
 interface DynamicEditModalProps {
   visible: boolean;
   onCancel: () => void;
@@ -291,49 +321,52 @@ export const DynamicEditModal: React.FC<DynamicEditModalProps> = ({
     return (
       <Card title={field.label} size="small" style={{ marginBottom: 16 }}>
         <Row gutter={[16, 16]}>
-          {field.objectFields?.map((objectField) => (
-            <Col
-              span={objectField.type === "textarea" ? 24 : 12}
-              key={objectField.id}
-            >
-              <Form.Item
-                name={[field.id, objectField.id]}
-                label={objectField.label}
-                rules={
-                  objectField.required
-                    ? [
-                        {
-                          required: true,
-                          message: `${objectField.label} is required`,
-                        },
-                        {
-                          validator: (_: any, value: any) => {
-                            if (!validateNonEmpty(value)) {
-                              return Promise.reject(
-                                new Error(
-                                  `Please enter at least one character for: ${objectField.label}`
-                                )
-                              );
-                            }
-                            return Promise.resolve();
-                          },
-                        },
-                      ]
-                    : []
-                }
+          {field.objectFields?.map((objectField) => {
+            const isNestedCoordField = isCoordinateField(objectField.id);
+            return (
+              <Col
+                span={objectField.type === "textarea" ? 24 : 12}
+                key={objectField.id}
               >
-                {renderFieldInput(objectField)}
-              </Form.Item>
-            </Col>
-          ))}
+                <Form.Item
+                  name={[field.id, objectField.id]}
+                  label={objectField.label}
+                  rules={
+                    objectField.required
+                      ? [
+                          {
+                            required: true,
+                            message: `${objectField.label} is required`,
+                          },
+                          {
+                            validator: (_: any, value: any) => {
+                              if (!validateNonEmpty(value)) {
+                                return Promise.reject(
+                                  new Error(
+                                    `Please enter at least one character for: ${objectField.label}`
+                                  )
+                                );
+                              }
+                              return Promise.resolve();
+                            },
+                          },
+                        ]
+                      : []
+                  }
+                >
+                  {renderFieldInput({ ...objectField, readOnly: isNestedCoordField })}
+                </Form.Item>
+              </Col>
+            );
+          })}
         </Row>
       </Card>
     );
   };
 
   const renderFieldInput = (field: WebFieldDefinition) => {
-    // Allow editing of readOnly fields (auto fields)
-    const isReadOnly = false;
+    const isCoordField = isCoordinateField(field.id);
+    const isReadOnly = isCoordField || field.readOnly || false;
 
     // Common onChange handler to trim whitespace
     const handleChange = (value: any, onChange?: (value: any) => void) => {

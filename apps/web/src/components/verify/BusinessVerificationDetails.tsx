@@ -35,6 +35,34 @@ import { UploadOutlined } from "@ant-design/icons";
 const { TextArea } = Input;
 import React, { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import "react-quill/dist/quill.snow.css";
+
+const COORDINATE_FIELD_KEYS = [
+  'siteCoordinates',
+  'coordinates',
+  'latitude',
+  'longitude',
+  'latitudeLongitude',
+  'latitudeAndLongitude',
+  'officeGeoTag',
+  'customerGeoTag',
+  'geoTag',
+  'geoCoordinates',
+  'geoLocation',
+  'lat',
+  'lng',
+  'long',
+  'siteLatitude',
+  'siteLongitude',
+  'currentLatitude',
+  'currentLongitude',
+];
+
+const isCoordinateField = (fieldId: string): boolean => {
+  if (!fieldId) return false;
+  const fieldIdLower = fieldId.toLowerCase();
+  return COORDINATE_FIELD_KEYS.some(key => fieldIdLower === key.toLowerCase());
+};
+
 import EditRequestLogs from "./EditRequestLogs";
 import Footer from "./Footer";
 import AssistantVerifierFooter from "./AssistantVerifierFooter";
@@ -2916,10 +2944,9 @@ export const BusinessVerificationDetails: React.FC<
       // Check if field is required
       const isRequired = field?.required ?? false;
 
-      // Fields with formulas are read-only
       const isFormulaField = !!field.formula;
-      // Allow editing of readOnly fields (auto fields), but keep formula fields and form-level readOnly
-      const fieldReadOnly = readOnly || isFormulaField;
+      const isCoordField = isCoordinateField(fieldId);
+      const fieldReadOnly = readOnly || isFormulaField || isCoordField;
 
       // Handle array fields
       if (field.type === "array" && field.arrayItemFields) {
@@ -3235,7 +3262,7 @@ export const BusinessVerificationDetails: React.FC<
               label={showLabel ? field.label : undefined}
             >
               <TextArea
-                disabled={readOnly}
+                disabled={fieldReadOnly}
                 placeholder={field.placeholder || field.label}
                 autoSize={{ minRows: 1 }}
               />
@@ -3349,7 +3376,8 @@ export const BusinessVerificationDetails: React.FC<
                 <Card size="small" style={{ backgroundColor: "#fafafa" }}>
                   <Row gutter={[16, 16]}>
                     {field.objectFields.map((objectField: any) => {
-                      const objectFieldReadOnly = readOnly || objectField.readOnly || false;
+                      const isNestedCoordField = isCoordinateField(objectField.id);
+                      const objectFieldReadOnly = readOnly || objectField.readOnly || isNestedCoordField || false;
                       const objectFieldRequired = objectField.required || false;
                       
                       // Render nested field based on its type
@@ -3469,7 +3497,7 @@ export const BusinessVerificationDetails: React.FC<
               label={showLabel ? field.label : undefined}
             >
               <TextArea
-                disabled={readOnly}
+                disabled={fieldReadOnly}
                 placeholder={field.placeholder || field.label}
                 autoSize={{ minRows: 1 }}
               />
@@ -4229,13 +4257,15 @@ export const BusinessVerificationDetails: React.FC<
       itemIndex: number
     ) => {
       const fieldKey = `${field.id}[${itemIndex}].${itemFieldId}`;
+      const isItemCoordField = isCoordinateField(itemFieldId);
+      const itemFieldReadOnly = readOnly || isItemCoordField;
 
       // Handle enum fields (select dropdown) in arrays
       if (itemField.enum && itemField.enum.length > 0) {
         return (
           <Form.Item key={itemFieldId} name={fieldKey} label={itemField.label}>
             <Select
-              disabled={readOnly}
+              disabled={itemFieldReadOnly}
               placeholder={`Select ${itemField.label}`}
             >
               {itemField.enum.map((option: string) => (
@@ -4257,7 +4287,7 @@ export const BusinessVerificationDetails: React.FC<
               name={fieldKey}
               label={itemField.label}
             >
-              <Radio.Group disabled={readOnly}>
+              <Radio.Group disabled={itemFieldReadOnly}>
                 <Radio value={true}>Yes</Radio>
                 <Radio value={false}>No</Radio>
               </Radio.Group>
@@ -4311,7 +4341,7 @@ export const BusinessVerificationDetails: React.FC<
               }}
             >
               <TimePicker
-                disabled={readOnly}
+                disabled={itemFieldReadOnly}
                 placeholder={`Select ${itemField.label}`}
                 format="hh:mm A"
                 style={{ width: "100%" }}
@@ -4329,7 +4359,7 @@ export const BusinessVerificationDetails: React.FC<
               label={itemField.label}
             >
               <InputNumber
-                disabled={readOnly}
+                disabled={itemFieldReadOnly}
                 style={{ width: "100%" }}
                 placeholder={itemField.placeholder || itemField.label}
                 formatter={
@@ -4383,7 +4413,7 @@ export const BusinessVerificationDetails: React.FC<
               }}
             >
               <DatePicker
-                disabled={readOnly}
+                disabled={itemFieldReadOnly}
                 placeholder={`Select ${itemField.label}`}
                 format="DD/MM/YYYY"
                 style={{ width: "100%" }}
@@ -4442,7 +4472,7 @@ export const BusinessVerificationDetails: React.FC<
                 }}
               >
                 <TimePicker
-                  disabled={readOnly}
+                  disabled={itemFieldReadOnly}
                   placeholder={`Select ${itemField.label}`}
                   format="hh:mm A"
                   style={{ width: "100%" }}
@@ -4503,7 +4533,7 @@ export const BusinessVerificationDetails: React.FC<
                 }}
               >
                 <DatePicker
-                  disabled={readOnly}
+                  disabled={itemFieldReadOnly}
                   placeholder={`Select ${itemField.label}`}
                   format="DD/MM/YYYY HH:mm A"
                   showTime={{ format: "HH:mm A" }}
@@ -4546,7 +4576,7 @@ export const BusinessVerificationDetails: React.FC<
                 }}
               >
                 <DatePicker
-                  disabled={readOnly}
+                  disabled={itemFieldReadOnly}
                   placeholder={`Select ${itemField.label}`}
                   format="DD/MM/YYYY"
                   style={{ width: "100%" }}
@@ -4568,7 +4598,7 @@ export const BusinessVerificationDetails: React.FC<
                 label={itemField.label}
               >
                 <TextArea
-                  disabled={readOnly}
+                  disabled={itemFieldReadOnly}
                   placeholder={itemField.placeholder || itemField.label}
                   autoSize={{ minRows: minRows }}
                 />
@@ -4584,7 +4614,7 @@ export const BusinessVerificationDetails: React.FC<
               label={itemField.label}
             >
               <TextArea
-                disabled={readOnly}
+                disabled={itemFieldReadOnly}
                 placeholder={itemField.placeholder || itemField.label}
                 autoSize={{ minRows: 1 }}
               />
@@ -4598,7 +4628,7 @@ export const BusinessVerificationDetails: React.FC<
               name={fieldKey}
               label={itemField.label}
             >
-              <Radio.Group disabled={readOnly}>
+              <Radio.Group disabled={itemFieldReadOnly}>
                 <Radio value={true}>Yes</Radio>
                 <Radio value={false}>No</Radio>
               </Radio.Group>
@@ -4613,7 +4643,7 @@ export const BusinessVerificationDetails: React.FC<
               label={itemField.label}
             >
               <TextArea
-                disabled={readOnly}
+                disabled={itemFieldReadOnly}
                 placeholder={itemField.placeholder || itemField.label}
                 autoSize={{ minRows: 1 }}
               />
