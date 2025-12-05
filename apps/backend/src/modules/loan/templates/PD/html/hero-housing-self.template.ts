@@ -474,16 +474,14 @@ export const heroHousingSelfTemplate = (
         supplierCustomer.briefAboutSupplierAndCustomer,
     ],
     [
-      "No. of suppliers",
+      "No. of total suppliers and details of terms for credit period",
       supplierCustomer.totalSuppliers ||
         supplierCustomer.noOfTotalSuppliersAndCustomers,
     ],
-    ["Supplier credit terms", supplierCustomer.supplierCreditTerms],
     [
-      "No. of customers",
+      "No. of total customers and details of terms for credit period",
       supplierCustomer.totalCustomers || supplierCustomer.noOfTotalCustomers,
     ],
-    ["Customer credit terms", supplierCustomer.customerCreditTerms],
     [
       "Billing period/cycle and receipt mode (Billing on consignment basis/monthly basis/progress of work basis) also comment if any advance is received",
       supplierCustomer.billingCycleAndReceiptMode ||
@@ -708,7 +706,7 @@ export const heroHousingSelfTemplate = (
       right: borrowerValue,
     },
     {
-      left: `<p style="${paragraphStyle}"><strong>Family details</strong></p>`,
+      left: `<p style="${paragraphStyle}"><strong>Family details</strong></p><br><ul><li><strong>Family details – Including dependents</strong></li><li><strong>Family background (Parents and siblings including all dependents)</strong></li></ul>`,
       right: familyValue,
     },
     {
@@ -728,7 +726,7 @@ export const heroHousingSelfTemplate = (
       right: [
         ...supplierCustomerList,
         { 
-          label: "Trade references", 
+          label: "Please collect Reference of min 2 suppliers and 2 customers with their phone no. and business name)", 
           value: tradeReferenceValue || "Not provided", 
           formatter: undefined 
         }

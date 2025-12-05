@@ -263,12 +263,20 @@ export const herohousingSelfSchema = {
           noOfTotalSuppliersAndCustomers: {
             type: "string",
             title:
-              "No of total suppliers and details of terms for credit period ",
+              "No of total suppliers and details of terms for credit period",
+            ui: {
+              widget: "textarea",
+              rows: 2,
+            },
           },
           noOfTotalCustomers: {
             type: "string",
             title:
-              "No of total customers and details of terms for credit period ",
+              "No of total customers and details of terms for credit period",
+            ui: {
+              widget: "textarea",
+              rows: 2,
+            },
           },
           billingCycleAndReceiptMode: {
             type: "string",
