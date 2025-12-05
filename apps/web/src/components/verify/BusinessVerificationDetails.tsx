@@ -2568,229 +2568,56 @@ export const BusinessVerificationDetails: React.FC<
       const allData = { ...data, ...changedData[section.id] };
       const mergedData = { ...allData, ...currentFormValues };
 
-      // Helper to safely parse number
       const parseNum = (value: any): number => {
         if (value === null || value === undefined || value === "") return 0;
         const num = parseFloat(String(value));
         return isNaN(num) ? 0 : num;
       };
 
-      // Type 1: Generic/Standard Financial Analysis
-      if (
-        sectionLabel.includes("financial analysis") &&
-        !sectionLabel.includes("gp/pbdit") &&
-        !sectionLabel.includes("comprehensive") &&
-        !sectionLabel.includes("detailed")
-      ) {
-        const storedGrossProfitDebit = parseNum(mergedData.grossProfitDebit || mergedData.toGrossProfit);
-        const storedGrossProfitCredit = parseNum(mergedData.grossProfitCredit || mergedData.byGrossProfit);
-        const storedNetProfit = parseNum(mergedData.netProfit || mergedData.toNetProfit);
-        const sales = parseNum(mergedData.bySales || mergedData.sales);
-        const services = parseNum(mergedData.byServices || mergedData.services);
-        const closingStock = parseNum(mergedData.byClosingStock || mergedData.closingStock);
-        const openingStock = parseNum(mergedData.toOpeningStock || mergedData.openingStock);
-        const purchase = parseNum(mergedData.toPurchase || mergedData.purchase);
-        const costOfServices = parseNum(mergedData.toCostOfServices || mergedData.costOfServices);
-        const wages = parseNum(mergedData.toWages || mergedData.wages);
-        const hamaliCharges = parseNum(mergedData.toHamaliCharges || mergedData.hamaliCharges);
-        const manufacturingExpenses = parseNum(mergedData.toManufacturingExpenses || mergedData.manufacturingExpenses);
-        const packingCharges = parseNum(mergedData.toPackingCharges || mergedData.packingCharges);
+      let totalGrossProfit = 0;
+      let totalNetProfit = 0;
 
-        const calculatedGrossProfit =
-          sales +
-          services +
-          closingStock -
-          (openingStock +
-            purchase +
-            costOfServices +
-            wages +
-            hamaliCharges +
-            manufacturingExpenses +
-            packingCharges);
+      if (section.fields && Array.isArray(section.fields)) {
+        section.fields.forEach((field: any) => {
+          const fieldId = field.id;
+          const fieldValue = mergedData[fieldId];
+          const fieldLabel = (field.label || field.title || "").toLowerCase();
 
-        const hasStoredGrossProfit = mergedData.grossProfitDebit !== undefined ||
-                                     mergedData.toGrossProfit !== undefined ||
-                                     mergedData.grossProfitCredit !== undefined || 
-                                     mergedData.byGrossProfit !== undefined;
-        const totalGrossProfit = hasStoredGrossProfit 
-          ? (storedGrossProfitDebit || storedGrossProfitCredit)
-          : calculatedGrossProfit;
+          if (field.formula) {
+            const calculatedValue = evaluateFormula(field.formula, mergedData);
+            if (calculatedValue !== null) {
+              mergedData[fieldId] = calculatedValue;
+            }
+          }
 
-        const salaries = parseNum(mergedData.toSalaries || mergedData.salaries);
-        const rent = parseNum(mergedData.toRent || mergedData.rent);
-        const electricityCharges = parseNum(mergedData.toElectricityCharges || mergedData.electricityCharges);
-        const printingStationery = parseNum(mergedData.toPrintingStationery || mergedData.printingStationery);
-        const telephoneCharges = parseNum(mergedData.toTelephoneCharges || mergedData.telephoneCharges);
-        const postageTelegram = parseNum(mergedData.toPostageTelegram || mergedData.postageTelegram);
-        const officeMaintenance = parseNum(mergedData.toOfficeMaintenance || mergedData.officeMaintenance);
-        const repairsMaintenance = parseNum(mergedData.toRepairsMaintenance || mergedData.repairsMaintenance);
-        const sadarExpenses = parseNum(mergedData.toSadarExpenses || mergedData.sadarExpenses);
-        const auditFee = parseNum(mergedData.toAuditFee || mergedData.auditFee);
-        const advertisement = parseNum(mergedData.toAdvertisement || mergedData.advertisement);
-        const bankCharges = parseNum(mergedData.toBankCharges || mergedData.bankCharges);
-        const insurance = parseNum(mergedData.toInsurance || mergedData.insurance);
-        const depreciation = parseNum(mergedData.toDepreciation || mergedData.depreciation);
-        const interestOnLoan = parseNum(mergedData.toInterestOnLoan || mergedData.interestOnLoan);
-        const rentReceived = parseNum(mergedData.byRentReceived || mergedData.rentReceived);
-        const commissionReceived = parseNum(mergedData.byCommissionReceived || mergedData.commissionReceived);
+          if (fieldLabel.includes("gross profit") || fieldId.toLowerCase().includes("grossprofit")) {
+            const value = parseNum(fieldValue || mergedData[fieldId]);
+            if (value !== 0 && (totalGrossProfit === 0 || Math.abs(value) > Math.abs(totalGrossProfit))) {
+              totalGrossProfit = value;
+            }
+          }
 
-        const indirectExpenses =
-          salaries +
-          rent +
-          electricityCharges +
-          printingStationery +
-          telephoneCharges +
-          postageTelegram +
-          officeMaintenance +
-          repairsMaintenance +
-          sadarExpenses +
-          auditFee +
-          advertisement +
-          bankCharges +
-          insurance +
-          depreciation +
-          interestOnLoan;
-        const otherIncomes = rentReceived + commissionReceived;
-        const calculatedNetProfit = totalGrossProfit + otherIncomes - indirectExpenses;
-        const hasStoredNetProfit = mergedData.netProfit !== undefined || mergedData.toNetProfit !== undefined;
-        const totalNetProfit = hasStoredNetProfit 
-          ? storedNetProfit 
-          : calculatedNetProfit;
+          if (
+            (fieldLabel.includes("net profit") && !fieldLabel.includes("before") && !fieldLabel.includes("after tax")) ||
+            (fieldId.toLowerCase().includes("netprofit") && !fieldId.toLowerCase().includes("before") && !fieldId.toLowerCase().includes("aftertax"))
+          ) {
+            const value = parseNum(fieldValue || mergedData[fieldId]);
+            if (value !== 0 && (totalNetProfit === 0 || Math.abs(value) > Math.abs(totalNetProfit))) {
+              totalNetProfit = value;
+            }
+          }
 
-        return { totalGrossProfit, totalNetProfit };
+          if (fieldLabel.includes("net profit after tax") || fieldId.toLowerCase().includes("netprofitaftertax")) {
+            const value = parseNum(fieldValue || mergedData[fieldId]);
+            if (value !== 0) {
+              totalNetProfit = value;
+            }
+          }
+        });
       }
 
-      // Type 2: GP/PBDIT Financial Analysis
-      if (sectionLabel.includes("gp/pbdit")) {
-        const storedGrossProfitAsPerAssumption = parseNum(mergedData.grossProfitAsPerAssumption);
-        const storedNetProfitAfterTax = parseNum(mergedData.netProfitAfterTax);
-        const storedNetProfitBeforeTax = parseNum(mergedData.netProfitBeforeTax);
-
-        const grossReceipts = parseNum(mergedData.grossReceipts);
-        const otherIncome = parseNum(mergedData.otherIncome);
-        const costOfMaterialConsumed = parseNum(mergedData.costOfMaterialConsumed);
-
-        const calculatedGrossProfit = grossReceipts + otherIncome - costOfMaterialConsumed;
-        const hasStoredGrossProfit = mergedData.grossProfitAsPerAssumption !== undefined;
-        const totalGrossProfit = hasStoredGrossProfit
-          ? storedGrossProfitAsPerAssumption
-          : calculatedGrossProfit;
-
-        const salary = parseNum(mergedData.salary);
-        const rent = parseNum(mergedData.rent);
-        const electricity = parseNum(mergedData.electricity);
-        const travelling = parseNum(mergedData.travelling);
-        const otherExpenses = parseNum(mergedData.otherExpenses);
-        const financeExpenses = parseNum(mergedData.financeExpenses);
-        const depreciation = parseNum(mergedData.depreciation);
-        const incomeTax = parseNum(mergedData.incomeTax);
-
-        const incomeSubtotal = grossReceipts + otherIncome;
-        const expenditureSubtotal = salary + rent + electricity + travelling + otherExpenses;
-        const netProfitBeforeInterestTaxDepreciation = incomeSubtotal - expenditureSubtotal;
-        const netProfitBeforeTaxDepreciation = netProfitBeforeInterestTaxDepreciation - financeExpenses;
-        const netProfitBeforeTax = netProfitBeforeTaxDepreciation - depreciation;
-        const calculatedNetProfitAfterTax = netProfitBeforeTax - incomeTax;
-
-        const hasStoredNetProfit = mergedData.netProfitAfterTax !== undefined || 
-                                   mergedData.netProfitBeforeTax !== undefined;
-        const totalNetProfit = hasStoredNetProfit
-          ? (storedNetProfitAfterTax || storedNetProfitBeforeTax)
-          : calculatedNetProfitAfterTax;
-
-        return { totalGrossProfit, totalNetProfit };
-      }
-
-      // Type 3: Comprehensive Actuals vs Estimated Analysis
-      if (sectionLabel.includes("comprehensive")) {
-        const storedGrossProfitEstimated = parseNum(mergedData.grossProfitEstimated);
-        const storedNetProfitEstimated = parseNum(mergedData.netProfitEstimated);
-
-        const salesEstimated = parseNum(mergedData.salesEstimated);
-        const servicesEstimated = parseNum(mergedData.servicesEstimated);
-        const closingStockEstimated = parseNum(mergedData.closingStockEstimated);
-        const openingStockEstimated = parseNum(mergedData.openingStockEstimated);
-        const purchasesEstimated = parseNum(mergedData.purchasesEstimated);
-        const costOfServicesEstimated = parseNum(mergedData.costOfServicesEstimated);
-        const wagesEstimated = parseNum(mergedData.wagesEstimated);
-        const hamaliChargesEstimated = parseNum(mergedData.hamaliChargesEstimated);
-        const manufacturingExpensesEstimated = parseNum(
-          mergedData.manufacturingExpensesEstimated
-        );
-        const packingChargesEstimated = parseNum(mergedData.packingChargesEstimated);
-
-        const calculatedGrossProfit =
-          salesEstimated +
-          servicesEstimated +
-          closingStockEstimated -
-          (openingStockEstimated +
-            purchasesEstimated +
-            costOfServicesEstimated +
-            wagesEstimated +
-            hamaliChargesEstimated +
-            manufacturingExpensesEstimated +
-            packingChargesEstimated);
-
-        const hasStoredGrossProfit = mergedData.grossProfitEstimated !== undefined;
-        const totalGrossProfit = hasStoredGrossProfit
-          ? storedGrossProfitEstimated
-          : calculatedGrossProfit;
-
-        const hasStoredNetProfit = mergedData.netProfitEstimated !== undefined;
-        const totalNetProfit = hasStoredNetProfit
-          ? storedNetProfitEstimated
-          : totalGrossProfit;
-
-        return { totalGrossProfit, totalNetProfit };
-      }
-
-      // Type 4: Detailed Financial Analysis with Balance Sheet
-      if (sectionLabel.includes("detailed financial analysis with balance sheet")) {
-        const storedGrossProfitAssessed = parseNum(mergedData.grossProfitAssessed || mergedData.toGrossProfitAssessed);
-        const storedByGrossProfitEstimated = parseNum(
-          mergedData.byGrossProfitEstimated || 
-          mergedData.grossProfitEstimated
-        );
-
-        const salesEstimated = parseNum(mergedData.salesEstimated || mergedData.bySalesEstimated);
-        const servicesEstimated = parseNum(mergedData.servicesEstimated || mergedData.byServicesEstimated);
-        const closingStockEstimated = parseNum(mergedData.closingStockEstimated || mergedData.byClosingStockEstimated);
-        const openingStockAssessed = parseNum(mergedData.openingStockAssessed || mergedData.toOpeningStockAssessed);
-        const purchasesAssessed = parseNum(mergedData.purchasesAssessed || mergedData.toPurchasesAssessed);
-
-        const calculatedGrossProfit = 
-          salesEstimated + 
-          servicesEstimated + 
-          closingStockEstimated - 
-          openingStockAssessed - 
-          purchasesAssessed;
-
-        const hasStoredGrossProfitAssessed = mergedData.grossProfitAssessed !== undefined || mergedData.toGrossProfitAssessed !== undefined;
-        const hasStoredByGrossProfitEstimated = mergedData.byGrossProfitEstimated !== undefined || mergedData.grossProfitEstimated !== undefined;
-        const totalGrossProfit = hasStoredGrossProfitAssessed
-          ? storedGrossProfitAssessed
-          : hasStoredByGrossProfitEstimated
-          ? storedByGrossProfitEstimated
-          : calculatedGrossProfit;
-
-        const electricity = parseNum(mergedData.electricity || mergedData.toElectricity);
-        const rent = parseNum(mergedData.rent || mergedData.toRent);
-        const salaries = parseNum(mergedData.salaries || mergedData.toSalaries);
-        const travellingCharges = parseNum(mergedData.travellingCharges || mergedData.toTravellingCharges);
-        const otherExpenses = parseNum(mergedData.otherExpenses || mergedData.toOtherExpenses);
-
-        const storedNetProfit = parseNum(mergedData.netProfit || mergedData.toNetProfit);
-        const calculatedNetProfit = totalGrossProfit - (electricity + rent + salaries + travellingCharges + otherExpenses);
-        const hasStoredNetProfit = mergedData.netProfit !== undefined || mergedData.toNetProfit !== undefined;
-        const totalNetProfit = hasStoredNetProfit 
-          ? storedNetProfit 
-          : calculatedNetProfit;
-
-        return { totalGrossProfit, totalNetProfit };
-      }
-
-      return { totalGrossProfit: 0, totalNetProfit: 0 };
-    }, [data, changedData, section.id, section.label, form, formValues]);
+      return { totalGrossProfit, totalNetProfit };
+    }, [data, changedData, section.id, section.label, section.fields, form, formValues]);
 
     // Use side and variant attributes that are set by the schema conversion service
     // These are determined from the credit/debit arrays in the schema
