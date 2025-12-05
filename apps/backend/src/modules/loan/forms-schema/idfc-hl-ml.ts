@@ -399,16 +399,26 @@ export const idfcHlMlSchema = {
                   title: "Monthly Interest (if not in EMI mode)",
                 },
                 loanAmount: {
-                  type: "string",
+                  type: "number",
                   title: "Loan amount (Rs. lacs)",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                  },
                 },
                 mob: {
                   type: "string",
                   title: "MOB",
                 },
                 outstanding: {
-                  type: "string",
+                  type: "number",
                   title: "Outstanding (Rs)",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                  },
                 },
               },
             },
@@ -492,7 +502,7 @@ export const idfcHlMlSchema = {
           loanAmountApplied: {
             type: "string",
             title: "Amount of loan applied",
-            readonly: true,
+            readOnly: true,
           },
           purposeOfLoan: {
             type: "string",

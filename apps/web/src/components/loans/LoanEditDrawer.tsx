@@ -714,7 +714,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                     </div>
                   ))}
                 </Card>
-              )}
+            )}
           </>
         )}
       </Drawer>
