@@ -499,6 +499,10 @@ export class LoanService {
         throw new NotFoundException("Loan not found");
       }
 
+      if (!loan.templateName) {
+        throw new BadRequestException("Please assign a template to the loan first");
+      }
+
       if (!createData.fieldExecutiveId || !createData.verifierId) {
         throw new BadRequestException(
           "Field Executive ID or Verifier ID is required when assigning a field executive"
