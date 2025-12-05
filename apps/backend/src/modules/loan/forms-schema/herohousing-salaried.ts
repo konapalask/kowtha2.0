@@ -362,6 +362,7 @@ export const herohousingSalariedSchema = {
         properties: {
           bankAccounts: {
             type: "array",
+            title: "Bank accounts",
             items: {
               type: "object",
               properties: {
@@ -381,6 +382,7 @@ export const herohousingSalariedSchema = {
           },
           savingAccounts: {
             type: "array",
+            title: "Saving accounts",
             items: {
               type: "object",
               properties: {

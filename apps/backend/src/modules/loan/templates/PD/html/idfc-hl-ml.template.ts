@@ -226,7 +226,9 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>Phone No. of the applicant</strong></p>`,
-      content: wrapParagraph(formatMultiline(personal.phoneNumber || "")),
+      content: wrapParagraph(
+        formatMultiline(personal.applicantPhoneNumber || "")
+      ),
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>PAN No.</strong></p>`,
@@ -381,8 +383,12 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
     {
       instruction: `<p style="${paragraphStyle}"><strong>Describe Business Process</strong></p>`,
       content: wrapParagraph(
-        operational.businessProcess.split("\n")
-          .map((line: string) => `<ul style="margin-left: 8px;"><li>${line}</li></ul>`)
+        operational.businessProcess
+          .split("\n")
+          .map(
+            (line: string) =>
+              `<ul style="margin-left: 8px;"><li>${line}</li></ul>`
+          )
           .join("") || ""
       ),
     },
@@ -590,7 +596,7 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>PD Status</strong></p>`,
-      content: wrapParagraph(html_data.approvedStatus|| "Not provided"),
+      content: wrapParagraph(html_data.approvedStatus || "Not provided"),
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>Overall outcome of the Personal Discussion</strong></p>`,
@@ -604,8 +610,9 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>PD Conducted by</strong></p>`,
-      content:
-        wrapParagraph(formatMultiline(personalDiscussion.pdConductedBy || "")) ,
+      content: wrapParagraph(
+        formatMultiline(personalDiscussion.pdConductedBy || "")
+      ),
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>Signature</strong></p>`,
@@ -625,14 +632,15 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
   ${
     detailsConfirmation.detailsCheckedSameOrNot === "No"
       ? `<p><strong>Details:</strong> ${
-          detailsConfirmation?.detailsNotSameReason?.split("\n")
-          .map((line: string) => `<p style="margin-left: 8px;">${line}</p>`)
-          .join("") || ""
-      }</p>`
-    : ""
-}`;
+          detailsConfirmation?.detailsNotSameReason
+            ?.split("\n")
+            .map((line: string) => `<p style="margin-left: 8px;">${line}</p>`)
+            .join("") || ""
+        }</p>`
+      : ""
+  }`;
 
-return `
+  return `
 ${pdBaseTemplate(html_data)}
 <div class="template-content">
 ${wrapParagraph("<strong>IDFC Bank LTD – Personal Discussion Report</strong>")}
@@ -658,13 +666,15 @@ ${wrapParagraph("<strong>II] Personal Details:-</strong>")}
       ${bankingTable}
       ${wrapParagraph("<strong>Other Assets:</strong>")}
       ${wrapParagraph(
-        termLoansSection?.otherAssets?.split("\n")
+        termLoansSection?.otherAssets
+          ?.split("\n")
           .map((line: string) => `<li style="margin-left: 20px;">${line}</li>`)
           .join("") || "-"
       )}
       ${wrapParagraph("<strong>Other Business if any:</strong>")}
       ${wrapParagraph(
-        termLoansSection?.otherBusiness?.split("\n")
+        termLoansSection?.otherBusiness
+          ?.split("\n")
           .map((line: string) => `<li style="margin-left: 20px;">${line}</li>`)
           .join("") || "-"
       )}

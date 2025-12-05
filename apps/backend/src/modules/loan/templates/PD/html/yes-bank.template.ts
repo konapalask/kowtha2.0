@@ -34,7 +34,7 @@ const formatCurrency = (value: any): string => {
   return `Rs. ${numeric.toLocaleString("en-IN")}/-`;
 };
 
-const ensureArray = <T,>(value: T | T[] | null | undefined): T[] => {
+const ensureArray = <T>(value: T | T[] | null | undefined): T[] => {
   if (Array.isArray(value)) return value;
   if (value === null || value === undefined) return [];
   return [value];
@@ -57,10 +57,7 @@ const renderKeyValue = (
   `;
 };
 
-const renderArrayTable = (
-  headers: string[],
-  rows: string[][]
-): string => {
+const renderArrayTable = (headers: string[], rows: string[][]): string => {
   if (!rows.length) {
     return `<tr><td style="${valueCellStyle}" colspan="${headers.length}">Not provided</td></tr>`;
   }
@@ -124,10 +121,9 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
     ref.status || "",
   ]);
 
-  const employmentDocs = renderArrayTable(
-    ["Documentary evidence"],
-    ensureArray(annexureSalaried.employmentDocuments).map((doc: any) => [doc])
-  );
+  const employmentDocs = ensureArray(annexureSalaried.employmentDocuments)
+    .map((doc: any) => [doc?.document])
+    .join(", ");
 
   return `
     ${pdBaseTemplate(html_data)}
@@ -136,13 +132,13 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
       <table style="${tableStyle}">
         ${renderKeyValue("Name of the Main applicant", general.mainApplicantName)}
         ${renderKeyValue(
-    "PD done with and relation with applicant",
-    general.relationWithApplicant
-  )}
+          "PD done with and relation with applicant",
+          general.relationWithApplicant
+        )}
         ${renderKeyValue(
-    "Address of the visit with landmark",
-    general.addressVisited
-  )}
+          "Address of the visit with landmark",
+          general.addressVisited
+        )}
         <tr>
           <td style="${labelCellStyle}">CAS ID</td>
           <td style="${valueCellStyle}">${formatMultiline(general.casId)}</td>
@@ -153,30 +149,30 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
           <td style="${labelCellStyle}">PD visit date and time</td>
           <td style="${valueCellStyle}">
             ${formatMultiline(general.pdVisitDate)}<br>${formatMultiline(
-    general.pdVisitTime
-  )}
+              general.pdVisitTime
+            )}
           </td>
           <td style="${labelCellStyle}">Contact number</td>
           <td style="${valueCellStyle}">${formatMultiline(
-    general.contactNumber
-  )}</td>
+            general.contactNumber
+          )}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">Loan applied amount</td>
           <td style="${valueCellStyle}">${formatCurrency(
-    general.loanAppliedAmount
-  )}</td>
+            general.loanAppliedAmount
+          )}</td>
           <td style="${labelCellStyle}">Tenor required</td>
           <td style="${valueCellStyle}">${formatMultiline(
-    general.tenorRequired
-  )}</td>
+            general.tenorRequired
+          )}</td>
         </tr>
         ${renderKeyValue(
-    "Address visited type",
-    general.addressVisitedType,
-    undefined,
-    { colspan: 3 }
-  )}
+          "Address visited type",
+          general.addressVisitedType,
+          undefined,
+          { colspan: 3 }
+        )}
       </table>
 
       <table style="${tableStyle}">
@@ -184,25 +180,25 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
         <tr>
           <td style="${labelCellStyle}">Applicant <br> &middot; Business <br> &middot; Educational background <br> &middot; Past experience</td>
           <td style="${valueCellStyle}">${formatMultiline(
-    basic.applicantBackground
-  )}</td>
+            basic.applicantBackground
+          )}</td>
         </tr>
         ${renderKeyValue(
-    "Co-Applicant <br> &middot; Business <br> &middot; Employment <br> &middot; Educational background <br> &middot; Past experience",
-    basic.coApplicantBackground
-  )}
+          "Co-Applicant <br> &middot; Business <br> &middot; Employment <br> &middot; Educational background <br> &middot; Past experience",
+          basic.coApplicantBackground
+        )}
         ${renderKeyValue(
-    "Parents occupation / business / employment background",
-    basic.parentsBackground
-  )}
+          "Parents occupation / business / employment background",
+          basic.parentsBackground
+        )}
         ${renderKeyValue(
-    "Details of children (studying / working)",
-    basic.childrenDetails
-  )}
+          "Details of children (studying / working)",
+          basic.childrenDetails
+        )}
         ${renderKeyValue(
-    "Siblings business / employment background (if residing together)",
-    basic.siblingsBackground
-  )}
+          "Siblings business / employment background (if residing together)",
+          basic.siblingsBackground
+        )}
       </table>
 
       <table style="${tableStyle}">
@@ -213,37 +209,37 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
       </tr>
         ${renderKeyValue("Name of the Business / Employment", business.businessName)}
         ${renderKeyValue(
-    "Constitution of Business Entity (Proprietorship, Partnership, Ltd. Co.)",
-    business.businessConstitution
-  )}
+          "Constitution of Business Entity (Proprietorship, Partnership, Ltd. Co.)",
+          business.businessConstitution
+        )}
         ${renderKeyValue(
-    "Name of Proprietor / Partners / Shareholders with % share",
-    business.proprietorShareDetails
-  )}
+          "Name of Proprietor / Partners / Shareholders with % share",
+          business.proprietorShareDetails
+        )}
         ${renderKeyValue(
-    "No. of Years in Current Business",
-    business.yearsInBusiness
-  )}
+          "No. of Years in Current Business",
+          business.yearsInBusiness
+        )}
         ${renderKeyValue(
-    "Business profile (to include nature of industry, product preference in the market, competition, seasonality, and other aspects of business",
-    `<u><strong>Business details:</strong>  </u> <br>${formatDottedList(business.businessNarrative)}`
-  )}
+          "Business profile (to include nature of industry, product preference in the market, competition, seasonality, and other aspects of business",
+          `<u><strong>Business details:</strong>  </u> <br>${formatDottedList(business.businessNarrative)}`
+        )}
         ${renderKeyValue("Whether GST registered (if Yes, since when GST registration exist)", business.gstRegistration)}
         ${renderKeyValue(
-    "Details of any other proof of business existence/stability available/verified during visit",
-    business.proofOfBusinessStability
-  )}
+          "Details of any other proof of business existence/stability available/verified during visit",
+          business.proofOfBusinessStability
+        )}
         <tr>
           <td style="${labelCellStyle}">Average Monthly sales/receipts</td>
           <td style="${valueCellStyle}">${formatCurrency(
-    business.averageMonthlySales
-  )}</td>
+            business.averageMonthlySales
+          )}</td>
           </tr>
           <tr>
           <td style="${labelCellStyle}">Average Monthly purchase</td>
           <td style="${valueCellStyle}">${formatCurrency(
-    business.averageMonthlyPurchase
-  )}</td>
+            business.averageMonthlyPurchase
+          )}</td>
         </tr>
         ${renderKeyValue("Gross margin on the on goods sold", business.grossMargin)}
         ${renderKeyValue("Overheads to run the business (Indirect expenses)", business.indirectExpenses)}
@@ -253,21 +249,21 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
         ${renderKeyValue("Description about major suppliers with credit terms", business.majorSuppliers)}
         ${renderKeyValue("Business setup details", business.businessSetupDetails)}
         ${renderKeyValue(
-    "Infrastructure and manpower details (to include Business / factory details, plant capacity utilization and staff strength etc)",
-    business.infrastructureManpower
-  )}
+          "Infrastructure and manpower details (to include Business / factory details, plant capacity utilization and staff strength etc)",
+          business.infrastructureManpower
+        )}
         ${renderKeyValue(
-    "Details of other owned Assets (Property, Land etc) / Investment Details (FD, MF, Share etc)",
-    business.otherAssetsInvestments
-  )}
+          "Details of other owned Assets (Property, Land etc) / Investment Details (FD, MF, Share etc)",
+          business.otherAssetsInvestments
+        )}
         ${renderKeyValue(
-    "Details of other Source of Income (Rental income, Agri income, Interest income etc)",
-    business.otherIncomeSources
-  )}
+          "Details of other Source of Income (Rental income, Agri income, Interest income etc)",
+          business.otherIncomeSources
+        )}
         ${renderKeyValue(
-    "Monthly total household expenses",
-    business.householdExpenses
-  )}
+          "Monthly total household expenses",
+          business.householdExpenses
+        )}
         ${renderKeyValue("Collateral Details (for MLAP) – Capture Type, Occupancy status, Year of purchase, Parental owned etc", business.collateralDetails)}
       </table>
 
@@ -276,8 +272,8 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
       <h2 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;">End use (MLAP)</h2>
         <tr><td style="${labelCellStyle}">MLAP (End use in detail), (In case of BT Loan/Loan consolidation, capture end use of earlier loans), (For LCP - capture Cost, AV, source of OCR etc)</td>
         <td style="${valueCellStyle}">${formatMultiline(
-    business.mlapEndUse
-  )}</td></tr>
+          business.mlapEndUse
+        )}</td></tr>
       </table>
 
       <table style="${tableStyle}">
@@ -343,50 +339,50 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
 
       <h2 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;">Reference Check Details</h2>
       ${renderArrayTable(
-    [
-      "Business Ref check",
-      "Reference type (Nearby business premises, Buyer, Suppliers)",
-      "Name of Shop/Business premises with whom ref check done",
-      "Name of person spoken to",
-      "Feedback on business stability, vintage of business, Volume of business, Payment regularity, Capture contact number of person as well (in case ref check done from Suppliers/Buyer)",
-      "Any other Ref check feedback",
-      "Ref Check status (Positive, Negative, Neutral)",
-    ],
-    businessRefRows
-  )}
+        [
+          "Business Ref check",
+          "Reference type (Nearby business premises, Buyer, Suppliers)",
+          "Name of Shop/Business premises with whom ref check done",
+          "Name of person spoken to",
+          "Feedback on business stability, vintage of business, Volume of business, Payment regularity, Capture contact number of person as well (in case ref check done from Suppliers/Buyer)",
+          "Any other Ref check feedback",
+          "Ref Check status (Positive, Negative, Neutral)",
+        ],
+        businessRefRows
+      )}
 
       ${renderArrayTable(
-    [
-      "Residence Ref check (if visited)",
-      "Reference type (from neighbors, nearby Grocery stores, sweets shops, Dairy etc.",
-      "Name of Person, Shop/Business premises with whom ref check done",
-      "Name of person spoken to",
-      "Feedback on applicant’s behavior, Involvement in Negative activity, Vintage at residence, involvement in political activity etc",
-      "Any other Ref check feedback",
-      "Ref Check status (Positive, Negative, Neutral)",
-    ],
-    residenceRefRows
-  )}
+        [
+          "Residence Ref check (if visited)",
+          "Reference type (from neighbors, nearby Grocery stores, sweets shops, Dairy etc.",
+          "Name of Person, Shop/Business premises with whom ref check done",
+          "Name of person spoken to",
+          "Feedback on applicant’s behavior, Involvement in Negative activity, Vintage at residence, involvement in political activity etc",
+          "Any other Ref check feedback",
+          "Ref Check status (Positive, Negative, Neutral)",
+        ],
+        residenceRefRows
+      )}
 
       <table style="${tableStyle}">
       <h2 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;">Final PD Comment</h2>
         ${renderKeyValue(
-    "Interviewer’s overall comments, along with explanations",
-    finalComment.interviewerComment
-  )}
+          "Interviewer’s overall comments, along with explanations",
+          finalComment.interviewerComment
+        )}
         ${renderKeyValue(
-    "Level of activity & stocks observed Along with other Observations",
-    finalComment.activityAndStocks
-  )}
-        ${renderKeyValue("PD Status", html_data.approvedStatus|| "Not provided")}
+          "Level of activity & stocks observed Along with other Observations",
+          finalComment.activityAndStocks
+        )}
+        ${renderKeyValue("PD Status", html_data.approvedStatus || "Not provided")}
         ${renderKeyValue(
-    "Remarks for Positive / Negative / Referred cases",
-    finalComment.remarks
-  )}
+          "Remarks for Positive / Negative / Referred cases",
+          finalComment.remarks
+        )}
         ${renderKeyValue(
-    "Name of the YBL Employee",
-    finalComment.yblEmployeeName
-  )}
+          "Name of the YBL Employee",
+          finalComment.yblEmployeeName
+        )}
         ${renderKeyValue("Designation", finalComment.yblDesignation)}
         ${renderKeyValue("EMP ID", finalComment.yblEmpId)}
         <tr>
@@ -394,13 +390,10 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
           <td style="${valueCellStyle}" colspan="2"></td>
         </tr>
         ${renderKeyValue(
-    "PD agency Interviewer’s Name",
-    finalComment.pdAgencyInterviewer
-  )}
-        ${renderKeyValue(
-    "Report processed by",
-    finalComment.reportProcessedBy
-  )}
+          "PD agency Interviewer’s Name",
+          finalComment.pdAgencyInterviewer
+        )}
+        ${renderKeyValue("Report processed by", finalComment.reportProcessedBy)}
   </table>
 
     
@@ -415,131 +408,123 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
       <h2 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;">Annexure 1 – AFHL Cases</h2>
       <table style="${tableStyle}">
         ${renderKeyValue(
-    "Source from which property was identified",
-    annexureAfhl.propertyIdentifiedThrough
-  )}
+          "Source from which property was identified",
+          annexureAfhl.propertyIdentifiedThrough
+        )}
         ${renderKeyValue(
-    "Builder / Project / Representative details",
-    annexureAfhl.builderDetails
-  )}
+          "Builder / Project / Representative details",
+          annexureAfhl.builderDetails
+        )}
         ${renderKeyValue("Type of transaction", annexureAfhl.transactionType)}
         ${renderKeyValue("Type of property", annexureAfhl.propertyType)}
+        ${renderKeyValue("Property details", annexureAfhl.propertyDetails)}
         ${renderKeyValue(
-    "Property details",
-    annexureAfhl.propertyDetails
-  )}
-        ${renderKeyValue(
-    "Total cost of the property",
-    annexureAfhl.totalPropertyCost,
-    formatCurrency
-  )}
+          "Total cost of the property",
+          annexureAfhl.totalPropertyCost,
+          formatCurrency
+        )}
         ${renderKeyValue("Source of OCR", annexureAfhl.ocrSource)}
+        ${renderKeyValue("Down payment details", annexureAfhl.downPaymentDone)}
         ${renderKeyValue(
-    "Down payment details",
-    annexureAfhl.downPaymentDone
-  )}
+          "Amount of down payment",
+          annexureAfhl.downPaymentAmount,
+          formatCurrency
+        )}
         ${renderKeyValue(
-    "Amount of down payment",
-    annexureAfhl.downPaymentAmount,
-    formatCurrency
-  )}
+          "Source of funds for down payment",
+          annexureAfhl.downPaymentSource
+        )}
+        ${renderKeyValue("Purpose of purchase", annexureAfhl.purposeOfPurchase)}
         ${renderKeyValue(
-    "Source of funds for down payment",
-    annexureAfhl.downPaymentSource
-  )}
+          "Distance of the property from current business and residence",
+          annexureAfhl.distanceFromWork
+        )}
         ${renderKeyValue(
-    "Purpose of purchase",
-    annexureAfhl.purposeOfPurchase
-  )}
-        ${renderKeyValue(
-    "Distance of the property from current business and residence",
-    annexureAfhl.distanceFromWork
-  )}
-        ${renderKeyValue(
-    "If distance is more than 15-20Km from work place provide details of commute plan / reason for buying in far area",
-    annexureAfhl.commutePlan
-  )}
+          "If distance is more than 15-20Km from work place provide details of commute plan / reason for buying in far area",
+          annexureAfhl.commutePlan
+        )}
       </table>
 
       <h2 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;">Annexure 2 – Salaried Profile</h2>
       <table style="${tableStyle}">
         ${renderKeyValue("Name of the Company", annexureSalaried.companyName)}
         ${renderKeyValue(
-    "Constitution of the Company",
-    annexureSalaried.companyConstitution
-  )}
+          "Constitution of the Company",
+          annexureSalaried.companyConstitution
+        )}
         ${renderKeyValue(
-    "HR & Reporting Authority contact",
-    annexureSalaried.hrAndReportingContact
-  )}
+          "HR & Reporting Authority contact",
+          annexureSalaried.hrAndReportingContact
+        )}
         ${renderKeyValue(
-    "Employer representative",
-    annexureSalaried.employerContact
-  )}
+          "Employer representative",
+          annexureSalaried.employerContact
+        )}
+        ${renderKeyValue("Employer details", annexureSalaried.employerDetails)}
         ${renderKeyValue(
-    "Employer details",
-    annexureSalaried.employerDetails
-  )}
+          "Employment status",
+          annexureSalaried.employmentStatus
+        )}
         ${renderKeyValue(
-    "Employment status",
-    annexureSalaried.employmentStatus
-  )}
-        ${renderKeyValue(
-    "Current designation & department",
-    annexureSalaried.currentDesignation
-  )}
+          "Current designation & department",
+          annexureSalaried.currentDesignation
+        )}
         ${renderKeyValue("Employee ID", annexureSalaried.employeeId)}
         ${renderKeyValue(
-    "Salary mode & account details",
-    annexureSalaried.salaryMode
-  )}
+          "Salary mode & account details",
+          annexureSalaried.salaryMode
+        )}
         ${renderKeyValue(
-    "Gross monthly salary",
-    annexureSalaried.grossMonthlySalary,
-    formatCurrency
-  )}
+          "Gross monthly salary",
+          annexureSalaried.grossMonthlySalary,
+          formatCurrency
+        )}
         ${renderKeyValue(
-    "Net monthly salary",
-    annexureSalaried.netMonthlySalary,
-    formatCurrency
-  )}
+          "Net monthly salary",
+          annexureSalaried.netMonthlySalary,
+          formatCurrency
+        )}
         ${renderKeyValue(
-    "Loans from employer",
-    annexureSalaried.employerLoanDetails
-  )}
+          "Loans from employer",
+          annexureSalaried.employerLoanDetails
+        )}
         ${renderKeyValue(
-    "Terms of employment",
-    annexureSalaried.employmentTerms
-  )}
+          "Terms of employment",
+          annexureSalaried.employmentTerms
+        )}
         ${renderKeyValue(
-    "Vintage with current employer",
-    annexureSalaried.currentEmployerVintage
-  )}
+          "Vintage with current employer",
+          annexureSalaried.currentEmployerVintage
+        )}
         ${renderKeyValue(
-    "Previous work experience details",
-    annexureSalaried.previousExperienceDetails
-  )}
+          "Previous work experience details",
+          annexureSalaried.previousExperienceDetails
+        )}
         ${renderKeyValue(
-    "Years worked in previous job",
-    annexureSalaried.previousExperienceYears
-  )}
+          "Years worked in previous job",
+          annexureSalaried.previousExperienceYears
+        )}
         ${renderKeyValue("Other source of income", annexureSalaried.otherIncome)}
         ${renderKeyValue(
-    "Existing residence status",
-    annexureSalaried.residenceStatus
-  )}
+          "Existing residence status",
+          annexureSalaried.residenceStatus
+        )}
         ${renderKeyValue(
-    "Rental expenses per month",
-    annexureSalaried.rentExpenses
-  )}
+          "Rental expenses per month",
+          annexureSalaried.rentExpenses
+        )}
         ${renderKeyValue(
-    "Other family expenses per month",
-    annexureSalaried.familyExpenses
-  )}
+          "Other family expenses per month",
+          annexureSalaried.familyExpenses
+        )}
         ${renderKeyValue(
-    "Third party check for employment",
-    annexureSalaried.employmentTPC
-  )}
+          "Third party check for employment",
+          annexureSalaried.employmentTPC
+        )}
+        ${renderKeyValue(
+          "Documentary evidence seen for employment",
+          employmentDocs
+        )}
       </table>
 
 

@@ -85,7 +85,7 @@ export const idfcHlMlSchema = {
             title: "Name of the Applicant",
             readOnly: true,
           },
-          phoneNumber: {
+          applicantPhoneNumber: {
             type: "integer",
             title: "Phone No. of the Applicant",
             readOnly: true,
@@ -137,7 +137,7 @@ export const idfcHlMlSchema = {
                   ],
                 },
                 age: {
-                  type: "string",
+                  type: "integer",
                   title: "Age",
                 },
                 qualification: {

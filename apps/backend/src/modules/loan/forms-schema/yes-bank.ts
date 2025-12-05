@@ -608,9 +608,14 @@ export const yesBankSchema = {
             title: "Third party check for employment",
           },
           employmentDocuments: {
-            type: "array",
             title: "Documentary evidence seen for employment",
-            items: { type: "string", title: "Document" },
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                document: { type: "string", title: "Document" },
+              },
+            },
           },
         },
       },
