@@ -205,7 +205,15 @@ export const janaSenpAbove50lTemplate = (verificationData: any, html_data: any) 
         <td style="text-align: center;${labelCellStyle}" colspan="2">About the Business</td>
        </tr>
        <tr>
-        <td style="${valueCellStyle}" colspan="2">${formatMultiline(aboutTheBusiness.aboutTheBusiness)}</td>
+        <td style="${valueCellStyle}" colspan="2">${
+          (() => {
+            const text = aboutTheBusiness.aboutTheBusiness;
+            if (!text) return "Not provided";
+            const lines = String(text).split(/\n+/).filter((line: string) => line.trim().length > 0);
+            if (lines.length === 0) return "Not provided";
+            return `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;">${lines.map((line: string) => `<li style="margin-left: 8px;">${line.trim()}</li>`).join("")}</ul>`;
+          })()
+        }</td>
        </tr>
 
        <tr>

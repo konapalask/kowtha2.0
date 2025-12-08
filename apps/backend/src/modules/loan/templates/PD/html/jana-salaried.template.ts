@@ -465,13 +465,29 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
                 <td style="${labelCellStyle}">Case Strengths</td>
                 </tr>
                 <tr>
-                <td style="${valueCellStyle}">${formatMultiline(otherObservations?.caseStrengths || "Not provided")}</td>
+                <td style="${valueCellStyle}">${
+                  (() => {
+                    const text = otherObservations?.caseStrengths;
+                    if (!text) return "Not provided";
+                    const lines = String(text).split(/\n+/).filter((line: string) => line.trim().length > 0);
+                    if (lines.length === 0) return "Not provided";
+                    return `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;">${lines.map((line: string) => `<li style="margin-left: 8px;">${line.trim()}</li>`).join("")}</ul>`;
+                  })()
+                }</td>
               </tr>
               <tr>
                 <td style="${labelCellStyle}">Case Weakness</td>
                 </tr>
                 <tr>
-                <td style="${valueCellStyle}">${formatMultiline(otherObservations?.caseWeakness || "Not provided")}</td>
+                <td style="${valueCellStyle}">${
+                  (() => {
+                    const text = otherObservations?.caseWeakness;
+                    if (!text) return "Not provided";
+                    const lines = String(text).split(/\n+/).filter((line: string) => line.trim().length > 0);
+                    if (lines.length === 0) return "Not provided";
+                    return `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;">${lines.map((line: string) => `<li style="margin-left: 8px;">${line.trim()}</li>`).join("")}</ul>`;
+                  })()
+                }</td>
               </tr>
             </table> 
           </td>

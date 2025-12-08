@@ -395,83 +395,84 @@ export const iciciSchema = {
             items: {
               type: "object",
               properties: {
-              
-                    coApplicantMonthlyTO: {
-                      type: "number",
-                      title:
-                        "Co-Applicant - Monthly TO / Gross Receipts (Weekly sales * 4)",
-                    },
-                    coApplicantCostOfRawMaterial: {
-                      type: "number",
-                      title: "Co-Applicant - Less: Cost of Raw Material",
-                    },
-                    coApplicantRentIncome: {
-                      type: "number",
-                      title: "Co-Applicant - Rent Income (If Any)",
-                    },
-                    coApplicantOtherIncome: {
-                      type: "number",
-                      title:
-                        "Co-Applicant - Any Other Regular Income Other than Business",
-                    },
-                    coApplicantGrossMonthlyIncome: {
-                      type: "number",
-                      title: "Co-Applicant - Gross Monthly Income",
-                    },
-                    coApplicantBusinessExpensesRent: {
-                      type: "number",
-                      title: "Co-Applicant - Business Expenses: Rent",
-                    },
-                    coApplicantBusinessExpensesSalary: {
-                      type: "number",
-                      title: "Co-Applicant - Business Expenses: Salary",
-                    },
-                    coApplicantBusinessExpensesElectricity: {
-                      type: "number",
-                      title: "Co-Applicant - Business Expenses: Electricity",
-                    },
-                    coApplicantBusinessExpensesTravelling: {
-                      type: "number",
-                      title: "Co-Applicant - Business Expenses: Travelling",
-                    },
-                    coApplicantBusinessExpensesOther: {
-                      type: "number",
-                      title: "Co-Applicant - Business Expenses: Other Operating Expense",
-                    },
-                    coApplicantIncomeLeftForDomestic: {
-                      type: "number",
-                      title: "Co-Applicant - Income Left for Domestic Expenses",
-                    },
-                    coApplicantHouseholdExpensesFood: {
-                      type: "number",
-                      title: "Co-Applicant - Household Expenses: Food",
-                    },
-                    coApplicantHouseholdExpensesSchoolFees: {
-                      type: "number",
-                      title: "Co-Applicant - Household Expenses: School Fees",
-                    },
-                    coApplicantHouseholdExpensesOther: {
-                      type: "number",
-                      title:
-                        "Co-Applicant - Household Expenses: Others household expenses",
-                    },
-                    coApplicantNetMonthlyIncome: {
-                      type: "number",
-                      title: "Co-Applicant - Net Monthly Income Post All Expenses",
-                    },
-                    coApplicantSavingsInvestments: {
-                      type: "number",
-                      title:
-                        "Co-Applicant - Less: Savings/Investments/Insurance Premiums",
-                    },
-                    coApplicantExistingEmi: {
-                      type: "number",
-                      title: "Co-Applicant - Less: Existing EMI",
-                    },
-                    coApplicantNetSurplusForEmi: {
-                      type: "number",
-                      title: "Co-Applicant - Net Surplus Available for Proposed EMI",
-                    },
+                coApplicantMonthlyTO: {
+                  type: "number",
+                  title:
+                    "Co-Applicant - Monthly TO / Gross Receipts (Weekly sales * 4)",
+                },
+                coApplicantCostOfRawMaterial: {
+                  type: "number",
+                  title: "Co-Applicant - Less: Cost of Raw Material",
+                },
+                coApplicantRentIncome: {
+                  type: "number",
+                  title: "Co-Applicant - Rent Income (If Any)",
+                },
+                coApplicantOtherIncome: {
+                  type: "number",
+                  title:
+                    "Co-Applicant - Any Other Regular Income Other than Business",
+                },
+                coApplicantGrossMonthlyIncome: {
+                  type: "number",
+                  title: "Co-Applicant - Gross Monthly Income",
+                },
+                coApplicantBusinessExpensesRent: {
+                  type: "number",
+                  title: "Co-Applicant - Business Expenses: Rent",
+                },
+                coApplicantBusinessExpensesSalary: {
+                  type: "number",
+                  title: "Co-Applicant - Business Expenses: Salary",
+                },
+                coApplicantBusinessExpensesElectricity: {
+                  type: "number",
+                  title: "Co-Applicant - Business Expenses: Electricity",
+                },
+                coApplicantBusinessExpensesTravelling: {
+                  type: "number",
+                  title: "Co-Applicant - Business Expenses: Travelling",
+                },
+                coApplicantBusinessExpensesOther: {
+                  type: "number",
+                  title:
+                    "Co-Applicant - Business Expenses: Other Operating Expense",
+                },
+                coApplicantIncomeLeftForDomestic: {
+                  type: "number",
+                  title: "Co-Applicant - Income Left for Domestic Expenses",
+                },
+                coApplicantHouseholdExpensesFood: {
+                  type: "number",
+                  title: "Co-Applicant - Household Expenses: Food",
+                },
+                coApplicantHouseholdExpensesSchoolFees: {
+                  type: "number",
+                  title: "Co-Applicant - Household Expenses: School Fees",
+                },
+                coApplicantHouseholdExpensesOther: {
+                  type: "number",
+                  title:
+                    "Co-Applicant - Household Expenses: Others household expenses",
+                },
+                coApplicantNetMonthlyIncome: {
+                  type: "number",
+                  title: "Co-Applicant - Net Monthly Income Post All Expenses",
+                },
+                coApplicantSavingsInvestments: {
+                  type: "number",
+                  title:
+                    "Co-Applicant - Less: Savings/Investments/Insurance Premiums",
+                },
+                coApplicantExistingEmi: {
+                  type: "number",
+                  title: "Co-Applicant - Less: Existing EMI",
+                },
+                coApplicantNetSurplusForEmi: {
+                  type: "number",
+                  title:
+                    "Co-Applicant - Net Surplus Available for Proposed EMI",
+                },
               },
             },
           },

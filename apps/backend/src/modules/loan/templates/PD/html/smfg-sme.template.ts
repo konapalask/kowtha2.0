@@ -495,7 +495,15 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
         undefined,
         { colSpan: 3 }
       )}
-      ${renderKeyValueRow("Concerns", observations.concerns, undefined, {
+      ${renderKeyValueRow("Concerns", 
+        (() => {
+          const text = observations.concerns;
+          if (!text) return "Not provided";
+          const lines = String(text).split(/\n+/).filter((line: string) => line.trim().length > 0);
+          if (lines.length === 0) return "Not provided";
+          return `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;">${lines.map((line: string) => `<li style="margin-left: 8px;">${line.trim()}</li>`).join("")}</ul>`;
+        })(), 
+        undefined, {
         colSpan: 3,
       })}
       ${renderKeyValueRow("Status of PD", html_data.approvedStatus|| "Not provided", undefined, {

@@ -313,9 +313,15 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
             <tr>
                 <td colspan="2" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Any other observations / remarks during visit:</strong></p></td>
                 <td colspan="7" style="${valueCellStyle}">
-                    <ul>
-                        <li>${verificationData.otherDetailsObserved?.otherObservationsRemarks || ""}</li>
-                    </ul>
+                    ${
+                      (() => {
+                        const text = verificationData.otherDetailsObserved?.otherObservationsRemarks;
+                        if (!text) return "Not provided";
+                        const lines = String(text).split(/\n+/).filter((line: string) => line.trim().length > 0);
+                        if (lines.length === 0) return "Not provided";
+                        return `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;">${lines.map((line: string) => `<li style="margin-left: 8px;">${line.trim()}</li>`).join("")}</ul>`;
+                      })()
+                    }
                 </td>
             </tr>
             <tr>

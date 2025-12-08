@@ -429,8 +429,9 @@ export const arkaFincapSchema = {
         type: "object",
         properties: {
           gstRegistered: {
-            type: "boolean",
+            type: "string",
             title: "Whether Business Registered under GST?",
+            enum: ["Yes", "No"],
           },
         },
       },

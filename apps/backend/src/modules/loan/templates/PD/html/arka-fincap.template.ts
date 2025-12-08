@@ -12,7 +12,8 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
   const aboutTheBusiness = verificationData.aboutTheBusiness || {};
   const regularCustomers = verificationData.regularCustomers || {};
   const regularSuppliers = verificationData.regularSuppliers || {};
-  const businessActivityObserved = verificationData.businessActivityObserved || {};
+  const businessActivityObserved =
+    verificationData.businessActivityObserved || {};
   const documentsObserved = verificationData.documentsObserved || {};
   const gstRegistration = verificationData.gstRegistration || {};
   const itrDetails = verificationData.itrDetails || {};
@@ -23,8 +24,9 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
   const familyExpenses = verificationData.familyExpenses || {};
   const employees = verificationData.employees || {};
   const concerns = verificationData.concerns || {};
-  const otherObservations = verificationData.otherObservations?.otherObservations || [];
-  const otherIncomes = verificationData.otherIncomes || []; 
+  const otherObservations =
+    verificationData.otherObservations?.otherObservations || [];
+  const otherIncomes = verificationData.otherIncomes || [];
   const neighborCheck = verificationData.neighborCheck || {};
   const status = verificationData.status || {};
 
@@ -52,7 +54,6 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
 
     return `Rs. ${numericAmount.toLocaleString("en-IN")}/-`;
   };
-
 
   const ensureArray = <T>(value: T | T[] | undefined | null): T[] => {
     if (Array.isArray(value)) return value;
@@ -267,8 +268,11 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
   const renderConcernsSummary = () => {
     const summary = getValue(concerns.concernsSummary);
     return summary
-      ? summary.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("")
-       : '<div>Not Provided</div>';
+      ? summary
+          .split("\n")
+          .map((line: string) => `<ul><li>${line}</li></ul>`)
+          .join("")
+      : "<div>Not Provided</div>";
   };
 
   const getValue = (...candidates: any[]) => {
@@ -656,7 +660,11 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>About the Applicant</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${
-                  applicantDetails?.aboutTheApplicant?.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("") || "Not Provided"}</p></td>
+                  applicantDetails?.aboutTheApplicant
+                    ?.split("\n")
+                    .map((line: string) => `<ul><li>${line}</li></ul>`)
+                    .join("") || "Not Provided"
+                }</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px;vertical-align:top;width:25%"><p style="margin:8px 0;line-height:1.5"><strong>Family Details</strong></p></td>
@@ -692,7 +700,12 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
             <tr>
                 <td style="border:1px solid #ccc;padding:8px;vertical-align:top"><p style="margin:8px 0;line-height:1.5"><strong>About the Business</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px">
-                    ${aboutTheBusiness?.businessSummary?.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("") || "Not Provided"}
+                    ${
+                      aboutTheBusiness?.businessSummary
+                        ?.split("\n")
+                        .map((line: string) => `<ul><li>${line}</li></ul>`)
+                        .join("") || "Not Provided"
+                    }
                 </td>
             </tr>
             <tr>
@@ -727,14 +740,21 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Documents Observed</strong></p></td>
-                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCommaSeparatedList(
-                  documentsObserved.documentsObserved
-                )}</p></td>
+                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${(() => {
+                  const text = getValue(documentsObserved.documentsObserved);
+                  if (!text) return "Not Provided";
+                  const lines = text
+                    .split(/\n+/)
+                    .filter((line: string) => line.trim().length > 0);
+                  if (lines.length === 0) return "Not Provided";
+                  return `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;">${lines.map((line: string) => `<li style="margin-left: 8px;">${line.trim()}</li>`).join("")}</ul>`;
+                })()}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Whether Business Registered under GST?</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${
-                  gstRegistration?.gstRegistered}</p></td>
+                  gstRegistration?.gstRegistered
+                }</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>As per Audited individual ITR's</strong></p></td>
@@ -762,9 +782,9 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Net Margin</strong></p></td>
-                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${getValue(
-                  netMargin.netMargin
-                )+"%"}</p></td>
+                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${
+                  getValue(netMargin.netMargin) + "%"
+                }</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Family Expenses</strong></p></td>
@@ -785,15 +805,23 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Other observations</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px">
-                ${ensureArray(otherObservations).map(
-                  (item: any) => `<ul><li>${ item?.observation || ""}</li></ul>`
-                ).join("<br>")}
+                ${ensureArray(otherObservations)
+                  .map(
+                    (item: any) =>
+                      `<ul><li>${item?.observation || ""}</li></ul>`
+                  )
+                  .join("<br>")}
                 </td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Other Incomes</strong></p></td>
                 <td colspan="8" style="border:1px solid #ccc;padding:8px">
-                ${ensureArray(otherIncomes.otherIncomes).map((income: any) => `<ul><li>${income?.otherIncome || ""}</li></ul>`).join("<br>")}
+                ${ensureArray(otherIncomes.otherIncomes)
+                  .map(
+                    (income: any) =>
+                      `<ul><li>${income?.otherIncome || ""}</li></ul>`
+                  )
+                  .join("<br>")}
                 </td>
             </tr>
             <tr>
@@ -802,7 +830,7 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Status</strong></p></td>
-                <td colspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>${html_data.approvedStatus|| "Not provided"}</strong></p></td>
+                <td colspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>${html_data.approvedStatus || "Not provided"}</strong></p></td>
             </tr>
             </table>
                     

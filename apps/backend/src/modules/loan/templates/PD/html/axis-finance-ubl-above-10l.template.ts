@@ -3,7 +3,7 @@ import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.template";
 
 const tableStyle =
   "border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0";
-  const labelCellStyle =
+const labelCellStyle =
   "border:1px solid #c7cdd1;padding:8px;font-weight:600;color:#222;background:#b6bec3;vertical-align:top;width:25%";
 const cellStyle =
   "border:1px solid #ccc;padding:8px;vertical-align:top;line-height:1.5";
@@ -71,10 +71,7 @@ const renderInnerTable = (headers: string[], rows: string[][]) => {
     return wrapParagraph("Not provided");
   }
   const headerRow = headers
-    .map(
-      (header) =>
-        `<td style="${labelCellStyle}">${header}</td>`
-    )
+    .map((header) => `<td style="${labelCellStyle}">${header}</td>`)
     .join("");
   const rowsHtml = rows
     .map(
@@ -243,7 +240,7 @@ export const axisFinanceUBLTemplate = (
   // Handle both possible structures: bankingDetails.bankingDetails or bankingDetails array
   const bankingDetailsData = verificationData.bankingDetails || {};
   const bankingAccounts = ensureArray(bankingDetailsData?.banks).map(
-        (account: any) => [
+    (account: any) => [
       account?.bankName || "",
       account?.branchName || "",
       account?.accountType || "",
@@ -362,7 +359,7 @@ export const axisFinanceUBLTemplate = (
       <p style="${paragraphStyle};font-size:14px;"><strong>About the Business</strong></p>
       <table style="${tableStyle}">
       <tr>
-      <td width="25%" style="${cellStyle}"><strong>About the Business</strong></td>
+      <td width="25%" style="${labelCellStyle}"><strong>About the Business</strong></td>
       <td style="${cellStyle}">${businessPointsList.length ? `<ul style="margin: 0; padding-left: 20px;">${businessPointsList.map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("")}</ul>` : "Not provided"}</td>
       </tr>
       </table>
@@ -491,6 +488,7 @@ export const axisFinanceUBLTemplate = (
           assetSection.vehicles || "NA",
         ],
       ])}
+      <p style="${paragraphStyle};font-size:12px;font-style:italic;margin-top:8px;"><strong>NOTE:</strong> AMOUNTS MENTIONED ABOVE ARE APPROX</p>
 
       <p style="${paragraphStyle};font-size:14px;"><strong>Loan Details</strong></p>
       ${renderInnerTable(
@@ -541,7 +539,7 @@ export const axisFinanceUBLTemplate = (
       ])}
       ${renderKeyValueTable([
         ["Remarks:", thirdPartySection.remarks || ""],
-        ["Status:", html_data.approvedStatus|| "Not provided"],
+        ["Status:", html_data.approvedStatus || "Not provided"],
         [
           "AFL Verifier's Name & Emp Code:",
           thirdPartySection.verifierNameEmpCode || "",

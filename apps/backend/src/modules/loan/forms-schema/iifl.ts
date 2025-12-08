@@ -22,8 +22,15 @@ export const iiflSchema = {
           },
           educationalQualification: {
             type: "string",
-            title:
-              "Educational Qualification (Below 10th / 10th Pass / 12th Pass / Diploma / Graduate / PG / Professional Certification)",
+            title: "Educational Qualification",
+            enum: [
+              "Below 10th",
+              "10th pass",
+              "12th pass",
+              "Diploma/ITI certification",
+              "Graduate",
+              "PG/Professional Certification",
+            ],
           },
           category: {
             type: "string",
@@ -31,11 +38,11 @@ export const iiflSchema = {
             enum: ["General", "SC", "ST", "OBC", "Others"],
           },
           dependentsChildren: {
-            type: "string",
+            type: "number",
             title: "Number of Dependents - Children",
           },
           dependentsAdults: {
-            type: "string",
+            type: "number",
             title: "Number of Dependents - Adults",
           },
           dependentsOthers: {

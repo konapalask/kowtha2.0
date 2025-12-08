@@ -212,7 +212,7 @@ export const bankSchemas: BankSchemaConfig[] = [
     bankName: "INCRED",
     schema: incredSchema,
     templatesAndFooters: {
-      "INCRED/KKR India Financial Services Limited" : "KKR India Financial Services Limited" ,
+      "INCRED/KKR India Financial Services Limited" : "INCRED" ,
     },
   },
   {

@@ -314,20 +314,11 @@ export const cholaSchema = {
         type: "object",
         properties: {
           comfortFactors: {
-            type: "array",
+            type: "string",
             title: "Comfort Factors",
-            items: {
-              type: "object",
-              properties: {
-                comfortFactor: {
-                  type: "string",
-                  title: "Comfort Factor",
-                  ui: {
-                    widget: "textarea",
-                    rows: 6,
-                  },
-                },
-              },
+            ui: {
+              widget: "textarea",
+              rows: 3,
             },
           },
         },
@@ -340,20 +331,11 @@ export const cholaSchema = {
         type: "object",
         properties: {
           discomfortFactors: {
-            type: "array",
+            type: "string",
             title: "Discomfort Factors",
-            items: {
-              type: "object",
-              properties: {
-                discomfortFactor: {
-                  type: "string",
-                  title: "Discomfort Factor",
-                  ui: {
-                    widget: "textarea",
-                    rows: 6,
-                  },
-                },
-              },
+            ui: {
+              widget: "textarea",
+              rows: 3,
             },
           },
         },
@@ -366,17 +348,25 @@ export const cholaSchema = {
         type: "object",
         properties: {
           recommendations: {
-            type: "array",
+            type: "string",
             title: "Recommendations",
-            items: {
-              type: "object",
-              properties: {
-                recommendation: {
-                  type: "string",
-                  title: "Enter Details",
-                },
-              },
+            ui: {
+              widget: "textarea",
+              rows: 3,
             },
+          },
+        },
+      },
+    },
+    {
+      id: "disclaimer",
+      label: "Disclaimer",
+      schema: {
+        type: "object",
+        properties: {
+          disclaimer: {
+            type: "string",
+            title: "Disclaimer",
           },
         },
       },

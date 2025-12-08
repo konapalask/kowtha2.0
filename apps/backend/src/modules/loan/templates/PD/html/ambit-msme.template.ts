@@ -134,7 +134,7 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
           <td style="border:1px solid #ccc;padding:8px">
             <table style="${tableStyle}">
               <tr>
-                <td style="${valueCellStyle}" colspan="4"><strong><u>Address with Lattitude and Longitude:</u></strong> ${residentialDetails.address + "<br><strong>Latitude:</strong> " + residentialDetails.latitude + "<br><strong>Longitude:</strong> " + residentialDetails.longitude}</td>
+                <td style="${valueCellStyle}" colspan="4"><strong><u>Address with Lattitude and Longitude:</u></strong> ${residentialDetails.address + "<br><strong>Latitude:</strong> " + residentialDetails.addressLatitude + "<br><strong>Longitude:</strong> " + residentialDetails.addressLongitude}</td>
                 
               </tr>
               <tr>
@@ -161,8 +161,10 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
             <td style="border:1px solid #ccc;padding:8px">
                 <table style="${tableStyle}">
                     <tr>
-                        <td style="${valueCellStyle}" colspan="4"><strong><u>Address with Lattitude and Longitude:</u></strong> ${propertyDetails.address + "<br><strong>Latitude:</strong> " + propertyDetails.latitude + "<br><strong>Longitude:</strong> " + propertyDetails.longitude}</td>
+                        <td style="${valueCellStyle}" colspan="4"><strong><u>Address with Lattitude and Longitude:</u></strong> ${propertyDetails.address + "<br><strong>Latitude:</strong> " + propertyDetails.addressLatitude + "<br><strong>Longitude:</strong> " + propertyDetails.addressLongitude}</td>
+                      ${renderKeyValue("Type of Property", propertyDetails.typeOfProperty)}
                         ${renderKeyValue("Property owner name", propertyDetails.ownerName)}
+                        ${renderKeyValue("Nature of Uses", propertyDetails.natureOfUses)}
                         ${renderKeyValue("Market Value", propertyDetails.marketValue)}
                         ${renderKeyValue("Area (In Sq. Ft.)", propertyDetails.areaInSqft)}
                         ${renderKeyValue("Occupied since (years)", propertyDetails.occupiedSinceYears)}
@@ -459,18 +461,42 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
         <tr>
             <td style="${labelCellStyle}">12</td>
             <td style="${labelCellStyle}">Stregths</td>
-            <td style="${valueCellStyle}">${formatMultiline(strengthsAndWeaknesses.strengths)}</td>
+            <td style="${valueCellStyle}">${(() => {
+              const text = strengthsAndWeaknesses.strengths;
+              if (!text) return "Not provided";
+              const lines = String(text)
+                .split(/\n+/)
+                .filter((line: string) => line.trim().length > 0);
+              if (lines.length === 0) return "Not provided";
+              return `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;">${lines.map((line: string) => `<li style="margin-left: 8px;">${line.trim()}</li>`).join("")}</ul>`;
+            })()}</td>
         </tr>
         <tr>
             <td style="${labelCellStyle}">13</td>
             <td style="${labelCellStyle}">Weaknesses</td>
-            <td style="${valueCellStyle}">${formatMultiline(strengthsAndWeaknesses.weaknesses)}</td>
+            <td style="${valueCellStyle}">${(() => {
+              const text = strengthsAndWeaknesses.weaknesses;
+              if (!text) return "Not provided";
+              const lines = String(text)
+                .split(/\n+/)
+                .filter((line: string) => line.trim().length > 0);
+              if (lines.length === 0) return "Not provided";
+              return `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;">${lines.map((line: string) => `<li style="margin-left: 8px;">${line.trim()}</li>`).join("")}</ul>`;
+            })()}</td>
         </tr>
         
         <tr>
             <td style="${labelCellStyle}">14</td>
             <td style="${labelCellStyle}">List of Documents Seen during visit</td>
-            <td style="${valueCellStyle}">${formatMultiline(documentsSeen.documents)}</td>
+            <td style="${valueCellStyle}">${(() => {
+              const text = documentsSeen.documents;
+              if (!text) return "Not provided";
+              const lines = String(text)
+                .split(/\n+/)
+                .filter((line: string) => line.trim().length > 0);
+              if (lines.length === 0) return "Not provided";
+              return `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;">${lines.map((line: string) => `<li style="margin-left: 8px;">${line.trim()}</li>`).join("")}</ul>`;
+            })()}</td>
         </tr>
         
 
