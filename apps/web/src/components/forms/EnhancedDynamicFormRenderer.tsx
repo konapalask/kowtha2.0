@@ -37,6 +37,37 @@ import dayjs from "dayjs";
 const { TextArea } = Input;
 const { Title, Text } = Typography;
 
+
+const COORDINATE_FIELD_KEYS = [
+  'siteCoordinates',
+  'coordinates',
+  'latitude',
+  'longitude',
+  'latitudeLongitude',
+  'latitudeAndLongitude',
+  'officeGeoTag',
+  'customerGeoTag',
+  'geoTag',
+  'geoCoordinates',
+  'geoLocation',
+  'lat',
+  'lng',
+  'long',
+  'siteLatitude',
+  'siteLongitude',
+  'currentLatitude',
+  'currentLongitude',
+];
+
+const isCoordinateField = (fieldId: string): boolean => {
+  if (!fieldId) return false;
+  const fieldIdLower = fieldId.toLowerCase().trim();
+  return COORDINATE_FIELD_KEYS.some(key => {
+    const keyLower = key.toLowerCase().trim();
+    return fieldIdLower === keyLower;
+  });
+};
+
 interface EnhancedDynamicFormRendererProps {
   schema: WebFormDefinition;
   initialData?: WebFormData;
@@ -198,10 +229,10 @@ export const EnhancedDynamicFormRenderer: React.FC<
   };
 
   const renderField = (field: WebFieldDefinition, sectionId: string) => {
-    // Allow editing of readOnly fields (auto fields), but respect form-level readOnly
-    const isFieldReadOnly = readOnly;
+    const isFieldCoordField = isCoordinateField(field.id);
 
-    // For form-level readOnly, render as plain text instead of form controls
+    const isFieldReadOnly = readOnly || isFieldCoordField;
+
     if (isFieldReadOnly) {
       const value = form.getFieldValue([sectionId, field.id]);
       const isEmpty = !validateNonEmpty(value);
@@ -243,10 +274,17 @@ export const EnhancedDynamicFormRenderer: React.FC<
       );
     }
 
+    const isCoordFieldCheck = isCoordinateField(field.id);
+    
     const commonProps = {
       placeholder: field.placeholder || field.label,
-      disabled: false, // Only global readOnly affects this now
+      disabled: isCoordFieldCheck || isFieldCoordField,
     };
+    
+    // Debug: Log if field should be disabled
+    if (isCoordFieldCheck || isFieldCoordField) {
+      console.log('Disabling coordinate field:', field.id, 'disabled:', commonProps.disabled);
+    }
 
     // Add validation rules for required fields
     const validationRules = [];
@@ -421,8 +459,8 @@ export const EnhancedDynamicFormRenderer: React.FC<
               {/* Dynamically render array item fields based on schema */}
               {field.arrayItemFields &&
                 field.arrayItemFields.map((itemField: WebFieldDefinition) => {
-                  // Allow editing of readOnly fields (auto fields), but respect form-level readOnly
-                  const isItemFieldReadOnly = readOnly;
+                  const isItemCoordField = isCoordinateField(itemField.id);
+                  const isItemFieldReadOnly = readOnly || isItemCoordField;
 
                   // Validation rules for array item fields
                   const itemValidationRules = [];
@@ -477,6 +515,7 @@ export const EnhancedDynamicFormRenderer: React.FC<
                               <InputNumber
                                 placeholder={itemField.label}
                                 style={{ width: "100%" }}
+                                disabled={isItemCoordField}
                               />
                             ) : itemField.type === "select" ? (
                               <Select
@@ -486,6 +525,7 @@ export const EnhancedDynamicFormRenderer: React.FC<
                                 )}
                                 style={{ width: "100%" }}
                                 showSearch
+                                disabled={isItemCoordField}
                                 filterOption={(input, option) =>
                                   (option?.label ?? "")
                                     .toLowerCase()
@@ -497,16 +537,21 @@ export const EnhancedDynamicFormRenderer: React.FC<
                                 placeholder={itemField.label}
                                 style={{ width: "100%" }}
                                 format="DD-MM-YYYY"
+                                disabled={isItemCoordField}
                               />
                             ) : itemField.type === "boolean" ? (
-                              <Switch />
+                              <Switch disabled={isItemCoordField} />
                             ) : itemField.type === "textarea" ? (
                               <TextArea
                                 placeholder={itemField.label}
                                 rows={2}
+                                disabled={isItemCoordField}
                               />
                             ) : (
-                              <Input placeholder={itemField.label} />
+                              <Input 
+                                placeholder={itemField.label}
+                                disabled={isItemCoordField}
+                              />
                             )}
                           </Form.Item>
                         )}
@@ -548,7 +593,8 @@ export const EnhancedDynamicFormRenderer: React.FC<
 
     const renderObjectField = (objectField: WebFieldDefinition) => {
       const fieldValue = objectData[objectField.id];
-      const isFieldReadOnly = readOnly || objectField.readOnly;
+      const isNestedCoordField = isCoordinateField(objectField.id);
+      const isFieldReadOnly = readOnly || objectField.readOnly || isNestedCoordField;
 
       const commonProps = {
         disabled: isFieldReadOnly,

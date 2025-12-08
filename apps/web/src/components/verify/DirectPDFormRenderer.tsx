@@ -31,6 +31,33 @@ import {
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 
+const COORDINATE_FIELD_KEYS = [
+  'siteCoordinates',
+  'coordinates',
+  'latitude',
+  'longitude',
+  'latitudeLongitude',
+  'latitudeAndLongitude',
+  'officeGeoTag',
+  'customerGeoTag',
+  'geoTag',
+  'geoCoordinates',
+  'geoLocation',
+  'lat',
+  'lng',
+  'long',
+  'siteLatitude',
+  'siteLongitude',
+  'currentLatitude',
+  'currentLongitude',
+];
+
+const isCoordinateField = (fieldId: string): boolean => {
+  if (!fieldId) return false;
+  const fieldIdLower = fieldId.toLowerCase();
+  return COORDINATE_FIELD_KEYS.some(key => fieldIdLower === key.toLowerCase());
+};
+
 const extractPlainText = (html: string = "") =>
   html
     .replace(/<[^>]*>/g, "")
@@ -474,10 +501,11 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
     const uiSettings = field.ui || {};
     const rows = field.textAreaRows ?? uiSettings.rows;
     const maxLength = field.maxLength ?? uiSettings.maxLength;
+    const isCoordField = isCoordinateField(field.id);
 
     const commonProps = {
       placeholder: `Enter ${field.label}`,
-      disabled: !editMode, // Allow editing of readOnly fields when in edit mode
+      disabled: !editMode || isCoordField,
     };
 
     switch (field.type) {
@@ -511,7 +539,7 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
       case "richtext":
         return (
           <RichTextEditor
-            readOnly={!editMode} // Allow editing of readOnly fields when in edit mode
+            readOnly={!editMode || isCoordField}
             placeholder={`Enter ${field.label}`}
             minHeight={(rows ?? 3) * 40}
           />
@@ -553,7 +581,7 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
         );
 
       case "boolean":
-        return <Switch disabled={!editMode} />; // Allow editing of readOnly fields when in edit mode
+        return <Switch disabled={!editMode || isCoordField} />;
 
       case "array":
         return renderArrayField(field, sectionId || "");
@@ -583,11 +611,12 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
     const uiSettings = field.ui || {};
     const rows = field.textAreaRows ?? uiSettings.rows;
     const maxLength = field.maxLength ?? uiSettings.maxLength;
+    const isCoordField = isCoordinateField(field.id);
 
     const commonProps = {
       value: normalizedValue,
       placeholder: `Enter ${field.label}`,
-      disabled: !editMode, // Allow editing of readOnly fields when in edit mode
+      disabled: !editMode || isCoordField,
     };
 
     switch (field.type) {
@@ -687,7 +716,7 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
             checked={!!value}
             onChange={onChange}
             size="small"
-            disabled={!editMode} // Allow editing of readOnly fields when in edit mode
+            disabled={!editMode || isCoordField}
           />
         );
 

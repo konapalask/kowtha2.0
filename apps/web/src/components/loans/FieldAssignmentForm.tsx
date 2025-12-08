@@ -10,6 +10,7 @@ import {
   Typography,
   Tag,
   Badge,
+  Tooltip,
 } from "antd";
 // import { UserOutlined } from "@ant-design/icons";
 import React, { useState, useEffect } from "react";
@@ -232,6 +233,48 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
     }
   };
 
+  // Function to validate required loan fields (only for PD department)
+  const validateRequiredLoanFields = (loan: any): { isValid: boolean; missingFields: string[] } => {
+    // Only validate for PD department
+    if (currentDepartment !== 'PD') {
+      return {
+        isValid: true,
+        missingFields: [],
+      };
+    }
+
+    if (!loan) {
+      return {
+        isValid: false,
+        missingFields: ['All required loan fields'],
+      };
+    }
+
+    const requiredFields = [
+      { key: 'applicationNumber', label: 'Application Number' },
+      { key: 'applicantName', label: 'Applicant Name' },
+      { key: 'applicantMobile', label: 'Mobile Number' },
+      { key: 'loanType', label: 'Loan Type' },
+      { key: 'bankName', label: 'Bank Name' },
+      { key: 'applicantType', label: 'Applicant Type' },
+      { key: 'templateName', label: 'Template Name' },
+    ];
+
+    const missingFields: string[] = [];
+    
+    requiredFields.forEach(({ key, label }) => {
+      const value = loan?.[key];
+      if (!value || (typeof value === 'string' && value.trim() === '')) {
+        missingFields.push(label);
+      }
+    });
+
+    return {
+      isValid: missingFields.length === 0,
+      missingFields,
+    };
+  };
+
   const handleVerificationAssign = async (
     loanId: number,
     type: string,
@@ -245,6 +288,17 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
       currentOfficeName: string;
     }
   ) => {
+    // Validate required loan fields before assigning executives
+    if (!verification) {
+      const validation = validateRequiredLoanFields(selectedLoan);
+      if (!validation.isValid) {
+        message.error(
+          `Missing: ${validation.missingFields.join(', ')}`
+        );
+        return;
+      }
+    }
+
     // console.log(values);
     const finalData = {
       ...(type === "Business" ? { businessName: values?.businessName } : {}),
@@ -538,14 +592,34 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
         </Form.Item>
 
         <Form.Item>
-          <Button
-            // type="primary"
-            htmlType="submit"
-            loading={localLoading}
-            icon={<UserOutlined />}
-          >
-            {verification ? "Update Assignment" : "Assign Executives"}
-          </Button>
+          {(() => {
+            const isDisabled =
+              !verification &&
+              !validateRequiredLoanFields(selectedLoan).isValid;
+            const validation = validateRequiredLoanFields(selectedLoan);
+            const button = (
+              <Button
+                // type="primary"
+                htmlType="submit"
+                loading={localLoading}
+                icon={<UserOutlined />}
+                disabled={isDisabled}
+              >
+                {verification ? "Update Assignment" : "Assign Executives"}
+              </Button>
+            );
+
+            return isDisabled ? (
+              <Tooltip
+                title={`Missing: ${validation.missingFields.join(', ')}`}
+                placement="bottom"
+              >
+                {button}
+              </Tooltip>
+            ) : (
+              button
+            );
+          })()}
         </Form.Item>
       </Form>
     </div>
