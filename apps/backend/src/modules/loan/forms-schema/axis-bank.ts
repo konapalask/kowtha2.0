@@ -563,7 +563,7 @@ export const axisBankSchema = {
           },
           grossAndNetMargin: {
             type: "number",
-            title: "Gross and Net margin of business",
+            title: "Gross",
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
