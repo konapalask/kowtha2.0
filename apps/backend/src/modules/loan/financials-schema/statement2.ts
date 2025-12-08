@@ -30,6 +30,7 @@ export const statement2Schema = {
         type: "number",
         title: "Sub-total (Income)",
         formula: "grossReceipts + otherIncome",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -67,6 +68,8 @@ export const statement2Schema = {
       grossProfitAsPerAssumption: {
         type: "number",
         title: "Gross Profit as per assumption",
+        formula: "incomeSubtotal - costOfMaterialConsumed",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -147,6 +150,7 @@ export const statement2Schema = {
         type: "number",
         title: "Sub-total (Expenditure)",
         formula: "salary + rent + electricity + travelling + otherExpenses",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -161,6 +165,7 @@ export const statement2Schema = {
         type: "number",
         title: "Net Profit before interest, tax & Depreciation",
         formula: "incomeSubtotal - expenditureSubtotal",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -172,7 +177,8 @@ export const statement2Schema = {
       pbditMargin: {
         type: "number",
         title: "PBDIT Margin %",
-        formula: "netProfitBeforeInterestTaxDepreciation / incomeSubtotal",
+        formula: "(netProfitBeforeInterestTaxDepreciation / incomeSubtotal) * 100",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -198,6 +204,7 @@ export const statement2Schema = {
         type: "number",
         title: "Net Profit before tax & Depreciation",
         formula: "netProfitBeforeInterestTaxDepreciation - financeExpenses",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -223,6 +230,7 @@ export const statement2Schema = {
         type: "number",
         title: "Net Profit Before Tax",
         formula: "netProfitBeforeTaxDepreciation - depreciation",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -248,6 +256,7 @@ export const statement2Schema = {
         type: "number",
         title: "Net Profit After Tax",
         formula: "netProfitBeforeTax - incomeTax",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -261,6 +270,7 @@ export const statement2Schema = {
         title: "Total expenses including cost of sales",
         formula:
           "expenditureSubtotal + costOfMaterialConsumed + depreciation + financeExpenses + incomeTax",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,

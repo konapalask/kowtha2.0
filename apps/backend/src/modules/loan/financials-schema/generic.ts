@@ -85,6 +85,8 @@ export const financialsSchema = {
       grossProfitDebit: {
         type: "number",
         title: "To Gross Profit",
+        formula: "(sales + services + closingStock) - (openingStock + purchase + costOfServices + wages + hamaliCharges + manufacturingExpenses + packingCharges)",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -263,6 +265,8 @@ export const financialsSchema = {
       netProfit: {
         type: "number",
         title: "To Net Profit",
+        formula: "grossProfitDebit + rentReceived + commissionReceived - (salaries + rent + electricityCharges + printingStationery + telephoneCharges + postageTelegram + officeMaintenance + repairsMaintenance + sadarExpenses + auditFee + advertisement + bankCharges + insurance + depreciation + interestOnLoan)",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -309,6 +313,8 @@ export const financialsSchema = {
       grossProfitCredit: {
         type: "number",
         title: "By Gross Profit",
+        formula: "grossProfitDebit",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,

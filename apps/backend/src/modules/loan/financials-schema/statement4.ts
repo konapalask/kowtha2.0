@@ -62,6 +62,28 @@ export const statement4Schema = {
           minDecimalPlaces: 0,
         },
       },
+      openingStockEstimated: {
+        type: "number",
+        title: "Opening Stock - Estimated",
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      purchasesEstimated: {
+        type: "number",
+        title: "Purchases - Estimated",
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
 
       grossProfitAssessed: {
         type: "number",
@@ -77,6 +99,9 @@ export const statement4Schema = {
       grossProfitEstimated: {
         type: "number",
         title: "Gross Profit - Estimated",
+        formula:
+          "(salesEstimated + servicesEstimated + closingStockEstimated) - (openingStockEstimated + purchasesEstimated)",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -91,6 +116,7 @@ export const statement4Schema = {
         title: "Grand Total",
         formula:
           "openingStockAssessed + purchasesAssessed + grossProfitAssessed",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -162,7 +188,19 @@ export const statement4Schema = {
         title: "Net Profit",
         formula:
           "grossProfitEstimated - (electricity + rent + salaries + travellingCharges + otherExpenses)",
-        minimum: 0,
+        readOnly: true,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      netProfitEstimated: {
+        type: "number",
+        title: "Net Profit - Estimated",
+        formula: "netProfit",
+        readOnly: true,
         formatter: {
           useIndianFormat: true,
           locale: "en-IN",
@@ -255,6 +293,8 @@ export const statement4Schema = {
       byGrossProfitEstimated: {
         type: "number",
         title: "By Gross Profit - Estimated",
+        formula: "grossProfitEstimated",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -473,6 +513,7 @@ export const statement4Schema = {
         title: "Total Payments",
         formula:
           "electricity + rent + salaries + travellingCharges + otherExpenses",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -486,6 +527,7 @@ export const statement4Schema = {
         type: "number",
         title: "Net Profit Margin",
         formula: "netProfit",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -500,6 +542,7 @@ export const statement4Schema = {
         type: "number",
         title: "GP Margin %",
         formula: "(grossProfitEstimated / salesEstimated) * 100",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -513,6 +556,7 @@ export const statement4Schema = {
         type: "number",
         title: "NP Margin %",
         formula: "(netProfit / salesEstimated) * 100",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,

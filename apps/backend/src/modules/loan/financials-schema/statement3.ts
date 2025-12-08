@@ -40,6 +40,7 @@ export const statement3Schema = {
         title: "Opening Stock - Change %",
         formula:
           "((openingStock_2024 - openingStock_2023) / openingStock_2023) * 100",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -87,6 +88,7 @@ export const statement3Schema = {
         type: "number",
         title: "Purchases - Change %",
         formula: "((purchases_2024 - purchases_2023) / purchases_2023) * 100",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -135,6 +137,7 @@ export const statement3Schema = {
         title: "Gas & Liquid Items - Change %",
         formula:
           "((gasLiquidItems_2024 - gasLiquidItems_2023) / gasLiquidItems_2023) * 100",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -183,6 +186,7 @@ export const statement3Schema = {
         title: "Gross Profit - Change %",
         formula:
           "((grossProfit_2024 - grossProfit_2023) / grossProfit_2023) * 100",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -194,6 +198,8 @@ export const statement3Schema = {
       grossProfitEstimated: {
         type: "number",
         title: "Gross Profit - Estimated",
+        formula: "salesEstimated + closingStockEstimated - (openingStockEstimated + purchasesEstimated + gasLiquidItemsEstimated)",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -230,6 +236,7 @@ export const statement3Schema = {
         type: "number",
         title: "Sales - Change %",
         formula: "((sales_2024 - sales_2023) / sales_2023) * 100",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -278,6 +285,7 @@ export const statement3Schema = {
         title: "Majuri Charges - Change %",
         formula:
           "((majuriCharges_2024 - majuriCharges_2023) / majuriCharges_2023) * 100",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -326,6 +334,7 @@ export const statement3Schema = {
         title: "Closing Stock - Change %",
         formula:
           "((closingStock_2024 - closingStock_2023) / closingStock_2023) * 100",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -537,6 +546,8 @@ export const statement3Schema = {
       netProfitEstimated: {
         type: "number",
         title: "Net Profit - Estimated",
+        formula: "grossProfitEstimated - (salariesEstimated + bonusEstimated + electricityChargesEstimated + sadarEstimated + coalGasLiquidEstimated + sparesMachineryEstimated + bankInterestEstimated + bankChargesEstimated + financeChargesEstimated + shopRentsEstimated + gstLateFeeEstimated + auditorFeeEstimated + telephoneChargesEstimated + travellingExpEstimated + vehicleMaintenanceEstimated + depreciationEstimated + interestEstimated)",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -551,6 +562,7 @@ export const statement3Schema = {
         type: "number",
         title: "Monthly Turnover",
         formula: "salesEstimated / 12",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -574,6 +586,7 @@ export const statement3Schema = {
         type: "number",
         title: "Monthly Net Profit",
         formula: "netProfitEstimated / 12",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -588,6 +601,7 @@ export const statement3Schema = {
         type: "number",
         title: "Gross Profit %",
         formula: "(grossProfitEstimated / salesEstimated) * 100",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -600,6 +614,7 @@ export const statement3Schema = {
         type: "number",
         title: "Net Profit %",
         formula: "(netProfitEstimated / salesEstimated) * 100",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
