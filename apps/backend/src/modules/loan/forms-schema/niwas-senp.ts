@@ -148,66 +148,66 @@ export const niwasSenpSchema = {
         properties: {
           smartphone: {
             type: "string",
-            title: "Smartphone",
+            title: "Smartphone (Yes/No)",
             enum: ["Yes", "No"],
           },
           washingMachine: {
             type: "string",
-            title: "Washing Machine",
+            title: "Washing Machine (Yes/No)",
             enum: ["Yes", "No"],
           },
           carRcNo: { type: "string", title: "Car RC No." },
           twoWheeler: {
             type: "string",
-            title: "Two-Wheeler",
+            title: "Two-Wheeler (Yes/No)",
             enum: ["Yes", "No"],
           },
-          autoCab: { type: "string", title: "Auto/Cab", enum: ["Yes", "No"] },
+          autoCab: { type: "string", title: "Auto/Cab (Yes/No)", enum: ["Yes", "No"] },
           computerLaptop: {
             type: "string",
-            title: "Computer / Laptop",
+            title: "Computer / Laptop (Yes/No)",
             enum: ["Yes", "No"],
           },
-          ac: { type: "string", title: "AC", enum: ["Yes", "No"] },
-          fridge: { type: "string", title: "Fridge", enum: ["Yes", "No"] },
+          ac: { type: "string", title: "AC (Yes/No)", enum: ["Yes", "No"] },
+          fridge: { type: "string", title: "Fridge (Yes/No)", enum: ["Yes", "No"] },
           induction: {
             type: "string",
-            title: "Induction",
+            title: "Induction (Yes/No)",
             enum: ["Yes", "No"],
           },
           insurance: {
             type: "string",
-            title: "Insurance (LIC)",
+            title: "Insurance (LIC) (Yes/No)",
             enum: ["Yes", "No"],
           },
           fixedDeposit: {
             type: "string",
-            title: "Fixed Deposit",
+            title: "Fixed Deposit (Yes/No)",
             enum: ["Yes", "No"],
           },
           chitFunds: {
             type: "string",
-            title: "Chit Funds",
+            title: "Chit Funds (Yes/No)",
             enum: ["Yes", "No"],
           },
           postOfficeSavings: {
             type: "string",
-            title: "Post Office Savings",
+            title: "Post Office Savings (Yes/No)",
             enum: ["Yes", "No"],
           },
           postOfficeSavingsMonthly: {
             type: "string",
-            title: "Post Office savings monthly",
+            title: "Is Post Office savings monthly?",
             enum: ["Yes", "No"],
           },
           recurringDeposit: {
             type: "string",
-            title: "Recurring Deposit",
+            title: "Any Recurring Deposit",
             enum: ["Yes", "No"],
           },
           consumptionHabits: {
             type: "string",
-            title: "Consumption of Nicotine / Alcohol",
+            title: "Do you consume Nicotine Products or Alcohol?",
             enum: ["Yes", "No"],
           },
         },
@@ -380,7 +380,7 @@ export const niwasSenpSchema = {
           },
           yearsAtCurrentPremises: {
             type: "number",
-            title: "No. of Years for which Business Running in this Premises",
+            title: "No of Years for which Business Running in this Premises",
           },
           earlierOperatingAddress: {
             type: "string",
@@ -430,25 +430,16 @@ export const niwasSenpSchema = {
                   title: "Employer/Business Name",
                 },
                 designation: { type: "string", title: "Designation" },
-                from: { type: "date", title: "From" },
+                from: { type: "string", title: "From" , format:"date"},
                 to: { type: "date", title: "To" },
-                reasonForMovement: {
+                reasonForClosing: { type: "string", title: "Reason for Closing" },
+                contactPersonName: {
                   type: "string",
-                  title: "Reason for Movement",
+                  title: "Contact Person Name",
                 },
-                contactPersonNameNumber: {
-                  type: "object",
-                  title: "Contact Person Name & Number",
-                  properties: {
-                    contactPersonName: {
-                      type: "string",
-                      title: "Contact Person Name",
-                    },
-                    contactPersonNumber: {
-                      type: "integer",
-                      title: "Contact Person Number",
-                    },
-                  },
+                contactPersonNumber: {
+                  type: "integer",
+                  title: "Contact Person Number",
                 },
               },
             },
@@ -465,6 +456,8 @@ export const niwasSenpSchema = {
         properties: {
           revenue: {
             type: "object",
+            title: "Revenue",
+            properties: {
             sales: {
               type: "number",
               title: "Sales",
@@ -486,11 +479,14 @@ export const niwasSenpSchema = {
               },
             },
           },
-          expenditure: {
+        },
+        expenditure: {
             type: "object",
-            purchases: {
+            title: "Expenditure",
+            properties: {
+            wages: {
               type: "number",
-              title: "Purchases",
+              title: "Wages",
               formatter: {
                 useIndianFormat: true,
                 locale: "en-IN",
@@ -498,9 +494,9 @@ export const niwasSenpSchema = {
                 minDecimalPlaces: 0,
               },
             },
-            rent: {
+            diesel: {
               type: "number",
-              title: "Rent",
+              title: "Diesel",
               formatter: {
                 useIndianFormat: true,
                 locale: "en-IN",
@@ -508,19 +504,9 @@ export const niwasSenpSchema = {
                 minDecimalPlaces: 0,
               },
             },
-            electricity: {
+            maintenanceRepairs: {
               type: "number",
-              title: "Electricity",
-              formatter: {
-                useIndianFormat: true,
-                locale: "en-IN",
-                maxDecimalPlaces: 2,
-                minDecimalPlaces: 0,
-              },
-            },
-            transportation: {
-              type: "number",
-              title: "Transportation",
+              title: "Maintenance & Repairs",
               formatter: {
                 useIndianFormat: true,
                 locale: "en-IN",
@@ -549,6 +535,7 @@ export const niwasSenpSchema = {
               },
             },
           },
+        },
           netMonthlyProfitAB: {
             type: "number",
             title: "Net Monthly Profit (=A-B)",
@@ -653,7 +640,7 @@ export const niwasSenpSchema = {
 
     {
       id: "existingLoanDetails",
-      label: "Existing Loan Details",
+      label: "Existing or past Loan Details",
       schema: {
         type: "object",
         properties: {
@@ -887,31 +874,6 @@ export const niwasSenpSchema = {
         },
       },
     },
-    // {
-    //   id: "bankingDetails",
-    //   label: "Banking Details",
-    //   schema: {
-    //     type: "object",
-    //     properties: {
-    //       bankingAccounts: {
-    //         type: "array",
-    //         items: {
-    //           type: "object",
-    //           properties: {
-    //             bankName: { type: "string", title: "Bank Name" },
-    //             accountNumber: { type: "string", title: "Account Number" },
-    //             accountType: { type: "string", title: "Account Type" },
-    //             branch: { type: "string", title: "Branch" },
-    //             operatingSinceYears: {
-    //               type: "string",
-    //               title: "Operating since (years)",
-    //             },
-    //           },
-    //         },
-    //       },
-    //     },
-    //   },
-    // },
     {
       id: "familyMembers",
       label: "Other Family Member Details",
@@ -977,7 +939,7 @@ export const niwasSenpSchema = {
     },
     {
       id: "businessFirmCheck",
-      label: "Business Firm Check",
+      label: "Business Firm Check (From Neighbor/ Independent checking/ From existing customer)",
       schema: {
         type: "object",
         properties: {
@@ -1015,7 +977,7 @@ export const niwasSenpSchema = {
     },
     {
       id: "pdOfficerComments",
-      label: "PD Officer Comments",
+      label: "To be Filled by PD Officer",
       schema: {
         type: "object",
         properties: {
