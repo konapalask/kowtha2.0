@@ -18,6 +18,300 @@ const formKeyMapping: Record<string, string> = {
   familyDetails: "familyMemberDetails",
 };
 
+type FinancialSchemaFormat = "generic" | "statement2" | "statement3" | "statement4";
+
+const detectFinancialSchemaFormat = (values: Record<string, any>): FinancialSchemaFormat => {
+  const keys = Object.keys(values).map(k => k.toLowerCase());
+  
+  if (
+    keys.some(k => 
+      k.includes("grossreceipts") || 
+      k.includes("costofmaterialconsumed") ||
+      k.includes("grossprofitasperassumption") ||
+      k.includes("pbdit")
+    )
+  ) {
+    return "statement2";
+  }
+  
+  if (
+    keys.some(k => 
+      k.includes("_2023") || 
+      k.includes("_2024") ||
+      k.includes("2023") ||
+      k.includes("2024")
+    )
+  ) {
+    return "statement3";
+  }
+  
+  if (
+    keys.some(k => 
+      k.includes("assessed") || 
+      k.includes("audited") ||
+      k.includes("estimated") && (k.includes("openingstock") || k.includes("purchases"))
+    )
+  ) {
+    return "statement4";
+  }
+  
+  return "generic";
+};
+
+const getFormValue = (values: Record<string, any>, formField: string, schemaField: string): number => {
+  return parseFloat(values[formField] || values[schemaField] || "0") || 0;
+};
+
+const calculateGenericFormat = (values: Record<string, any>) => {
+  const openingStock = getFormValue(values, "toOpeningStock", "openingStock");
+  const purchase = getFormValue(values, "toPurchase", "purchase");
+  const costOfServices = getFormValue(values, "toCostOfServices", "costOfServices");
+  const wages = getFormValue(values, "toWages", "wages");
+  const hamaliCharges = getFormValue(values, "toHamaliCharges", "hamaliCharges");
+  const manufacturingExpenses = getFormValue(values, "toManufacturingExpenses", "manufacturingExpenses");
+  const packingCharges = getFormValue(values, "toPackingCharges", "packingCharges");
+  const sales = getFormValue(values, "bySales", "sales");
+  const services = getFormValue(values, "byServices", "services");
+  const closingStock = getFormValue(values, "byClosingStock", "closingStock");
+  const salaries = getFormValue(values, "toSalaries", "salaries");
+  const rent = getFormValue(values, "toRent", "rent");
+  const electricityCharges = getFormValue(values, "toElectricityCharges", "electricityCharges");
+  const printingStationery = getFormValue(values, "toPrintingStationery", "printingStationery");
+  const telephoneCharges = getFormValue(values, "toTelephoneCharges", "telephoneCharges");
+  const postageTelegram = getFormValue(values, "toPostageTelegram", "postageTelegram");
+  const officeMaintenance = getFormValue(values, "toOfficeMaintenance", "officeMaintenance");
+  const repairsMaintenance = getFormValue(values, "toRepairsMaintenance", "repairsMaintenance");
+  const sadarExpenses = getFormValue(values, "toSadarExpenses", "sadarExpenses");
+  const auditFee = getFormValue(values, "toAuditFee", "auditFee");
+  const advertisement = getFormValue(values, "toAdvertisement", "advertisement");
+  const bankCharges = getFormValue(values, "toBankCharges", "bankCharges");
+  const insurance = getFormValue(values, "toInsurance", "insurance");
+  const depreciation = getFormValue(values, "toDepreciation", "depreciation");
+  const interestOnLoan = getFormValue(values, "toInterestOnLoan", "interestOnLoan");
+  const rentReceived = getFormValue(values, "byRentReceived", "rentReceived");
+  const commissionReceived = getFormValue(values, "byCommissionReceived", "commissionReceived");
+
+  const grossProfit =
+    sales +
+    services +
+    closingStock -
+    (openingStock +
+      purchase +
+      costOfServices +
+      wages +
+      hamaliCharges +
+      manufacturingExpenses +
+      packingCharges);
+
+  const indirectExpenses =
+    salaries +
+    rent +
+    electricityCharges +
+    printingStationery +
+    telephoneCharges +
+    postageTelegram +
+    officeMaintenance +
+    repairsMaintenance +
+    sadarExpenses +
+    auditFee +
+    advertisement +
+    bankCharges +
+    insurance +
+    depreciation +
+    interestOnLoan;
+  const otherIncomes = rentReceived + commissionReceived;
+  const netProfit = grossProfit + otherIncomes - indirectExpenses;
+
+  return {
+    openingStock,
+    purchase,
+    costOfServices,
+    wages,
+    hamaliCharges,
+    manufacturingExpenses,
+    packingCharges,
+    sales,
+    services,
+    closingStock,
+    salaries,
+    rent,
+    electricityCharges,
+    printingStationery,
+    telephoneCharges,
+    postageTelegram,
+    officeMaintenance,
+    repairsMaintenance,
+    sadarExpenses,
+    auditFee,
+    advertisement,
+    bankCharges,
+    insurance,
+    depreciation,
+    interestOnLoan,
+    rentReceived,
+    commissionReceived,
+    grossProfit,
+    netProfit,
+  };
+};
+
+const calculateStatement2Format = (values: Record<string, any>) => {
+  const grossReceipts = parseFloat(values.grossReceipts) || 0;
+  const otherIncome = parseFloat(values.otherIncome) || 0;
+  const costOfMaterialConsumed = parseFloat(values.costOfMaterialConsumed) || 0;
+  const salary = parseFloat(values.salary) || 0;
+  const rent = parseFloat(values.rent) || 0;
+  const electricity = parseFloat(values.electricity) || 0;
+  const travelling = parseFloat(values.travelling) || 0;
+  const otherExpenses = parseFloat(values.otherExpenses) || 0;
+  const financeExpenses = parseFloat(values.financeExpenses) || 0;
+  const depreciation = parseFloat(values.depreciation) || 0;
+  const incomeTax = parseFloat(values.incomeTax) || 0;
+
+  const incomeSubtotal = grossReceipts + otherIncome;
+  const expenditureSubtotal = salary + rent + electricity + travelling + otherExpenses;
+  const grossProfitAsPerAssumption = parseFloat(values.grossProfitAsPerAssumption) || 
+    (incomeSubtotal - costOfMaterialConsumed);
+  const netProfitBeforeInterestTaxDepreciation = incomeSubtotal - expenditureSubtotal;
+  const netProfitBeforeTaxDepreciation = netProfitBeforeInterestTaxDepreciation - financeExpenses;
+  const netProfitBeforeTax = netProfitBeforeTaxDepreciation - depreciation;
+  const netProfitAfterTax = netProfitBeforeTax - incomeTax;
+
+  return {
+    grossReceipts,
+    otherIncome,
+    incomeSubtotal,
+    costOfMaterialConsumed,
+    grossProfitAsPerAssumption,
+    salary,
+    rent,
+    electricity,
+    travelling,
+    otherExpenses,
+    expenditureSubtotal,
+    netProfitBeforeInterestTaxDepreciation,
+    financeExpenses,
+    netProfitBeforeTaxDepreciation,
+    depreciation,
+    netProfitBeforeTax,
+    incomeTax,
+    netProfitAfterTax,
+  };
+};
+
+const calculateStatement3Format = (values: Record<string, any>) => {
+  const getValue = (key: string) => parseFloat(values[key]) || 0;
+
+  const openingStock_2023 = getValue("openingStock_2023");
+  const purchases_2023 = getValue("purchases_2023");
+  const sales_2023 = getValue("sales_2023");
+  const grossProfit_2023 = getValue("grossProfit_2023");
+  const netProfit_2023 = getValue("netProfit_2023");
+
+  const openingStock_2024 = getValue("openingStock_2024");
+  const purchases_2024 = getValue("purchases_2024");
+  const sales_2024 = getValue("sales_2024");
+  const grossProfit_2024 = getValue("grossProfit_2024");
+  const netProfit_2024 = getValue("netProfit_2024");
+
+  const openingStockEstimated = getValue("openingStockEstimated");
+  const purchasesEstimated = getValue("purchasesEstimated");
+  const salesEstimated = getValue("salesEstimated");
+  const grossProfitEstimated = getValue("grossProfitEstimated");
+  const netProfitEstimated = getValue("netProfitEstimated");
+
+  const openingStockChange = openingStock_2023 !== 0 
+    ? ((openingStock_2024 - openingStock_2023) / openingStock_2023) * 100 
+    : 0;
+  const purchasesChange = purchases_2023 !== 0 
+    ? ((purchases_2024 - purchases_2023) / purchases_2023) * 100 
+    : 0;
+  const salesChange = sales_2023 !== 0 
+    ? ((sales_2024 - sales_2023) / sales_2023) * 100 
+    : 0;
+  const grossProfitChange = grossProfit_2023 !== 0 
+    ? ((grossProfit_2024 - grossProfit_2023) / grossProfit_2023) * 100 
+    : 0;
+  const netProfitChange = netProfit_2023 !== 0 
+    ? ((netProfit_2024 - netProfit_2023) / netProfit_2023) * 100 
+    : 0;
+
+  return {
+    openingStock_2023,
+    openingStock_2024,
+    openingStockChange,
+    openingStockEstimated,
+    purchases_2023,
+    purchases_2024,
+    purchasesChange,
+    purchasesEstimated,
+    sales_2023,
+    sales_2024,
+    salesChange,
+    salesEstimated,
+    grossProfit_2023,
+    grossProfit_2024,
+    grossProfitChange,
+    grossProfitEstimated,
+    netProfit_2023,
+    netProfit_2024,
+    netProfitChange,
+    netProfitEstimated,
+    ...Object.fromEntries(
+      Object.entries(values).filter(([key]) => 
+        !key.includes("_2023") && !key.includes("_2024") && 
+        !key.includes("Change") && !key.includes("Estimated")
+      )
+    ),
+  };
+};
+
+const calculateStatement4Format = (values: Record<string, any>) => {
+  const getValue = (key: string) => parseFloat(values[key]) || 0;
+
+  const openingStockAssessed = getValue("openingStockAssessed");
+  const purchasesAssessed = getValue("purchasesAssessed");
+  const grossProfitAssessed = getValue("grossProfitAssessed");
+  const netProfitAssessed = getValue("netProfitAssessed");
+
+  const openingStockAudited = getValue("openingStockAudited");
+  const purchasesAudited = getValue("purchasesAudited");
+  const salesAudited = getValue("salesAudited");
+  const grossProfitAudited = getValue("grossProfitAudited");
+  const netProfitAudited = getValue("netProfitAudited");
+
+  const openingStockEstimated = getValue("openingStockEstimated");
+  const purchasesEstimated = getValue("purchasesEstimated");
+  const salesEstimated = getValue("salesEstimated");
+  const grossProfitEstimated = getValue("grossProfitEstimated");
+  const netProfitEstimated = getValue("netProfitEstimated");
+
+  const grandTotal = openingStockAssessed + purchasesAssessed + grossProfitAssessed;
+
+  return {
+    openingStockAssessed,
+    openingStockAudited,
+    openingStockEstimated,
+    purchasesAssessed,
+    purchasesAudited,
+    purchasesEstimated,
+    salesAudited,
+    salesEstimated,
+    grossProfitAssessed,
+    grossProfitAudited,
+    grossProfitEstimated,
+    netProfitAssessed,
+    netProfitAudited,
+    netProfitEstimated,
+    grandTotal,
+    ...Object.fromEntries(
+      Object.entries(values).filter(([key]) => 
+        !key.includes("Assessed") && !key.includes("Audited") && !key.includes("Estimated")
+      )
+    ),
+  };
+};
+
 interface ExtendedEditFormModalProps extends EditFormModalProps {
   onEditSuccess?: () => void;
 }
@@ -495,116 +789,37 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
         JSON.stringify(_.sortBy(Object.entries(cleanedInitialValues)));
 
       if (isChanged) {
-        // Handle financial analysis submissions differently
         if (formKey === "financialAnalysis") {
           try {
-            // Calculate gross profit and net profit
-            const openingStock = parseFloat(values.toOpeningStock) || 0;
-            const purchase = parseFloat(values.toPurchase) || 0;
-            const costOfServices = parseFloat(values.toCostOfServices) || 0;
-            const wages = parseFloat(values.toWages) || 0;
-            const hamaliCharges = parseFloat(values.toHamaliCharges) || 0;
-            const manufacturingExpenses =
-              parseFloat(values.toManufacturingExpenses) || 0;
-            const packingCharges = parseFloat(values.toPackingCharges) || 0;
-            const sales = parseFloat(values.bySales) || 0;
-            const services = parseFloat(values.byServices) || 0;
-            const closingStock = parseFloat(values.byClosingStock) || 0;
-            const salaries = parseFloat(values.toSalaries) || 0;
-            const rent = parseFloat(values.toRent) || 0;
-            const electricityCharges =
-              parseFloat(values.toElectricityCharges) || 0;
-            const printingStationery =
-              parseFloat(values.toPrintingStationery) || 0;
-            const telephoneCharges = parseFloat(values.toTelephoneCharges) || 0;
-            const postageTelegram = parseFloat(values.toPostageTelegram) || 0;
-            const officeMaintenance =
-              parseFloat(values.toOfficeMaintenance) || 0;
-            const repairsMaintenance =
-              parseFloat(values.toRepairsMaintenance) || 0;
-            const sadarExpenses = parseFloat(values.toSadarExpenses) || 0;
-            const auditFee = parseFloat(values.toAuditFee) || 0;
-            const advertisement = parseFloat(values.toAdvertisement) || 0;
-            const bankCharges = parseFloat(values.toBankCharges) || 0;
-            const insurance = parseFloat(values.toInsurance) || 0;
-            const depreciation = parseFloat(values.toDepreciation) || 0;
-            const interestOnLoan = parseFloat(values.toInterestOnLoan) || 0;
-            const rentReceived = parseFloat(values.byRentReceived) || 0;
-            const commissionReceived =
-              parseFloat(values.byCommissionReceived) || 0;
+            const schemaFormat = detectFinancialSchemaFormat(values);
+            
+            let financialData: Record<string, any>;
 
-            // Calculate Gross Profit
-            // Gross Profit = (Sales + Services + Closing Stock) - (Opening Stock + Purchases + Cost of Services + Wages + Hamali + Manufacturing + Packing)
-            const grossProfit =
-              sales +
-              services +
-              closingStock -
-              (openingStock +
-                purchase +
-                costOfServices +
-                wages +
-                hamaliCharges +
-                manufacturingExpenses +
-                packingCharges);
+            switch (schemaFormat) {
+              case "statement2":
+                financialData = calculateStatement2Format(values);
+                break;
+              
+              case "statement3":
+                financialData = calculateStatement3Format(values);
+                break;
+              
+              case "statement4":
+                financialData = calculateStatement4Format(values);
+                break;
+              
+              case "generic":
+              default:
+                financialData = calculateGenericFormat(values);
+                break;
+            }
 
-            // Calculate Net Profit
-            // Net Profit = (Gross Profit + Other Incomes) - (Indirect Expenses)
-            // Other Incomes = Rent Received + Commission Received
-            // Indirect Expenses = Salaries + Rent + Electricity + Printing & Stationery + Telephone + Postage + Office Maintenance + Repairs & Maintenance + Sadar Expenses + Audit Fee + Advertisement + Bank Charges + Insurance + Depreciation + Interest on Loan
-            const indirectExpenses =
-              salaries +
-              rent +
-              electricityCharges +
-              printingStationery +
-              telephoneCharges +
-              postageTelegram +
-              officeMaintenance +
-              repairsMaintenance +
-              sadarExpenses +
-              auditFee +
-              advertisement +
-              bankCharges +
-              insurance +
-              depreciation +
-              interestOnLoan;
-            const otherIncomes = rentReceived + commissionReceived;
-            const netProfit = grossProfit + otherIncomes - indirectExpenses;
-
-            // Prepare the financial analysis payload
-            const financialData = {
-              openingStock,
-              purchase,
-              costOfServices,
-              wages,
-              hamaliCharges,
-              manufacturingExpenses,
-              packingCharges,
-              sales,
-              services,
-              closingStock,
-              salaries,
-              rent,
-              electricityCharges,
-              printingStationery,
-              telephoneCharges,
-              postageTelegram,
-              officeMaintenance,
-              repairsMaintenance,
-              sadarExpenses,
-              auditFee,
-              advertisement,
-              bankCharges,
-              insurance,
-              depreciation,
-              interestOnLoan,
-              rentReceived,
-              commissionReceived,
-              grossProfit,
-              netProfit,
+            const allFinancialData = {
+              ...values,
+              ...financialData,
             };
 
-            // Call the PATCH API for financial analysis
-            await updateFinancialAnalysis(id as string, financialData);
+            await updateFinancialAnalysis(id as string, allFinancialData);
             message.success("Financial analysis updated successfully!");
             fetchVerificationData();
             onEditSuccess?.();
