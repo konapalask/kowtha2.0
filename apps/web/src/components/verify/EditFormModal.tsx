@@ -170,12 +170,15 @@ const calculateStatement2Format = (values: Record<string, any>) => {
 
   const incomeSubtotal = grossReceipts + otherIncome;
   const expenditureSubtotal = salary + rent + electricity + travelling + otherExpenses;
-  const grossProfitAsPerAssumption = parseFloat(values.grossProfitAsPerAssumption) || 
-    (incomeSubtotal - costOfMaterialConsumed);
+  const grossProfitAsPerAssumption = incomeSubtotal - costOfMaterialConsumed;
   const netProfitBeforeInterestTaxDepreciation = incomeSubtotal - expenditureSubtotal;
   const netProfitBeforeTaxDepreciation = netProfitBeforeInterestTaxDepreciation - financeExpenses;
   const netProfitBeforeTax = netProfitBeforeTaxDepreciation - depreciation;
   const netProfitAfterTax = netProfitBeforeTax - incomeTax;
+  const pbditMargin =
+    incomeSubtotal !== 0
+      ? (netProfitBeforeInterestTaxDepreciation / incomeSubtotal) * 100
+      : 0;
 
   return {
     grossReceipts,
@@ -190,6 +193,7 @@ const calculateStatement2Format = (values: Record<string, any>) => {
     otherExpenses,
     expenditureSubtotal,
     netProfitBeforeInterestTaxDepreciation,
+    pbditMargin,
     financeExpenses,
     netProfitBeforeTaxDepreciation,
     depreciation,
@@ -217,8 +221,51 @@ const calculateStatement3Format = (values: Record<string, any>) => {
   const openingStockEstimated = getValue("openingStockEstimated");
   const purchasesEstimated = getValue("purchasesEstimated");
   const salesEstimated = getValue("salesEstimated");
-  const grossProfitEstimated = getValue("grossProfitEstimated");
-  const netProfitEstimated = getValue("netProfitEstimated");
+  const closingStockEstimated = getValue("closingStockEstimated");
+  const gasLiquidItemsEstimated = getValue("gasLiquidItemsEstimated");
+  const salariesEstimated = getValue("salariesEstimated");
+  const bonusEstimated = getValue("bonusEstimated");
+  const electricityChargesEstimated = getValue("electricityChargesEstimated");
+  const sadarEstimated = getValue("sadarEstimated");
+  const coalGasLiquidEstimated = getValue("coalGasLiquidEstimated");
+  const sparesMachineryEstimated = getValue("sparesMachineryEstimated");
+  const bankInterestEstimated = getValue("bankInterestEstimated");
+  const bankChargesEstimated = getValue("bankChargesEstimated");
+  const financeChargesEstimated = getValue("financeChargesEstimated");
+  const shopRentsEstimated = getValue("shopRentsEstimated");
+  const gstLateFeeEstimated = getValue("gstLateFeeEstimated");
+  const auditorFeeEstimated = getValue("auditorFeeEstimated");
+  const telephoneChargesEstimated = getValue("telephoneChargesEstimated");
+  const travellingExpEstimated = getValue("travellingExpEstimated");
+  const vehicleMaintenanceEstimated = getValue("vehicleMaintenanceEstimated");
+  const depreciationEstimated = getValue("depreciationEstimated");
+  const interestEstimated = getValue("interestEstimated");
+
+  const grossProfitEstimated =
+    salesEstimated +
+    closingStockEstimated -
+    (openingStockEstimated + purchasesEstimated + gasLiquidItemsEstimated);
+
+  const totalEstimatedExpenses =
+    salariesEstimated +
+    bonusEstimated +
+    electricityChargesEstimated +
+    sadarEstimated +
+    coalGasLiquidEstimated +
+    sparesMachineryEstimated +
+    bankInterestEstimated +
+    bankChargesEstimated +
+    financeChargesEstimated +
+    shopRentsEstimated +
+    gstLateFeeEstimated +
+    auditorFeeEstimated +
+    telephoneChargesEstimated +
+    travellingExpEstimated +
+    vehicleMaintenanceEstimated +
+    depreciationEstimated +
+    interestEstimated;
+
+  const netProfitEstimated = grossProfitEstimated - totalEstimatedExpenses;
 
   const openingStockChange = openingStock_2023 !== 0 
     ? ((openingStock_2024 - openingStock_2023) / openingStock_2023) * 100 
@@ -283,8 +330,18 @@ const calculateStatement4Format = (values: Record<string, any>) => {
   const openingStockEstimated = getValue("openingStockEstimated");
   const purchasesEstimated = getValue("purchasesEstimated");
   const salesEstimated = getValue("salesEstimated");
-  const grossProfitEstimated = getValue("grossProfitEstimated");
-  const netProfitEstimated = getValue("netProfitEstimated");
+  const servicesEstimated = getValue("servicesEstimated");
+  const closingStockEstimated = getValue("closingStockEstimated");
+  const electricity = getValue("electricity");
+  const rent = getValue("rent");
+  const salaries = getValue("salaries");
+  const travellingCharges = getValue("travellingCharges");
+  const otherExpenses = getValue("otherExpenses");
+
+  const grossProfitEstimated = (salesEstimated + servicesEstimated + closingStockEstimated) - 
+                                (openingStockEstimated + purchasesEstimated);
+
+  const netProfit = grossProfitEstimated - (electricity + rent + salaries + travellingCharges + otherExpenses);
 
   const grandTotal = openingStockAssessed + purchasesAssessed + grossProfitAssessed;
 
@@ -297,16 +354,22 @@ const calculateStatement4Format = (values: Record<string, any>) => {
     purchasesEstimated,
     salesAudited,
     salesEstimated,
+    servicesEstimated,
+    closingStockEstimated,
     grossProfitAssessed,
     grossProfitAudited,
     grossProfitEstimated,
+    byGrossProfitEstimated: grossProfitEstimated,
     netProfitAssessed,
     netProfitAudited,
-    netProfitEstimated,
+    netProfit,
+    netProfitEstimated: netProfit,
     grandTotal,
     ...Object.fromEntries(
       Object.entries(values).filter(([key]) => 
-        !key.includes("Assessed") && !key.includes("Audited") && !key.includes("Estimated")
+        !key.includes("Assessed") && !key.includes("Audited") && !key.includes("Estimated") &&
+        key !== "grossProfitEstimated" && key !== "byGrossProfitEstimated" && 
+        key !== "netProfit" && key !== "netProfitEstimated"
       )
     ),
   };
