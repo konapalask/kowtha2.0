@@ -156,8 +156,8 @@ export const heroFincorpSchema = {
       },
     },
     {
-      id: "financialSummary",
-      label: "Financial Summary",
+      id: "turnoverAndNetProfitDetails",
+      label: "Turnover and net profit details for last one year audited financials.",
       schema: {
         type: "object",
         properties: {
@@ -195,6 +195,15 @@ export const heroFincorpSchema = {
               minDecimalPlaces: 0,
             },
           },
+        },
+      },
+    },
+    {
+      id: "documentsObserved",
+      label: "Documents Observed",
+      schema: {
+        type: "object",
+        properties: {
           documentsObserved: {
             type: "string",
             title: "Documents Observed",
@@ -203,6 +212,15 @@ export const heroFincorpSchema = {
               rows: 2,
             },
           },
+        },
+      },
+    },
+    {
+      id: "automationLevel",
+      label: "Automation Level",
+      schema: {
+        type: "object",
+        properties: {
           automationLevel: {
             type: "string",
             title: "Automation Level",
@@ -372,10 +390,6 @@ export const heroFincorpSchema = {
               widget: "textarea",
               rows: 3,
             },
-          },
-          place: {
-            type: "string",
-            title: "Place",
           },
         },
       },
