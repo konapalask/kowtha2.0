@@ -301,6 +301,7 @@ export const statement4Schema = {
       balanceSheet: {
         type: "object",
         title: "Balance Sheet",
+        ui: { widget: "card", collapsible: true },
         properties: {
           // Liabilities
           capitalAccount: {
@@ -372,31 +373,14 @@ export const statement4Schema = {
 
           // Assets - Loans and Advances
           loansAndAdvances: {
-            type: "object",
+            type: "number",
             title: "Loans and Advances",
-            properties: {
-              gcrumChaudhary: {
-                type: "number",
-                title: "GCRUM Chaudhary",
-                minimum: 0,
-                formatter: {
-                  useIndianFormat: true,
-                  locale: "en-IN",
-                  maxDecimalPlaces: 2,
-                  minDecimalPlaces: 0,
-                },
-              },
-              mahadevTrading: {
-                type: "number",
-                title: "Mahadev Trading",
-                minimum: 0,
-                formatter: {
-                  useIndianFormat: true,
-                  locale: "en-IN",
-                  maxDecimalPlaces: 2,
-                  minDecimalPlaces: 0,
-                },
-              },
+            minimum: 0,
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
             },
           },
 
