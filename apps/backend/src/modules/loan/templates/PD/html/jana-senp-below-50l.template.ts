@@ -224,7 +224,17 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
 
       <tr>
         <td style="${labelCellStyle}">Business Profile /Employment job profile along with previous business/employment details</td>
-        <td style="${valueCellStyle}">${formatMultiline(jobProfile?.businessOrEmploymentProfile)} <br> ${formatMultiline(jobProfile?.previousBusinessOrEmploymentDetails)}</td>
+        <td style="${valueCellStyle}">${
+          (() => {
+            const profileText = jobProfile?.businessOrEmploymentProfile || "";
+            const previousText = jobProfile?.previousBusinessOrEmploymentDetails || "";
+            const combined = [profileText, previousText].filter(Boolean).join("\n");
+            if (!combined.trim()) return "Not provided";
+            const lines = combined.split(/\n+/).filter((line: string) => line.trim().length > 0);
+            if (lines.length === 0) return "Not provided";
+            return `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;">${lines.map((line: string) => `<li style="margin-left: 8px;">${line.trim()}</li>`).join("")}</ul>`;
+          })()
+        }</td>
       </tr>
 
       <tr>

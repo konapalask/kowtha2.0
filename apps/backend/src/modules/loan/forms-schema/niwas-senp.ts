@@ -55,10 +55,26 @@ export const niwasSenpSchema = {
           previousAddress: {
             type: "string",
             title: "Previous address (if < 1 year)",
+            dependencies: {
+              show: {
+                yearsInCurrentResidence: "<1 Year",
+              },
+              required: {
+                yearsInCurrentResidence: "<1 Year",
+              },
+            },
           },
           yearsAtPreviousAddress: {
             type: "number",
             title: "Years stayed at previous address",
+            dependencies: {
+              show: {
+                yearsInCurrentResidence: "<1 Year",
+              },
+              required: {
+                yearsInCurrentResidence: "<1 Year",
+              },
+            },
           },
           yearsInCurrentCity: {
             type: "number",
@@ -68,18 +84,43 @@ export const niwasSenpSchema = {
           previousCity: {
             type: "string",
             title: "Previous city (if ≤ 3 years)",
+            dependencies: {
+              show: {
+                yearsInCurrentCity: "<=3 Years",
+              },
+              required: {
+                yearsInCurrentCity: "<=3 Years",
+              },
+            },
           },
           yearsInPreviousCity: {
             type: "number",
             title: "Years in previous city",
+            dependencies: {
+              show: {
+                yearsInCurrentCity: "<=3 Years",
+              },
+              required: {
+                yearsInCurrentCity: "<=3 Years",
+              },
+            },
           },
           reasonForChange: {
             type: "string",
             title: "Reason for change",
+            dependencies: {
+              show: {
+                yearsInCurrentCity: "<=3 Years",
+              },
+              required: {
+                yearsInCurrentCity: "<=3 Years",
+              },
+            },
           },
           parentsStayingWith: {
             type: "string",
-            title: "Parents staying with (Self / Separate / Expired)",
+            title: "Parents staying with?",
+            enum: ["Self", "Separate", "Expired"],
           },
           ifParentsLivingSeparately: {
             type: "object",
@@ -181,6 +222,7 @@ export const niwasSenpSchema = {
           businessName: {
             type: "string",
             title: "Name of Current Business Firm",
+            readOnly: true,
           },
           businessConstitution: {
             type: "string",
@@ -957,7 +999,8 @@ export const niwasSenpSchema = {
                 contactNumber: { type: "number", title: "Contact number" },
                 feedback: {
                   type: "string",
-                  title: "Feedback (Positive / Neutral / Negative)",
+                  title: "Feedback?",
+                  enum: ["Positive", "Neutral", "Negative"],
                 },
                 businessCardCollected: {
                   type: "string",

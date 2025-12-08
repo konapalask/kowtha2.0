@@ -183,29 +183,35 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
   // Handle nested structures for other incomes
   const otherIncomes = verificationData.otherIncomes || [];
 
-  // Handle nested structures for comfort factors
-  const comfortFactorData = verificationData.comfortFactor || {};
-  const comfortFactorsArray = Array.isArray(comfortFactorData)
-    ? comfortFactorData
-    : Array.isArray(comfortFactorData.comfortFactors)
-      ? comfortFactorData.comfortFactors
-      : [];
-  const comfortFactors = ensureArray(comfortFactorsArray).map(
-    (item: any) => `<li>${formatMultiline(item?.comfortFactor || "")}</li>`
-  );
+  // Handle comfort factors - now a simple string field
+  const comfortFactorsText =
+    verificationData.comfortFactor?.comfortFactors || "";
+  const comfortFactors = comfortFactorsText
+    ? comfortFactorsText
+        .split(/\n+/)
+        .filter((line: string) => line.trim().length > 0)
+        .map((line: string) => `<li>${line.trim()}</li>`)
+    : [];
 
-  // Handle nested structures for discomfort factors
-  const discomfortFactorData = verificationData.discomfortFactor || {};
-  const discomfortFactorsArray = Array.isArray(discomfortFactorData)
-    ? discomfortFactorData
-    : Array.isArray(discomfortFactorData.discomfortFactors)
-      ? discomfortFactorData.discomfortFactors
-      : [];
-  const discomfortFactors = ensureArray(discomfortFactorsArray).map(
-    (item: any) => `<li>${formatMultiline(item?.discomfortFactor || "")}</li>`
-  );
+  // Handle discomfort factors - now a simple string field
+  const discomfortFactorsText =
+    verificationData.discomfortFactor?.discomfortFactors || "";
+  const discomfortFactors = discomfortFactorsText
+    ? discomfortFactorsText
+        .split(/\n+/)
+        .filter((line: string) => line.trim().length > 0)
+        .map((line: string) => `<li>${line.trim()}</li>`)
+    : [];
 
-  const recom = verificationData.Recommendations || {};
+  // Handle recommendations - now a simple string field
+  const recommendationsText =
+    verificationData.Recommendations?.recommendations || "";
+  const recommendations = recommendationsText
+    ? recommendationsText
+        .split(/\n+/)
+        .filter((line: string) => line.trim().length > 0)
+        .map((line: string) => `<li>${line.trim()}</li>`)
+    : [];
 
   const businessList = [
     hasValue(aboutBusiness?.aboutTheApplicant)
@@ -333,9 +339,11 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
 
       <p style="${paragraphStyle}"><strong>Recommendations:-</strong></p>
       <ul>
-        ${ensureArray(recom?.recommendations)
-          ?.map((item: any) => `<li>${item?.recommendation || ""}</li>`)
-          .join("")}
+        ${
+          recommendations.length
+            ? recommendations.join("")
+            : "<li>Not provided</li>"
+        }
       </ul>
 
       <p style="${paragraphStyle}"><strong>PD Status:</strong> ${html_data.approvedStatus || "Not provided"}</p>

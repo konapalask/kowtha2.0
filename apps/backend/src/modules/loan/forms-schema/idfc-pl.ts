@@ -59,8 +59,15 @@ export const idfcPlSchema = {
           },
           typeOfFirmProprietorPartnershipPvtLtdGovtPsuMnc: {
             type: "string",
-            title:
-              "Type of Firm (Proprietor / Partnership / Pvt. Ltd. / Govt. / PSU / MNC)",
+            title: "Type of Firm",
+            enum: [
+              "Proprietor",
+              "Partnership",
+              "Pvt. Ltd.",
+              "Govt.",
+              "PSU",
+              "MNC",
+            ],
           },
           numberOfEmployees: {
             type: "string",

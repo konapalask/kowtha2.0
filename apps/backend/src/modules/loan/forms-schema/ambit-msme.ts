@@ -117,6 +117,14 @@ export const ambitMsmeSchema = {
               rows: 2,
             },
           },
+          addressLatitude: {
+            type: "number",
+            title: "Address Latitude",
+          },
+          addressLongitude: {
+            type: "number",
+            title: "Address Longitude",
+          },
           rentedOrOwned: {
             type: "string",
             title: "Rented/Owned",
@@ -151,9 +159,27 @@ export const ambitMsmeSchema = {
               rows: 2,
             },
           },
+          addressLatitude: {
+            type: "number",
+            title: "Address Latitude",
+          },
+          addressLongitude: {
+            type: "number",
+            title: "Address Longitude",
+          },
+          typeOfProperty: {
+            type: "string",
+            title: "Type of Property",
+            enum: ["Residential", "Commercial", "Others"],
+          },
           ownerName: {
             type: "string",
             title: "Property owner name",
+          },
+          natureOfUses: {
+            type: "string",
+            title: "Nature of Uses",
+            enum: ["Occupied", "Vacant", "Rented", "Others"],
           },
           marketValue: {
             type: "number",
