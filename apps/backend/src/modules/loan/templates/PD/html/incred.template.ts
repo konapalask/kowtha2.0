@@ -3,9 +3,9 @@ import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.template";
 const tableStyle =
   "border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:16px 0";
 const labelCellStyle =
-  "border:1px solid #c7cdd1;padding:8px;font-weight:600;color:#222;background:#f4f6fb;vertical-align:top;width:32%";
+  "border:1px solid #c7cdd1;padding:8px;font-weight:600;color:#222;background:#f4f6fb;vertical-align:top;width:32%;font-size:12px;";
 const valueCellStyle =
-  "border:1px solid #c7cdd1;padding:8px;color:#333;vertical-align:top";
+  "border:1px solid #c7cdd1;padding:8px;color:#333;vertical-align:top;font-size:12px;";
 
 const hasValue = (value: any): boolean => {
   if (value === null || value === undefined) return false;
@@ -111,7 +111,7 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
         ${renderKeyValue("Person Meet/owner of the business with Contact No", general.personMeetOwnerOfTheBusinessWithContactNo)}
         ${renderKeyValue("Date & time of Visit", general.dateTimeOfVisit)}
         ${renderKeyValue("PD Done by with Designation", general.pdDoneByWithDesignation)}
-        ${renderKeyValue("Loan Amt. Applied and Purpose", general.loanAmtApplied + " - " + general.purposeOfLoan)}
+        ${renderKeyValue("Loan Amt. Applied and Purpose", general.loanAmtApplied + " <br>" + (general.purposeOfLoan ? "<strong>Purpose of Loan:</strong> " + general.purposeOfLoan : ""))}
 
         ${renderKeyValue("About the Applicant/Business", formatMultiline(applicantAndBusinessDetails.aboutTheApplicantOrBusiness))}
         ${renderKeyValue("About the Co-Applicant", formatMultiline(applicantAndBusinessDetails.aboutTheCoApplicant))}
@@ -149,7 +149,7 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
                 <table style="${tableStyle}">
                     <tr>
                         <td style="${labelCellStyle}"></td>
-                        <td style="${labelCellStyle}">FY 2020-21</td>
+                        <td style="${labelCellStyle}">Previous Financial Year</td>
                         <td style="${labelCellStyle}">Current Period / At Time of PD</td>
                         <td style="${labelCellStyle}"></td>
                         <td style="${labelCellStyle}">No. of Days</td>
@@ -288,7 +288,8 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
 
       <p style="font-size:18px;"><strong>Overall Positives or Negatives:</strong>  ${formatMultiline(overallPositivesOrNegatives.overallPositivesOrNegatives)}</p>
       <br>
-      <p style="margin:8px 0;line-height:1.5"><strong>Signature of the PD Officer TRUE/FALSE:</strong></p>
+      ${renderKeyValue("Accept/Reject: ", verificationData.acceptRejectPD?.acceptReject || "Not provided", undefined)}
+      <p style="margin:8px 0;line-height:1.5"><strong>Signature of the PD Officer:</strong></p>
       <br>  
       <p style="font-size:18px;"><strong>Note:</strong> We have taken the estimated figures based on customer feedback and the gross profit has been arrived taking into consideration market information gathered on our experience.</p>
       <p style="font-size:18px;"><strong>Disclaimer:</strong> The Report (Including any attachments) has been prepared based on verbal information provided by the person contacted. Incred Financial Services will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. Our efficient services will not be liable in any case</p>

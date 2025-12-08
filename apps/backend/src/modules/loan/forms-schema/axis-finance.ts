@@ -244,67 +244,141 @@ export const axisFinanceSchema = {
       schema: {
         type: "object",
         properties: {
-          annualSales: {
-            type: "number",
-            title: "Annual Sales",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
+          accountingYear: {
+            type: "object",
+            title: "Accounting Year",
+            properties: {
+              annualSales: {
+                type: "number",
+                title: "Annual Sales",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+              overallCosts: {
+                type: "number",
+                title: "Overall Costs",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+              majorCostHeads: {
+                type: "string",
+                title: "Major Cost Heads",
+              },
+              grossMargin: {
+                type: "number",
+                title: "Gross Margin %",
+              },
+              pbditMargin: {
+                type: "number",
+                title: "PBDIT Margin %",
+              },
+              debtorsCycle: {
+                type: "integer",
+                title: "Debtors Cycle",
+              },
+              creditorsCycle: {
+                type: "integer",
+                title: "Creditors Cycle",
+              },
+              capitalInvested: {
+                type: "number",
+                title: "Capital Invested",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+              loanFundsInclCcLimit: {
+                type: "string",
+                title: "Loan Funds (incl. CC limit)",
+              },
+              stockMaintained: {
+                type: "string",
+                title: "Stock Maintained",
+              },
+              businessBankAccounts: {
+                type: "string",
+                title: "Business Bank Accounts",
+              },
+              },
           },
-          overallCosts: {
-            type: "number",
-            title: "Overall Costs",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
-          },
-          majorCostHeads: {
-            type: "string",
-            title: "Major Cost Heads",
-          },
-          grossMargin: {
-            type: "number",
-            title: "Gross Margin %",
-          },
-          pbditMargin: {
-            type: "number",
-            title: "PBDIT Margin %",
-          },
-          debtorsCycle: {
-            type: "integer",
-            title: "Debtors Cycle",
-          },
-          creditorsCycle: {
-            type: "integer",
-            title: "Creditors Cycle",
-          },
-          capitalInvested: {
-            type: "number",
-            title: "Capital Invested",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
-          },
-          loanFundsInclCcLimit: {
-            type: "string",
-            title: "Loan Funds (incl. CC limit)",
-          },
-          stockMaintained: {
-            type: "string",
-            title: "Stock Maintained",
-          },
-          businessBankAccounts: {
-            type: "string",
-            title: "Business Bank Accounts",
+          previousFinancialYear: {
+            type: "object",
+            title: "Previous Financial Year",
+            properties: {
+              annualSales: {
+                type: "number",
+                title: "Annual Sales",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+              overallCosts: {
+                type: "number",
+                title: "Overall Costs",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+              majorCostHeads: {
+                type: "string",
+                title: "Major Cost Heads",
+              },
+              grossMargin: {
+                type: "number",
+                title: "Gross Margin %",
+              },
+              pbditMargin: {
+                type: "number",
+                title: "PBDIT Margin %",
+              },
+              debtorsCycle: {
+                type: "integer",
+                title: "Debtors Cycle",
+              },
+              creditorsCycle: {
+                type: "integer",
+                title: "Creditors Cycle",
+              },
+              capitalInvested: {
+                type: "number",
+                title: "Capital Invested",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+              loanFundsInclCcLimit: {
+                type: "string",
+                title: "Loan Funds (incl. CC limit)",
+              },
+              stockMaintained: {
+                type: "string",
+                title: "Stock Maintained",
+              },
+              businessBankAccounts: {
+                type: "string",
+                title: "Business Bank Accounts",
+              },
+              },
           },
         },
       },
@@ -431,33 +505,75 @@ export const axisFinanceSchema = {
       schema: {
         type: "object",
         properties: {
-          affordableEmi: {
-            type: "number",
-            title: "Affordable EMI",
-          },
-          netSurplus: {
-            type: "string",
-            title: "Net Surplus",
-          },
           totalMonthlyIncomePerMonth: {
-            type: "string",
-            title: "Total Monthly Income per Month",
-          },
-          otherLoanEmi: {
             type: "number",
-            title: "Other Loan EMI",
+            title: "Total Monthly Net Income per month (Business income + Other Income)",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          overAllFamilyExpenses: {
+            type: "number",
+            title: "Overall Family Expenses per month",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
           plOrAutoLoanEMI: {
             type: "number",
             title: "PL or Auto Loan EMI",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
-          overAllFamilyExpenses: {
-            type: "string",
-            title: "Over All Family Expenses",
+          otherLoanEmi: {
+            type: "number",
+            title: "Other Loan EMI",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
           totalMonthlyExpensesPerMonth: {
-            type: "string",
+            type: "number",
             title: "Total Monthly Expenses per Month",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },         
+          netSurplus: {
+            type: "string",
+            title: "Net Surplus",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          affordableEmi: {
+            type: "number",
+            title: "Affordable EMI",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
         },
       },
@@ -537,6 +653,20 @@ export const axisFinanceSchema = {
         },
       },
       required: true,
+    },
+    {
+      id: "acceptRejectPD",
+      label: "Accept/Reject",
+      schema: {
+        type: "object",
+        properties: {
+          acceptReject: {
+            type: "string",
+            title: "Accept/Reject",
+            enum: ["Accept", "Reject"],
+          },
+        },
+      },
     },
     {
       id: "estimatedIncome",

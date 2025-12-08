@@ -553,7 +553,7 @@ export const axisFinanceUBLTemplate = (
       </table>
       <p style="${paragraphStyle};font-size:14px;"><strong>Disclaimer if any:</strong> ${formatMultiline(
         verificationData.recommendations?.disclaimer ||
-          "We estimated financials, purely based on the valid documents provided by the applicant."
+          "The Report (Including any attachments) has been prepared on the basis of verbal information provided by the person contacted. Axis Finance Limited will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions, efficient services will not be liable in any case."
       )}</p>
 
       
