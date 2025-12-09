@@ -15,7 +15,6 @@ import {
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import axiosInstance from "@/config/axios.config";
 import { ColumnsType } from "antd/es/table";
 import {
   createOfficeApi,
@@ -29,6 +28,7 @@ import {
   Bank,
   updateOfficeApi,
 } from "@/services/settings.services";
+import {  putWithDepartment } from "@/services/api.services";
 import { getUserDetails, getCurrentDepartmentRole, getCurrentDepartment } from "@/utils/utility";
 
 const { TabPane } = Tabs;
@@ -86,8 +86,13 @@ export default function OrganizationSettings() {
     const fetchOrganization = async () => {
       try {
         const result = await getOrganizationApi();
-        setOrganization(result.data);
-        form.setFieldsValue(result.data);
+        const apiData = result?.data?.data ?? result?.data
+        if (typeof apiData === "number") {
+          setOrganization((prev) => ({ ...prev, id: apiData }));
+        } else if (apiData) {
+          setOrganization(apiData);
+          form.setFieldsValue(apiData);
+        }
       } catch (error) {
         console.error("Fetch organization error:", error);
         // message.error("Failed to load organization details");
@@ -128,11 +133,20 @@ export default function OrganizationSettings() {
   const handleOrganizationUpdate = async (values: any) => {
     try {
       setLoading(true);
-      await axiosInstance.put(
-        `/accounts/organization/${organization.id}`,
-        values
-      );
-      setOrganization({ ...organization, ...values });
+      let orgId = organization?.id;
+      if (!orgId) {
+        const res = await getOrganizationApi();
+        const apiData = res?.data?.data ?? res?.data;
+        orgId = typeof apiData === "number" ? apiData : apiData?.id;
+        console.log(orgId);
+      }
+
+      if (!orgId) {
+        throw new Error("Organization id not found");
+      }
+
+      await putWithDepartment(`/accounts/organization/${orgId}`, values);
+      setOrganization({ ...organization, ...values, id: orgId });
       message.success("Organization details updated successfully");
     } catch (error) {
       message.error("Failed to update organization details");
