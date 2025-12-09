@@ -29,17 +29,6 @@ export const statement4Schema = {
           minDecimalPlaces: 0,
         },
       },
-      // openingStockEstimated: {
-      //   type: "number",
-      //   title: "Opening Stock - Estimated",
-      //   minimum: 0,
-      //   formatter: {
-      //     useIndianFormat: true,
-      //     locale: "en-IN",
-      //     maxDecimalPlaces: 2,
-      //     minDecimalPlaces: 0,
-      //   },
-      // },
       purchasesAssessed: {
         type: "number",
         title: "Purchases - Assessed",
@@ -52,18 +41,6 @@ export const statement4Schema = {
         },
       },
 
-      // purchasesEstimated: {
-      //   type: "number",
-      //   title: "Purchases - Estimated",
-      //   minimum: 0,
-      //   formatter: {
-      //     useIndianFormat: true,
-      //     locale: "en-IN",
-      //     maxDecimalPlaces: 2,
-      //     minDecimalPlaces: 0,
-      //   },
-      // },
-
       grossProfitAssessed: {
         type: "number",
         title: "Gross Profit - Assessed",
@@ -75,17 +52,6 @@ export const statement4Schema = {
           minDecimalPlaces: 0,
         },
       },
-      // grossProfitEstimated: {
-      //   type: "number",
-      //   title: "Gross Profit - Estimated",
-      //   minimum: 0,
-      //   formatter: {
-      //     useIndianFormat: true,
-      //     locale: "en-IN",
-      //     maxDecimalPlaces: 2,
-      //     minDecimalPlaces: 0,
-      //   },
-      // },
 
       grandTotalExpenditure: {
         type: "number",
@@ -228,16 +194,6 @@ export const statement4Schema = {
         title: "Net Profit",
         formula: "byGrossProfitEstimated - (electricity + rent + salaries + travellingCharges + otherExpenses)",
         readOnly: true,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      netProfitEstimated: {
-        type: "number",
-        title: "Net Profit - Income",
         formatter: {
           useIndianFormat: true,
           locale: "en-IN",
@@ -479,7 +435,7 @@ export const statement4Schema = {
       npMargin: {
         type: "number",
         title: "NP Margin %",
-        formula: "(netProfitEstimated / grandTotal) * 100",
+        formula: "(netProfit / grandTotal) * 100",
         readOnly: true,
         minimum: 0,
         formatter: {
