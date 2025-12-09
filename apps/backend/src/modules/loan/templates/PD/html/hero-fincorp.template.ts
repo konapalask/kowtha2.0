@@ -98,14 +98,16 @@ const renderInnerTable = (headers: string[], rows: string[][]) => {
 };
 
 const sectionTitle = (text: string) =>
-  `<h2 style="margin:18px 0 6px 0;font-size:18px;font-weight:600;color:#1f2d3d;text-transform:uppercase;">${text}</h2>`;
+  `<h2 style="margin:18px 0 6px 0;font-size:14px;font-weight:600;color:#1f2d3d;text-transform:uppercase;">${text}</h2>`;
 
 export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
   const basic = verificationData.basicDetails || {};
   const applicantProfile = verificationData.applicantProfile || {};
   // Handle nested structures for business profile
   const businessProfileData = verificationData.businessProfile || {};
-  const financialSummary = verificationData.financialSummary || {};
+  const turnoverAndNetProfitDetails = verificationData.turnoverAndNetProfitDetails || {};
+  const documentsObserved = verificationData.documentsObserved || {};
+  const automationLevel = verificationData.automationLevel || {};
   const relationships = verificationData.relationships || {};
   // Handle nested structures for existing loans
   const existingLoansData = verificationData.existingLoanDetails || {};
@@ -167,9 +169,9 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
     familyRows
   );
 
-  const documentsList = financialSummary?.documentsObserved
+  const documentsList = documentsObserved?.documentsObserved
     ? `<ul style="margin: 0; padding-left: 20px;">${
-        financialSummary?.documentsObserved
+        documentsObserved?.documentsObserved
           .split("\n")
           .map((line: string) => line.trim())
           .map((line: string) => `<li style="margin-left: 8px;">${line}</li>`)
@@ -224,10 +226,10 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
     ["AY", "Turnover", "Net Profit", "Net margin (%)"],
     [
       [
-        formatMultiline(financialSummary.assessmentYear || ""),
-        formatCurrency(financialSummary.turnover),
-        formatCurrency(financialSummary.netProfit),
-        formatMultiline(financialSummary.netMarginPercent + "%" || ""),
+        formatMultiline(turnoverAndNetProfitDetails.assessmentYear || ""),
+        formatCurrency(turnoverAndNetProfitDetails.turnover),
+        formatCurrency(turnoverAndNetProfitDetails.netProfit),
+        formatMultiline(turnoverAndNetProfitDetails.netMarginPercent + "%" || ""),
       ],
     ]
   );
@@ -285,7 +287,6 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
 
   const statusTable = renderTwoColumnTable([
     ["Status of this case", html_data.approvedStatus || "Not provided"],
-    ["Place", loanAnalysis.place],
   ]);
 
   const dateRow = wrapParagraph(
@@ -333,7 +334,7 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
           : "Not provided"
       }
 
-      ${sectionTitle("Financial Summary")}
+      ${sectionTitle("Turnover and net profit details for last one year audited financials.") }
       ${financialSummaryTable}
 
       <h3 style="margin:12px 0 6px;font-size:16px;font-weight:600;color:#1f2d3d;">Documents Observed</h3>
@@ -341,9 +342,9 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
 
       <h3 style="margin:12px 0 6px;font-size:16px;font-weight:600;color:#1f2d3d;">Automation Level</h3>
       ${
-        financialSummary.automationLevel
+        automationLevel?.automationLevel
           ? `<ul style="margin: 0; padding-left: 20px;">${
-              financialSummary?.automationLevel
+              automationLevel?.automationLevel
                 ?.split("\n")
                 .map((line: string) => line.trim())
                 .map(
@@ -372,7 +373,7 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
       ${relationships.margins ? `<p style="margin: 0; padding-left: 8px;">${relationships.margins}</p>` : "Not provided"}
 
       ${sectionTitle("Employees")}
-      ${wrapParagraph(formatMultiline(relationships.employeesCount || "Not provided"))}
+      ${wrapParagraph(relationships.employeesCount || "Not provided")}
 
       ${sectionTitle("Assets")}
       ${relationships.assets ? `<p style="margin: 0; padding-left: 8px;">${relationships.assets}</p>` : "Not provided"}
