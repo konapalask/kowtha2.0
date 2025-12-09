@@ -186,32 +186,17 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
   // Handle comfort factors - now a simple string field
   const comfortFactorsText =
     verificationData.comfortFactor?.comfortFactors || "";
-  const comfortFactors = comfortFactorsText
-    ? comfortFactorsText
-        .split(/\n+/)
-        .filter((line: string) => line.trim().length > 0)
-        .map((line: string) => `<li>${line.trim()}</li>`)
-    : [];
+  const comfortFactors = comfortFactorsText ? String(comfortFactorsText).split("\n").filter((line: string) => line.trim()).map((line: string) => `<li>${line.trim()}</li>`) : [];
 
   // Handle discomfort factors - now a simple string field
   const discomfortFactorsText =
     verificationData.discomfortFactor?.discomfortFactors || "";
-  const discomfortFactors = discomfortFactorsText
-    ? discomfortFactorsText
-        .split(/\n+/)
-        .filter((line: string) => line.trim().length > 0)
-        .map((line: string) => `<li>${line.trim()}</li>`)
-    : [];
+  const discomfortFactors = discomfortFactorsText ? String(discomfortFactorsText).split("\n").filter((line: string) => line.trim()).map((line: string) => `<li>${line.trim()}</li>`).join("") : "";
 
   // Handle recommendations - now a simple string field
   const recommendationsText =
     verificationData.Recommendations?.recommendations || "";
-  const recommendations = recommendationsText
-    ? recommendationsText
-        .split(/\n+/)
-        .filter((line: string) => line.trim().length > 0)
-        .map((line: string) => `<li>${line.trim()}</li>`)
-    : [];
+  const recommendations = recommendationsText ? String(recommendationsText).split("\n").filter((line: string) => line.trim()).map((line: string) => `<li>${line.trim()}</li>`).join("") : "";
 
   const businessList = [
     hasValue(aboutBusiness?.aboutTheApplicant)
@@ -331,8 +316,8 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
       <p style="${paragraphStyle}"><strong>Discomfort Factor: -</strong></p>
       <ul>
         ${
-          discomfortFactors.length
-            ? discomfortFactors.join("")
+          discomfortFactors
+            ? discomfortFactors
             : "<li>Not provided</li>"
         }
       </ul>
@@ -340,8 +325,8 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
       <p style="${paragraphStyle}"><strong>Recommendations:-</strong></p>
       <ul>
         ${
-          recommendations.length
-            ? recommendations.join("")
+          recommendations
+            ? recommendations
             : "<li>Not provided</li>"
         }
       </ul>
