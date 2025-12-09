@@ -246,7 +246,7 @@ export const axisFinanceSchema = {
         properties: {
           accountingYear: {
             type: "object",
-            title: "Accounting Year",
+            title: "Estimated (Rs.)",
             properties: {
               annualSales: {
                 type: "number",
@@ -314,7 +314,7 @@ export const axisFinanceSchema = {
           },
           previousFinancialYear: {
             type: "object",
-            title: "Previous Financial Year",
+            title: "Previous Financial Year (Rs.)",
             properties: {
               annualSales: {
                 type: "number",
