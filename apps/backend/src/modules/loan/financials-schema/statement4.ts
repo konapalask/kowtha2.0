@@ -29,28 +29,17 @@ export const statement4Schema = {
           minDecimalPlaces: 0,
         },
       },
-      openingStockAudited: {
-        type: "number",
-        title: "Opening Stock - Audited Income",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      openingStockEstimated: {
-        type: "number",
-        title: "Opening Stock - Estimated",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
+      // openingStockEstimated: {
+      //   type: "number",
+      //   title: "Opening Stock - Estimated",
+      //   minimum: 0,
+      //   formatter: {
+      //     useIndianFormat: true,
+      //     locale: "en-IN",
+      //     maxDecimalPlaces: 2,
+      //     minDecimalPlaces: 0,
+      //   },
+      // },
       purchasesAssessed: {
         type: "number",
         title: "Purchases - Assessed",
@@ -62,29 +51,18 @@ export const statement4Schema = {
           minDecimalPlaces: 0,
         },
       },
-      purchasesAudited: {
-        type: "number",
-        title: "Purchases - Audited Income",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
 
-      purchasesEstimated: {
-        type: "number",
-        title: "Purchases - Estimated",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
+      // purchasesEstimated: {
+      //   type: "number",
+      //   title: "Purchases - Estimated",
+      //   minimum: 0,
+      //   formatter: {
+      //     useIndianFormat: true,
+      //     locale: "en-IN",
+      //     maxDecimalPlaces: 2,
+      //     minDecimalPlaces: 0,
+      //   },
+      // },
 
       grossProfitAssessed: {
         type: "number",
@@ -97,9 +75,24 @@ export const statement4Schema = {
           minDecimalPlaces: 0,
         },
       },
-      grossProfitEstimated: {
+      // grossProfitEstimated: {
+      //   type: "number",
+      //   title: "Gross Profit - Estimated",
+      //   minimum: 0,
+      //   formatter: {
+      //     useIndianFormat: true,
+      //     locale: "en-IN",
+      //     maxDecimalPlaces: 2,
+      //     minDecimalPlaces: 0,
+      //   },
+      // },
+
+      grandTotalExpenditure: {
         type: "number",
-        title: "Gross Profit - Estimated",
+        title: "Grand Total Expenditure",
+        formula:
+          "openingStockAssessed + purchasesAssessed + grossProfitAssessed",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -109,11 +102,60 @@ export const statement4Schema = {
         },
       },
 
-      grandTotal: {
+      // Income Section
+      salesEstimated: {
         type: "number",
-        title: "Grand Total",
-        formula:
-          "openingStockAssessed + purchasesAssessed + grossProfitAssessed",
+        title: "By Sales - Estimated",
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+
+      servicesEstimated: {
+        type: "number",
+        title: "By Services - Estimated",
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+
+      closingStockEstimated: {
+        type: "number",
+        title: "By Closing Stock - Estimated",
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      grandTotalIncome: {
+        type: "number",
+        title: "Grand Total Income",
+        formula: "salesEstimated + servicesEstimated + closingStockEstimated",
+        readOnly: true,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+
+      byGrossProfitEstimated: {
+        type: "number",
+        title: "By Gross Profit - Estimated",
+        formula: "grossProfitAssessed",
         readOnly: true,
         minimum: 0,
         formatter: {
@@ -184,6 +226,8 @@ export const statement4Schema = {
       netProfit: {
         type: "number",
         title: "Net Profit",
+        formula: "byGrossProfitEstimated - (electricity + rent + salaries + travellingCharges + otherExpenses)",
+        readOnly: true,
         formatter: {
           useIndianFormat: true,
           locale: "en-IN",
@@ -193,102 +237,7 @@ export const statement4Schema = {
       },
       netProfitEstimated: {
         type: "number",
-        title: "Net Profit - Estimated",
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-
-      // Income Section
-      salesAudited: {
-        type: "number",
-        title: "By Sales - Audited Income",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      salesEstimated: {
-        type: "number",
-        title: "By Sales - Estimated",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-
-      servicesAudited: {
-        type: "number",
-        title: "By Services - Audited Income",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      servicesEstimated: {
-        type: "number",
-        title: "By Services - Estimated",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-
-      closingStockAudited: {
-        type: "number",
-        title: "By Closing Stock - Audited Income",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      closingStockEstimated: {
-        type: "number",
-        title: "By Closing Stock - Estimated",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-
-      byGrossProfitAudited: {
-        type: "number",
-        title: "By Gross Profit - Audited Income",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      byGrossProfitEstimated: {
-        type: "number",
-        title: "By Gross Profit - Estimated",
-        formula: "grossProfitEstimated",
-        readOnly: true,
-        minimum: 0,
+        title: "Net Profit - Income",
         formatter: {
           useIndianFormat: true,
           locale: "en-IN",
@@ -516,7 +465,7 @@ export const statement4Schema = {
       gpMargin: {
         type: "number",
         title: "GP Margin %",
-        formula: "(grossProfitEstimated / grandTotal) * 100",
+        formula: "(grossProfitAssessed / grandTotal) * 100",
         readOnly: true,
         minimum: 0,
         formatter: {
