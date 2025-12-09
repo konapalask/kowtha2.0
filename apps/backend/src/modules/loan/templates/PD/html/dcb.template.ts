@@ -83,26 +83,17 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
   // Handle nested structures for directors and proprietor
   const detailsOfDirectorsAndProprietorData =
     verificationData.detailsOfDirectorsAndProprietor || {};
-  const detailsOfDirectorsAndProprietorArray = Array.isArray(
-    detailsOfDirectorsAndProprietorData
-  )
-    ? detailsOfDirectorsAndProprietorData
-    : Array.isArray(detailsOfDirectorsAndProprietorData.directorsAndProprietor)
-      ? detailsOfDirectorsAndProprietorData.directorsAndProprietor
-      : [];
-  const detailsOfDirectorsAndProprietor = ensureArray(
-    verificationData.detailsOfDirectorsAndProprietor.details
-  );
+  const detailsOfDirectorsAndProprietor = detailsOfDirectorsAndProprietorData?.details || [];
   const history = verificationData.history || {};
   const businessActivities = verificationData.businessActivities || {};
   const businessSetup = verificationData.businessSetup || {};
   const detailsOfAllLoansAsOn =
-    verificationData.detailsOfAllLoansAsOn.details || {};
+    verificationData.detailsOfAllLoansAsOn || {};
   const personalAssetsOfProprietor =
-    verificationData.personalAssetsOfProprietor.details || {};
-  const detailsOfCustomers = verificationData.detailsOfCustomers.details || {};
-  const detailsOfSuppliers = verificationData.detailsOfSuppliers.details || {};
-  const sisterCompanies = verificationData.sisterCompanies.details || {};
+    verificationData.personalAssetsOfProprietor?.details || [];
+  const detailsOfCustomers = verificationData.detailsOfCustomers?.details || [];
+  const detailsOfSuppliers = verificationData.detailsOfSuppliers?.details || [];
+  const sisterCompanies = verificationData.sisterCompanies?.details || [];
   const insuranceDetails = verificationData.insuranceDetails || {};
   const performanceDetails = verificationData.performanceDetails || {};
   const otherBusinessInterests = verificationData.otherBusinessInterests || {};
@@ -146,22 +137,13 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
         "Responsibilities",
         "Share holding Pattern (in %)",
       ],
-      detailsOfDirectorsAndProprietor
-        .filter(
-          (director: any) =>
-            hasValue(director?.nameOfShareholder) ||
-            hasValue(director?.ageOfShareholder) ||
-            hasValue(director?.qualifications) ||
-            hasValue(director?.responsibilities) ||
-            hasValue(director?.shareholdingPatternIn)
-        )
-        .map((director: any) => [
-          director?.nameOfShareholder || "",
-          director?.ageOfShareholder || "",
-          director?.qualifications || "",
-          director?.responsibilities || "",
-          director?.shareholdingPatternIn !== undefined &&
-          director?.shareholdingPatternIn !== null
+      detailsOfDirectorsAndProprietor.map((director: any) => [
+          director.nameOfShareholder || "",
+          director.ageOfShareholder || "",
+          director.qualifications || "",
+          director.responsibilities || "",
+          director.shareholdingPatternIn !== undefined &&
+          director.shareholdingPatternIn !== null
             ? `${director.shareholdingPatternIn}%`
             : "",
         ])
@@ -227,18 +209,14 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
       <td style="${labelCellStyle}">o/s Amount/</td>
       <td style="${labelCellStyle}">EMI</td>
     </tr>
-    ${detailsOfAllLoansAsOn
-      .map(
-        (item: any) => `
+    ${ensureArray(detailsOfAllLoansAsOn?.details)?.map((item: any) => `
       <tr>
-        <td style="${valueCellStyle}">${item.bank || ""}</td>
-        <td style="${valueCellStyle}">${item.typeOfLoan || ""}</td>
-        <td style="${valueCellStyle}">${item.loanAmount || ""}</td>
-        <td style="${valueCellStyle}">${item.emi || ""}</td>
+        <td style="${valueCellStyle}">${item.bank}</td>
+        <td style="${valueCellStyle}">${item.typeOfLoan}</td>
+        <td style="${valueCellStyle}">${formatCurrency(item.loanAmount)}</td>
+        <td style="${valueCellStyle}">${formatCurrency(item.emi)}</td>
       </tr>
-    `
-      )
-      .join("")}
+    `).join("")}
     </table>
 
     <h2 style="margin:0 0 16px;color:#1f2a37;font-size:16px;">Personal Assets of Proprietor</h2>
@@ -340,7 +318,7 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
     <td style="${labelCellStyle}">Sum Assured</td>
     <td style="${labelCellStyle}">Assured Covered</td>
     </tr>
-    ${insuranceDetails.details
+    ${(insuranceDetails.details || [])
       .map(
         (item: any, index: number) => `
       <tr>
