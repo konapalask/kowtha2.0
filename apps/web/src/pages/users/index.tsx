@@ -107,11 +107,13 @@ const DepartmentRoleSelector = ({
   editingUser,
   fiOffices,
   pdOffices,
+  currentDepartment,
 }: {
   form: FormInstance;
   editingUser: User | null;
   fiOffices: any[];
   pdOffices: any[];
+  currentDepartment?: string;
 }) => {
   // Get current department roles directly from form
   const getCurrentDepartments = () => {
@@ -120,6 +122,7 @@ const DepartmentRoleSelector = ({
   };
 
   const handleCheck = (checked: boolean, dept: string) => {
+    if (currentDepartment && currentDepartment !== dept) return;
     const current = form.getFieldValue("departmentRoles") || [];
     if (checked) {
       form.setFieldsValue({
@@ -139,6 +142,10 @@ const DepartmentRoleSelector = ({
       {departments.map((dept, index) => {
         const currentDepartments = getCurrentDepartments();
         const isChecked = currentDepartments.includes(dept);
+        const isDeptDisabled =
+          currentDepartment !== undefined &&
+          currentDepartment !== "" &&
+          currentDepartment !== dept;
 
         return (
           <Row
@@ -150,6 +157,7 @@ const DepartmentRoleSelector = ({
             <Col>
               <Checkbox
                 checked={isChecked}
+                disabled={isDeptDisabled}
                 onChange={(e) => handleCheck(e.target.checked, dept)}
               >
                 {dept}
@@ -170,6 +178,7 @@ const DepartmentRoleSelector = ({
                       options={dept === "FI" ? FIroleOptions : PDroleOptions}
                       placeholder={`Select role for ${dept}`}
                       style={{ width: 200 }}
+                      disabled={isDeptDisabled}
                     />
                   </Form.Item>
                   {/* Branch per department */}
@@ -188,6 +197,7 @@ const DepartmentRoleSelector = ({
                       options={dept === "FI" ? fiOffices : pdOffices}
                       placeholder={`Select ${dept} branch`}
                       style={{ width: 240 }}
+                      disabled={isDeptDisabled}
                       onChange={(val) => {
                         // Keep root officeId in sync for backend
                         const rootOfficeId = form.getFieldValue("officeId");
@@ -750,6 +760,7 @@ export default function Users() {
               editingUser={editingUser}
               fiOffices={fiOffices}
               pdOffices={pdOffices}
+              currentDepartment={currentDepartment}
             />
           </Form.Item>
           <Form.Item
