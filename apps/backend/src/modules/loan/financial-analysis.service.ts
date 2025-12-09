@@ -280,9 +280,9 @@ export class FinancialAnalysisTemplatesService {
     // Add header row
     const headerRow = worksheet.addRow([
       "Particulars",
-      "Actuals",
+      "Estimated",
       "Particulars",
-      "Actuals",
+      "Estimated",
     ]);
     headerRow.font = { bold: true };
     headerRow.alignment = { horizontal: "center", vertical: "middle" };
@@ -338,8 +338,8 @@ export class FinancialAnalysisTemplatesService {
       { label: "By Sales", key: "sales" },
       { label: "By Services", key: "services" },
       { label: "By Closing Stock", key: "closingStock" },
-      ...Array(5).fill({ label: "", key: "" }),
-      { label: "By Gross Profit", key: "grossProfitCredit", isBold: true },
+      ...Array(7).fill({ label: "", key: "" }),
+      { label: "By Gross Profit", key: "grossProfitCredit" },
       { label: "By Rent Received", key: "rentReceived" },
       { label: "By Commission Received", key: "commissionReceived" },
       ...Array(17).fill({ label: "", key: "" }),
@@ -566,7 +566,7 @@ export class FinancialAnalysisTemplatesService {
     worksheet.addRow([]); // Empty row
 
     // Headers
-    const headerRow = worksheet.addRow(["PARTICULARS", "VALUE"]);
+    const headerRow = worksheet.addRow(["PARTICULARS", "Estimated Income"]);
     headerRow.font = { bold: true };
     headerRow.alignment = { horizontal: "center", vertical: "middle" };
     headerRow.eachCell((cell) => {
@@ -636,7 +636,7 @@ export class FinancialAnalysisTemplatesService {
 
     // Cost section
     addDataRow("Cost of material consumed", getValue("costOfMaterialConsumed"));
-    addDataRow("Cost to Receipts %", getValue("costToReceiptsPercentage"));
+    addDataRow("Cost of material consumed to Receipts %", getValue("costToReceiptsPercentage"));
 
     // Gross Profit
     addDataRow(
@@ -645,6 +645,7 @@ export class FinancialAnalysisTemplatesService {
       true
     );
     addDataRow("GP ratio %", getValue("gpRatio"));
+    addDataRow("Expenditure","",true);
 
     // Expenditure section
     addDataRow("Salary", getValue("salary"));
@@ -714,13 +715,13 @@ export class FinancialAnalysisTemplatesService {
     // Set up columns for P&L with comparison columns
     worksheet.columns = [
       { width: 30 }, // A - Particulars (left)
-      { width: 15 }, // B - 2023 Actuals
-      { width: 15 }, // C - 2024 Actuals
+      { width: 20 }, // B - Previous Year Actuals
+      { width: 20 }, // C - This Year Actuals
       { width: 12 }, // D - Change %
       { width: 15 }, // E - Estimated
       { width: 30 }, // F - Particulars (right)
-      { width: 15 }, // G - 2023 Actuals
-      { width: 15 }, // H - 2024 Actuals
+      { width: 20 }, // G - Previous Year Actuals
+      { width: 20 }, // H - This Year Actuals
       { width: 12 }, // I - Change %
       { width: 15 }, // J - Estimated
     ];
@@ -771,13 +772,13 @@ export class FinancialAnalysisTemplatesService {
     // Column headers row
     const columnHeaderRow = worksheet.addRow([
       "PARTICULARS",
-      "2023 Actuals",
-      "2024 Actuals",
+      "Previous Year Actuals",
+      "This Year Actuals",
       "Change %",
       "Estimated",
       "PARTICULARS",
-      "2023 Actuals",
-      "2024 Actuals",
+      "Previous Year Actuals",
+      "This Year Actuals",
       "Change %",
       "Estimated",
     ]);
@@ -924,6 +925,21 @@ export class FinancialAnalysisTemplatesService {
       ""
     );
 
+    // Majuri Charges (Right)
+    addDataRow(
+      "",
+      "",
+      "",
+      "",
+      "",
+      "To Majuri Charges",
+      getValue("majuriCharges_2023"),
+      getValue("majuriCharges_2024"),
+      getValue("majuriChargesChange"),
+      getValue("majuriChargesEstimated")
+    );
+
+
     // Closing Stock (Right)
     addDataRow(
       "",
@@ -952,32 +968,18 @@ export class FinancialAnalysisTemplatesService {
       ""
     );
 
-    // Majuri Charges (Left)
+    // Gross Profit (Left)
     addDataRow(
-      "To Majuri Charges",
-      getValue("majuriCharges_2023"),
-      getValue("majuriCharges_2024"),
-      getValue("majuriChargesChange"),
-      getValue("majuriChargesEstimated"),
-      "",
-      "",
-      "",
-      "",
-      ""
-    );
-
-    // Gross Profit (Right)
-    addDataRow(
-      "",
-      "",
-      "",
-      "",
-      "",
-      "By Gross Profit",
+      "To Gross Profit",
       getValue("grossProfit_2023"),
       getValue("grossProfit_2024"),
       getValue("grossProfitChange"),
       getValue("grossProfitEstimated"),
+      "",
+      "",
+      "",
+      "",
+      "",
       true
     );
 
@@ -991,12 +993,13 @@ export class FinancialAnalysisTemplatesService {
       "",
       "",
       getValue("salariesEstimated"),
-      "",
-      "",
-      "",
-      "",
-      ""
+     "By Gross Profit",
+      getValue("grossProfit_2023"),
+      getValue("grossProfit_2024"),
+      getValue("grossProfitChange"),
+      getValue("grossProfitEstimated"),
     );
+ 
 
     addDataRow(
       "To Bonus",
@@ -1211,16 +1214,16 @@ export class FinancialAnalysisTemplatesService {
 
     // Net Profit (Right)
     addDataRow(
-      "",
-      "",
-      "",
-      "",
-      "",
       "To Net Profit",
       "",
       "",
       "",
       getValue("netProfitEstimated"),
+      "",
+      "",
+      "",
+      "",
+      "",
       true
     );
 
@@ -1371,13 +1374,9 @@ export class FinancialAnalysisTemplatesService {
     // Set up columns for P&L and Balance Sheet side by side
     worksheet.columns = [
       { width: 25 }, // A - Particulars (left)
-      { width: 10 }, // B - Note
-      { width: 15 }, // C - Audited Income
-      { width: 12 }, // D - Assessed/Estimated
-      { width: 25 }, // E - Particulars (right)
-      { width: 10 }, // F - Note
-      { width: 15 }, // G - Audited Income
-      { width: 12 }, // H - Estimated
+      { width: 12 }, // B - Assessed/Estimated
+      { width: 25 }, // C - Particulars (right)
+      { width: 12 }, // D - Estimated
     ];
 
     // Helper function to get value safely
@@ -1428,18 +1427,6 @@ export class FinancialAnalysisTemplatesService {
     partnerRow.font = { bold: true, size: 11 };
     partnerRow.alignment = { horizontal: "center" };
 
-    // Balance Sheet title on right
-    worksheet.getCell("E1").value = `Balance Sheet as on 31st March 2024`;
-    worksheet.mergeCells("E1:H1");
-    worksheet.getCell("E1").font = { bold: true, size: 12 };
-    worksheet.getCell("E1").alignment = { horizontal: "center" };
-
-    worksheet.getCell("E2").value =
-      `${financialAnalysis.partnersNames || "XXX"}`;
-    worksheet.mergeCells("E2:H2");
-    worksheet.getCell("E2").font = { bold: true };
-    worksheet.getCell("E2").alignment = { horizontal: "center" };
-
     // Subtitle
     const subTitleRow = worksheet.addRow([
       "Estimated Profit & Loss Account for the Year Ended 31st March 2026",
@@ -1451,12 +1438,8 @@ export class FinancialAnalysisTemplatesService {
     // Headers for P&L
     const headerRow = worksheet.addRow([
       "PARTICULARS",
-      "Note",
-      "Audited Income",
       "Assessed",
       "PARTICULARS",
-      "Note",
-      "Audited Income",
       "Estimated",
     ]);
     headerRow.font = { bold: true };
@@ -1473,23 +1456,15 @@ export class FinancialAnalysisTemplatesService {
     // Helper function to add a data row
     const addDataRow = (
       leftLabel: string,
-      leftNote: string | number,
-      leftAudited: string | number,
       leftAssessed: string | number,
       rightLabel: string,
-      rightNote: string | number,
-      rightAudited: string | number,
       rightEstimated: string | number,
       isBold = false
     ) => {
       const row = worksheet.addRow([
         leftLabel,
-        leftNote,
-        leftAudited,
         leftAssessed,
         rightLabel,
-        rightNote,
-        rightAudited,
         rightEstimated,
       ]);
 
@@ -1509,8 +1484,8 @@ export class FinancialAnalysisTemplatesService {
         cell.alignment = { vertical: "middle" };
       });
 
-      // Format numeric columns (C, D, G, H)
-      [3, 4, 7, 8].forEach((colNum) => {
+      // Format numeric columns (B, D)
+      [2, 4].forEach((colNum) => {
         const cell = row.getCell(colNum);
         const value = cell.value;
         if (value !== null && value !== undefined && value !== "") {
@@ -1534,14 +1509,19 @@ export class FinancialAnalysisTemplatesService {
 
     // Add P&L data rows - Left side (Expenditure) and Right side (Income)
 
+    addDataRow(
+      "Expenditure",
+      "",
+      "INCOME",
+      "",
+      true
+    );
+    
+
     // Opening Stock (Left)
     addDataRow(
       "To Opening Stock",
-      "",
-      getValue("openingStockAudited"),
       getValue("openingStockAssessed"),
-      "",
-      "",
       "",
       ""
     );
@@ -1550,22 +1530,14 @@ export class FinancialAnalysisTemplatesService {
     addDataRow(
       "",
       "",
-      "",
-      "",
       "By Sales",
-      "",
-      getValue("salesAudited"),
       getValue("salesEstimated")
     );
 
     // Purchases (Left)
     addDataRow(
       "To Purchases",
-      "",
-      getValue("purchasesAudited"),
       getValue("purchasesAssessed"),
-      "",
-      "",
       "",
       ""
     );
@@ -1574,11 +1546,7 @@ export class FinancialAnalysisTemplatesService {
     addDataRow(
       "",
       "",
-      "",
-      "",
       "By Services",
-      "",
-      getValue("servicesAudited"),
       getValue("servicesEstimated")
     );
 
@@ -1586,94 +1554,72 @@ export class FinancialAnalysisTemplatesService {
     addDataRow(
       "",
       "",
-      "",
-      "",
       "By Closing Stock",
-      "",
-      getValue("closingStockAudited"),
       getValue("closingStockEstimated")
     );
 
     // Gross Profit (Left - Assessed, Right - Estimated)
     addDataRow(
       "To Gross Profit",
-      "",
-      "",
       getValue("grossProfitAssessed"),
       "By Gross Profit",
-      "",
-      getValue("byGrossProfitAudited"),
-      getValue("byGrossProfitEstimated"),
-      true
+      getValue("byGrossProfitEstimated")
     );
 
     // Grand Total (Left)
     addDataRow(
       "Grand Total",
-      "",
-      "",
-      getValue("grandTotal"),
-      "",
-      "",
-      "",
-      "",
+      getValue("grandTotalExpenditure"),
+      "Grand Total",
+      getValue("grandTotalIncome"),
       true
     );
 
     // Empty row
-    addDataRow("", "", "", "", "", "", "", "");
+    addDataRow("To Indirect Expenditures", "", "By Gross Profit", getValue("byGrossProfitEstimated"));
 
     // Indirect Expenses (Left side)
     addDataRow(
       "To Electricity",
-      "",
-      "",
       getValue("electricity"),
-      "",
-      "",
       "",
       ""
     );
 
-    addDataRow("To Rent", "", "", getValue("rent"), "", "", "", "");
+    addDataRow("To Rent", getValue("rent"), "", "");
 
-    addDataRow("To Salaries", "", "", getValue("salaries"), "", "", "", "");
+    addDataRow("To Salaries", getValue("salaries"), "", "");
 
     addDataRow(
       "To Travelling Charges",
-      "",
-      "",
       getValue("travellingCharges"),
-      "",
-      "",
       "",
       ""
     );
 
     addDataRow(
       "To Other Expenses",
-      "",
-      "",
       getValue("otherExpenses"),
-      "",
-      "",
       "",
       ""
     );
 
     // Empty row
-    addDataRow("", "", "", "", "", "", "", "");
+    addDataRow("", "", "", "");
 
     // Net Profit (Right)
     addDataRow(
-      "",
-      "",
-      "",
-      "",
       "To Net Profit",
-      "",
-      "",
       getValue("netProfit"),
+      "",
+      "",
+      true
+    );
+    addDataRow(
+      "Total",
+      getValue("byGrossProfitEstimated"),
+      "",
+      getValue("byGrossProfitEstimated"),
       true
     );
 
@@ -1681,18 +1627,41 @@ export class FinancialAnalysisTemplatesService {
     worksheet.addRow([]);
     worksheet.addRow([]);
 
+    // Balance Sheet title directly above balance sheet table
+    const balanceSheetTitleRowNumber = worksheet.lastRow.number + 1;
+    worksheet.getCell(`A${balanceSheetTitleRowNumber}`).value =
+      `Balance Sheet as on 31st March 2024`;
+    worksheet.mergeCells(
+      `A${balanceSheetTitleRowNumber}:D${balanceSheetTitleRowNumber}`
+    );
+    worksheet.getCell(`A${balanceSheetTitleRowNumber}`).font = {
+      bold: true,
+      size: 12,
+    };
+    worksheet.getCell(`A${balanceSheetTitleRowNumber}`).alignment = {
+      horizontal: "center",
+    };
+
+    const balanceSheetPartnerRowNumber = balanceSheetTitleRowNumber + 1;
+    worksheet.getCell(`A${balanceSheetPartnerRowNumber}`).value = `${
+      financialAnalysis.partnersNames || "XXX"
+    }`;
+    worksheet.mergeCells(
+      `A${balanceSheetPartnerRowNumber}:D${balanceSheetPartnerRowNumber}`
+    );
+    worksheet.getCell(`A${balanceSheetPartnerRowNumber}`).font = { bold: true };
+    worksheet.getCell(`A${balanceSheetPartnerRowNumber}`).alignment = {
+      horizontal: "center",
+    };
+
     // Balance Sheet Section - Liabilities (Left) and Assets (Right)
 
     // Balance Sheet Headers
     const balanceSheetHeaderRow = worksheet.addRow([
       "LIABILITIES",
-      "",
-      "",
-      "",
+      "Estimated",
       "ASSETS",
-      "",
-      "",
-      "",
+      "Estimated",
     ]);
     balanceSheetHeaderRow.font = { bold: true, size: 12 };
     balanceSheetHeaderRow.alignment = {
@@ -1700,7 +1669,7 @@ export class FinancialAnalysisTemplatesService {
       vertical: "middle",
     };
     balanceSheetHeaderRow.eachCell((cell, colNumber) => {
-      if (colNumber === 1 || colNumber === 5) {
+      if (colNumber) {
         this.applyBorder(cell);
         cell.fill = {
           type: "pattern",
@@ -1709,76 +1678,52 @@ export class FinancialAnalysisTemplatesService {
         };
       }
     });
-    worksheet.mergeCells(
-      `A${balanceSheetHeaderRow.number}:D${balanceSheetHeaderRow.number}`
-    );
-    worksheet.mergeCells(
-      `E${balanceSheetHeaderRow.number}:H${balanceSheetHeaderRow.number}`
-    );
+    // worksheet.mergeCells(
+    //   `A${balanceSheetHeaderRow.number}:E${balanceSheetHeaderRow.number}`
+    // );
+    // worksheet.mergeCells(
+    //   `F${balanceSheetHeaderRow.number}:J${balanceSheetHeaderRow.number}`
+    // );
 
     // Liabilities (Left side)
     addDataRow(
       "Capital Account",
-      "",
-      "",
       getBalanceSheetValue("capitalAccount"),
-      "",
-      "",
       "",
       ""
     );
 
     addDataRow(
       "Sundry Creditors",
-      "",
-      "",
       getBalanceSheetValue("sundryCreditors"),
-      "",
-      "",
       "",
       ""
     );
 
     addDataRow(
       "Provisions",
-      "",
-      "",
       getBalanceSheetValue("provisions"),
-      "",
-      "",
       "",
       ""
     );
 
     addDataRow(
       "Audit Payable",
-      "",
-      "",
       getBalanceSheetValue("auditPayable"),
-      "",
-      "",
       "",
       ""
     );
 
     addDataRow(
       "Accountant Fees",
-      "",
-      "",
       getBalanceSheetValue("accountantFees"),
-      "",
-      "",
       "",
       ""
     );
 
     addDataRow(
       "New Loan",
-      "",
-      "",
       getBalanceSheetValue("newLoan"),
-      "",
-      "",
       "",
       ""
     );
@@ -1787,77 +1732,49 @@ export class FinancialAnalysisTemplatesService {
     addDataRow(
       "",
       "",
-      "",
-      "",
       "Loans and Advances",
-      "",
-      "",
       getBalanceSheetValue("loansAndAdvances")
     );
 
     addDataRow(
       "",
       "",
-      "",
-      "",
       "Current Assets",
-      "",
-      "",
       getBalanceSheetValue("currentAssets")
     );
 
     addDataRow(
       "",
       "",
-      "",
-      "",
       "GST Refund",
-      "",
-      "",
       getBalanceSheetValue("gstRefund")
     );
 
     addDataRow(
       "",
       "",
-      "",
-      "",
       "GST Set Off",
-      "",
-      "",
       getBalanceSheetValue("gstSetOff")
     );
 
     addDataRow(
       "",
       "",
-      "",
-      "",
       "DCB Bank",
-      "",
-      "",
       getBalanceSheetValue("dcbBank")
     );
 
     addDataRow(
       "",
       "",
-      "",
-      "",
       "Cash in Hand",
-      "",
-      "",
       getBalanceSheetValue("cashInHand")
     );
 
     addDataRow(
       "",
       "",
-      "",
-      "",
       "Additional Property",
-      "",
-      "",
       getBalanceSheetValue("additionalProperty")
     );
 
@@ -1868,10 +1785,6 @@ export class FinancialAnalysisTemplatesService {
     // Payment Calculations Section
     const paymentHeaderRow = worksheet.addRow([
       "Payment Calculations",
-      "",
-      "",
-      "",
-      "",
       "",
       "",
       "",
@@ -1889,18 +1802,14 @@ export class FinancialAnalysisTemplatesService {
 
     const totalPaymentsRow = worksheet.addRow([
       "Total Payments",
-      "",
-      "",
       getValue("totalPayments"),
-      "",
-      "",
       "",
       "",
     ]);
     totalPaymentsRow.getCell(1).font = { bold: true };
     totalPaymentsRow.eachCell((cell, colNumber) => {
       this.applyBorder(cell);
-      if (colNumber === 4) {
+      if (colNumber === 2) {
         cell.alignment = { horizontal: "right" };
         if (cell.value && typeof cell.value === "number") {
           cell.numFmt = "#,##0.00";
@@ -1938,10 +1847,6 @@ export class FinancialAnalysisTemplatesService {
       "",
       "",
       getValue("gpMargin"),
-      "",
-      "",
-      "",
-      "",
     ]);
     gpMarginRow.getCell(1).font = { bold: true };
     gpMarginRow.eachCell((cell, colNumber) => {
@@ -1959,10 +1864,6 @@ export class FinancialAnalysisTemplatesService {
       "",
       "",
       getValue("npMargin"),
-      "",
-      "",
-      "",
-      "",
     ]);
     npMarginRow.getCell(1).font = { bold: true };
     npMarginRow.eachCell((cell, colNumber) => {
@@ -1980,10 +1881,6 @@ export class FinancialAnalysisTemplatesService {
       "",
       "",
       getValue("netProfitMargin"),
-      "",
-      "",
-      "",
-      "",
     ]);
     netProfitMarginRow.getCell(1).font = { bold: true };
     netProfitMarginRow.eachCell((cell, colNumber) => {
