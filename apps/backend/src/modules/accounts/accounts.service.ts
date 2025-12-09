@@ -971,7 +971,7 @@ export class AccountsService {
     try {
       const user = await this.prisma.user.findUnique({
         where: { id: userId },
-        // include: { office: true },
+        include: { departmentRoles: { include: { office: true } } },
       });
 
       // if (!user || !user.office) {
@@ -983,13 +983,13 @@ export class AccountsService {
       //   where: { id: user.office.organizationId },
       // });
 
-      const org = null;
+      const orgId = user?.departmentRoles[0]?.office?.organizationId;
 
       await this.loggingService.debug('Retrieved organization for user', { 
         userId,
-        organizationId: org?.id 
+        organizationId: orgId
       });
-      return org;
+      return orgId;
     } catch (error) {
       await this.loggingService.error('Failed to get organization by user', { 
         userId,
