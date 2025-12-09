@@ -741,7 +741,10 @@ export class AccountsService {
       }
 
       // Check if email is being updated and already exists
-      if (updateUserDto.email && updateUserDto.email !== user.email) {
+      if (updateUserDto.email==="") {
+        updateUserDto.email = null;
+      }
+      else if (updateUserDto.email && updateUserDto.email !== user.email) {
         const existingEmail = await this.prisma.user.findUnique({
           where: { email: updateUserDto.email },
         });
