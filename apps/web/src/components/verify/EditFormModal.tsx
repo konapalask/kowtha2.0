@@ -318,60 +318,67 @@ const calculateStatement4Format = (values: Record<string, any>) => {
 
   const openingStockAssessed = getValue("openingStockAssessed");
   const purchasesAssessed = getValue("purchasesAssessed");
-  const grossProfitAssessed = getValue("grossProfitAssessed");
-  const netProfitAssessed = getValue("netProfitAssessed");
-
-  const openingStockAudited = getValue("openingStockAudited");
-  const purchasesAudited = getValue("purchasesAudited");
-  const salesAudited = getValue("salesAudited");
-  const grossProfitAudited = getValue("grossProfitAudited");
-  const netProfitAudited = getValue("netProfitAudited");
-
-  const openingStockEstimated = getValue("openingStockEstimated");
-  const purchasesEstimated = getValue("purchasesEstimated");
   const salesEstimated = getValue("salesEstimated");
   const servicesEstimated = getValue("servicesEstimated");
   const closingStockEstimated = getValue("closingStockEstimated");
+
+  const salesPlusServices = salesEstimated + servicesEstimated;
+  const grossProfitAssessed =
+    salesPlusServices -
+    (openingStockAssessed + purchasesAssessed - closingStockEstimated);
+
   const electricity = getValue("electricity");
   const rent = getValue("rent");
   const salaries = getValue("salaries");
   const travellingCharges = getValue("travellingCharges");
   const otherExpenses = getValue("otherExpenses");
 
-  const grossProfitEstimated = (salesEstimated + servicesEstimated + closingStockEstimated) - 
-                                (openingStockEstimated + purchasesEstimated);
+  const grandTotalExpenditure =
+    openingStockAssessed + purchasesAssessed + grossProfitAssessed;
+  const grandTotalIncome = salesPlusServices + closingStockEstimated;
+  const byGrossProfitEstimated = grossProfitAssessed;
+  const netProfit =
+    grossProfitAssessed -
+    (electricity + rent + salaries + travellingCharges + otherExpenses);
 
-  const netProfit = grossProfitEstimated - (electricity + rent + salaries + travellingCharges + otherExpenses);
+  const grandTotal = grandTotalExpenditure;
 
-  const grandTotal = openingStockAssessed + purchasesAssessed + grossProfitAssessed;
+  const safeDiv = (num: number, denom: number) =>
+    denom === 0 ? 0 : (num / denom) * 100;
+  const round2 = (num: number) => Math.round(num * 100) / 100;
 
+  const gpMargin = round2(safeDiv(grossProfitAssessed, salesPlusServices));
+  const npMargin = round2(safeDiv(netProfit, salesPlusServices));
+  const netProfitMargin = npMargin;
+  const gpMarginPercent = gpMargin;
+  const npMarginPercent = npMargin;
+  const netProfitMarginPercent = netProfitMargin;
   return {
+    ...values,
     openingStockAssessed,
-    openingStockAudited,
-    openingStockEstimated,
     purchasesAssessed,
-    purchasesAudited,
-    purchasesEstimated,
-    salesAudited,
+    grossProfitAssessed,
     salesEstimated,
     servicesEstimated,
     closingStockEstimated,
-    grossProfitAssessed,
-    grossProfitAudited,
-    grossProfitEstimated,
-    byGrossProfitEstimated: grossProfitEstimated,
-    netProfitAssessed,
-    netProfitAudited,
+    electricity,
+    rent,
+    salaries,
+    travellingCharges,
+    otherExpenses,
+    toGrossProfit: grossProfitAssessed,
+    grandTotalExpenditure,
+    grandTotalIncome,
+    byGrossProfitEstimated,
     netProfit,
     netProfitEstimated: netProfit,
     grandTotal,
-    ...Object.fromEntries(
-      Object.entries(values).filter(([key]) => 
-        !key.includes("Assessed") && !key.includes("Audited") && !key.includes("Estimated") &&
-        key !== "grossProfitEstimated" && key !== "byGrossProfitEstimated" && 
-        key !== "netProfit" && key !== "netProfitEstimated"
-      )
-    ),
+    netProfitMargin,
+    gpMargin,
+    npMargin,
+    gpMarginPercent,
+    npMarginPercent,
+    netProfitMarginPercent,
   };
 };
 
