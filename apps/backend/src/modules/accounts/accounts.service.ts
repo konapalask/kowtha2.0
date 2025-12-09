@@ -1,22 +1,21 @@
-import { Injectable, UnauthorizedException, BadRequestException, NotFoundException, ConflictException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { PrismaService } from '../../prisma.service';
-import * as crypto from 'crypto';
-import { LoggingService } from '../common/logging/logging.service';
-import { EditRequestStatus, EditRequestType, UserRole, Department } from '@prisma/client';
-import { ListUsersDto } from './dto/list-users.dto';
 import axios from 'axios';
+import * as crypto from 'crypto';
+import { JwtService } from '@nestjs/jwt';
+import { ListUsersDto } from './dto/list-users.dto';
+import { PrismaService } from '../../prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateOfficeDto } from './dto/create-office.dto';
 import { UpdateOfficeDto } from './dto/update-office.dto';
-import { PaginatedResponse } from '../common/dto/pagination.dto';
 import { ListAllUsersDto } from './dto/list-all-users.dto';
+import { PaginatedResponse } from '../common/dto/pagination.dto';
+import { LoggingService } from '../common/logging/logging.service';
 import { CreateDepartmentRoleDto } from './dto/create-department-role.dto';
 import { UpdateDepartmentRoleDto } from './dto/update-department-role.dto';
-import { UpdateUserDepartmentRolesDto } from './dto/update-user-department-roles.dto';
 import { getUserWithDepartmentRoles } from '../common/types/request.types';
-// import { ConfigService } from '@nestjs/config';
+import { UpdateUserDepartmentRolesDto } from './dto/update-user-department-roles.dto';
+import { EditRequestStatus, EditRequestType, UserRole, Department } from '@prisma/client';
+import { Injectable, UnauthorizedException, BadRequestException, NotFoundException, ConflictException } from '@nestjs/common';
 
 @Injectable()
 export class AccountsService {
