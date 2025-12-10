@@ -47,9 +47,10 @@ export const janaSenpAbove50lSchema = {
               rows: 3,
             },
           },
-          phoneNumber: {
-            type: "string",
+          applicantPhoneNumber: {
+            type: "integer",
             title: "Phone Number",
+            readOnly: true,
           },
           appointmentFixedTime: {
             type: "string",
@@ -66,7 +67,7 @@ export const janaSenpAbove50lSchema = {
             title: "Structure of Loan",
           },
           numberOfVisits: {
-            type: "number",
+            type: "string",
             title: "No. of Visit",
           },
           personMet: {
