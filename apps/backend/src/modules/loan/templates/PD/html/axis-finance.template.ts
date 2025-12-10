@@ -358,61 +358,94 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
     },
   ]);
 
-  const combinedBusinessTable = renderTwoColumnTable(
-    [
-      {
-        label: "ANNUAL SALES",
-        value: businessData.annualSales || "Not Provided",
-        formatter: formatCurrency,
-      },
-      {
-        label: "OVERALL COSTS",
-        value: businessData.overallCosts || "Not Provided",
-        formatter: formatCurrency,
-      },
-      {
-        label: "MAJOR COST HEADS",
-        value: businessData.majorCostHeads || "Not Provided",
-      },
-      {
-        label: "GROSS MARGIN %",
-        value: businessData.grossMargin || "Not Provided",
-      },
-      {
-        label: "PBDIT MARGIN %",
-        value: businessData.pbditMargin || "Not Provided",
-      },
-      {
-        label: "DEBTORS CYCLE",
-        value: businessData.debtorsCycle || "Not Provided",
-      },
-      {
-        label: "CREDITORS CYCLE",
-        value: businessData.creditorsCycle || "Not Provided",
-      },
-      {
-        label: "CAPITAL INVESTED",
-        value: businessData.capitalInvested || "Not Provided",
-        formatter: formatCurrency,
-      },
-      {
-        label: "LOAN FUNDS (INCL. CC LIMIT)",
-        value: businessData.loanFundsInclCcLimit || "Not Provided",
-      },
-      {
-        label: "STOCK MAINTAINED",
-        value: businessData.stockMaintained || "Not Provided",
-      },
-      {
-        label: "BUSINESS BANK ACCOUNTS",
-        value: businessData.businessBankAccounts || "Not Provided",
-      },
-    ],
+  const businessDataRows = [
     {
-      left: "ACCOUNTING YEAR",
-      right: "ESTIMATED(RS.)",
-    }
-  );
+      label: "ANNUAL SALES",
+      accountingYear: businessData.accountingYear?.annualSales,
+      previousFinancialYear: businessData.previousFinancialYear?.annualSales,
+      formatter: formatCurrency,
+    },
+    {
+      label: "OVERALL COSTS",
+      accountingYear: businessData.accountingYear?.overallCosts,
+      previousFinancialYear: businessData.previousFinancialYear?.overallCosts,
+      formatter: formatCurrency,
+    },
+    {
+      label: "MAJOR COST HEADS",
+      accountingYear: businessData.accountingYear?.majorCostHeads,
+      previousFinancialYear: businessData.previousFinancialYear?.majorCostHeads,
+    },
+    {
+      label: "GROSS MARGIN %",
+      accountingYear: businessData.accountingYear?.grossMargin ? `${businessData.accountingYear.grossMargin}%` : "Not Provided",
+      previousFinancialYear: businessData.previousFinancialYear?.grossMargin ? `${businessData.previousFinancialYear.grossMargin}%` : "Not Provided",
+    },
+    {
+      label: "PBDIT MARGIN %",
+      accountingYear: businessData.accountingYear?.pbditMargin ? `${businessData.accountingYear.pbditMargin}%` : "Not Provided",
+      previousFinancialYear: businessData.previousFinancialYear?.pbditMargin ? `${businessData.previousFinancialYear.pbditMargin}%` : "Not Provided",
+    },
+    {
+      label: "DEBTORS CYCLE",
+      accountingYear: businessData.accountingYear?.debtorsCycle,
+      previousFinancialYear: businessData.previousFinancialYear?.debtorsCycle,
+    },
+    {
+      label: "CREDITORS CYCLE",
+      accountingYear: businessData.accountingYear?.creditorsCycle,
+      previousFinancialYear: businessData.previousFinancialYear?.creditorsCycle,
+    },
+    {
+      label: "CAPITAL INVESTED",
+      accountingYear: businessData.accountingYear?.capitalInvested,
+      previousFinancialYear: businessData.previousFinancialYear?.capitalInvested,
+      formatter: formatCurrency,
+    },
+    {
+      label: "LOAN FUNDS (INCL. CC LIMIT)",
+      accountingYear: businessData.accountingYear?.loanFundsInclCcLimit,
+      previousFinancialYear: businessData.previousFinancialYear?.loanFundsInclCcLimit,
+      formatter: formatCurrency,
+    },
+    {
+      label: "STOCK MAINTAINED",
+      accountingYear: businessData.accountingYear?.stockMaintained,
+      previousFinancialYear: businessData.previousFinancialYear?.stockMaintained,
+    },
+    {
+      label: "BUSINESS BANK ACCOUNTS",
+      accountingYear: businessData.accountingYear?.businessBankAccounts,
+      previousFinancialYear: businessData.previousFinancialYear?.businessBankAccounts,
+    },
+  ];
+
+  const combinedBusinessTable = `
+    <table style="${tableStyle}">
+      <tr>
+        <td style="${headerCellStyle};width:30%;">ACCOUNTING YEAR</td>
+        <td style="${headerCellStyle};width:35%;">ESTIMATED(RS.)</td>
+        <td style="${headerCellStyle};width:35%;">PREVIOUS FINANCIAL YEAR</td>
+      </tr>
+      ${businessDataRows
+        .map((row) => {
+          const accountingYearValue = row.formatter
+            ? row.formatter(row.accountingYear)
+            : displayValue(row.accountingYear || "Not Provided");
+          const previousFinancialYearValue = row.formatter
+            ? row.formatter(row.previousFinancialYear)
+            : displayValue(row.previousFinancialYear || "Not Provided");
+          return `
+            <tr>
+              <td style="${headerCellStyle};width:30%;">${row.label}</td>
+              <td style="${cellStyle}"><span class="var-value">${accountingYearValue}</span></td>
+              <td style="${cellStyle}"><span class="var-value">${previousFinancialYearValue}</span></td>
+            </tr>
+          `;
+        })
+        .join("")}
+    </table>
+  `;
 
   const coApplicantIncomeTable = renderTwoColumnTable([
     {
@@ -480,45 +513,44 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
   const budgetRows = [
     {
       sno: 1,
-      label: "Affordable EMI",
-      value: budget.affordableEmi || "Not Provided",
-      formatter: formatCurrency,
+      label: "<strong>Total Monthly Net Income per month (Business income + Other Income)</strong>",
+      value: formatCurrency(budget.totalMonthlyIncomePerMonth || "Not Provided"),
     },
     {
       sno: 2,
-      label: "Net Surplus",
-      value: budget.netSurplus || "Not Provided",
+      label: "Overall Family Expenses per month",
+      value: formatCurrency(budget.overAllFamilyExpenses || "Not Provided"),
       formatter: formatCurrency,
     },
     {
       sno: 3,
       label:
-        "Total Monthly Net Income per month (Business income + Other Income)",
-      value: budget.totalMonthlyIncomePerMonth || "Not Provided",
+        "PL or Auto Loan EMI",
+      value: formatCurrency(budget.plOrAutoLoanEMI || "Not Provided"),
       formatter: formatCurrency,
     },
     {
       sno: 4,
       label: "Other Loan EMI",
-      value: budget.otherLoanEmi || "Not Provided",
+      value: formatCurrency(budget.otherLoanEmi || "Not Provided"),
       formatter: formatCurrency,
     },
     {
-      sno: 5,
-      label: "PL / Auto Loan EMI",
-      value: budget.plOrAutoLoanEMI || "Not Provided",
+      sno: "",
+      label: "<strong>Total Monthly Expenses per month</strong>",
+      value: formatCurrency(budget.totalMonthlyExpensesPerMonth || "Not Provided"),
       formatter: formatCurrency,
     },
     {
-      sno: 6,
-      label: "Overall Family Expenses per month",
-      value: budget.overAllFamilyExpenses || "Not Provided",
+      sno: "",
+      label: "<strong>Net Surplus</strong>",
+      value: formatCurrency(budget.netSurplus || "Not Provided"),
       formatter: formatCurrency,
     },
     {
-      sno: 7,
-      label: "Total Monthly Expenses per month",
-      value: budget.totalMonthlyExpensesPerMonth || "Not Provided",
+      sno: "",
+      label: "<strong>Affordable EMI</strong>",
+      value: formatCurrency(budget.affordableEmi || "Not Provided"),
       formatter: formatCurrency,
     },
   ];
@@ -537,7 +569,7 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
             : displayValue(row.value);
           return `
             <tr>
-              <td style="${cellStyle};text-align:center;">${row.sno}</td>
+              <td style="${cellStyle};text-align:center;">${row.sno ? row.sno : ""}</td>
               <td style="${cellStyle}">${row.label}</td>
               <td style="${cellStyle}"><span class="var-value">${rendered}</span></td>
             </tr>
@@ -596,10 +628,10 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
         <strong>Note:</strong> The estimated financials and qualitative remarks furnished above are based on the applicant’s disclosures and on-site observations captured during the personal discussion.
       </p>
       <p style="${paragraphStyle}">
-        <strong>Disclaimer:</strong> The report contains information shared by the person contacted during the visit. Axis Finance will be solely responsible for decisions taken on the basis of this report and any liabilities directly or indirectly arising therefrom.
+        <strong>Disclaimer:</strong>The Report (Including any attachments) has been prepared on the basis of verbal information provided by the person contacted.
       </p>
       <p style="${paragraphStyle}">
-        Axis Finance will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. Kowtha & Co. will not be liable in any case.
+        Axis Finance will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions, efficient services will not be liable in any case..
       </p>
     </div>
   `;
@@ -610,6 +642,14 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
     <p style="${paragraphStyle}">${formatMultiline(estimatedIncome?.estimatedIncomeDetails || "Not Provided")}</p>
     ${estimatedIncome?.patOfTheBusinessConcern ? `<p style="${paragraphStyle}"><strong>The PAT of the Business Concern (Rs.)</strong> ${formatCurrency(estimatedIncome?.patOfTheBusinessConcern)}</p>` : ""}
     </div>
+  `;
+  const acceptRejectPDTable = `
+    <table style="${tableStyle}">
+      <tr>
+        <td style="${headerCellStyle};width:35%;">Accept/Reject</td>
+        <td style="${cellStyle}">${verificationData.acceptRejectPD?.acceptReject || "Not provided"}</td>
+      </tr>
+    </table>
   `;
 
 
@@ -635,6 +675,7 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
       ${overallPositivesOrNegativesTable}
       ${renderSection("Trade References ", tradeReferenceTable)}
       ${pdStatusTable}
+      ${acceptRejectPDTable}
       ${estimatedIncomeTable}
       ${noteBlock}
     </div>

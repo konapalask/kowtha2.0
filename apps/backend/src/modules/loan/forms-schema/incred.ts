@@ -178,7 +178,7 @@ export const incredSchema = {
             properties: {
               fy2020to2021: {
                 type: "number",
-                title: "FY 2020-21",
+                title: "Previous Financial Year",
                 formatter: {
                   useIndianFormat: true,
                   locale: "en-IN",
@@ -202,7 +202,7 @@ export const incredSchema = {
             properties: {
               fy2020to2021: {
                 type: "number",
-                title: "FY 2020-21",
+                title: "Previous Financial Year",
                 formatter: {
                   useIndianFormat: true,
                   locale: "en-IN",
@@ -227,7 +227,7 @@ export const incredSchema = {
             properties: {
               fy2020to2021: {
                 type: "number",
-                title: "FY 2020-21",
+                title: "Previous Financial Year",
                 formatter: {
                   useIndianFormat: true,
                   locale: "en-IN",
@@ -579,6 +579,33 @@ export const incredSchema = {
         },
       },
       required: true,
+    },
+    {
+      id: "overallPositivesOrNegatives",    
+      label: "Overall Positives or Negatives",
+      schema: {
+        type: "object",
+        properties: {
+          overallPositivesOrNegatives: {
+            type: "string",
+            title: "Overall Positives or Negatives",
+          },
+        },
+      },
+    },
+    {
+      id: "acceptRejectPD",
+      label: "Accept/Reject",
+      schema: {
+        type: "object",
+        properties: {
+          acceptReject: {
+            type: "string",
+            title: "Accept/Reject",
+            enum: ["Accept", "Reject"],
+          },
+        },
+      },
     },
     statement2Schema,
   ],

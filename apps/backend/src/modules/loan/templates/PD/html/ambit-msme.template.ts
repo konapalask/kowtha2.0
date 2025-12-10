@@ -3,9 +3,9 @@ import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.template";
 const tableStyle =
   "border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:16px 0";
 const labelCellStyle =
-  "border:1px solid #c7cdd1;padding:8px;font-weight:600;color:#222;background:#f4f6fb;vertical-align:top;width:32%";
+  "border:1px solid #c7cdd1;padding:8px;font-weight:600;color:#222;background:#f4f6fb;vertical-align:top;width:32%;font-size:12px";
 const valueCellStyle =
-  "border:1px solid #c7cdd1;padding:8px;color:#333;vertical-align:top";
+  "border:1px solid #c7cdd1;padding:8px;color:#333;vertical-align:top;font-size:12px";
 
 const hasValue = (value: any): boolean => {
   if (value === null || value === undefined) return false;
@@ -122,7 +122,7 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
         </tr>
         <tr>
           <td style="${labelCellStyle}">Visited Address</td>
-          <td style="${valueCellStyle}">${visitedAddress?.address || ""}${visitedAddress?.latitude ? `<br>Latitude: ${visitedAddress.latitude}` : ""}${visitedAddress?.longitude ? `<br>Longitude: ${visitedAddress.longitude}` : ""}</td>
+          <td style="${valueCellStyle}">${visitedAddress?.address || ""}${visitedAddress?.latitude ? `<br><strong>Latitude:</strong> ${visitedAddress.latitude}` : ""}${visitedAddress?.longitude ? `<br><strong>Longitude:</strong> ${visitedAddress.longitude}` : ""}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">Business License Address</td>

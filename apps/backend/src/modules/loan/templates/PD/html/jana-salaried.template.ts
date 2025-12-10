@@ -152,7 +152,7 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
                   (member: any) => `
                 <tr>
                   <td style="${valueCellStyle}">${member.name}</td>
-                  <td style="${valueCellStyle}">${member.relation}</td>
+                  <td style="${valueCellStyle}">${member.relationship}</td>
                   <td style="${valueCellStyle}">${member.age}</td>
                   <td style="${valueCellStyle}">${member.qualification}</td>
                   <td style="${valueCellStyle}">${member.occupation}</td>

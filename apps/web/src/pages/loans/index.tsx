@@ -125,7 +125,7 @@ export default function Loans() {
       }
       const result = await getLoansApi(page, limit, apiFilters);
       const data = result.data.data;
-      setLoans(data?.items ?? [null]);
+      setLoans(data?.items ?? []);
       setPagination({
         current: data.meta.page,
         pageSize: data.meta.limit,
@@ -273,6 +273,11 @@ export default function Loans() {
       current: newPagination.current,
       pageSize: newPagination.pageSize,
     }));
+  };
+
+  const handleFilterChange = (newFilters: FilterValue) => {
+    setFilters(newFilters);
+    setPagination((prev) => ({ ...prev, current: 1 }));
   };
 
   const refreshLoans = () => {
@@ -803,7 +808,7 @@ export default function Loans() {
         >
           <FilterOverlay
             filters={filters}
-            onFilterChange={(newFilters: FilterValue) => setFilters(newFilters)}
+            onFilterChange={handleFilterChange}
             currentDepartment={currentDepartment}
             pdBankOptions={pdBankOptions}
             templateOptions={templateOptions}
@@ -848,19 +853,13 @@ export default function Loans() {
           rowKey="id"
           loading={loading}
           onChange={handleTableChange}
-          pagination={
-            // Hide pagination if filters are applied and results are <= 10
-            Object.values(filters).some((v) => v !== undefined && v !== "") &&
-            loans.length <= 20
-              ? false
-              : {
-                  current: pagination.current,
-                  pageSize: pagination.pageSize,
-                  total: pagination.total,
-                  showTotal: (total) => `Total ${total} items`,
-                  position: ["bottomCenter"],
-                }
-          }
+          pagination={{
+            current: pagination.current,
+            pageSize: pagination.pageSize,
+            total: pagination.total,
+            showTotal: (total) => `Total ${total} items`,
+            position: ["bottomCenter"],
+          }}
           size="small"
           scroll={{ x: 1800 }}
           sticky
