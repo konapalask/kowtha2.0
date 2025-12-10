@@ -220,6 +220,10 @@ export const janaSenpAbove50lSchema = {
                 comingIntoLoanStructure: {
                   type: "string",
                   title: "Coming into Loan Structure",
+                  enum: [
+                    "Yes",
+                    "No",
+                  ],
                 },
                 functionalRole: {
                   type: "string",
@@ -648,30 +652,30 @@ export const janaSenpAbove50lSchema = {
                   enum: ["Yes", "No"],
                 },
               },
-              liquidMoveableAssets: {
-                type: "string",
-                title:
-                  "Any Liquid, Moveable & Monetary items such as Cash, Gold, FD, RD, Mutual Funds, Shares, Bonds, Securities",
-                ui: { widget: "textarea", rows: 3 },
-              },
-              insurances: {
-                type: "string",
-                title:
-                  "Life insurance, mediclaim, property/asset insurance (premium & sum assured)",
-                ui: { widget: "textarea", rows: 3 },
-              },
-              capitalInvestedBusiness: {
-                type: "string",
-                title:
-                  "Capital Invested in any Business, Loans & Advances given",
-                ui: { widget: "textarea", rows: 3 },
-              },
-              vehicles: {
-                type: "string",
-                title: "Car, Bike and Other Vehicles (Company Name and Model)",
-                ui: { widget: "textarea", rows: 3 },
-              },
             },
+          },
+          liquidMoveableAssets: {
+            type: "string",
+            title:
+              "Any Liquid, Moveable & Monetary items such as Cash, Gold, FD, RD, Mutual Funds, Shares, Bonds, Securities",
+            ui: { widget: "textarea", rows: 3 },
+          },
+          insurances: {
+            type: "string",
+            title:
+              "Life insurance, mediclaim, property/asset insurance (premium & sum assured)",
+            ui: { widget: "textarea", rows: 3 },
+          },
+          capitalInvestedBusiness: {
+            type: "string",
+            title:
+              "Capital Invested in any Business, Loans & Advances given",
+            ui: { widget: "textarea", rows: 3 },
+          },
+          vehicles: {
+            type: "string",
+            title: "Car, Bike and Other Vehicles (Company Name and Model)",
+            ui: { widget: "textarea", rows: 3 },
           },
         },
       },

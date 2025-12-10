@@ -348,8 +348,8 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
                 <td style="${labelCellStyle}">Actual Purchase Cost (in Lakhs)</td>
                 <td style="${labelCellStyle}">Market Value (in Lakhs)</td>
                 <td style="${labelCellStyle}">OCR (in Lakhs)</td>
-                <td style="${labelCellStyle}">Owner Name</td>
-                <td style="${labelCellStyle}">Mortgaged</td>
+                <td style="${labelCellStyle}">OCR Paid Till Date (in Lakhs)</td>
+                <td style="${labelCellStyle}">OCR Source</td>
               </tr>
               ${securityOffered?.securityDetails
                 .map(
@@ -360,8 +360,8 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
                   <td style="${valueCellStyle}">${item.purchaseCost}</td>
                   <td style="${valueCellStyle}">${item.marketValue}</td>
                   <td style="${valueCellStyle}">${item.ocrValue}</td>
-                  <td style="${valueCellStyle}">${item.ownerName}</td>
-                  <td style="${valueCellStyle}">${item.mortgaged}</td>
+                  <td style="${valueCellStyle}">${item.ocrPaidTillDate}</td>
+                  <td style="${valueCellStyle}">${item.ocrSource}</td>
                 </tr>
               `
                 )
@@ -519,10 +519,11 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
         </td>
       </tr>
       </table>
-
     </div>
 
     ${pdBaseTemplateFooter(html_data)}
+
+    <p style="margin:0 0 24px;color:#333;"><strong>Disclaimer:</strong> <br>This report (including any attachments) has been prepared on the basis of information provided by the person contacted. Jana Small Finance Bank Ltd. will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. Veeraraghavan & Co. will not be held liable in any case.</p>
 
   `;
 };

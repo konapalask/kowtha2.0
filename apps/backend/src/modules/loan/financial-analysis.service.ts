@@ -772,13 +772,13 @@ export class FinancialAnalysisTemplatesService {
     // Column headers row
     const columnHeaderRow = worksheet.addRow([
       "PARTICULARS",
-      "Previous Year Actuals",
-      "This Year Actuals",
+      `${new Date().getFullYear() - 1} Actuals`,
+      `${new Date().getFullYear()} Actuals`,
       "Change %",
       "Estimated",
       "PARTICULARS",
-      "Previous Year Actuals",
-      "This Year Actuals",
+      `${new Date().getFullYear() - 1} Actuals`,
+      `${new Date().getFullYear()} Actuals`,
       "Change %",
       "Estimated",
     ]);
@@ -989,9 +989,9 @@ export class FinancialAnalysisTemplatesService {
     // Indirect Expenses (Left side)
     addDataRow(
       "To Salaries",
-      "",
-      "",
-      "",
+      getValue("salaries_2023"),
+      getValue("salaries_2024"),
+      getValue("salariesChange"),
       getValue("salariesEstimated"),
      "By Gross Profit",
       getValue("grossProfit_2023"),
@@ -1003,9 +1003,9 @@ export class FinancialAnalysisTemplatesService {
 
     addDataRow(
       "To Bonus",
-      "",
-      "",
-      "",
+      getValue("bonus_2023"),
+      getValue("bonus_2024"),
+      getValue("bonusChange"),
       getValue("bonusEstimated"),
       "",
       "",
@@ -1016,9 +1016,9 @@ export class FinancialAnalysisTemplatesService {
 
     addDataRow(
       "To Shop Rents",
-      "",
-      "",
-      "",
+      getValue("shopRents_2023"),
+      getValue("shopRents_2024"),
+      getValue("shopRentsChange"),
       getValue("shopRentsEstimated"),
       "",
       "",
@@ -1029,9 +1029,9 @@ export class FinancialAnalysisTemplatesService {
 
     addDataRow(
       "To Electricity Charges",
-      "",
-      "",
-      "",
+      getValue("electricityCharges_2023"),
+      getValue("electricityCharges_2024"),
+      getValue("electricityChargesChange"),
       getValue("electricityChargesEstimated"),
       "",
       "",
@@ -1042,9 +1042,9 @@ export class FinancialAnalysisTemplatesService {
 
     addDataRow(
       "To Coal, Gas & Liquid",
-      "",
-      "",
-      "",
+      getValue("coalGasLiquid_2023"),
+      getValue("coalGasLiquid_2024"),
+      getValue("coalGasLiquidChange"),
       getValue("coalGasLiquidEstimated"),
       "",
       "",
@@ -1055,9 +1055,9 @@ export class FinancialAnalysisTemplatesService {
 
     addDataRow(
       "To Spares & Machinery",
-      "",
-      "",
-      "",
+      getValue("sparesMachinery_2023"),
+      getValue("sparesMachinery_2024"),
+      getValue("sparesMachineryChange"),
       getValue("sparesMachineryEstimated"),
       "",
       "",
@@ -1068,9 +1068,9 @@ export class FinancialAnalysisTemplatesService {
 
     addDataRow(
       "To Bank Interest",
-      "",
-      "",
-      "",
+      getValue("bankInterest_2023"),
+      getValue("bankInterest_2024"),
+      getValue("bankInterestChange"),
       getValue("bankInterestEstimated"),
       "",
       "",
@@ -1081,9 +1081,9 @@ export class FinancialAnalysisTemplatesService {
 
     addDataRow(
       "To Bank Charges",
-      "",
-      "",
-      "",
+      getValue("bankCharges_2023"),
+      getValue("bankCharges_2024"),
+      getValue("bankChargesChange"),
       getValue("bankChargesEstimated"),
       "",
       "",
@@ -1094,9 +1094,9 @@ export class FinancialAnalysisTemplatesService {
 
     addDataRow(
       "To Finance Charges/Professional Tax",
-      "",
-      "",
-      "",
+      getValue("financeCharges_2023"),
+      getValue("financeCharges_2024"),
+      getValue("financeChargesChange"),
       getValue("financeChargesEstimated"),
       "",
       "",
@@ -1107,9 +1107,9 @@ export class FinancialAnalysisTemplatesService {
 
     addDataRow(
       "To GST Late Fee",
-      "",
-      "",
-      "",
+      getValue("gstLateFee_2023"),
+      getValue("gstLateFee_2024"),
+      getValue("gstLateFeeChange"),
       getValue("gstLateFeeEstimated"),
       "",
       "",
@@ -1120,9 +1120,9 @@ export class FinancialAnalysisTemplatesService {
 
     addDataRow(
       "To Auditor Fee",
-      "",
-      "",
-      "",
+      getValue("auditorFee_2023"),
+      getValue("auditorFee_2024"),
+      getValue("auditorFeeChange"),
       getValue("auditorFeeEstimated"),
       "",
       "",
@@ -1133,9 +1133,9 @@ export class FinancialAnalysisTemplatesService {
 
     addDataRow(
       "To Telephone Charges",
-      "",
-      "",
-      "",
+      getValue("telephoneCharges_2023"),
+      getValue("telephoneCharges_2024"),
+      getValue("telephoneChargesChange"),
       getValue("telephoneChargesEstimated"),
       "",
       "",
@@ -1146,9 +1146,9 @@ export class FinancialAnalysisTemplatesService {
 
     addDataRow(
       "To Travelling Exp/Transport",
-      "",
-      "",
-      "",
+      getValue("travellingExp_2023"),
+      getValue("travellingExp_2024"),
+      getValue("travellingExpChange"),
       getValue("travellingExpEstimated"),
       "",
       "",
@@ -1159,9 +1159,9 @@ export class FinancialAnalysisTemplatesService {
 
     addDataRow(
       "To Vehicle Maintenance & Machinery",
-      "",
-      "",
-      "",
+      getValue("vehicleMaintenance_2023"),
+      getValue("vehicleMaintenance_2024"),
+      getValue("vehicleMaintenanceChange"),
       getValue("vehicleMaintenanceEstimated"),
       "",
       "",
@@ -1172,9 +1172,9 @@ export class FinancialAnalysisTemplatesService {
 
     addDataRow(
       "To Depreciation",
-      "",
-      "",
-      "",
+      getValue("depreciation_2023"),
+      getValue("depreciation_2024"),
+      getValue("depreciationChange"),
       getValue("depreciationEstimated"),
       "",
       "",
@@ -1185,9 +1185,9 @@ export class FinancialAnalysisTemplatesService {
 
     addDataRow(
       "To Interest",
-      "",
-      "",
-      "",
+      getValue("interest_2023"),
+      getValue("interest_2024"),
+      getValue("interestChange"),
       getValue("interestEstimated"),
       "",
       "",
@@ -1198,9 +1198,9 @@ export class FinancialAnalysisTemplatesService {
 
     addDataRow(
       "To Sadar",
-      "",
-      "",
-      "",
+      getValue("sadar_2023"),
+      getValue("sadar_2024"),
+      getValue("sadarChange"),
       getValue("sadarEstimated"),
       "",
       "",
@@ -1215,15 +1215,30 @@ export class FinancialAnalysisTemplatesService {
     // Net Profit (Right)
     addDataRow(
       "To Net Profit",
-      "",
-      "",
-      "",
+      getValue("netProfit_2023"),
+      getValue("netProfit_2024"),
+      getValue("netProfitChange"),
       getValue("netProfitEstimated"),
       "",
       "",
       "",
       "",
       "",
+      true
+    );
+
+    // Net Profit (Right)
+    addDataRow(
+      "Total",
+      getValue("total_2023_left"),
+      getValue("total_2024_left"),
+      "",
+      getValue("total_estimated_left"),
+      "",
+      getValue("total_2023_right"),
+      getValue("total_2024_right"),
+      "",
+      getValue("total_estimated_right"),
       true
     );
 

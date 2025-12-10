@@ -243,37 +243,37 @@ export const janaSenpAbove50lTemplate = (verificationData: any, html_data: any) 
         <td style="${labelCellStyle}">Annual Receipts</td>
         <td style="${valueCellStyle}">${formatCurrency(financialDetails?.annualReceipts?.ay202425)}</td>
         <td style="${valueCellStyle}">${formatCurrency(financialDetails?.annualReceipts?.ay202324)}</td>
-        <td style="${valueCellStyle}">${formatMultiline(financialDetails?.annualReceipts?.remarks)}</td>
+        <td style="${valueCellStyle}">${formatMultiline(financialDetails?.annualReceipts?.Remarks)}</td>
        </tr>
        <tr>
         <td style="${labelCellStyle}">Gross Profit</td>
         <td style="${valueCellStyle}">${formatCurrency(financialDetails?.grossProfit?.ay202425)}</td>
         <td style="${valueCellStyle}">${formatCurrency(financialDetails?.grossProfit?.ay202324)}</td>
-        <td style="${valueCellStyle}">${formatMultiline(financialDetails?.grossProfit?.remarks)}</td>
+        <td style="${valueCellStyle}">${formatMultiline(financialDetails?.grossProfit?.Remarks)}</td>
        </tr>
        <tr>
         <td style="${labelCellStyle}">Gross Profit Margin</td>
         <td style="${valueCellStyle}">${financialDetails?.grossProfitMargin?.ay202425 ? `${financialDetails.grossProfitMargin.ay202425}%` : "Not provided"}</td>
         <td style="${valueCellStyle}">${financialDetails?.grossProfitMargin?.ay202324 ? `${financialDetails.grossProfitMargin.ay202324}%` : "Not provided"}</td>
-        <td style="${valueCellStyle}">${formatMultiline(financialDetails?.grossProfitMargin?.remarks)}</td>
+        <td style="${valueCellStyle}">${formatMultiline(financialDetails?.grossProfitMargin?.Remarks)}</td>
        </tr>
        <tr>
         <td style="${labelCellStyle}">Net Profit</td>
         <td style="${valueCellStyle}">${formatCurrency(financialDetails?.netProfit?.ay202425)}</td>
         <td style="${valueCellStyle}">${formatCurrency(financialDetails?.netProfit?.ay202324)}</td>
-        <td style="${valueCellStyle}">${formatMultiline(financialDetails?.netProfit?.remarks)}</td>
+        <td style="${valueCellStyle}">${formatMultiline(financialDetails?.netProfit?.Remarks)}</td>
        </tr>
        <tr>
         <td style="${labelCellStyle}">Net Profit Margin</td>
         <td style="${valueCellStyle}">${financialDetails?.netProfitMargin?.ay202425 ? `${financialDetails.netProfitMargin.ay202425}%` : "Not provided"}</td>
         <td style="${valueCellStyle}">${financialDetails?.netProfitMargin?.ay202324 ? `${financialDetails.netProfitMargin.ay202324}%` : "Not provided"}</td>
-        <td style="${valueCellStyle}">${formatMultiline(financialDetails?.netProfitMargin?.remarks)}</td>
+        <td style="${valueCellStyle}">${formatMultiline(financialDetails?.netProfitMargin?.Remarks)}</td>
        </tr>
        <tr>
         <td style="${labelCellStyle}">Filled Date</td>
         <td style="${valueCellStyle}">${formatMultiline(financialDetails?.filledDate?.ay202425)}</td>
         <td style="${valueCellStyle}">${formatMultiline(financialDetails?.filledDate?.ay202324)}</td>
-        <td style="${valueCellStyle}">${formatMultiline(financialDetails?.filledDate?.remarks)}</td>
+        <td style="${valueCellStyle}">${formatMultiline(financialDetails?.filledDate?.Remarks)}</td>
        </tr>
        </table>
 
