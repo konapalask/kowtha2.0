@@ -138,7 +138,11 @@ export const niwasSalariedSchema = {
             title: "Insurance (LIC)",
             enum: ["Yes", "No"],
           },
-          fixedDeposit: { type: "string", title: "Fixed Deposit" },
+          fixedDeposit: {
+            type: "string",
+            title: "Fixed Deposit",
+            enum: ["Yes", "No"],
+          },
           chitFunds: {
             type: "string",
             title: "Chit Funds",
@@ -772,7 +776,8 @@ export const niwasSalariedSchema = {
                 contactNumber: { type: "number", title: "Contact number" },
                 feedback: {
                   type: "string",
-                  title: "Feedback (Positive / Neutral / Negative)",
+                  title: "Feedback",
+                  enum: ["Positive", "Neutral", "Negative"],
                 },
                 businessCardCollected: {
                   type: "string",
