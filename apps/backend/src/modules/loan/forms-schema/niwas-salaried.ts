@@ -331,10 +331,12 @@ export const niwasSalariedSchema = {
                 fromDate: {
                   type: "date",
                   title: "From Date",
+                  format: "date",
                 },
                 toDate: {
                   type: "date",
                   title: "To Date",
+                  format: "date",
                 },
                 contactPersonName: {
                   type: "string",

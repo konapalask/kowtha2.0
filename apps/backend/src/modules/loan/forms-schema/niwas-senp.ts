@@ -162,14 +162,22 @@ export const niwasSenpSchema = {
             title: "Two-Wheeler (Yes/No)",
             enum: ["Yes", "No"],
           },
-          autoCab: { type: "string", title: "Auto/Cab (Yes/No)", enum: ["Yes", "No"] },
+          autoCab: {
+            type: "string",
+            title: "Auto/Cab (Yes/No)",
+            enum: ["Yes", "No"],
+          },
           computerLaptop: {
             type: "string",
             title: "Computer / Laptop (Yes/No)",
             enum: ["Yes", "No"],
           },
           ac: { type: "string", title: "AC (Yes/No)", enum: ["Yes", "No"] },
-          fridge: { type: "string", title: "Fridge (Yes/No)", enum: ["Yes", "No"] },
+          fridge: {
+            type: "string",
+            title: "Fridge (Yes/No)",
+            enum: ["Yes", "No"],
+          },
           induction: {
             type: "string",
             title: "Induction (Yes/No)",
@@ -430,9 +438,12 @@ export const niwasSenpSchema = {
                   title: "Employer/Business Name",
                 },
                 designation: { type: "string", title: "Designation" },
-                from: { type: "string", title: "From" , format:"date"},
-                to: { type: "date", title: "To" },
-                reasonForClosing: { type: "string", title: "Reason for Closing" },
+                from: { type: "string", title: "From", format: "date" },
+                to: { type: "date", title: "To", format: "date" },
+                reasonForClosing: {
+                  type: "string",
+                  title: "Reason for Closing",
+                },
                 contactPersonName: {
                   type: "string",
                   title: "Contact Person Name",
@@ -458,84 +469,84 @@ export const niwasSenpSchema = {
             type: "object",
             title: "Revenue",
             properties: {
-            sales: {
-              type: "number",
-              title: "Sales",
-              formatter: {
-                useIndianFormat: true,
-                locale: "en-IN",
-                maxDecimalPlaces: 2,
-                minDecimalPlaces: 0,
+              sales: {
+                type: "number",
+                title: "Sales",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
               },
-            },
-            totalMonthlyRevenueA: {
-              type: "number",
-              title: "Total Monthly Revenue (A)",
-              formatter: {
-                useIndianFormat: true,
-                locale: "en-IN",
-                maxDecimalPlaces: 2,
-                minDecimalPlaces: 0,
+              totalMonthlyRevenueA: {
+                type: "number",
+                title: "Total Monthly Revenue (A)",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
               },
             },
           },
-        },
-        expenditure: {
+          expenditure: {
             type: "object",
             title: "Expenditure",
             properties: {
-            wages: {
-              type: "number",
-              title: "Wages",
-              formatter: {
-                useIndianFormat: true,
-                locale: "en-IN",
-                maxDecimalPlaces: 2,
-                minDecimalPlaces: 0,
+              wages: {
+                type: "number",
+                title: "Wages",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
               },
-            },
-            diesel: {
-              type: "number",
-              title: "Diesel",
-              formatter: {
-                useIndianFormat: true,
-                locale: "en-IN",
-                maxDecimalPlaces: 2,
-                minDecimalPlaces: 0,
+              diesel: {
+                type: "number",
+                title: "Diesel",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
               },
-            },
-            maintenanceRepairs: {
-              type: "number",
-              title: "Maintenance & Repairs",
-              formatter: {
-                useIndianFormat: true,
-                locale: "en-IN",
-                maxDecimalPlaces: 2,
-                minDecimalPlaces: 0,
+              maintenanceRepairs: {
+                type: "number",
+                title: "Maintenance & Repairs",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
               },
-            },
-            otherExpenses: {
-              type: "number",
-              title: "Other Expenses",
-              formatter: {
-                useIndianFormat: true,
-                locale: "en-IN",
-                maxDecimalPlaces: 2,
-                minDecimalPlaces: 0,
+              otherExpenses: {
+                type: "number",
+                title: "Other Expenses",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
               },
-            },
-            totalMonthlyExpensesB: {
-              type: "number",
-              title: "Total Monthly Expenses (B)",
-              formatter: {
-                useIndianFormat: true,
-                locale: "en-IN",
-                maxDecimalPlaces: 2,
-                minDecimalPlaces: 0,
+              totalMonthlyExpensesB: {
+                type: "number",
+                title: "Total Monthly Expenses (B)",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
               },
             },
           },
-        },
           netMonthlyProfitAB: {
             type: "number",
             title: "Net Monthly Profit (=A-B)",
@@ -939,7 +950,8 @@ export const niwasSenpSchema = {
     },
     {
       id: "businessFirmCheck",
-      label: "Business Firm Check (From Neighbor/ Independent checking/ From existing customer)",
+      label:
+        "Business Firm Check (From Neighbor/ Independent checking/ From existing customer)",
       schema: {
         type: "object",
         properties: {
@@ -990,6 +1002,7 @@ export const niwasSenpSchema = {
             type: "string",
             title: "Initiated address",
             ui: { widget: "textarea", rows: 2 },
+            readOnly: true,
           },
           visitedAddress: {
             type: "string",
