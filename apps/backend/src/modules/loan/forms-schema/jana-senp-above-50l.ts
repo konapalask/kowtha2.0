@@ -12,7 +12,8 @@ export const janaSenpAbove50lSchema = {
         properties: {
           applicantName: {
             type: "string",
-            title: "Name of Custome",
+            title: "Name of Customer",
+            readOnly: true,
           },
           dateOfReport: {
             type: "string",
@@ -27,6 +28,7 @@ export const janaSenpAbove50lSchema = {
           nameOfConcern: {
             type: "string",
             title: "Name of Concern",
+            readOnly: true,
           },
           initiatedAddress: {
             type: "string",
@@ -35,6 +37,7 @@ export const janaSenpAbove50lSchema = {
               widget: "textarea",
               rows: 3,
             },
+            readOnly: true,
           },
           visitedAddress: {
             type: "string",
