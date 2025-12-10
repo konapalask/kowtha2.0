@@ -178,7 +178,11 @@ export const janaSenpAbove50lSchema = {
                     minDecimalPlaces: 0,
                   },
                 },
-                dependent: { type: "string", title: "Dependent" },
+                dependent: {
+                  type: "string",
+                  title: "Dependent",
+                  enum: ["Yes", "No"],
+                },
               },
             },
           },
