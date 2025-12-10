@@ -345,6 +345,8 @@ export const iiflTemplate = (verificationData: any, html_data: any) => {
           `${html_data.approvedStatus|| "Not provided"}`
         )}
       </table>
+
+      <p style="margin:24px 0 8px;color:#ccc;"><strong>Disclaimer Clause:</strong> <br>This report (including any attachments) has been prepared based on verbal information provided by the person contacted. IIFL HOME FINANCE LTD will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. M/s. KOWTHA & CO will not be held liable in any case.</p>
     </div>
     ${pdBaseTemplateFooter(html_data)}
   `;

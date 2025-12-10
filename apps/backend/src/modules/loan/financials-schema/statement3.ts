@@ -15,7 +15,7 @@ export const statement3Schema = {
       // Opening Stock
       openingStock_2023: {
         type: "number",
-        title: "Opening Stock - Actuals as on 31/03/23",
+        title: `Opening Stock - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -26,7 +26,7 @@ export const statement3Schema = {
       },
       openingStock_2024: {
         type: "number",
-        title: "Opening Stock - Actuals as on 31/03/24",
+        title: `Opening Stock - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -64,7 +64,7 @@ export const statement3Schema = {
       // Purchases
       purchases_2023: {
         type: "number",
-        title: "Purchases - Actuals as on 31/03/23",
+        title: `Purchases - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -75,7 +75,7 @@ export const statement3Schema = {
       },
       purchases_2024: {
         type: "number",
-        title: "Purchases - Actuals as on 31/03/24",
+        title: `Purchases - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -112,7 +112,7 @@ export const statement3Schema = {
       // Gas & Liquid Items
       gasLiquidItems_2023: {
         type: "number",
-        title: "Gas & Liquid Items - Actuals as on 31/03/23",
+        title: `Gas & Liquid Items - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -123,7 +123,7 @@ export const statement3Schema = {
       },
       gasLiquidItems_2024: {
         type: "number",
-        title: "Gas & Liquid Items - Actuals as on 31/03/24",
+        title: `Gas & Liquid Items - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -161,7 +161,9 @@ export const statement3Schema = {
       // Gross Profit
       grossProfit_2023: {
         type: "number",
-        title: "Gross Profit - Actuals as on 31/03/23",
+        title: `Gross Profit - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        formula: "sales_2023 + closingStock_2023 - (openingStock_2023 + purchases_2023 + gasLiquidItems_2023)",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -172,7 +174,9 @@ export const statement3Schema = {
       },
       grossProfit_2024: {
         type: "number",
-        title: "Gross Profit - Actuals as on 31/03/24",
+        title: `Gross Profit - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        formula: "sales_2024 + closingStock_2024 - (openingStock_2024 + purchases_2024 + gasLiquidItems_2024)",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -212,7 +216,7 @@ export const statement3Schema = {
       // Sales (Income Side)
       sales_2023: {
         type: "number",
-        title: "Sales - Actuals as on 31/03/23",
+        title: `Sales - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -223,7 +227,7 @@ export const statement3Schema = {
       },
       sales_2024: {
         type: "number",
-        title: "Sales - Actuals as on 31/03/24",
+        title: `Sales - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -260,7 +264,7 @@ export const statement3Schema = {
       // Majuri Charges
       majuriCharges_2023: {
         type: "number",
-        title: "Majuri Charges - Actuals as on 31/03/23",
+        title: `Majuri Charges - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -271,7 +275,7 @@ export const statement3Schema = {
       },
       majuriCharges_2024: {
         type: "number",
-        title: "Majuri Charges - Actuals as on 31/03/24",
+        title: `Majuri Charges - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -309,7 +313,7 @@ export const statement3Schema = {
       // Closing Stock
       closingStock_2023: {
         type: "number",
-        title: "Closing Stock - Actuals as on 31/03/23",
+        title: `Closing Stock - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -320,7 +324,7 @@ export const statement3Schema = {
       },
       closingStock_2024: {
         type: "number",
-        title: "Closing Stock - Actuals as on 31/03/24",
+        title: `Closing Stock - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -356,9 +360,79 @@ export const statement3Schema = {
       },
 
       // Indirect Expenses (Estimated Only)
+      salaries_2023: {
+        type: "number",
+        title: `Salaries - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      salaries_2024: {
+        type: "number",
+        title: `Salaries - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      salariesChange: {
+        type: "number",
+        title: "Salaries - Change %",
+        formula: "((salaries_2024 - salaries_2023) / salaries_2023) * 100",
+        readOnly: true,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
       salariesEstimated: {
         type: "number",
         title: "Salaries - Estimated",
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      bonus_2023: {
+        type: "number",
+        title: `Bonus - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      bonus_2024: {
+        type: "number",
+        title: `Bonus - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      bonusChange: {
+        type: "number",
+        title: "Bonus - Change %",
+        formula: "((bonus_2024 - bonus_2023) / bonus_2023) * 100",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -378,9 +452,79 @@ export const statement3Schema = {
           minDecimalPlaces: 0,
         },
       },
+      electricityCharges_2023: {
+        type: "number",
+        title: `Electricity Charges - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      electricityCharges_2024: {
+        type: "number",
+        title: `Electricity Charges - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      electricityChargesChange: {
+        type: "number",
+        title: "Electricity Charges - Change %",
+        formula: "((electricityCharges_2024 - electricityCharges_2023) / electricityCharges_2023) * 100",
+        readOnly: true,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
       electricityChargesEstimated: {
         type: "number",
         title: "Electricity Charges - Estimated",
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      sadar_2023: {
+        type: "number",
+        title: `Sadar - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      sadar_2024: {
+        type: "number",
+        title: `Sadar - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      sadarChange: {
+        type: "number",
+        title: "Sadar - Change %",
+        formula: "((sadar_2024 - sadar_2023) / sadar_2023) * 100",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -400,9 +544,79 @@ export const statement3Schema = {
           minDecimalPlaces: 0,
         },
       },
+      coalGasLiquid_2023: { 
+        type: "number",
+        title: `Coal, Gas & Liquid - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      coalGasLiquid_2024: {
+        type: "number",
+        title: `Coal, Gas & Liquid - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      coalGasLiquidChange: {
+        type: "number",
+        title: "Coal, Gas & Liquid - Change %",
+        formula: "((coalGasLiquid_2024 - coalGasLiquid_2023) / coalGasLiquid_2023) * 100",
+        readOnly: true,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
       coalGasLiquidEstimated: {
         type: "number",
         title: "Coal, Gas & Liquid - Estimated",
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      sparesMachinery_2023: {
+        type: "number",
+        title: `Spares & Machinery - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      sparesMachinery_2024: {
+        type: "number",
+        title: `Spares & Machinery - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      sparesMachineryChange: {
+        type: "number",
+        title: "Spares & Machinery - Change %",
+        formula: "((sparesMachinery_2024 - sparesMachinery_2023) / sparesMachinery_2023) * 100",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -422,9 +636,79 @@ export const statement3Schema = {
           minDecimalPlaces: 0,
         },
       },
+      bankInterest_2023: {
+        type: "number",
+        title: `Bank Interest - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      bankInterest_2024: {
+        type: "number",
+          title: `Bank Interest - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      bankInterestChange: {
+        type: "number",
+        title: "Bank Interest - Change %",
+        formula: "((bankInterest_2024 - bankInterest_2023) / bankInterest_2023) * 100",
+        readOnly: true,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
       bankInterestEstimated: {
         type: "number",
         title: "Bank Interest - Estimated",
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      bankCharges_2023: {
+        type: "number",
+        title: `Bank Charges - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      bankCharges_2024: {
+        type: "number",
+        title: `Bank Charges - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      bankChargesChange: {
+        type: "number",
+        title: "Bank Charges - Change %",
+        formula: "((bankCharges_2024 - bankCharges_2023) / bankCharges_2023) * 100",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -444,9 +728,79 @@ export const statement3Schema = {
           minDecimalPlaces: 0,
         },
       },
+      financeCharges_2023: {
+        type: "number",
+        title: `Finance Charges/Professional Tax - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      financeCharges_2024: {
+        type: "number",
+        title: `Finance Charges/Professional Tax - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      financeChargesChange: {
+        type: "number",
+        title: "Finance Charges/Professional Tax - Change %",
+        formula: "((financeCharges_2024 - financeCharges_2023) / financeCharges_2023) * 100",
+        readOnly: true,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
       financeChargesEstimated: {
         type: "number",
         title: "Finance Charges/Professional Tax - Estimated",
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      shopRents_2023: {
+        type: "number",
+        title: `Shop Rents - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      shopRents_2024: {
+        type: "number",
+        title: `Shop Rents - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      shopRentsChange: {
+        type: "number",
+        title: "Shop Rents - Change %",
+        formula: "((shopRents_2024 - shopRents_2023) / shopRents_2023) * 100",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -466,9 +820,79 @@ export const statement3Schema = {
           minDecimalPlaces: 0,
         },
       },
+      gstLateFee_2023: {
+        type: "number",
+        title: `GST Late Fee - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      gstLateFee_2024: {
+        type: "number",
+        title: `GST Late Fee - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      gstLateFeeChange: {
+        type: "number",
+        title: "GST Late Fee - Change %",
+        formula: "((gstLateFee_2024 - gstLateFee_2023) / gstLateFee_2023) * 100",
+        readOnly: true,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
       gstLateFeeEstimated: {
         type: "number",
         title: "GST Late Fee - Estimated",
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      auditorFee_2023: {
+        type: "number",
+        title: `Auditor Fee - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      auditorFee_2024: {
+        type: "number",
+        title: `Auditor Fee - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      auditorFeeChange: {
+        type: "number",
+        title: "Auditor Fee - Change %",
+        formula: "((auditorFee_2024 - auditorFee_2023) / auditorFee_2023) * 100",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -488,9 +912,79 @@ export const statement3Schema = {
           minDecimalPlaces: 0,
         },
       },
+      telephoneCharges_2023: {
+        type: "number",
+        title: `Telephone Charges - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      telephoneCharges_2024: {
+        type: "number",
+          title: `Telephone Charges - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      telephoneChargesChange: {
+        type: "number",
+        title: "Telephone Charges - Change %",
+        formula: "((telephoneCharges_2024 - telephoneCharges_2023) / telephoneCharges_2023) * 100",
+        readOnly: true,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
       telephoneChargesEstimated: {
         type: "number",
         title: "Telephone Charges - Estimated",
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      travellingExp_2023: {
+        type: "number",
+        title: `Travelling Exp/Transport - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      travellingExp_2024: {
+        type: "number",
+        title: `Travelling Exp/Transport - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      travellingExpChange: {
+        type: "number",
+        title: "Travelling Exp/Transport - Change %",
+        formula: "((travellingExp_2024 - travellingExp_2023) / travellingExp_2023) * 100",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -510,9 +1004,79 @@ export const statement3Schema = {
           minDecimalPlaces: 0,
         },
       },
+      vehicleMaintenance_2023: {
+        type: "number",
+        title: `Vehicle Maintenance & machinery - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      vehicleMaintenance_2024: {
+        type: "number",
+        title: `Vehicle Maintenance & machinery - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      vehicleMaintenanceChange: {
+        type: "number",
+        title: "Vehicle Maintenance & machinery - Change %",
+        formula: "((vehicleMaintenance_2024 - vehicleMaintenance_2023) / vehicleMaintenance_2023) * 100",
+        readOnly: true,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
       vehicleMaintenanceEstimated: {
         type: "number",
         title: "Vehicle Maintenance & machinery - Estimated",
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      depreciation_2023: {
+        type: "number",
+        title: `Depreciation - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      depreciation_2024: {
+        type: "number",
+        title: `Depreciation - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      depreciationChange: {
+        type: "number",
+        title: "Depreciation - Change %",
+        formula: "((depreciation_2024 - depreciation_2023) / depreciation_2023) * 100",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -532,9 +1096,83 @@ export const statement3Schema = {
           minDecimalPlaces: 0,
         },
       },
+      interest_2023: {
+        type: "number",
+        title: `Interest - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      interest_2024: {
+        type: "number",
+        title: `Interest - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      interestChange: {
+        type: "number",
+        title: "Interest - Change %",
+        formula: "((interest_2024 - interest_2023) / interest_2023) * 100",
+        readOnly: true,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
       interestEstimated: {
         type: "number",
         title: "Interest - Estimated",
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      netProfit_2023: {
+        type: "number",
+        title: `Net Profit - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        formula: "grossProfit_2023 - (salaries_2023 + bonus_2023 + electricityCharges_2023 + sadar_2023 + coalGasLiquid_2023 + sparesMachinery_2023 + bankInterest_2023 + bankCharges_2023 + financeCharges_2023 + shopRents_2023 + gstLateFee_2023 + auditorFee_2023 + telephoneCharges_2023 + travellingExp_2023 + vehicleMaintenance_2023 + depreciation_2023 + interest_2023)",
+        readOnly: true,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      netProfit_2024: {
+        type: "number",
+        title: `Net Profit - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        formula: "grossProfit_2024 - (salaries_2024 + bonus_2024 + electricityCharges_2024 + sadar_2024 + coalGasLiquid_2024 + sparesMachinery_2024 + bankInterest_2024 + bankCharges_2024 + financeCharges_2024 + shopRents_2024 + gstLateFee_2024 + auditorFee_2024 + telephoneCharges_2024 + travellingExp_2024 + vehicleMaintenance_2024 + depreciation_2024 + interest_2024)",
+        readOnly: true,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      netProfitChange: {
+        type: "number",
+        title: "Net Profit - Change %",
+        formula: "((netProfit_2024 - netProfit_2023) / netProfit_2023) * 100",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -547,6 +1185,86 @@ export const statement3Schema = {
         type: "number",
         title: "Net Profit - Estimated",
         formula: "grossProfitEstimated - (salariesEstimated + bonusEstimated + electricityChargesEstimated + sadarEstimated + coalGasLiquidEstimated + sparesMachineryEstimated + bankInterestEstimated + bankChargesEstimated + financeChargesEstimated + shopRentsEstimated + gstLateFeeEstimated + auditorFeeEstimated + telephoneChargesEstimated + travellingExpEstimated + vehicleMaintenanceEstimated + depreciationEstimated + interestEstimated)",
+        readOnly: true,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+
+      // Total (Left And Right)
+      total_2023_left: {
+        type: "number",
+        title: `Total - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        formula: "sales_2023 + closingStock_2023 + gasLiquidItems_2023 + sparesMachinery_2023 + bankInterest_2023 + bankCharges_2023 + financeCharges_2023 + shopRents_2023 + gstLateFee_2023 + auditorFee_2023 + telephoneCharges_2023 + travellingExp_2023 + vehicleMaintenance_2023 + depreciation_2023 + interest_2023 + sadar_2023 + coalGasLiquid_2023 + bonus_2023 + electricityCharges_2023 + salaries_2023",
+        readOnly: true,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      total_2024_left: {
+        type: "number",
+        title: `Total - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        formula: "sales_2024 + closingStock_2024 + gasLiquidItems_2024 + sparesMachinery_2024 + bankInterest_2024 + bankCharges_2024 + financeCharges_2024 + shopRents_2024 + gstLateFee_2024 + auditorFee_2024 + telephoneCharges_2024 + travellingExp_2024 + vehicleMaintenance_2024 + depreciation_2024 + interest_2024 + sadar_2024 + coalGasLiquid_2024 + bonus_2024 + electricityCharges_2024 + salaries_2024",
+        readOnly: true,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      total_estimated_left: {
+        type: "number",
+        title: "Total - Estimated",
+        formula: "salesEstimated + closingStockEstimated + gasLiquidItemsEstimated + sparesMachineryEstimated + bankInterestEstimated + bankChargesEstimated + financeChargesEstimated + shopRentsEstimated + gstLateFeeEstimated + auditorFeeEstimated + telephoneChargesEstimated + travellingExpEstimated + vehicleMaintenanceEstimated + depreciationEstimated + interestEstimated + sadarEstimated + coalGasLiquidEstimated + bonusEstimated + electricityChargesEstimated + salariesEstimated",
+        readOnly: true,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      total_2023_right: {
+        type: "number",
+        title: `Total - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        formula: "sales_2023 + majuriCharges_2023 + closingStock_2023",
+        readOnly: true,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },  
+      total_2024_right: {
+        type: "number",
+        title: `Total - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        formula: "sales_2024 + majuriCharges_2024 + closingStock_2024",
+        readOnly: true,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      total_estimated_right: {
+        type: "number",
+        title: "Total - Estimated",
+        formula: "salesEstimated + majuriChargesEstimated + closingStockEstimated",
         readOnly: true,
         minimum: 0,
         formatter: {
