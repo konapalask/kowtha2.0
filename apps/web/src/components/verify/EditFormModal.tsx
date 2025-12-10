@@ -485,10 +485,7 @@ const calculateStatement3Format = (values: Record<string, any>) => {
     salesEstimated + majuriChargesEstimated + closingStockEstimated + grossProfitEstimated;
 
 
-  const monthlyTurnover =
-    "monthlyTurnover" in values && values.monthlyTurnover !== ""
-      ? getValue("monthlyTurnover")
-      : round2(salesEstimated / 12);
+  const monthlyTurnover = round2(salesEstimated / 12);
 
   const totalEstimatedExpenses =
     salariesEstimated + bonusEstimated + electricityChargesEstimated + sadarEstimated + 
@@ -498,30 +495,20 @@ const calculateStatement3Format = (values: Record<string, any>) => {
     travellingExpEstimated + vehicleMaintenanceEstimated + depreciationEstimated + 
     interestEstimated;
 
-  const monthlyPayments =
-    "monthlyPayments" in values && values.monthlyPayments !== ""
-      ? getValue("monthlyPayments")
-      : round2(totalEstimatedExpenses / 12);
+  const monthlyPayments = round2(totalEstimatedExpenses / 12);
 
-  const monthlyNetProfit =
-    "monthlyNetProfit" in values && values.monthlyNetProfit !== ""
-      ? getValue("monthlyNetProfit")
-      : round2(netProfitEstimated / 12);
+  const monthlyNetProfit = round2(netProfitEstimated / 12);
 
 
   const gpPercentage =
-    "gpPercentage" in values && values.gpPercentage !== ""
-      ? getValue("gpPercentage")
-      : salesEstimated !== 0
-        ? round2((grossProfitEstimated / salesEstimated) * 100)
-        : 0;
+    salesEstimated !== 0
+      ? round2((grossProfitEstimated / salesEstimated) * 100)
+      : 0;
 
   const npPercentage =
-    "npPercentage" in values && values.npPercentage !== ""
-      ? getValue("npPercentage")
-      : salesEstimated !== 0
-        ? round2((netProfitEstimated / salesEstimated) * 100)
-        : 0;
+    salesEstimated !== 0
+      ? round2((netProfitEstimated / salesEstimated) * 100)
+      : 0;
 
   return {
     ...values,
