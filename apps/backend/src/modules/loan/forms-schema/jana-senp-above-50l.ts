@@ -12,7 +12,8 @@ export const janaSenpAbove50lSchema = {
         properties: {
           applicantName: {
             type: "string",
-            title: "Name of Custome",
+            title: "Name of Customer",
+            readOnly: true,
           },
           dateOfReport: {
             type: "string",
@@ -27,6 +28,7 @@ export const janaSenpAbove50lSchema = {
           nameOfConcern: {
             type: "string",
             title: "Name of Concern",
+            readOnly: true,
           },
           initiatedAddress: {
             type: "string",
@@ -35,6 +37,7 @@ export const janaSenpAbove50lSchema = {
               widget: "textarea",
               rows: 3,
             },
+            readOnly: true,
           },
           visitedAddress: {
             type: "string",
@@ -44,9 +47,10 @@ export const janaSenpAbove50lSchema = {
               rows: 3,
             },
           },
-          phoneNumber: {
-            type: "string",
+          applicantPhoneNumber: {
+            type: "integer",
             title: "Phone Number",
+            readOnly: true,
           },
           appointmentFixedTime: {
             type: "string",
@@ -63,7 +67,7 @@ export const janaSenpAbove50lSchema = {
             title: "Structure of Loan",
           },
           numberOfVisits: {
-            type: "number",
+            type: "string",
             title: "No. of Visit",
           },
           personMet: {
@@ -174,7 +178,11 @@ export const janaSenpAbove50lSchema = {
                     minDecimalPlaces: 0,
                   },
                 },
-                dependent: { type: "string", title: "Dependent" },
+                dependent: {
+                  type: "string",
+                  title: "Dependent",
+                  enum: ["Yes", "No"],
+                },
               },
             },
           },
@@ -444,12 +452,12 @@ export const janaSenpAbove50lSchema = {
         type: "object",
         properties: {
           noOfFixedSuppliers: {
-            type: "number",
+            type: "string",
             title: "No of Fixed Suppliers",
           },
-          creditPeriod: { type: "number", title: "Credit Period" },
+          creditPeriod: { type: "string", title: "Credit Period" },
           cashChequeProportion: {
-            type: "number",
+            type: "string",
             title: "Cash - Cheque proportion",
           },
           top3suppliers: {
@@ -478,12 +486,12 @@ export const janaSenpAbove50lSchema = {
         type: "object",
         properties: {
           noOfFixedCustomers: {
-            type: "number",
+            type: "string",
             title: "No of Fixed Customers",
           },
-          creditPeriod: { type: "number", title: "Credit Period" },
+          creditPeriod: { type: "string", title: "Credit Period" },
           cashChequeProportion: {
-            type: "number",
+            type: "string",
             title: "Cash - Cheque proportion",
           },
           top3customers: {
