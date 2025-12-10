@@ -43,8 +43,8 @@ export const axisBankSchema = {
           },
           pdAddress: {
             type: "string",
-            title: "PD Address Type (Residence/Office/Factory/Godown)",
-            readOnly: true,
+            title: "PD Address Type",
+            enum: ["Residence", "Office", "Factory", "Godown"],
           },
           initiatedAddress: {
             type: "string",
@@ -669,7 +669,7 @@ export const axisBankSchema = {
               incomeLeftForDomesticExpenses: {
                 type: "number",
                 title: "Income left for domestic expenses",
-                  formatter: {
+                formatter: {
                   useIndianFormat: true,
                   locale: "en-IN",
                   maxDecimalPlaces: 2,
@@ -729,7 +729,7 @@ export const axisBankSchema = {
               netmonthlyincomepostallexpenses: {
                 type: "number",
                 title: "Net monthly income post all expenses",
-                 formatter: {
+                formatter: {
                   useIndianFormat: true,
                   locale: "en-IN",
                   maxDecimalPlaces: 2,

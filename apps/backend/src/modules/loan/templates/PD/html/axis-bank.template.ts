@@ -18,11 +18,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
 
   // Helper function to format currency
   const formatCurrency = (amount: number) => {
-    if (
-      amount === null ||
-      amount === undefined ||
-      amount === 0 
-    ) {
+    if (amount === null || amount === undefined || amount === 0) {
       return "Not Provided";
     }
     return `Rs. ${amount.toLocaleString("en-IN")}/-`;
@@ -150,7 +146,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
                 <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${verificationData.applicantDetails?.visitedAddress || ""}</p></td>
             </tr>
             <tr>
-                <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>PD address: - (Residence/Office/Factory/Godown)</strong></p></td>
+                <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>PD address type: - (Residence/Office/Factory/Godown)</strong></p></td>
                 <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${verificationData.applicantDetails?.pdAddress || ""}</p></td>
             </tr>
             <tr>
@@ -313,15 +309,17 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
             <tr>
                 <td colspan="2" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Any other observations / remarks during visit:</strong></p></td>
                 <td colspan="7" style="${valueCellStyle}">
-                    ${
-                      (() => {
-                        const text = verificationData.otherDetailsObserved?.otherObservationsRemarks;
-                        if (!text) return "Not provided";
-                        const lines = String(text).split(/\n+/).filter((line: string) => line.trim().length > 0);
-                        if (lines.length === 0) return "Not provided";
-                        return `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;">${lines.map((line: string) => `<li style="margin-left: 8px;">${line.trim()}</li>`).join("")}</ul>`;
-                      })()
-                    }
+                    ${(() => {
+                      const text =
+                        verificationData.otherDetailsObserved
+                          ?.otherObservationsRemarks;
+                      if (!text) return "Not provided";
+                      const lines = String(text)
+                        .split(/\n+/)
+                        .filter((line: string) => line.trim().length > 0);
+                      if (lines.length === 0) return "Not provided";
+                      return `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;">${lines.map((line: string) => `<li style="margin-left: 8px;">${line.trim()}</li>`).join("")}</ul>`;
+                    })()}
                 </td>
             </tr>
             <tr>
@@ -333,7 +331,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
             </tr>
             <tr>
                 <td colspan="2" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>1) Turnover and Margin</strong></p></td>
-                <td colspan="7" style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Turnover:</strong> ${formatCurrency(verificationData.commonPoints?.turnOverAndMargin) || ""} <br> <strong>Margin:</strong> ${verificationData.commonPoints?.netMargin+"%" || ""}</p></td>
+                <td colspan="7" style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Turnover:</strong> ${formatCurrency(verificationData.commonPoints?.turnOverAndMargin) || ""} <br> <strong>Margin:</strong> ${verificationData.commonPoints?.netMargin + "%" || ""}</p></td>
             </tr>
             <tr>
                 <td colspan="2" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>2) Sales fluctuations (Seasonal business)</strong></p></td>
@@ -437,13 +435,13 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
             </tr>
             <tr>
                 <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Status of PD (Positive, Negative, Credit Manager visit<br />needed)</strong></p></td>
-                <td colspan="3" style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>${html_data.approvedStatus|| "Not provided"}</strong></p></td>
+                <td colspan="3" style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>${html_data.approvedStatus || "Not provided"}</strong></p></td>
             </tr>
         </table>
         <table style="${tableStyle}">
             <tr>
                 <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>PD Officer Name</strong></p></td>
-                <td colspan="3" style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>${html_data.pdVerifiedBy|| ""}</strong></p></td>
+                <td colspan="3" style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>${html_data.pdVerifiedBy || ""}</strong></p></td>
             </tr>
             <tr>
                 <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>PD Officer Signature</strong></p></td>
@@ -471,7 +469,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
             </tr>
             <tr>
                 <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Gross and Net margin of business.</strong></p></td>
-                <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Gross:</strong> ${formatCurrency(verificationData.annexure1?.grossAndNetMargin || "NotProvided")} <br> <strong>Net Margin:</strong> ${verificationData.annexure1?.netMargin+"%" || ""}<br> approx (Confirmed by customer during PD).</p></td>
+                <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Gross:</strong> ${formatCurrency(verificationData.annexure1?.grossAndNetMargin || "NotProvided")} <br> <strong>Net Margin:</strong> ${verificationData.annexure1?.netMargin + "%" || ""}<br> approx (Confirmed by customer during PD).</p></td>
             </tr>
             <tr>
                 <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Estimated income</strong></p></td>
