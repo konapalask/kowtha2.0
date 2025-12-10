@@ -205,24 +205,68 @@ const calculateStatement2Format = (values: Record<string, any>) => {
 
 const calculateStatement3Format = (values: Record<string, any>) => {
   const getValue = (key: string) => parseFloat(values[key]) || 0;
+  const round2 = (num: number) => Math.round(num * 100) / 100;
 
+  // 2023 Actuals
   const openingStock_2023 = getValue("openingStock_2023");
   const purchases_2023 = getValue("purchases_2023");
+  const gasLiquidItems_2023 = getValue("gasLiquidItems_2023");
   const sales_2023 = getValue("sales_2023");
-  const grossProfit_2023 = getValue("grossProfit_2023");
-  const netProfit_2023 = getValue("netProfit_2023");
+  const majuriCharges_2023 = getValue("majuriCharges_2023");
+  const closingStock_2023 = getValue("closingStock_2023");
+  
+  const salaries_2023 = getValue("salaries_2023");
+  const bonus_2023 = getValue("bonus_2023");
+  const electricityCharges_2023 = getValue("electricityCharges_2023");
+  const sadar_2023 = getValue("sadar_2023");
+  const coalGasLiquid_2023 = getValue("coalGasLiquid_2023");
+  const sparesMachinery_2023 = getValue("sparesMachinery_2023");
+  const bankInterest_2023 = getValue("bankInterest_2023");
+  const bankCharges_2023 = getValue("bankCharges_2023");
+  const financeCharges_2023 = getValue("financeCharges_2023");
+  const shopRents_2023 = getValue("shopRents_2023");
+  const gstLateFee_2023 = getValue("gstLateFee_2023");
+  const auditorFee_2023 = getValue("auditorFee_2023");
+  const telephoneCharges_2023 = getValue("telephoneCharges_2023");
+  const travellingExp_2023 = getValue("travellingExp_2023");
+  const vehicleMaintenance_2023 = getValue("vehicleMaintenance_2023");
+  const depreciation_2023 = getValue("depreciation_2023");
+  const interest_2023 = getValue("interest_2023");
 
+  // 2024 Actuals
   const openingStock_2024 = getValue("openingStock_2024");
   const purchases_2024 = getValue("purchases_2024");
+  const gasLiquidItems_2024 = getValue("gasLiquidItems_2024");
   const sales_2024 = getValue("sales_2024");
-  const grossProfit_2024 = getValue("grossProfit_2024");
-  const netProfit_2024 = getValue("netProfit_2024");
+  const majuriCharges_2024 = getValue("majuriCharges_2024");
+  const closingStock_2024 = getValue("closingStock_2024");
+  
+  const salaries_2024 = getValue("salaries_2024");
+  const bonus_2024 = getValue("bonus_2024");
+  const electricityCharges_2024 = getValue("electricityCharges_2024");
+  const sadar_2024 = getValue("sadar_2024");
+  const coalGasLiquid_2024 = getValue("coalGasLiquid_2024");
+  const sparesMachinery_2024 = getValue("sparesMachinery_2024");
+  const bankInterest_2024 = getValue("bankInterest_2024");
+  const bankCharges_2024 = getValue("bankCharges_2024");
+  const financeCharges_2024 = getValue("financeCharges_2024");
+  const shopRents_2024 = getValue("shopRents_2024");
+  const gstLateFee_2024 = getValue("gstLateFee_2024");
+  const auditorFee_2024 = getValue("auditorFee_2024");
+  const telephoneCharges_2024 = getValue("telephoneCharges_2024");
+  const travellingExp_2024 = getValue("travellingExp_2024");
+  const vehicleMaintenance_2024 = getValue("vehicleMaintenance_2024");
+  const depreciation_2024 = getValue("depreciation_2024");
+  const interest_2024 = getValue("interest_2024");
 
+  // Estimated
   const openingStockEstimated = getValue("openingStockEstimated");
   const purchasesEstimated = getValue("purchasesEstimated");
-  const salesEstimated = getValue("salesEstimated");
-  const closingStockEstimated = getValue("closingStockEstimated");
   const gasLiquidItemsEstimated = getValue("gasLiquidItemsEstimated");
+  const salesEstimated = getValue("salesEstimated");
+  const majuriChargesEstimated = getValue("majuriChargesEstimated");
+  const closingStockEstimated = getValue("closingStockEstimated");
+
   const salariesEstimated = getValue("salariesEstimated");
   const bonusEstimated = getValue("bonusEstimated");
   const electricityChargesEstimated = getValue("electricityChargesEstimated");
@@ -241,75 +285,291 @@ const calculateStatement3Format = (values: Record<string, any>) => {
   const depreciationEstimated = getValue("depreciationEstimated");
   const interestEstimated = getValue("interestEstimated");
 
+  const grossProfit_2023 =
+    "grossProfit_2023" in values && values.grossProfit_2023 !== ""
+      ? getValue("grossProfit_2023")
+      : sales_2023 + closingStock_2023 + majuriCharges_2023 - (openingStock_2023 + purchases_2023 + gasLiquidItems_2023);
+  
+  const grossProfit_2024 =
+    "grossProfit_2024" in values && values.grossProfit_2024 !== ""
+      ? getValue("grossProfit_2024")
+      : sales_2024 + closingStock_2024 + majuriCharges_2024 - (openingStock_2024 + purchases_2024 + gasLiquidItems_2024);
+  
   const grossProfitEstimated =
-    salesEstimated +
-    closingStockEstimated -
-    (openingStockEstimated + purchasesEstimated + gasLiquidItemsEstimated);
+    "grossProfitEstimated" in values && values.grossProfitEstimated !== ""
+      ? getValue("grossProfitEstimated")
+      : salesEstimated + closingStockEstimated + majuriChargesEstimated - (openingStockEstimated + purchasesEstimated + gasLiquidItemsEstimated);
+
+  const netProfit_2023 =
+    "netProfit_2023" in values && values.netProfit_2023 !== ""
+      ? getValue("netProfit_2023")
+      : grossProfit_2023 - (
+          salaries_2023 + bonus_2023 + electricityCharges_2023 + sadar_2023 + 
+          coalGasLiquid_2023 + sparesMachinery_2023 + bankInterest_2023 + 
+          bankCharges_2023 + financeCharges_2023 + shopRents_2023 + 
+          gstLateFee_2023 + auditorFee_2023 + telephoneCharges_2023 + 
+          travellingExp_2023 + vehicleMaintenance_2023 + depreciation_2023 + interest_2023
+        );
+
+  const netProfit_2024 =
+    "netProfit_2024" in values && values.netProfit_2024 !== ""
+      ? getValue("netProfit_2024")
+      : grossProfit_2024 - (
+          salaries_2024 + bonus_2024 + electricityCharges_2024 + sadar_2024 + 
+          coalGasLiquid_2024 + sparesMachinery_2024 + bankInterest_2024 + 
+          bankCharges_2024 + financeCharges_2024 + shopRents_2024 + 
+          gstLateFee_2024 + auditorFee_2024 + telephoneCharges_2024 + 
+          travellingExp_2024 + vehicleMaintenance_2024 + depreciation_2024 + interest_2024
+        );
+
+  const netProfitEstimated =
+    "netProfitEstimated" in values && values.netProfitEstimated !== ""
+      ? getValue("netProfitEstimated")
+      : grossProfitEstimated - (
+          salariesEstimated + bonusEstimated + electricityChargesEstimated + sadarEstimated + 
+          coalGasLiquidEstimated + sparesMachineryEstimated + bankInterestEstimated + 
+          bankChargesEstimated + financeChargesEstimated + shopRentsEstimated + 
+          gstLateFeeEstimated + auditorFeeEstimated + telephoneChargesEstimated + 
+          travellingExpEstimated + vehicleMaintenanceEstimated + depreciationEstimated + interestEstimated
+        );
+
+  // Change % calculations
+  const calculateChange = (val2024: number, val2023: number) => 
+    val2023 !== 0 ? round2(((val2024 - val2023) / val2023) * 100) : 0;
+
+  const openingStockChange = calculateChange(openingStock_2024, openingStock_2023);
+  const purchasesChange = calculateChange(purchases_2024, purchases_2023);
+  const gasLiquidItemsChange = calculateChange(gasLiquidItems_2024, gasLiquidItems_2023);
+  const salesChange = calculateChange(sales_2024, sales_2023);
+  const majuriChargesChange = calculateChange(majuriCharges_2024, majuriCharges_2023);
+  const closingStockChange = calculateChange(closingStock_2024, closingStock_2023);
+  const grossProfitChange = calculateChange(grossProfit_2024, grossProfit_2023);
+  const netProfitChange = calculateChange(netProfit_2024, netProfit_2023);
+  
+  const salariesChange = calculateChange(salaries_2024, salaries_2023);
+  const bonusChange = calculateChange(bonus_2024, bonus_2023);
+  const electricityChargesChange = calculateChange(electricityCharges_2024, electricityCharges_2023);
+  const sadarChange = calculateChange(sadar_2024, sadar_2023);
+  const coalGasLiquidChange = calculateChange(coalGasLiquid_2024, coalGasLiquid_2023);
+  const sparesMachineryChange = calculateChange(sparesMachinery_2024, sparesMachinery_2023);
+  const bankInterestChange = calculateChange(bankInterest_2024, bankInterest_2023);
+  const bankChargesChange = calculateChange(bankCharges_2024, bankCharges_2023);
+  const financeChargesChange = calculateChange(financeCharges_2024, financeCharges_2023);
+  const shopRentsChange = calculateChange(shopRents_2024, shopRents_2023);
+  const gstLateFeeChange = calculateChange(gstLateFee_2024, gstLateFee_2023);
+  const auditorFeeChange = calculateChange(auditorFee_2024, auditorFee_2023);
+  const telephoneChargesChange = calculateChange(telephoneCharges_2024, telephoneCharges_2023);
+  const travellingExpChange = calculateChange(travellingExp_2024, travellingExp_2023);
+  const vehicleMaintenanceChange = calculateChange(vehicleMaintenance_2024, vehicleMaintenance_2023);
+  const depreciationChange = calculateChange(depreciation_2024, depreciation_2023);
+  const interestChange = calculateChange(interest_2024, interest_2023);
+
+ 
+  const total_2023_left =
+    "total_2023_left" in values && values.total_2023_left !== ""
+      ? getValue("total_2023_left")
+      : openingStock_2023 + purchases_2023 + gasLiquidItems_2023 + grossProfit_2023 +
+        salaries_2023 + bonus_2023 + electricityCharges_2023 + sadar_2023 + 
+        coalGasLiquid_2023 + sparesMachinery_2023 + bankInterest_2023 + 
+        bankCharges_2023 + financeCharges_2023 + shopRents_2023 + 
+        gstLateFee_2023 + auditorFee_2023 + telephoneCharges_2023 + 
+        travellingExp_2023 + vehicleMaintenance_2023 + depreciation_2023 + 
+        interest_2023 + netProfit_2023;
+
+  const total_2024_left =
+    "total_2024_left" in values && values.total_2024_left !== ""
+      ? getValue("total_2024_left")
+      : openingStock_2024 + purchases_2024 + gasLiquidItems_2024 + grossProfit_2024 +
+        salaries_2024 + bonus_2024 + electricityCharges_2024 + sadar_2024 + 
+        coalGasLiquid_2024 + sparesMachinery_2024 + bankInterest_2024 + 
+        bankCharges_2024 + financeCharges_2024 + shopRents_2024 + 
+        gstLateFee_2024 + auditorFee_2024 + telephoneCharges_2024 + 
+        travellingExp_2024 + vehicleMaintenance_2024 + depreciation_2024 + 
+        interest_2024 + netProfit_2024;
+
+  const total_estimated_left =
+    "total_estimated_left" in values && values.total_estimated_left !== ""
+      ? getValue("total_estimated_left")
+      : openingStockEstimated + purchasesEstimated + gasLiquidItemsEstimated + grossProfitEstimated +
+        salariesEstimated + bonusEstimated + electricityChargesEstimated + sadarEstimated + 
+        coalGasLiquidEstimated + sparesMachineryEstimated + bankInterestEstimated + 
+        bankChargesEstimated + financeChargesEstimated + shopRentsEstimated + 
+        gstLateFeeEstimated + auditorFeeEstimated + telephoneChargesEstimated + 
+        travellingExpEstimated + vehicleMaintenanceEstimated + depreciationEstimated + 
+        interestEstimated + netProfitEstimated;
+
+  const total_2023_right =
+    "total_2023_right" in values && values.total_2023_right !== ""
+      ? getValue("total_2023_right")
+      : sales_2023 + majuriCharges_2023 + closingStock_2023 + grossProfit_2023;
+
+  const total_2024_right =
+    "total_2024_right" in values && values.total_2024_right !== ""
+      ? getValue("total_2024_right")
+      : sales_2024 + majuriCharges_2024 + closingStock_2024 + grossProfit_2024;
+
+  const total_estimated_right =
+    "total_estimated_right" in values && values.total_estimated_right !== ""
+      ? getValue("total_estimated_right")
+      : salesEstimated + majuriChargesEstimated + closingStockEstimated + grossProfitEstimated;
+
+
+  const monthlyTurnover =
+    "monthlyTurnover" in values && values.monthlyTurnover !== ""
+      ? getValue("monthlyTurnover")
+      : round2(salesEstimated / 12);
 
   const totalEstimatedExpenses =
-    salariesEstimated +
-    bonusEstimated +
-    electricityChargesEstimated +
-    sadarEstimated +
-    coalGasLiquidEstimated +
-    sparesMachineryEstimated +
-    bankInterestEstimated +
-    bankChargesEstimated +
-    financeChargesEstimated +
-    shopRentsEstimated +
-    gstLateFeeEstimated +
-    auditorFeeEstimated +
-    telephoneChargesEstimated +
-    travellingExpEstimated +
-    vehicleMaintenanceEstimated +
-    depreciationEstimated +
+    salariesEstimated + bonusEstimated + electricityChargesEstimated + sadarEstimated + 
+    coalGasLiquidEstimated + sparesMachineryEstimated + bankInterestEstimated + 
+    bankChargesEstimated + financeChargesEstimated + shopRentsEstimated + 
+    gstLateFeeEstimated + auditorFeeEstimated + telephoneChargesEstimated + 
+    travellingExpEstimated + vehicleMaintenanceEstimated + depreciationEstimated + 
     interestEstimated;
 
-  const netProfitEstimated = grossProfitEstimated - totalEstimatedExpenses;
+  const monthlyPayments =
+    "monthlyPayments" in values && values.monthlyPayments !== ""
+      ? getValue("monthlyPayments")
+      : round2(totalEstimatedExpenses / 12);
 
-  const openingStockChange = openingStock_2023 !== 0 
-    ? ((openingStock_2024 - openingStock_2023) / openingStock_2023) * 100 
-    : 0;
-  const purchasesChange = purchases_2023 !== 0 
-    ? ((purchases_2024 - purchases_2023) / purchases_2023) * 100 
-    : 0;
-  const salesChange = sales_2023 !== 0 
-    ? ((sales_2024 - sales_2023) / sales_2023) * 100 
-    : 0;
-  const grossProfitChange = grossProfit_2023 !== 0 
-    ? ((grossProfit_2024 - grossProfit_2023) / grossProfit_2023) * 100 
-    : 0;
-  const netProfitChange = netProfit_2023 !== 0 
-    ? ((netProfit_2024 - netProfit_2023) / netProfit_2023) * 100 
-    : 0;
+  const monthlyNetProfit =
+    "monthlyNetProfit" in values && values.monthlyNetProfit !== ""
+      ? getValue("monthlyNetProfit")
+      : round2(netProfitEstimated / 12);
+
+
+  const gpPercentage =
+    "gpPercentage" in values && values.gpPercentage !== ""
+      ? getValue("gpPercentage")
+      : salesEstimated !== 0
+        ? round2((grossProfitEstimated / salesEstimated) * 100)
+        : 0;
+
+  const npPercentage =
+    "npPercentage" in values && values.npPercentage !== ""
+      ? getValue("npPercentage")
+      : salesEstimated !== 0
+        ? round2((netProfitEstimated / salesEstimated) * 100)
+        : 0;
 
   return {
+    ...values,
     openingStock_2023,
-    openingStock_2024,
-    openingStockChange,
-    openingStockEstimated,
     purchases_2023,
-    purchases_2024,
-    purchasesChange,
-    purchasesEstimated,
+    gasLiquidItems_2023,
     sales_2023,
-    sales_2024,
-    salesChange,
-    salesEstimated,
+    majuriCharges_2023,
+    closingStock_2023,
     grossProfit_2023,
-    grossProfit_2024,
-    grossProfitChange,
-    grossProfitEstimated,
     netProfit_2023,
+    salaries_2023,
+    bonus_2023,
+    electricityCharges_2023,
+    sadar_2023,
+    coalGasLiquid_2023,
+    sparesMachinery_2023,
+    bankInterest_2023,
+    bankCharges_2023,
+    financeCharges_2023,
+    shopRents_2023,
+    gstLateFee_2023,
+    auditorFee_2023,
+    telephoneCharges_2023,
+    travellingExp_2023,
+    vehicleMaintenance_2023,
+    depreciation_2023,
+    interest_2023,
+    // 2024 Actuals
+    openingStock_2024,
+    purchases_2024,
+    gasLiquidItems_2024,
+    sales_2024,
+    majuriCharges_2024,
+    closingStock_2024,
+    grossProfit_2024,
     netProfit_2024,
+    salaries_2024,
+    bonus_2024,
+    electricityCharges_2024,
+    sadar_2024,
+    coalGasLiquid_2024,
+    sparesMachinery_2024,
+    bankInterest_2024,
+    bankCharges_2024,
+    financeCharges_2024,
+    shopRents_2024,
+    gstLateFee_2024,
+    auditorFee_2024,
+    telephoneCharges_2024,
+    travellingExp_2024,
+    vehicleMaintenance_2024,
+    depreciation_2024,
+    interest_2024,
+    // Changes
+    openingStockChange,
+    purchasesChange,
+    gasLiquidItemsChange,
+    salesChange,
+    majuriChargesChange,
+    closingStockChange,
+    grossProfitChange,
     netProfitChange,
+    salariesChange,
+    bonusChange,
+    electricityChargesChange,
+    sadarChange,
+    coalGasLiquidChange,
+    sparesMachineryChange,
+    bankInterestChange,
+    bankChargesChange,
+    financeChargesChange,
+    shopRentsChange,
+    gstLateFeeChange,
+    auditorFeeChange,
+    telephoneChargesChange,
+    travellingExpChange,
+    vehicleMaintenanceChange,
+    depreciationChange,
+    interestChange,
+    // Estimated
+    openingStockEstimated,
+    purchasesEstimated,
+    gasLiquidItemsEstimated,
+    salesEstimated,
+    majuriChargesEstimated,
+    closingStockEstimated,
+    grossProfitEstimated,
     netProfitEstimated,
-    ...Object.fromEntries(
-      Object.entries(values).filter(([key]) => 
-        !key.includes("_2023") && !key.includes("_2024") && 
-        !key.includes("Change") && !key.includes("Estimated")
-      )
-    ),
+    salariesEstimated,
+    bonusEstimated,
+    electricityChargesEstimated,
+    sadarEstimated,
+    coalGasLiquidEstimated,
+    sparesMachineryEstimated,
+    bankInterestEstimated,
+    bankChargesEstimated,
+    financeChargesEstimated,
+    shopRentsEstimated,
+    gstLateFeeEstimated,
+    auditorFeeEstimated,
+    telephoneChargesEstimated,
+    travellingExpEstimated,
+    vehicleMaintenanceEstimated,
+    depreciationEstimated,
+    interestEstimated,
+    // Totals
+    total_2023_left,
+    total_2024_left,
+    total_estimated_left,
+    total_2023_right,
+    total_2024_right,
+    total_estimated_right,
+    // Monthly
+    monthlyTurnover,
+    monthlyPayments,
+    monthlyNetProfit,
+    gpPercentage,
+    npPercentage,
   };
 };
 

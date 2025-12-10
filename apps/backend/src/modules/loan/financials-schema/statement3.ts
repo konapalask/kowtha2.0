@@ -162,7 +162,7 @@ export const statement3Schema = {
       grossProfit_2023: {
         type: "number",
         title: `Gross Profit - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
-        formula: "sales_2023 + closingStock_2023 - (openingStock_2023 + purchases_2023 + gasLiquidItems_2023)",
+        formula: "sales_2023 + majuriCharges_2023 + closingStock_2023 - (openingStock_2023 + purchases_2023 + gasLiquidItems_2023)",
         readOnly: true,
         minimum: 0,
         formatter: {
@@ -175,7 +175,7 @@ export const statement3Schema = {
       grossProfit_2024: {
         type: "number",
         title: `Gross Profit - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
-        formula: "sales_2024 + closingStock_2024 - (openingStock_2024 + purchases_2024 + gasLiquidItems_2024)",
+        formula: "sales_2024 + majuriCharges_2024 + closingStock_2024 - (openingStock_2024 + purchases_2024 + gasLiquidItems_2024)",
         readOnly: true,
         minimum: 0,
         formatter: {
@@ -202,7 +202,7 @@ export const statement3Schema = {
       grossProfitEstimated: {
         type: "number",
         title: "Gross Profit - Estimated",
-        formula: "salesEstimated + closingStockEstimated - (openingStockEstimated + purchasesEstimated + gasLiquidItemsEstimated)",
+        formula: "salesEstimated + majuriChargesEstimated + closingStockEstimated - (openingStockEstimated + purchasesEstimated + gasLiquidItemsEstimated)",
         readOnly: true,
         minimum: 0,
         formatter: {
@@ -1199,7 +1199,7 @@ export const statement3Schema = {
       total_2023_left: {
         type: "number",
         title: `Total - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
-        formula: "sales_2023 + closingStock_2023 + gasLiquidItems_2023 + sparesMachinery_2023 + bankInterest_2023 + bankCharges_2023 + financeCharges_2023 + shopRents_2023 + gstLateFee_2023 + auditorFee_2023 + telephoneCharges_2023 + travellingExp_2023 + vehicleMaintenance_2023 + depreciation_2023 + interest_2023 + sadar_2023 + coalGasLiquid_2023 + bonus_2023 + electricityCharges_2023 + salaries_2023",
+        formula: "openingStock_2023 + purchases_2023 + gasLiquidItems_2023 + grossProfit_2023 + salaries_2023 + bonus_2023 + electricityCharges_2023 + sadar_2023 + coalGasLiquid_2023 + sparesMachinery_2023 + bankInterest_2023 + bankCharges_2023 + financeCharges_2023 + shopRents_2023 + gstLateFee_2023 + auditorFee_2023 + telephoneCharges_2023 + travellingExp_2023 + vehicleMaintenance_2023 + depreciation_2023 + interest_2023 + netProfit_2023",
         readOnly: true,
         minimum: 0,
         formatter: {
@@ -1212,7 +1212,7 @@ export const statement3Schema = {
       total_2024_left: {
         type: "number",
         title: `Total - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
-        formula: "sales_2024 + closingStock_2024 + gasLiquidItems_2024 + sparesMachinery_2024 + bankInterest_2024 + bankCharges_2024 + financeCharges_2024 + shopRents_2024 + gstLateFee_2024 + auditorFee_2024 + telephoneCharges_2024 + travellingExp_2024 + vehicleMaintenance_2024 + depreciation_2024 + interest_2024 + sadar_2024 + coalGasLiquid_2024 + bonus_2024 + electricityCharges_2024 + salaries_2024",
+        formula: "openingStock_2024 + purchases_2024 + gasLiquidItems_2024 + grossProfit_2024 + salaries_2024 + bonus_2024 + electricityCharges_2024 + sadar_2024 + coalGasLiquid_2024 + sparesMachinery_2024 + bankInterest_2024 + bankCharges_2024 + financeCharges_2024 + shopRents_2024 + gstLateFee_2024 + auditorFee_2024 + telephoneCharges_2024 + travellingExp_2024 + vehicleMaintenance_2024 + depreciation_2024 + interest_2024 + netProfit_2024",
         readOnly: true,
         minimum: 0,
         formatter: {
@@ -1225,7 +1225,7 @@ export const statement3Schema = {
       total_estimated_left: {
         type: "number",
         title: "Total - Estimated",
-        formula: "salesEstimated + closingStockEstimated + gasLiquidItemsEstimated + sparesMachineryEstimated + bankInterestEstimated + bankChargesEstimated + financeChargesEstimated + shopRentsEstimated + gstLateFeeEstimated + auditorFeeEstimated + telephoneChargesEstimated + travellingExpEstimated + vehicleMaintenanceEstimated + depreciationEstimated + interestEstimated + sadarEstimated + coalGasLiquidEstimated + bonusEstimated + electricityChargesEstimated + salariesEstimated",
+        formula: "openingStockEstimated + purchasesEstimated + gasLiquidItemsEstimated + grossProfitEstimated + salariesEstimated + bonusEstimated + electricityChargesEstimated + sadarEstimated + coalGasLiquidEstimated + sparesMachineryEstimated + bankInterestEstimated + bankChargesEstimated + financeChargesEstimated + shopRentsEstimated + gstLateFeeEstimated + auditorFeeEstimated + telephoneChargesEstimated + travellingExpEstimated + vehicleMaintenanceEstimated + depreciationEstimated + interestEstimated + netProfitEstimated",
         readOnly: true,
         minimum: 0,
         formatter: {
@@ -1238,7 +1238,7 @@ export const statement3Schema = {
       total_2023_right: {
         type: "number",
         title: `Total - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
-        formula: "sales_2023 + majuriCharges_2023 + closingStock_2023",
+        formula: "sales_2023 + majuriCharges_2023 + closingStock_2023 + grossProfit_2023",
         readOnly: true,
         minimum: 0,
         formatter: {
@@ -1251,7 +1251,7 @@ export const statement3Schema = {
       total_2024_right: {
         type: "number",
         title: `Total - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
-        formula: "sales_2024 + majuriCharges_2024 + closingStock_2024",
+        formula: "sales_2024 + majuriCharges_2024 + closingStock_2024 + grossProfit_2024",
         readOnly: true,
         minimum: 0,
         formatter: {
@@ -1264,7 +1264,7 @@ export const statement3Schema = {
       total_estimated_right: {
         type: "number",
         title: "Total - Estimated",
-        formula: "salesEstimated + majuriChargesEstimated + closingStockEstimated",
+        formula: "salesEstimated + majuriChargesEstimated + closingStockEstimated + grossProfitEstimated",
         readOnly: true,
         minimum: 0,
         formatter: {
@@ -1292,6 +1292,8 @@ export const statement3Schema = {
       monthlyPayments: {
         type: "number",
         title: "Monthly Payments",
+        formula: "(salariesEstimated + bonusEstimated + electricityChargesEstimated + sadarEstimated + coalGasLiquidEstimated + sparesMachineryEstimated + bankInterestEstimated + bankChargesEstimated + financeChargesEstimated + shopRentsEstimated + gstLateFeeEstimated + auditorFeeEstimated + telephoneChargesEstimated + travellingExpEstimated + vehicleMaintenanceEstimated + depreciationEstimated + interestEstimated) / 12",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
