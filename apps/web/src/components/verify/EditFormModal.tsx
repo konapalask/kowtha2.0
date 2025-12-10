@@ -58,8 +58,15 @@ const detectFinancialSchemaFormat = (values: Record<string, any>): FinancialSche
   return "generic";
 };
 
+const parseNumber = (raw: any): number => {
+  if (raw === undefined || raw === null) return 0;
+  const cleaned = typeof raw === "string" ? raw.replace(/,/g, "").trim() : raw;
+  const num = parseFloat(cleaned as any);
+  return isNaN(num) ? 0 : num;
+};
+
 const getFormValue = (values: Record<string, any>, formField: string, schemaField: string): number => {
-  return parseFloat(values[formField] || values[schemaField] || "0") || 0;
+  return parseNumber(values[formField] ?? values[schemaField] ?? 0);
 };
 
 const calculateGenericFormat = (values: Record<string, any>) => {
@@ -156,17 +163,17 @@ const calculateGenericFormat = (values: Record<string, any>) => {
 };
 
 const calculateStatement2Format = (values: Record<string, any>) => {
-  const grossReceipts = parseFloat(values.grossReceipts) || 0;
-  const otherIncome = parseFloat(values.otherIncome) || 0;
-  const costOfMaterialConsumed = parseFloat(values.costOfMaterialConsumed) || 0;
-  const salary = parseFloat(values.salary) || 0;
-  const rent = parseFloat(values.rent) || 0;
-  const electricity = parseFloat(values.electricity) || 0;
-  const travelling = parseFloat(values.travelling) || 0;
-  const otherExpenses = parseFloat(values.otherExpenses) || 0;
-  const financeExpenses = parseFloat(values.financeExpenses) || 0;
-  const depreciation = parseFloat(values.depreciation) || 0;
-  const incomeTax = parseFloat(values.incomeTax) || 0;
+  const grossReceipts = parseNumber(values.grossReceipts);
+  const otherIncome = parseNumber(values.otherIncome);
+  const costOfMaterialConsumed = parseNumber(values.costOfMaterialConsumed);
+  const salary = parseNumber(values.salary);
+  const rent = parseNumber(values.rent);
+  const electricity = parseNumber(values.electricity);
+  const travelling = parseNumber(values.travelling);
+  const otherExpenses = parseNumber(values.otherExpenses);
+  const financeExpenses = parseNumber(values.financeExpenses);
+  const depreciation = parseNumber(values.depreciation);
+  const incomeTax = parseNumber(values.incomeTax);
 
   const incomeSubtotal = grossReceipts + otherIncome;
   const expenditureSubtotal = salary + rent + electricity + travelling + otherExpenses;
@@ -204,7 +211,7 @@ const calculateStatement2Format = (values: Record<string, any>) => {
 };
 
 const calculateStatement3Format = (values: Record<string, any>) => {
-  const getValue = (key: string) => parseFloat(values[key]) || 0;
+  const getValue = (key: string) => parseNumber(values[key]);
   const round2 = (num: number) => Math.round(num * 100) / 100;
 
   // 2023 Actuals
@@ -285,53 +292,84 @@ const calculateStatement3Format = (values: Record<string, any>) => {
   const depreciationEstimated = getValue("depreciationEstimated");
   const interestEstimated = getValue("interestEstimated");
 
+  // Always compute GP from current inputs
   const grossProfit_2023 =
-    "grossProfit_2023" in values && values.grossProfit_2023 !== ""
-      ? getValue("grossProfit_2023")
-      : sales_2023 + closingStock_2023 + majuriCharges_2023 - (openingStock_2023 + purchases_2023 + gasLiquidItems_2023);
+    sales_2023 +
+    closingStock_2023 +
+    majuriCharges_2023 -
+    (openingStock_2023 + purchases_2023 + gasLiquidItems_2023);
   
   const grossProfit_2024 =
-    "grossProfit_2024" in values && values.grossProfit_2024 !== ""
-      ? getValue("grossProfit_2024")
-      : sales_2024 + closingStock_2024 + majuriCharges_2024 - (openingStock_2024 + purchases_2024 + gasLiquidItems_2024);
+    sales_2024 +
+    closingStock_2024 +
+    majuriCharges_2024 -
+    (openingStock_2024 + purchases_2024 + gasLiquidItems_2024);
   
   const grossProfitEstimated =
-    "grossProfitEstimated" in values && values.grossProfitEstimated !== ""
-      ? getValue("grossProfitEstimated")
-      : salesEstimated + closingStockEstimated + majuriChargesEstimated - (openingStockEstimated + purchasesEstimated + gasLiquidItemsEstimated);
+    salesEstimated +
+    closingStockEstimated +
+    majuriChargesEstimated -
+    (openingStockEstimated + purchasesEstimated + gasLiquidItemsEstimated);
 
   const netProfit_2023 =
-    "netProfit_2023" in values && values.netProfit_2023 !== ""
-      ? getValue("netProfit_2023")
-      : grossProfit_2023 - (
-          salaries_2023 + bonus_2023 + electricityCharges_2023 + sadar_2023 + 
-          coalGasLiquid_2023 + sparesMachinery_2023 + bankInterest_2023 + 
-          bankCharges_2023 + financeCharges_2023 + shopRents_2023 + 
-          gstLateFee_2023 + auditorFee_2023 + telephoneCharges_2023 + 
-          travellingExp_2023 + vehicleMaintenance_2023 + depreciation_2023 + interest_2023
-        );
+    grossProfit_2023 -
+    (salaries_2023 +
+      bonus_2023 +
+      electricityCharges_2023 +
+      sadar_2023 +
+      coalGasLiquid_2023 +
+      sparesMachinery_2023 +
+      bankInterest_2023 +
+      bankCharges_2023 +
+      financeCharges_2023 +
+      shopRents_2023 +
+      gstLateFee_2023 +
+      auditorFee_2023 +
+      telephoneCharges_2023 +
+      travellingExp_2023 +
+      vehicleMaintenance_2023 +
+      depreciation_2023 +
+      interest_2023);
 
   const netProfit_2024 =
-    "netProfit_2024" in values && values.netProfit_2024 !== ""
-      ? getValue("netProfit_2024")
-      : grossProfit_2024 - (
-          salaries_2024 + bonus_2024 + electricityCharges_2024 + sadar_2024 + 
-          coalGasLiquid_2024 + sparesMachinery_2024 + bankInterest_2024 + 
-          bankCharges_2024 + financeCharges_2024 + shopRents_2024 + 
-          gstLateFee_2024 + auditorFee_2024 + telephoneCharges_2024 + 
-          travellingExp_2024 + vehicleMaintenance_2024 + depreciation_2024 + interest_2024
-        );
+    grossProfit_2024 -
+    (salaries_2024 +
+      bonus_2024 +
+      electricityCharges_2024 +
+      sadar_2024 +
+      coalGasLiquid_2024 +
+      sparesMachinery_2024 +
+      bankInterest_2024 +
+      bankCharges_2024 +
+      financeCharges_2024 +
+      shopRents_2024 +
+      gstLateFee_2024 +
+      auditorFee_2024 +
+      telephoneCharges_2024 +
+      travellingExp_2024 +
+      vehicleMaintenance_2024 +
+      depreciation_2024 +
+      interest_2024);
 
   const netProfitEstimated =
-    "netProfitEstimated" in values && values.netProfitEstimated !== ""
-      ? getValue("netProfitEstimated")
-      : grossProfitEstimated - (
-          salariesEstimated + bonusEstimated + electricityChargesEstimated + sadarEstimated + 
-          coalGasLiquidEstimated + sparesMachineryEstimated + bankInterestEstimated + 
-          bankChargesEstimated + financeChargesEstimated + shopRentsEstimated + 
-          gstLateFeeEstimated + auditorFeeEstimated + telephoneChargesEstimated + 
-          travellingExpEstimated + vehicleMaintenanceEstimated + depreciationEstimated + interestEstimated
-        );
+    grossProfitEstimated -
+    (salariesEstimated +
+      bonusEstimated +
+      electricityChargesEstimated +
+      sadarEstimated +
+      coalGasLiquidEstimated +
+      sparesMachineryEstimated +
+      bankInterestEstimated +
+      bankChargesEstimated +
+      financeChargesEstimated +
+      shopRentsEstimated +
+      gstLateFeeEstimated +
+      auditorFeeEstimated +
+      telephoneChargesEstimated +
+      travellingExpEstimated +
+      vehicleMaintenanceEstimated +
+      depreciationEstimated +
+      interestEstimated);
 
   // Change % calculations
   const calculateChange = (val2024: number, val2023: number) => 
@@ -366,52 +404,85 @@ const calculateStatement3Format = (values: Record<string, any>) => {
 
  
   const total_2023_left =
-    "total_2023_left" in values && values.total_2023_left !== ""
-      ? getValue("total_2023_left")
-      : openingStock_2023 + purchases_2023 + gasLiquidItems_2023 + grossProfit_2023 +
-        salaries_2023 + bonus_2023 + electricityCharges_2023 + sadar_2023 + 
-        coalGasLiquid_2023 + sparesMachinery_2023 + bankInterest_2023 + 
-        bankCharges_2023 + financeCharges_2023 + shopRents_2023 + 
-        gstLateFee_2023 + auditorFee_2023 + telephoneCharges_2023 + 
-        travellingExp_2023 + vehicleMaintenance_2023 + depreciation_2023 + 
-        interest_2023 + netProfit_2023;
+    openingStock_2023 +
+    purchases_2023 +
+    gasLiquidItems_2023 +
+    grossProfit_2023 +
+    salaries_2023 +
+    bonus_2023 +
+    electricityCharges_2023 +
+    sadar_2023 +
+    coalGasLiquid_2023 +
+    sparesMachinery_2023 +
+    bankInterest_2023 +
+    bankCharges_2023 +
+    financeCharges_2023 +
+    shopRents_2023 +
+    gstLateFee_2023 +
+    auditorFee_2023 +
+    telephoneCharges_2023 +
+    travellingExp_2023 +
+    vehicleMaintenance_2023 +
+    depreciation_2023 +
+    interest_2023 +
+    netProfit_2023;
 
   const total_2024_left =
-    "total_2024_left" in values && values.total_2024_left !== ""
-      ? getValue("total_2024_left")
-      : openingStock_2024 + purchases_2024 + gasLiquidItems_2024 + grossProfit_2024 +
-        salaries_2024 + bonus_2024 + electricityCharges_2024 + sadar_2024 + 
-        coalGasLiquid_2024 + sparesMachinery_2024 + bankInterest_2024 + 
-        bankCharges_2024 + financeCharges_2024 + shopRents_2024 + 
-        gstLateFee_2024 + auditorFee_2024 + telephoneCharges_2024 + 
-        travellingExp_2024 + vehicleMaintenance_2024 + depreciation_2024 + 
-        interest_2024 + netProfit_2024;
+    openingStock_2024 +
+    purchases_2024 +
+    gasLiquidItems_2024 +
+    grossProfit_2024 +
+    salaries_2024 +
+    bonus_2024 +
+    electricityCharges_2024 +
+    sadar_2024 +
+    coalGasLiquid_2024 +
+    sparesMachinery_2024 +
+    bankInterest_2024 +
+    bankCharges_2024 +
+    financeCharges_2024 +
+    shopRents_2024 +
+    gstLateFee_2024 +
+    auditorFee_2024 +
+    telephoneCharges_2024 +
+    travellingExp_2024 +
+    vehicleMaintenance_2024 +
+    depreciation_2024 +
+    interest_2024 +
+    netProfit_2024;
 
   const total_estimated_left =
-    "total_estimated_left" in values && values.total_estimated_left !== ""
-      ? getValue("total_estimated_left")
-      : openingStockEstimated + purchasesEstimated + gasLiquidItemsEstimated + grossProfitEstimated +
-        salariesEstimated + bonusEstimated + electricityChargesEstimated + sadarEstimated + 
-        coalGasLiquidEstimated + sparesMachineryEstimated + bankInterestEstimated + 
-        bankChargesEstimated + financeChargesEstimated + shopRentsEstimated + 
-        gstLateFeeEstimated + auditorFeeEstimated + telephoneChargesEstimated + 
-        travellingExpEstimated + vehicleMaintenanceEstimated + depreciationEstimated + 
-        interestEstimated + netProfitEstimated;
+    openingStockEstimated +
+    purchasesEstimated +
+    gasLiquidItemsEstimated +
+    grossProfitEstimated +
+    salariesEstimated +
+    bonusEstimated +
+    electricityChargesEstimated +
+    sadarEstimated +
+    coalGasLiquidEstimated +
+    sparesMachineryEstimated +
+    bankInterestEstimated +
+    bankChargesEstimated +
+    financeChargesEstimated +
+    shopRentsEstimated +
+    gstLateFeeEstimated +
+    auditorFeeEstimated +
+    telephoneChargesEstimated +
+    travellingExpEstimated +
+    vehicleMaintenanceEstimated +
+    depreciationEstimated +
+    interestEstimated +
+    netProfitEstimated;
 
   const total_2023_right =
-    "total_2023_right" in values && values.total_2023_right !== ""
-      ? getValue("total_2023_right")
-      : sales_2023 + majuriCharges_2023 + closingStock_2023 + grossProfit_2023;
+    sales_2023 + majuriCharges_2023 + closingStock_2023 + grossProfit_2023;
 
   const total_2024_right =
-    "total_2024_right" in values && values.total_2024_right !== ""
-      ? getValue("total_2024_right")
-      : sales_2024 + majuriCharges_2024 + closingStock_2024 + grossProfit_2024;
+    sales_2024 + majuriCharges_2024 + closingStock_2024 + grossProfit_2024;
 
   const total_estimated_right =
-    "total_estimated_right" in values && values.total_estimated_right !== ""
-      ? getValue("total_estimated_right")
-      : salesEstimated + majuriChargesEstimated + closingStockEstimated + grossProfitEstimated;
+    salesEstimated + majuriChargesEstimated + closingStockEstimated + grossProfitEstimated;
 
 
   const monthlyTurnover =
@@ -574,7 +645,7 @@ const calculateStatement3Format = (values: Record<string, any>) => {
 };
 
 const calculateStatement4Format = (values: Record<string, any>) => {
-  const getValue = (key: string) => parseFloat(values[key]) || 0;
+  const getValue = (key: string) => parseNumber(values[key]);
 
   const openingStockAssessed = getValue("openingStockAssessed");
   const purchasesAssessed = getValue("purchasesAssessed");
