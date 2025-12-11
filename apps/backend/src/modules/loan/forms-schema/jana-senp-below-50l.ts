@@ -246,14 +246,20 @@ export const janaSenpBelow50lSchema = {
     },
 
     {
-      id: " averageStockMaintained",
+      id: "averageStockMaintained",
       label: "Average Stock Maintained",
       schema: {
         type: "object",
         properties: {
-          averageStockMaintained: {
+          averaggeStock: {
             type: "number",
             title: "Average Stock Maintained",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
         },
       },
@@ -332,22 +338,30 @@ export const janaSenpBelow50lSchema = {
       schema: {
         type: "object",
         properties: {
-          typeOfIncome: { type: "string", title: "Type of Income" },
-          incomeAmount: {
-            type: "number",
-            title: "Amount",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
+          otherIncome: {
+            type: "array",
+            title: "Other Sources of Income",
+            items: {
+              type: "object",
+              properties: {
+                typeOfIncome: { type: "string", title: "Type of Income" },
+                incomeAmount: {
+                  type: "number",
+                  title: "Amount",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
+                },
+                remarks: { type: "string", title: "Remarks (pls. Specify)" },
+              },
             },
           },
-          remarks: { type: "string", title: "Remarks (pls. Specify)" },
         },
       },
     },
-
     {
       id: "specificForCashSalariedProfile",
       label:

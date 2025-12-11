@@ -239,7 +239,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
 
       <tr>
         <td style="${labelCellStyle}">Average Stock Maintained</td>
-        <td style="${valueCellStyle}">${formatCurrency(averageStockMaintained?.averageStockMaintained)}</td>
+        <td style="${valueCellStyle}">${formatCurrency(averageStockMaintained?.averaggeStock)}</td>
       </tr>
 
       <tr>
