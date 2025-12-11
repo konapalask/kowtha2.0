@@ -361,10 +361,17 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
                     matchesFieldExact(fieldKey, FIELD_KEY_MAPPINGS.coordinates)
                   ) {
                     // Populate combined coordinates field
+                    // Ensure section exists in updates
+                    if (!updates[section.id]) {
+                      updates[section.id] = {};
+                    }
                     updates[section.id] = {
-                      ...prev[section.id],
+                      ...(prev[section.id] || {}),
                       [fieldKey]: coordinates,
                     };
+                    console.log(
+                      `✅ Populated coordinates field "${fieldKey}" in section "${section.id}": ${coordinates}`,
+                    );
                   } else if (
                     matchesFieldExact(fieldKey, FIELD_KEY_MAPPINGS.latitude)
                   ) {
@@ -374,6 +381,10 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
                       fieldSchema?.type === 'number'
                         ? latitude
                         : latitude.toString();
+                    // Ensure section exists in updates
+                    if (!updates[section.id]) {
+                      updates[section.id] = {};
+                    }
                     updates[section.id] = {
                       ...(updates[section.id] || prev[section.id] || {}),
                       [fieldKey]: latitudeValue,
@@ -387,6 +398,10 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
                       fieldSchema?.type === 'number'
                         ? longitude
                         : longitude.toString();
+                    // Ensure section exists in updates
+                    if (!updates[section.id]) {
+                      updates[section.id] = {};
+                    }
                     updates[section.id] = {
                       ...(updates[section.id] || prev[section.id] || {}),
                       [fieldKey]: longitudeValue,
@@ -420,8 +435,12 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
                     matchesFieldExact(fieldKey, FIELD_KEY_MAPPINGS.latitude) ||
                     matchesFieldExact(fieldKey, FIELD_KEY_MAPPINGS.longitude)
                   ) {
+                    // Ensure section exists in updates
+                    if (!updates[section.id]) {
+                      updates[section.id] = {};
+                    }
                     updates[section.id] = {
-                      ...prev[section.id],
+                      ...(prev[section.id] || {}),
                       [fieldKey]: 'Location not available',
                     };
                   }
