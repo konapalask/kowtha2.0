@@ -1279,7 +1279,7 @@ export const statement3Schema = {
       monthlyTurnover: {
         type: "number",
         title: "Monthly Turnover",
-        formula: "salesEstimated / 12",
+        formula: "(salesEstimated) / 12",
         readOnly: true,
         minimum: 0,
         formatter: {
@@ -1292,7 +1292,7 @@ export const statement3Schema = {
       monthlyPayments: {
         type: "number",
         title: "Monthly Payments",
-        formula: "(salariesEstimated + bonusEstimated + electricityChargesEstimated + sadarEstimated + coalGasLiquidEstimated + sparesMachineryEstimated + bankInterestEstimated + bankChargesEstimated + financeChargesEstimated + shopRentsEstimated + gstLateFeeEstimated + auditorFeeEstimated + telephoneChargesEstimated + travellingExpEstimated + vehicleMaintenanceEstimated + depreciationEstimated + interestEstimated) / 12",
+        formula: "monthlyTurnover - (monthlyNetProfit)",
         readOnly: true,
         minimum: 0,
         formatter: {
@@ -1320,7 +1320,7 @@ export const statement3Schema = {
       gpPercentage: {
         type: "number",
         title: "Gross Profit %",
-        formula: "(grossProfitEstimated / salesEstimated) * 100",
+        formula: "grossProfitEstimated / (salesEstimated+majuriChargesEstimated+closingStockEstimated)",
         readOnly: true,
         minimum: 0,
         formatter: {
@@ -1333,7 +1333,7 @@ export const statement3Schema = {
       npPercentage: {
         type: "number",
         title: "Net Profit %",
-        formula: "(netProfitEstimated / salesEstimated) * 100",
+        formula: "netProfitEstimated / (salesEstimated+majuriChargesEstimated+closingStockEstimated)",
         readOnly: true,
         minimum: 0,
         formatter: {
