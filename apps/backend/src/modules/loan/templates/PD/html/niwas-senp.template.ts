@@ -192,8 +192,8 @@ export const niwasSenpTemplate = (verificationData: any, html_data: any) => {
           "Current residence house size",
           general.currentResidenceHouseSize
         )}
-        ${renderKeyValue("If <1= Year, then Previous Address", general.previousAddress)}
-        ${renderKeyValue("Number of Years Stayed at that Address", general.yearsAtPreviousAddress)}
+        ${renderKeyValue("If <1= Year, then Previous Address", general.yearsInCurrentResidence === "<1 Year" ? general.previousAddress : "NA")}
+        ${renderKeyValue("Number of Years Stayed at that Address", general.yearsInCurrentResidence === "<1 Year" ? general.yearsAtPreviousAddress : "NA")}
      
         ${renderKeyValue(
           "Number of Years in Current City",
@@ -205,11 +205,11 @@ export const niwasSenpTemplate = (verificationData: any, html_data: any) => {
             <table style="border-collapse:collapse;width:100%;margin:0;">
               <tr>
                <td style="border:none;padding:0 16px 0 0;font-weight:600;color:#333;">Previous City:</td>
-                <td style="border:none;padding:0 16px 0 0;color:#333;">${formatMultiline(general.previousCity)}</td>
+                <td style="border:none;padding:0 16px 0 0;color:#333;">${formatMultiline(general.yearsInCurrentCity === "<=3 Years" ? general.previousCity : "NA")}</td>
                 <td style="border:none;padding:0 16px 0 0;font-weight:600;color:#333;">Number of Years in that City:</td>
-                <td style="border:none;padding:0 16px 0 0;color:#333;">${formatMultiline(general.yearsAtPreviousAddress)}</td>
+                <td style="border:none;padding:0 16px 0 0;color:#333;">${formatMultiline(general.yearsInCurrentCity === "<=3 Years" ? general.yearsInPreviousCity : "NA")}</td>
                 <td style="border:none;padding:0 16px 0 0;font-weight:600;color:#333;">Reason for Change:</td>
-                <td style="border:none;padding:0 16px 0 0;color:#333;">${formatMultiline(general.reasonForChange)}</td>
+                <td style="border:none;padding:0 16px 0 0;color:#333;">${formatMultiline(general.yearsInCurrentCity === "<=3 Years" ? general.reasonForChange : "NA")}</td>
               </tr>
             </table>
           </td>
@@ -495,8 +495,8 @@ export const niwasSenpTemplate = (verificationData: any, html_data: any) => {
         <tr>
           <td style="${labelCellStyle}" >Mode of Payment to Seller:</td>
           <td style="${valueCellStyle}" colspan="2">
-          <span><b>Cash Amount:</b> ${formatCurrency(costFunds.cashAmount || "Not provided")}</span>
-          <span style="margin-left: 16px;"><b>Cheque Amount:</b> ${formatCurrency(costFunds.chequeAmount || "Not provided")}</span>
+          <span><b>Cash Amount:</b> ${formatCurrency(costFunds.modeOfPaymentToSeller.cashAmount || "Not provided")}</span>
+          <span style="margin-left: 16px;"><b>Cheque Amount:</b> ${formatCurrency(costFunds.modeOfPaymentToSeller.chequeAmount || "Not provided")}</span>
           </td>
         </tr>
       </table>
