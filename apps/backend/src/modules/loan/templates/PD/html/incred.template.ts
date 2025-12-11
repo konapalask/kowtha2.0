@@ -193,7 +193,7 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
             <td style="${labelCellStyle}">Name</td>
             <td style="${labelCellStyle}">Relation</td>
             <td style="${labelCellStyle}">Age(Yrs)</td>
-            <td style="${labelCellStyle}">Qualification</td>
+            <td style="${labelCellStyle}">Education</td>
             <td style="${labelCellStyle}">Occupation</td>
         </tr>
         ${familyMembers
@@ -203,7 +203,7 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
                 <td style="${valueCellStyle}">${member.name || ""}</td>
                 <td style="${valueCellStyle}">${member.relation || ""}</td>
                 <td style="${valueCellStyle}">${member.age || ""} yrs</td>
-                <td style="${valueCellStyle}">${member.qualification || ""}</td>
+                <td style="${valueCellStyle}">${member.education || ""}</td>
                 <td style="${valueCellStyle}">${member.occupation || ""}</td>
             </tr>
         `
@@ -288,7 +288,7 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
 
       <p style="font-size:18px;"><strong>Overall Positives or Negatives:</strong>  ${formatMultiline(overallPositivesOrNegatives.overallPositivesOrNegatives)}</p>
       <br>
-      ${renderKeyValue("Accept/Reject: ", verificationData.acceptRejectPD?.acceptReject || "Not provided", undefined)}
+      ${renderKeyValue("<strong>Accept/Reject:</strong> ", verificationData.acceptRejectPD?.acceptReject || "Not provided", undefined)}
       <p style="margin:8px 0;line-height:1.5"><strong>Signature of the PD Officer:</strong></p>
       <br>  
       <p style="font-size:18px;"><strong>Note:</strong> We have taken the estimated figures based on customer feedback and the gross profit has been arrived taking into consideration market information gathered on our experience.</p>
