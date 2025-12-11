@@ -1577,8 +1577,8 @@ export class FinancialAnalysisTemplatesService {
     addDataRow(
       "To Gross Profit",
       getValue("grossProfitAssessed"),
-      "By Gross Profit",
-      getValue("byGrossProfitEstimated")
+      "",
+      ""
     );
 
     // Grand Total (Left)

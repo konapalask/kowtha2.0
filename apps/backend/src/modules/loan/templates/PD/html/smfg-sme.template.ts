@@ -161,7 +161,7 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
     account.accountType || "",
     formatMultiline(account.vintage),
     formatMultiline(account.ifCcOdLimitWhatIsLimitMinBal),
-    formatMultiline(account.customerBehaviour),
+    formatMultiline(account.customerBehavior),
   ]);
 
   const generalTable = `
