@@ -2,10 +2,11 @@ import { useTabContext } from "@/pages/verify/[id]";
 import { EditFormModalProps } from "@/utils/verifierInterface";
 import { Form, message, Modal, Row } from "antd";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { FormSelector } from "./VerificationEditForms";
 import { updateFinancialAnalysis } from "@/services/verifier.services";
 import { useDepartmentChange } from "@/utils/utility";
+import { getSchemaFromBackend } from "@/services/schema.service";
 import _ from "lodash";
 
 const formKeyMapping: Record<string, string> = {
@@ -18,687 +19,6 @@ const formKeyMapping: Record<string, string> = {
   familyDetails: "familyMemberDetails",
 };
 
-type FinancialSchemaFormat = "generic" | "statement2" | "statement3" | "statement4";
-
-const detectFinancialSchemaFormat = (values: Record<string, any>): FinancialSchemaFormat => {
-  const keys = Object.keys(values).map(k => k.toLowerCase());
-  
-  if (
-    keys.some(k => 
-      k.includes("grossreceipts") || 
-      k.includes("costofmaterialconsumed") ||
-      k.includes("grossprofitasperassumption") ||
-      k.includes("pbdit")
-    )
-  ) {
-    return "statement2";
-  }
-  
-  if (
-    keys.some(k => 
-      k.includes("_2023") || 
-      k.includes("_2024") ||
-      k.includes("2023") ||
-      k.includes("2024")
-    )
-  ) {
-    return "statement3";
-  }
-  
-  if (
-    keys.some(k => 
-      k.includes("assessed") || 
-      k.includes("audited") ||
-      k.includes("estimated") && (k.includes("openingstock") || k.includes("purchases"))
-    )
-  ) {
-    return "statement4";
-  }
-  
-  return "generic";
-};
-
-const parseNumber = (raw: any): number => {
-  if (raw === undefined || raw === null) return 0;
-  const cleaned = typeof raw === "string" ? raw.replace(/,/g, "").trim() : raw;
-  const num = parseFloat(cleaned as any);
-  return isNaN(num) ? 0 : num;
-};
-
-const getFormValue = (values: Record<string, any>, formField: string, schemaField: string): number => {
-  return parseNumber(values[formField] ?? values[schemaField] ?? 0);
-};
-
-const calculateGenericFormat = (values: Record<string, any>) => {
-  const openingStock = getFormValue(values, "toOpeningStock", "openingStock");
-  const purchase = getFormValue(values, "toPurchase", "purchase");
-  const costOfServices = getFormValue(values, "toCostOfServices", "costOfServices");
-  const wages = getFormValue(values, "toWages", "wages");
-  const hamaliCharges = getFormValue(values, "toHamaliCharges", "hamaliCharges");
-  const manufacturingExpenses = getFormValue(values, "toManufacturingExpenses", "manufacturingExpenses");
-  const packingCharges = getFormValue(values, "toPackingCharges", "packingCharges");
-  const sales = getFormValue(values, "bySales", "sales");
-  const services = getFormValue(values, "byServices", "services");
-  const closingStock = getFormValue(values, "byClosingStock", "closingStock");
-  const salaries = getFormValue(values, "toSalaries", "salaries");
-  const rent = getFormValue(values, "toRent", "rent");
-  const electricityCharges = getFormValue(values, "toElectricityCharges", "electricityCharges");
-  const printingStationery = getFormValue(values, "toPrintingStationery", "printingStationery");
-  const telephoneCharges = getFormValue(values, "toTelephoneCharges", "telephoneCharges");
-  const postageTelegram = getFormValue(values, "toPostageTelegram", "postageTelegram");
-  const officeMaintenance = getFormValue(values, "toOfficeMaintenance", "officeMaintenance");
-  const repairsMaintenance = getFormValue(values, "toRepairsMaintenance", "repairsMaintenance");
-  const sadarExpenses = getFormValue(values, "toSadarExpenses", "sadarExpenses");
-  const auditFee = getFormValue(values, "toAuditFee", "auditFee");
-  const advertisement = getFormValue(values, "toAdvertisement", "advertisement");
-  const bankCharges = getFormValue(values, "toBankCharges", "bankCharges");
-  const insurance = getFormValue(values, "toInsurance", "insurance");
-  const depreciation = getFormValue(values, "toDepreciation", "depreciation");
-  const interestOnLoan = getFormValue(values, "toInterestOnLoan", "interestOnLoan");
-  const rentReceived = getFormValue(values, "byRentReceived", "rentReceived");
-  const commissionReceived = getFormValue(values, "byCommissionReceived", "commissionReceived");
-
-  const grossProfit =
-    sales +
-    services +
-    closingStock -
-    (openingStock +
-      purchase +
-      costOfServices +
-      wages +
-      hamaliCharges +
-      manufacturingExpenses +
-      packingCharges);
-
-  const indirectExpenses =
-    salaries +
-    rent +
-    electricityCharges +
-    printingStationery +
-    telephoneCharges +
-    postageTelegram +
-    officeMaintenance +
-    repairsMaintenance +
-    sadarExpenses +
-    auditFee +
-    advertisement +
-    bankCharges +
-    insurance +
-    depreciation +
-    interestOnLoan;
-  const otherIncomes = rentReceived + commissionReceived;
-  const netProfit = grossProfit + otherIncomes - indirectExpenses;
-
-  return {
-    openingStock,
-    purchase,
-    costOfServices,
-    wages,
-    hamaliCharges,
-    manufacturingExpenses,
-    packingCharges,
-    sales,
-    services,
-    closingStock,
-    salaries,
-    rent,
-    electricityCharges,
-    printingStationery,
-    telephoneCharges,
-    postageTelegram,
-    officeMaintenance,
-    repairsMaintenance,
-    sadarExpenses,
-    auditFee,
-    advertisement,
-    bankCharges,
-    insurance,
-    depreciation,
-    interestOnLoan,
-    rentReceived,
-    commissionReceived,
-    grossProfit,
-    netProfit,
-  };
-};
-
-const calculateStatement2Format = (values: Record<string, any>) => {
-  const grossReceipts = parseNumber(values.grossReceipts);
-  const otherIncome = parseNumber(values.otherIncome);
-  const costOfMaterialConsumed = parseNumber(values.costOfMaterialConsumed);
-  const salary = parseNumber(values.salary);
-  const rent = parseNumber(values.rent);
-  const electricity = parseNumber(values.electricity);
-  const travelling = parseNumber(values.travelling);
-  const otherExpenses = parseNumber(values.otherExpenses);
-  const financeExpenses = parseNumber(values.financeExpenses);
-  const depreciation = parseNumber(values.depreciation);
-  const incomeTax = parseNumber(values.incomeTax);
-
-  const incomeSubtotal = grossReceipts + otherIncome;
-  const expenditureSubtotal = salary + rent + electricity + travelling + otherExpenses;
-  const grossProfitAsPerAssumption = incomeSubtotal - costOfMaterialConsumed;
-  const netProfitBeforeInterestTaxDepreciation = incomeSubtotal - expenditureSubtotal;
-  const netProfitBeforeTaxDepreciation = netProfitBeforeInterestTaxDepreciation - financeExpenses;
-  const netProfitBeforeTax = netProfitBeforeTaxDepreciation - depreciation;
-  const netProfitAfterTax = netProfitBeforeTax - incomeTax;
-  const pbditMargin =
-    incomeSubtotal !== 0
-      ? (netProfitBeforeInterestTaxDepreciation / incomeSubtotal) * 100
-      : 0;
-
-  return {
-    grossReceipts,
-    otherIncome,
-    incomeSubtotal,
-    costOfMaterialConsumed,
-    grossProfitAsPerAssumption,
-    salary,
-    rent,
-    electricity,
-    travelling,
-    otherExpenses,
-    expenditureSubtotal,
-    netProfitBeforeInterestTaxDepreciation,
-    pbditMargin,
-    financeExpenses,
-    netProfitBeforeTaxDepreciation,
-    depreciation,
-    netProfitBeforeTax,
-    incomeTax,
-    netProfitAfterTax,
-  };
-};
-
-const calculateStatement3Format = (values: Record<string, any>) => {
-  const getValue = (key: string) => parseNumber(values[key]);
-  const round2 = (num: number) => Math.round(num * 100) / 100;
-
-  // 2023 Actuals
-  const openingStock_2023 = getValue("openingStock_2023");
-  const purchases_2023 = getValue("purchases_2023");
-  const gasLiquidItems_2023 = getValue("gasLiquidItems_2023");
-  const sales_2023 = getValue("sales_2023");
-  const majuriCharges_2023 = getValue("majuriCharges_2023");
-  const closingStock_2023 = getValue("closingStock_2023");
-  
-  const salaries_2023 = getValue("salaries_2023");
-  const bonus_2023 = getValue("bonus_2023");
-  const electricityCharges_2023 = getValue("electricityCharges_2023");
-  const sadar_2023 = getValue("sadar_2023");
-  const coalGasLiquid_2023 = getValue("coalGasLiquid_2023");
-  const sparesMachinery_2023 = getValue("sparesMachinery_2023");
-  const bankInterest_2023 = getValue("bankInterest_2023");
-  const bankCharges_2023 = getValue("bankCharges_2023");
-  const financeCharges_2023 = getValue("financeCharges_2023");
-  const shopRents_2023 = getValue("shopRents_2023");
-  const gstLateFee_2023 = getValue("gstLateFee_2023");
-  const auditorFee_2023 = getValue("auditorFee_2023");
-  const telephoneCharges_2023 = getValue("telephoneCharges_2023");
-  const travellingExp_2023 = getValue("travellingExp_2023");
-  const vehicleMaintenance_2023 = getValue("vehicleMaintenance_2023");
-  const depreciation_2023 = getValue("depreciation_2023");
-  const interest_2023 = getValue("interest_2023");
-
-  // 2024 Actuals
-  const openingStock_2024 = getValue("openingStock_2024");
-  const purchases_2024 = getValue("purchases_2024");
-  const gasLiquidItems_2024 = getValue("gasLiquidItems_2024");
-  const sales_2024 = getValue("sales_2024");
-  const majuriCharges_2024 = getValue("majuriCharges_2024");
-  const closingStock_2024 = getValue("closingStock_2024");
-  
-  const salaries_2024 = getValue("salaries_2024");
-  const bonus_2024 = getValue("bonus_2024");
-  const electricityCharges_2024 = getValue("electricityCharges_2024");
-  const sadar_2024 = getValue("sadar_2024");
-  const coalGasLiquid_2024 = getValue("coalGasLiquid_2024");
-  const sparesMachinery_2024 = getValue("sparesMachinery_2024");
-  const bankInterest_2024 = getValue("bankInterest_2024");
-  const bankCharges_2024 = getValue("bankCharges_2024");
-  const financeCharges_2024 = getValue("financeCharges_2024");
-  const shopRents_2024 = getValue("shopRents_2024");
-  const gstLateFee_2024 = getValue("gstLateFee_2024");
-  const auditorFee_2024 = getValue("auditorFee_2024");
-  const telephoneCharges_2024 = getValue("telephoneCharges_2024");
-  const travellingExp_2024 = getValue("travellingExp_2024");
-  const vehicleMaintenance_2024 = getValue("vehicleMaintenance_2024");
-  const depreciation_2024 = getValue("depreciation_2024");
-  const interest_2024 = getValue("interest_2024");
-
-  // Estimated
-  const openingStockEstimated = getValue("openingStockEstimated");
-  const purchasesEstimated = getValue("purchasesEstimated");
-  const gasLiquidItemsEstimated = getValue("gasLiquidItemsEstimated");
-  const salesEstimated = getValue("salesEstimated");
-  const majuriChargesEstimated = getValue("majuriChargesEstimated");
-  const closingStockEstimated = getValue("closingStockEstimated");
-
-  const salariesEstimated = getValue("salariesEstimated");
-  const bonusEstimated = getValue("bonusEstimated");
-  const electricityChargesEstimated = getValue("electricityChargesEstimated");
-  const sadarEstimated = getValue("sadarEstimated");
-  const coalGasLiquidEstimated = getValue("coalGasLiquidEstimated");
-  const sparesMachineryEstimated = getValue("sparesMachineryEstimated");
-  const bankInterestEstimated = getValue("bankInterestEstimated");
-  const bankChargesEstimated = getValue("bankChargesEstimated");
-  const financeChargesEstimated = getValue("financeChargesEstimated");
-  const shopRentsEstimated = getValue("shopRentsEstimated");
-  const gstLateFeeEstimated = getValue("gstLateFeeEstimated");
-  const auditorFeeEstimated = getValue("auditorFeeEstimated");
-  const telephoneChargesEstimated = getValue("telephoneChargesEstimated");
-  const travellingExpEstimated = getValue("travellingExpEstimated");
-  const vehicleMaintenanceEstimated = getValue("vehicleMaintenanceEstimated");
-  const depreciationEstimated = getValue("depreciationEstimated");
-  const interestEstimated = getValue("interestEstimated");
-
-  // Always compute GP from current inputs
-  const grossProfit_2023 =
-    sales_2023 +
-    closingStock_2023 +
-    majuriCharges_2023 -
-    (openingStock_2023 + purchases_2023 + gasLiquidItems_2023);
-  
-  const grossProfit_2024 =
-    sales_2024 +
-    closingStock_2024 +
-    majuriCharges_2024 -
-    (openingStock_2024 + purchases_2024 + gasLiquidItems_2024);
-  
-  const grossProfitEstimated =
-    salesEstimated +
-    closingStockEstimated +
-    majuriChargesEstimated -
-    (openingStockEstimated + purchasesEstimated + gasLiquidItemsEstimated);
-
-  const netProfit_2023 =
-    grossProfit_2023 -
-    (salaries_2023 +
-      bonus_2023 +
-      electricityCharges_2023 +
-      sadar_2023 +
-      coalGasLiquid_2023 +
-      sparesMachinery_2023 +
-      bankInterest_2023 +
-      bankCharges_2023 +
-      financeCharges_2023 +
-      shopRents_2023 +
-      gstLateFee_2023 +
-      auditorFee_2023 +
-      telephoneCharges_2023 +
-      travellingExp_2023 +
-      vehicleMaintenance_2023 +
-      depreciation_2023 +
-      interest_2023);
-
-  const netProfit_2024 =
-    grossProfit_2024 -
-    (salaries_2024 +
-      bonus_2024 +
-      electricityCharges_2024 +
-      sadar_2024 +
-      coalGasLiquid_2024 +
-      sparesMachinery_2024 +
-      bankInterest_2024 +
-      bankCharges_2024 +
-      financeCharges_2024 +
-      shopRents_2024 +
-      gstLateFee_2024 +
-      auditorFee_2024 +
-      telephoneCharges_2024 +
-      travellingExp_2024 +
-      vehicleMaintenance_2024 +
-      depreciation_2024 +
-      interest_2024);
-
-  const netProfitEstimated =
-    grossProfitEstimated -
-    (salariesEstimated +
-      bonusEstimated +
-      electricityChargesEstimated +
-      sadarEstimated +
-      coalGasLiquidEstimated +
-      sparesMachineryEstimated +
-      bankInterestEstimated +
-      bankChargesEstimated +
-      financeChargesEstimated +
-      shopRentsEstimated +
-      gstLateFeeEstimated +
-      auditorFeeEstimated +
-      telephoneChargesEstimated +
-      travellingExpEstimated +
-      vehicleMaintenanceEstimated +
-      depreciationEstimated +
-      interestEstimated);
-
-  // Change % calculations
-  const calculateChange = (val2024: number, val2023: number) => 
-    val2023 !== 0 ? round2(((val2024 - val2023) / val2023) * 100) : 0;
-
-  const openingStockChange = calculateChange(openingStock_2024, openingStock_2023);
-  const purchasesChange = calculateChange(purchases_2024, purchases_2023);
-  const gasLiquidItemsChange = calculateChange(gasLiquidItems_2024, gasLiquidItems_2023);
-  const salesChange = calculateChange(sales_2024, sales_2023);
-  const majuriChargesChange = calculateChange(majuriCharges_2024, majuriCharges_2023);
-  const closingStockChange = calculateChange(closingStock_2024, closingStock_2023);
-  const grossProfitChange = calculateChange(grossProfit_2024, grossProfit_2023);
-  const netProfitChange = calculateChange(netProfit_2024, netProfit_2023);
-  
-  const salariesChange = calculateChange(salaries_2024, salaries_2023);
-  const bonusChange = calculateChange(bonus_2024, bonus_2023);
-  const electricityChargesChange = calculateChange(electricityCharges_2024, electricityCharges_2023);
-  const sadarChange = calculateChange(sadar_2024, sadar_2023);
-  const coalGasLiquidChange = calculateChange(coalGasLiquid_2024, coalGasLiquid_2023);
-  const sparesMachineryChange = calculateChange(sparesMachinery_2024, sparesMachinery_2023);
-  const bankInterestChange = calculateChange(bankInterest_2024, bankInterest_2023);
-  const bankChargesChange = calculateChange(bankCharges_2024, bankCharges_2023);
-  const financeChargesChange = calculateChange(financeCharges_2024, financeCharges_2023);
-  const shopRentsChange = calculateChange(shopRents_2024, shopRents_2023);
-  const gstLateFeeChange = calculateChange(gstLateFee_2024, gstLateFee_2023);
-  const auditorFeeChange = calculateChange(auditorFee_2024, auditorFee_2023);
-  const telephoneChargesChange = calculateChange(telephoneCharges_2024, telephoneCharges_2023);
-  const travellingExpChange = calculateChange(travellingExp_2024, travellingExp_2023);
-  const vehicleMaintenanceChange = calculateChange(vehicleMaintenance_2024, vehicleMaintenance_2023);
-  const depreciationChange = calculateChange(depreciation_2024, depreciation_2023);
-  const interestChange = calculateChange(interest_2024, interest_2023);
-
- 
-  const total_2023_left =
-    openingStock_2023 +
-    purchases_2023 +
-    gasLiquidItems_2023 +
-    grossProfit_2023 +
-    salaries_2023 +
-    bonus_2023 +
-    electricityCharges_2023 +
-    sadar_2023 +
-    coalGasLiquid_2023 +
-    sparesMachinery_2023 +
-    bankInterest_2023 +
-    bankCharges_2023 +
-    financeCharges_2023 +
-    shopRents_2023 +
-    gstLateFee_2023 +
-    auditorFee_2023 +
-    telephoneCharges_2023 +
-    travellingExp_2023 +
-    vehicleMaintenance_2023 +
-    depreciation_2023 +
-    interest_2023 +
-    netProfit_2023;
-
-  const total_2024_left =
-    openingStock_2024 +
-    purchases_2024 +
-    gasLiquidItems_2024 +
-    grossProfit_2024 +
-    salaries_2024 +
-    bonus_2024 +
-    electricityCharges_2024 +
-    sadar_2024 +
-    coalGasLiquid_2024 +
-    sparesMachinery_2024 +
-    bankInterest_2024 +
-    bankCharges_2024 +
-    financeCharges_2024 +
-    shopRents_2024 +
-    gstLateFee_2024 +
-    auditorFee_2024 +
-    telephoneCharges_2024 +
-    travellingExp_2024 +
-    vehicleMaintenance_2024 +
-    depreciation_2024 +
-    interest_2024 +
-    netProfit_2024;
-
-  const total_estimated_left =
-    openingStockEstimated +
-    purchasesEstimated +
-    gasLiquidItemsEstimated +
-    grossProfitEstimated +
-    salariesEstimated +
-    bonusEstimated +
-    electricityChargesEstimated +
-    sadarEstimated +
-    coalGasLiquidEstimated +
-    sparesMachineryEstimated +
-    bankInterestEstimated +
-    bankChargesEstimated +
-    financeChargesEstimated +
-    shopRentsEstimated +
-    gstLateFeeEstimated +
-    auditorFeeEstimated +
-    telephoneChargesEstimated +
-    travellingExpEstimated +
-    vehicleMaintenanceEstimated +
-    depreciationEstimated +
-    interestEstimated +
-    netProfitEstimated;
-
-  const total_2023_right =
-    sales_2023 + majuriCharges_2023 + closingStock_2023 + grossProfit_2023;
-
-  const total_2024_right =
-    sales_2024 + majuriCharges_2024 + closingStock_2024 + grossProfit_2024;
-
-  const total_estimated_right =
-    salesEstimated + majuriChargesEstimated + closingStockEstimated + grossProfitEstimated;
-
-
-  const monthlyTurnover = round2(salesEstimated / 12);
-
-  const totalEstimatedExpenses =
-    salariesEstimated + bonusEstimated + electricityChargesEstimated + sadarEstimated + 
-    coalGasLiquidEstimated + sparesMachineryEstimated + bankInterestEstimated + 
-    bankChargesEstimated + financeChargesEstimated + shopRentsEstimated + 
-    gstLateFeeEstimated + auditorFeeEstimated + telephoneChargesEstimated + 
-    travellingExpEstimated + vehicleMaintenanceEstimated + depreciationEstimated + 
-    interestEstimated;
-
-  const monthlyPayments = round2(totalEstimatedExpenses / 12);
-
-  const monthlyNetProfit = round2(netProfitEstimated / 12);
-
-
-  const gpPercentage =
-    salesEstimated !== 0
-      ? round2((grossProfitEstimated / salesEstimated) * 100)
-      : 0;
-
-  const npPercentage =
-    salesEstimated !== 0
-      ? round2((netProfitEstimated / salesEstimated) * 100)
-      : 0;
-
-  return {
-    ...values,
-    openingStock_2023,
-    purchases_2023,
-    gasLiquidItems_2023,
-    sales_2023,
-    majuriCharges_2023,
-    closingStock_2023,
-    grossProfit_2023,
-    netProfit_2023,
-    salaries_2023,
-    bonus_2023,
-    electricityCharges_2023,
-    sadar_2023,
-    coalGasLiquid_2023,
-    sparesMachinery_2023,
-    bankInterest_2023,
-    bankCharges_2023,
-    financeCharges_2023,
-    shopRents_2023,
-    gstLateFee_2023,
-    auditorFee_2023,
-    telephoneCharges_2023,
-    travellingExp_2023,
-    vehicleMaintenance_2023,
-    depreciation_2023,
-    interest_2023,
-    // 2024 Actuals
-    openingStock_2024,
-    purchases_2024,
-    gasLiquidItems_2024,
-    sales_2024,
-    majuriCharges_2024,
-    closingStock_2024,
-    grossProfit_2024,
-    netProfit_2024,
-    salaries_2024,
-    bonus_2024,
-    electricityCharges_2024,
-    sadar_2024,
-    coalGasLiquid_2024,
-    sparesMachinery_2024,
-    bankInterest_2024,
-    bankCharges_2024,
-    financeCharges_2024,
-    shopRents_2024,
-    gstLateFee_2024,
-    auditorFee_2024,
-    telephoneCharges_2024,
-    travellingExp_2024,
-    vehicleMaintenance_2024,
-    depreciation_2024,
-    interest_2024,
-    // Changes
-    openingStockChange,
-    purchasesChange,
-    gasLiquidItemsChange,
-    salesChange,
-    majuriChargesChange,
-    closingStockChange,
-    grossProfitChange,
-    netProfitChange,
-    salariesChange,
-    bonusChange,
-    electricityChargesChange,
-    sadarChange,
-    coalGasLiquidChange,
-    sparesMachineryChange,
-    bankInterestChange,
-    bankChargesChange,
-    financeChargesChange,
-    shopRentsChange,
-    gstLateFeeChange,
-    auditorFeeChange,
-    telephoneChargesChange,
-    travellingExpChange,
-    vehicleMaintenanceChange,
-    depreciationChange,
-    interestChange,
-    // Estimated
-    openingStockEstimated,
-    purchasesEstimated,
-    gasLiquidItemsEstimated,
-    salesEstimated,
-    majuriChargesEstimated,
-    closingStockEstimated,
-    grossProfitEstimated,
-    netProfitEstimated,
-    salariesEstimated,
-    bonusEstimated,
-    electricityChargesEstimated,
-    sadarEstimated,
-    coalGasLiquidEstimated,
-    sparesMachineryEstimated,
-    bankInterestEstimated,
-    bankChargesEstimated,
-    financeChargesEstimated,
-    shopRentsEstimated,
-    gstLateFeeEstimated,
-    auditorFeeEstimated,
-    telephoneChargesEstimated,
-    travellingExpEstimated,
-    vehicleMaintenanceEstimated,
-    depreciationEstimated,
-    interestEstimated,
-    // Totals
-    total_2023_left,
-    total_2024_left,
-    total_estimated_left,
-    total_2023_right,
-    total_2024_right,
-    total_estimated_right,
-    // Monthly
-    monthlyTurnover,
-    monthlyPayments,
-    monthlyNetProfit,
-    gpPercentage,
-    npPercentage,
-  };
-};
-
-const calculateStatement4Format = (values: Record<string, any>) => {
-  const getValue = (key: string) => parseNumber(values[key]);
-
-  const openingStockAssessed = getValue("openingStockAssessed");
-  const purchasesAssessed = getValue("purchasesAssessed");
-  const salesEstimated = getValue("salesEstimated");
-  const servicesEstimated = getValue("servicesEstimated");
-  const closingStockEstimated = getValue("closingStockEstimated");
-
-  const salesPlusServices = salesEstimated + servicesEstimated;
-  const grossProfitAssessed =
-    salesPlusServices -
-    (openingStockAssessed + purchasesAssessed - closingStockEstimated);
-
-  const electricity = getValue("electricity");
-  const rent = getValue("rent");
-  const salaries = getValue("salaries");
-  const travellingCharges = getValue("travellingCharges");
-  const otherExpenses = getValue("otherExpenses");
-
-  const grandTotalExpenditure =
-    openingStockAssessed + purchasesAssessed + grossProfitAssessed;
-  const grandTotalIncome = salesPlusServices + closingStockEstimated;
-  const byGrossProfitEstimated = grossProfitAssessed;
-  const netProfit =
-    grossProfitAssessed -
-    (electricity + rent + salaries + travellingCharges + otherExpenses);
-
-  const grandTotal = grandTotalExpenditure;
-
-  const safeDiv = (num: number, denom: number) =>
-    denom === 0 ? 0 : (num / denom) * 100;
-  const round2 = (num: number) => Math.round(num * 100) / 100;
-
-  const gpMargin = round2(safeDiv(grossProfitAssessed, salesPlusServices));
-  const npMargin = round2(safeDiv(netProfit, salesPlusServices));
-  const netProfitMargin = npMargin;
-  const gpMarginPercent = gpMargin;
-  const npMarginPercent = npMargin;
-  const netProfitMarginPercent = netProfitMargin;
-  return {
-    ...values,
-    openingStockAssessed,
-    purchasesAssessed,
-    grossProfitAssessed,
-    salesEstimated,
-    servicesEstimated,
-    closingStockEstimated,
-    electricity,
-    rent,
-    salaries,
-    travellingCharges,
-    otherExpenses,
-    toGrossProfit: grossProfitAssessed,
-    grandTotalExpenditure,
-    grandTotalIncome,
-    byGrossProfitEstimated,
-    netProfit,
-    netProfitEstimated: netProfit,
-    grandTotal,
-    netProfitMargin,
-    gpMargin,
-    npMargin,
-    gpMarginPercent,
-    npMarginPercent,
-    netProfitMarginPercent,
-  };
-};
 
 interface ExtendedEditFormModalProps extends EditFormModalProps {
   onEditSuccess?: () => void;
@@ -719,54 +39,284 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
   const { id } = router.query;
   const { activeTab } = useTabContext();
   const currentDepartment = useDepartmentChange();
-  // const [dirty, setDirty] = useState(false);
+  const initialValuesSetRef = useRef(false);
+  const [financialSchemaProperties, setFinancialSchemaProperties] = useState<Record<string, any> | null>(null);
+
+  const evaluateFormula = (
+    formula: string,
+    formValues: Record<string, any>
+  ): number | null => {
+    if (!formula || typeof formula !== "string") return null;
+
+    try {
+      let evaluatedFormula = formula;
+
+      const fieldNameMatches = formula.match(/\b[a-zA-Z_][a-zA-Z0-9_]*\b/g);
+      const fieldNamesInFormula = fieldNameMatches || [];
+
+      for (const fieldName of fieldNamesInFormula) {
+        const jsKeywords = [
+          'true', 'false', 'null', 'undefined', 'NaN', 'Infinity',
+        ];
+        if (jsKeywords.includes(fieldName)) continue;
+
+        const regex = new RegExp(`\\b${fieldName}\\b`, 'g');
+        const value = formValues[fieldName];
+
+        let numValue = 0;
+        if (value !== undefined && value !== null && value !== '') {
+          const parsed = typeof value === 'number' ? value : parseFloat(String(value));
+          if (!isNaN(parsed)) {
+            numValue = parsed;
+          }
+        }
+
+        evaluatedFormula = evaluatedFormula.replace(regex, String(numValue));
+      }
+
+      const result = Function(
+        '"use strict"; return (' + evaluatedFormula + ')',
+      )();
+      return typeof result === 'number' && !isNaN(result) ? result : null;
+    } catch (error) {
+      return null;
+    }
+  };
+
+  const evaluateNestedFormulas = (
+    properties: Record<string, any>,
+    objectValues: Record<string, any>,
+    parentKey: string = '',
+    calculatedSoFar: Record<string, any> = {},
+  ): Record<string, any> => {
+    const calculatedFields: Record<string, any> = {};
+    const currentCalculated: Record<string, any> = {...calculatedSoFar};
+
+    Object.entries(properties).forEach(([fieldId, property]) => {
+      if ((property as any).formula) {
+        const numericValues: Record<string, any> = {};
+
+        Object.entries(objectValues).forEach(([key, val]) => {
+          const fieldSchema = properties[key];
+          if (
+            fieldSchema?.type === 'number' ||
+            fieldSchema?.type === 'integer'
+          ) {
+            const numVal =
+              typeof val === 'number' ? val : parseFloat(String(val));
+            numericValues[key] = isNaN(numVal) ? 0 : numVal;
+          } else {
+            numericValues[key] =
+              val === undefined || val === null || val === '' ? 0 : val;
+          }
+        });
+
+        Object.entries(currentCalculated).forEach(([key, val]) => {
+          if (!(key in numericValues)) {
+            const numVal =
+              typeof val === 'number' ? val : parseFloat(String(val));
+            numericValues[key] = isNaN(numVal) ? 0 : numVal;
+          }
+        });
+
+        Object.keys(properties).forEach(key => {
+          if (!(key in numericValues)) {
+            numericValues[key] = 0;
+          }
+        });
+
+        const calculatedValue = evaluateFormula(
+          (property as any).formula,
+          numericValues,
+        );
+        if (calculatedValue !== null && !isNaN(calculatedValue)) {
+          const calculatedStr = calculatedValue.toString();
+          currentCalculated[fieldId] = calculatedValue;
+
+          if (parentKey) {
+            if (!calculatedFields[parentKey]) {
+              calculatedFields[parentKey] = {};
+            }
+            calculatedFields[parentKey][fieldId] = calculatedStr;
+          } else {
+            calculatedFields[fieldId] = calculatedStr;
+          }
+        }
+      }
+
+      if (property.type === 'object' && property.properties) {
+        const nestedObjectValues = objectValues[fieldId] || {};
+        const nestedCalculated = evaluateNestedFormulas(
+          property.properties,
+          nestedObjectValues,
+          parentKey ? parentKey : fieldId,
+          {},
+        );
+
+        if (parentKey) {
+          if (!calculatedFields[parentKey]) {
+            calculatedFields[parentKey] = {};
+          }
+          Object.entries(nestedCalculated).forEach(([nestedKey, nestedVal]) => {
+            if (typeof nestedVal === 'object' && nestedVal !== null) {
+              calculatedFields[parentKey] = {
+                ...calculatedFields[parentKey],
+                ...nestedVal,
+              };
+            } else {
+              calculatedFields[parentKey][nestedKey] = nestedVal;
+            }
+          });
+        } else {
+          if (!calculatedFields[fieldId]) {
+            calculatedFields[fieldId] = {};
+          }
+          Object.entries(nestedCalculated).forEach(([nestedKey, nestedVal]) => {
+            if (typeof nestedVal === 'object' && nestedVal !== null) {
+              calculatedFields[fieldId] = {
+                ...calculatedFields[fieldId],
+                ...nestedVal,
+              };
+            } else {
+              calculatedFields[fieldId][nestedKey] = nestedVal;
+            }
+          });
+        }
+      }
+    });
+
+    return calculatedFields;
+  };
 
   useEffect(() => {
-    if (visible && initialValues) {
+    if (formKey !== "financialAnalysis" || !visible) return;
+
+    const fetchSchema = async () => {
+      try {
+        const currentVerification = initialValues?.verifications?.find(
+          (v: any) => v.type === currentTab
+        );
+        const bankName = currentVerification?.bankName || initialValues?.loan?.bankName || "";
+        const templateName = initialValues?.loan?.templateName || "";
+
+        if (!bankName && !templateName) {
+          console.warn("No bank name or template name found for schema fetch");
+          return;
+        }
+
+        const schemaResponse = await getSchemaFromBackend(
+          bankName || templateName,
+          "PD"
+        );
+
+        const financialSection = schemaResponse?.schema?.sections?.find(
+          (section: any) => section.id === "financialAnalysis"
+        );
+
+        if (financialSection?.schema?.properties) {
+          setFinancialSchemaProperties(financialSection.schema.properties);
+        }
+      } catch (error) {
+        console.error("Error fetching financial analysis schema:", error);
+      }
+    };
+
+    fetchSchema();
+  }, [formKey, visible, initialValues, currentTab]);
+
+  const formValues = Form.useWatch([], form);
+
+  useEffect(() => {
+    if (formKey !== "financialAnalysis" || !visible || !formValues || !financialSchemaProperties) return;
+
+    const calculatedFields = evaluateNestedFormulas(
+      financialSchemaProperties,
+      formValues,
+    );
+
+    if (Object.keys(calculatedFields).length > 0) {
+      Object.entries(calculatedFields).forEach(([key, val]) => {
+        if (typeof val === 'object' && val !== null && !Array.isArray(val)) {
+          const currentValue = formValues[key] || {};
+          const updatedNested: Record<string, any> = {...currentValue};
+          let hasChanges = false;
+
+          Object.entries(val).forEach(([nestedKey, nestedVal]) => {
+            const currentNestedValue = currentValue[nestedKey];
+            const currentStr =
+              currentNestedValue !== undefined && currentNestedValue !== null
+                ? String(currentNestedValue)
+                : '';
+            const newStr =
+              nestedVal !== undefined && nestedVal !== null
+                ? String(nestedVal)
+                : '';
+
+            if (currentStr !== newStr) {
+              const currentNum = parseFloat(currentStr || '0');
+              const newNum = parseFloat(newStr || '0');
+
+              if (
+                isNaN(currentNum) ||
+                Math.abs(currentNum - newNum) > 0.0001
+              ) {
+                updatedNested[nestedKey] = nestedVal;
+                hasChanges = true;
+              }
+            }
+          });
+
+          if (hasChanges) {
+            form.setFieldsValue({ [key]: updatedNested });
+          }
+        } else {
+          const currentValue = formValues[key];
+          const currentNum =
+            typeof currentValue === 'number'
+              ? currentValue
+              : parseFloat(String(currentValue || '0'));
+          const newNum =
+            typeof val === 'number' ? val : parseFloat(String(val || '0'));
+
+          if (isNaN(currentNum) || Math.abs(currentNum - newNum) > 0.0001) {
+            form.setFieldsValue({ [key]: val });
+          }
+        }
+      });
+    }
+    
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formValues, formKey, visible, financialSchemaProperties]);
+
+  useEffect(() => {
+    if (!visible) {
+      initialValuesSetRef.current = false;
+      setFinancialSchemaProperties(null);
+      form.resetFields();
+    }
+  }, [visible, form]);
+
+  useEffect(() => {
+    // Only set initial values once when modal first opens
+    if (visible && initialValues && !initialValuesSetRef.current) {
+      initialValuesSetRef.current = true;
+      
       const currentVerification = initialValues?.verifications?.find(
         (v: any) => v.type === currentTab
       );
 
-      // Handle financial analysis data differently since it's not nested under verificationData
       if (formKey === "financialAnalysis") {
         const financialData = currentVerification?.financialAnalysis;
         if (financialData) {
-          const formValues = {
-            toOpeningStock: financialData.openingStock?.toString() || "",
-            toPurchase: financialData.purchase?.toString() || "",
-            toCostOfServices: financialData.costOfServices?.toString() || "",
-            toWages: financialData.wages?.toString() || "",
-            toHamaliCharges: financialData.hamaliCharges?.toString() || "",
-            toManufacturingExpenses:
-              financialData.manufacturingExpenses?.toString() || "",
-            toPackingCharges: financialData.packingCharges?.toString() || "",
-            bySales: financialData.sales?.toString() || "",
-            byServices: financialData.services?.toString() || "",
-            byClosingStock: financialData.closingStock?.toString() || "",
-            toSalaries: financialData.salaries?.toString() || "",
-            toRent: financialData.rent?.toString() || "",
-            toElectricityCharges:
-              financialData.electricityCharges?.toString() || "",
-            toPrintingStationery:
-              financialData.printingStationery?.toString() || "",
-            toTelephoneCharges:
-              financialData.telephoneCharges?.toString() || "",
-            toPostageTelegram: financialData.postageTelegram?.toString() || "",
-            toOfficeMaintenance:
-              financialData.officeMaintenance?.toString() || "",
-            toRepairsMaintenance:
-              financialData.repairsMaintenance?.toString() || "",
-            toSadarExpenses: financialData.sadarExpenses?.toString() || "",
-            toAuditFee: financialData.auditFee?.toString() || "",
-            toAdvertisement: financialData.advertisement?.toString() || "",
-            toBankCharges: financialData.bankCharges?.toString() || "",
-            toInsurance: financialData.insurance?.toString() || "",
-            toDepreciation: financialData.depreciation?.toString() || "",
-            toInterestOnLoan: financialData.interestOnLoan?.toString() || "",
-            byRentReceived: financialData.rentReceived?.toString() || "",
-            byCommissionReceived:
-              financialData.commissionReceived?.toString() || "",
-          };
+          const formValues: Record<string, any> = {};
+          
+          Object.keys(financialData).forEach((key) => {
+            const value = financialData[key];
+            if (value !== undefined && value !== null) {
+              formValues[key] = typeof value === "number" ? value : value.toString();
+            }
+          });
+          
           form.setFieldsValue(formValues);
         }
       } else if (currentDepartment === "PD") {
@@ -1000,7 +550,8 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
         form.setFieldsValue(currentVerification?.verificationData || {});
       }
     }
-  }, [visible, initialValues, form, formKey, currentTab, currentDepartment]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible]); // Only depend on visible to prevent resetting during user edits
 
   const getInitialValues = async () => {
     const currentVerification = initialValues?.verifications?.find(
@@ -1165,7 +716,6 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
         formKey === "familyMemberDetails"
           ? Object.values(cleanedValues?.familyMemberDetails)
           : cleanedValues;
-      console.log(formValues);
       const initialValues = await getInitialValues();
       const cleanedInitialValues = Object.fromEntries(
         Object.entries(initialValues).filter(
@@ -1179,35 +729,7 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
       if (isChanged) {
         if (formKey === "financialAnalysis") {
           try {
-            const schemaFormat = detectFinancialSchemaFormat(values);
-            
-            let financialData: Record<string, any>;
-
-            switch (schemaFormat) {
-              case "statement2":
-                financialData = calculateStatement2Format(values);
-                break;
-              
-              case "statement3":
-                financialData = calculateStatement3Format(values);
-                break;
-              
-              case "statement4":
-                financialData = calculateStatement4Format(values);
-                break;
-              
-              case "generic":
-              default:
-                financialData = calculateGenericFormat(values);
-                break;
-            }
-
-            const allFinancialData = {
-              ...values,
-              ...financialData,
-            };
-
-            await updateFinancialAnalysis(id as string, allFinancialData);
+            await updateFinancialAnalysis(id as string, values);
             message.success("Financial analysis updated successfully!");
             fetchVerificationData();
             onEditSuccess?.();
@@ -1397,12 +919,6 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
     )?.verificationData?.basicDetails?.maritalStatus;
   };
 
-  // console.log(initialValues);
-
-  console.log(
-    initialValues?.verifications?.find((v: any) => v.addressType === currentTab)
-      ?.verificationData?.[formKeyMapping[formKey] || formKey]
-  );
 
   return (
     <Modal
