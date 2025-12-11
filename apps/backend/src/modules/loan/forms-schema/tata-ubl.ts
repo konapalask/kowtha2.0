@@ -738,6 +738,7 @@ export const tataUblSchema = {
           phoneNoOfApplicant: {
             type: "integer",
             title: "Phone No. of Applicant",
+            readOnly: true,
           },
           latitudeAndLongitude: {
             type: "string",

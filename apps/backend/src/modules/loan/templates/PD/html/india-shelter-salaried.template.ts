@@ -257,7 +257,7 @@ export const indiaShelterSalariedTemplate = (
       <tr><th style="${subHeaderStyle}" colspan="4">Loan Details & Purpose</th></tr>
       ${renderKeyValueRow(
         "Purpose of Loan",
-        renderList(loanPurpose.purposes, "Not provided"),
+        formatMultiline(loanPurpose.purposes),
         undefined,
         { colSpan: 3 }
       )}
@@ -294,7 +294,7 @@ export const indiaShelterSalariedTemplate = (
     )}
     ${renderKeyValueRow(
       "Usage of Property after Purchase",
-      renderList(collateral.usageAfterPurchase, "Not provided"),
+      collateral.usageAfterPurchase === "Others" ? formatMultiline(collateral.usageOtherNotes) : collateral.usageAfterPurchase,
       undefined,
       { colSpan: 3 }
     )}
@@ -638,7 +638,7 @@ export const indiaShelterSalariedTemplate = (
         <td style="${valueCellStyle}">${formatMultiline(pdReview.visitTime)}</td>
       </tr>
       <tr>
-        <td style="${labelCellStyle}">Signature of the PD Officer TRUE/FALSE</td>
+        <td style="${labelCellStyle}">Signature of the PD Officer</td>
         <td style="${valueCellStyle}"></td>
       </tr>
     </table>
