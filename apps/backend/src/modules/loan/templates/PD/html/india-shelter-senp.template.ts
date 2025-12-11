@@ -151,8 +151,8 @@ export const indiaShelterSenpTemplate = (
   const otherFamilyMembers = ensureArray(
     verificationData.otherFamilyMembers?.familyMembers
   );
-  const references = ensureArray(verificationData.references?.references);
-  const tpcRefs = ensureArray(verificationData.tpcDetails?.businessReferences);
+  const references = verificationData.references || [];
+  const tpcRefs = verificationData.tpcDetails || [];
   const pdReview = verificationData.pdOfficerReview || {};
 
   const generalTable = `
@@ -285,53 +285,81 @@ export const indiaShelterSenpTemplate = (
   const assetsTable = `
     <table style="${tableStyle}">
       <tr><th style="${subHeaderStyle}" colspan="4">Assets and Investment Details</th></tr>
-      ${renderKeyValueRow(
-        "Assets Owned (Summary)",
-        checklist.assetsOwned,
-        undefined,
-        { colSpan: 3 }
-      )}
-      ${assetChecklistRows}
-      <tr><th style="${subHeaderStyle}" colspan="4">Financial Assets</th></tr>
-      ${renderKeyValueRow(
-        "Fixed Deposits (amount/maturity)",
-        financialAssets.fixedDeposits,
-        undefined,
-        { colSpan: 3 }
-      )}
-      ${renderKeyValueRow(
-        "Mutual Funds (type/value)",
-        financialAssets.mutualFunds,
-        undefined,
-        { colSpan: 3 }
-      )}
-      ${renderKeyValueRow(
-        "Shares / Stocks (companies/value)",
-        financialAssets.sharesStocks,
-        undefined,
-        { colSpan: 3 }
-      )}
-      ${renderKeyValueRow(
-        "Insurance (type/sum assured)",
-        financialAssets.insurance,
-        undefined,
-        { colSpan: 3 }
-      )}
-      ${renderKeyValueRow(
-        "Other investments",
-        financialAssets.otherInvestments,
-        undefined,
-        { colSpan: 3 }
-      )}
       <tr>
-        <td style="${labelCellStyle}">Post Office savings monthly?</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          financialAssets.postOfficeSavings
-        )}</td>
-        <td style="${labelCellStyle}">Any Recurring Deposit?</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          financialAssets.recurringDeposit
-        )}</td>
+        <td style="${labelCellStyle}">Assets Owned</td>
+        <td style="border:1px solid #ccc;padding:8px" colspan="10">
+          <table style="${tableStyle}">
+            <tr>
+              <td style="${labelCellStyle}">Smartphone</td>
+              <td style="${valueCellStyle}">${formatMultiline(checklist.smartphone)}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">Washing Machine</td>
+              <td style="${valueCellStyle}">${formatMultiline(checklist.washingMachine)}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">Car</td>
+              <td style="${valueCellStyle}">${formatMultiline(checklist.car)}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">Two Wheeler</td>
+              <td style="${valueCellStyle}">${formatMultiline(checklist.twoWheeler)}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">Computer / Laptop</td>
+              <td style="${valueCellStyle}">${formatMultiline(checklist.computerLaptop)}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">AC</td>
+              <td style="${valueCellStyle}">${formatMultiline(checklist.ac)}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">Fridge</td>
+              <td style="${valueCellStyle}">${formatMultiline(checklist.fridge)}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">Induction</td>
+              <td style="${valueCellStyle}">${formatMultiline(checklist.induction)}</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <tr>
+        <td style="vertical-align:center;${labelCellStyle}">Financial Assets</td>
+        <td style="vertical-align:center;${labelCellStyle}">Investments</td>
+        <td style="border:1px solid #ccc;padding:8px" colspan="10">
+          <table style="${tableStyle}">
+            <tr>
+              <td style="${labelCellStyle}">Fixed Deposits (amount/maturity)</td>
+              <td style="${valueCellStyle}">${formatMultiline(financialAssets.fixedDeposits)}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">Mutual Funds (type/value)</td>
+              <td style="${valueCellStyle}">${formatMultiline(financialAssets.mutualFunds)}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">Shares / Stocks (companies/value)</td>
+              <td style="${valueCellStyle}">${formatMultiline(financialAssets.sharesStocks)}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">Insurance (type/sum assured)</td>
+              <td style="${valueCellStyle}">${formatMultiline(financialAssets.insurance)}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">Other investments?</td>
+              <td style="${valueCellStyle}">${formatMultiline(financialAssets.otherInvestments)}</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+          <td style="${labelCellStyle}">Is Post Office savings monthly?</td>
+          <td style="${valueCellStyle}" colspan="3">${formatMultiline(financialAssets.postOfficeSavings)}</td>
+        </tr>
+        <tr>
+          <td style="${labelCellStyle}">Any Recurring Deposit?</td>
+          <td style="${valueCellStyle}" colspan="3">${formatMultiline(financialAssets.recurringDeposit)}</td>
       </tr>
     </table>
   `;
@@ -419,7 +447,7 @@ export const indiaShelterSenpTemplate = (
         ["Total quantity (grams)", "Form", "Market value"],
         preciousRows
       )}
-      <tr><th style="${subHeaderStyle}" colspan="6">Livestock</th></tr>
+      <tr><th style="${subHeaderStyle}" colspan="6">Livestock - Animals</th></tr>
       ${renderArrayTable(
         [
           "Types of animals",
@@ -454,11 +482,9 @@ export const indiaShelterSenpTemplate = (
         { colSpan: 3 }
       )}
      <tr>
-      <td style="${labelCellStyle}">Partners</td>
+      <td style="${labelCellStyle}">Name of the Partners</td>
       <td style="${valueCellStyle}">
-        ${ensureArray(business.partners)
-          .map((item: any) => item?.partnerName)
-          .join(", ")}
+        ${ensureArray(business.partners).map((item: any) => item?.partnerName).join("<br>")}
         </td>
      </tr>
       <tr>
@@ -496,7 +522,7 @@ export const indiaShelterSenpTemplate = (
       </tr>
       ${renderKeyValueRow(
         "Business Profile",
-        business.businessProfile,
+        business.businessProfile.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join(""),
         undefined,
         { colSpan: 3 }
       )}
@@ -565,7 +591,7 @@ export const indiaShelterSenpTemplate = (
 
   const businessIncomeTable = `
     <table style="${tableStyle}">
-      <tr><th style="${subHeaderStyle}" colspan="4">Business Income Computation</th></tr>
+      <tr><th style="${subHeaderStyle}" colspan="4">Business Income Computation (Monthly Basis)</th></tr>
       <tr>
         <th style="${labelCellStyle};font-weight:bold;background:#f5f5f5;">Revenue</th>
         <th style="${valueCellStyle};font-weight:bold;background:#f5f5f5;">Amount (in Rs)</th>
@@ -682,7 +708,7 @@ export const indiaShelterSenpTemplate = (
       <tr><th style="${subHeaderStyle}" colspan="4">Loan Details & Purpose</th></tr>
       ${renderKeyValueRow(
         "Purpose of Loan",
-        renderSimpleList(ensureArray(loanPurpose.purposes)),
+        loanPurpose.purposes,
         undefined,
         { colSpan: 3 }
       )}
@@ -715,10 +741,6 @@ export const indiaShelterSenpTemplate = (
     </table>
   `;
 
-  const usageList = renderSimpleList(
-    ensureArray(collateral.usageAfterPurchase)
-  );
-
   const collateralTable = `
     <table style="${tableStyle}">
       <tr><th style="${subHeaderStyle}" colspan="4">Collateral Details</th></tr>
@@ -728,7 +750,7 @@ export const indiaShelterSenpTemplate = (
           collateral.propertyStatus
         )}</td>
         <td style="${labelCellStyle}">Usage of Property after Purchase</td>
-        <td style="${valueCellStyle}">${usageList}</td>
+        <td style="${valueCellStyle}">${collateral.usageAfterPurchase === "Others" ? formatMultiline(collateral.usageOtherNotes) : collateral.usageAfterPurchase}</td>
       </tr>
       ${renderKeyValueRow(
         "Property Address",
@@ -921,47 +943,24 @@ export const indiaShelterSenpTemplate = (
         <td style="${labelCellStyle}">Contact Number</td>
         <td style="${labelCellStyle}">Email</td>
         <td style="${labelCellStyle}">Years Known</td>
-        <td style="${labelCellStyle}">Photo with Applicant</td>
       </tr>
-      ${
-        references.length
-          ? references
-              .map(
-                (reference: any) => `
-          <tr>
-            <td style="${valueCellStyle}">${formatMultiline(
-              reference.referenceName
-            )}</td>
-            <td style="${valueCellStyle}">${formatMultiline(
-              reference.address
-            )}</td>
-            <td style="${valueCellStyle}">${formatMultiline(
-              reference.relationship
-            )}</td>
-            <td style="${valueCellStyle}">${formatMultiline(
-              reference.contactNumber
-            )}</td>
-            <td style="${valueCellStyle}">${formatMultiline(
-              reference.email
-            )}</td>
-            <td style="${valueCellStyle}">${formatMultiline(
-              reference.yearsKnown
-            )}</td>
-            <td style="${valueCellStyle}">${formatMultiline(
-              reference.photoWithApplicant
-            )}</td>
-          </tr>
-        `
-              )
-              .join("")
-          : `<tr><td style="${valueCellStyle}" colspan="7">Not provided</td></tr>`
-      }
+      ${ensureArray(references?.references).map((reference: any) => `
+        <tr>
+          <td style="${valueCellStyle}">${formatMultiline(reference.referenceName)}</td>
+          <td style="${valueCellStyle}">${formatMultiline(reference.address)}</td>
+          <td style="${valueCellStyle}">${formatMultiline(reference.relationship)}</td>
+          <td style="${valueCellStyle}">${formatMultiline(reference.contactNumber)}</td>
+          <td style="${valueCellStyle}">${formatMultiline(reference.email)}</td>
+          <td style="${valueCellStyle}">${formatMultiline(reference.yearsKnown)}</td>
+        </tr>
+      `).join("")}
     </table>
   `;
 
   const tpcTable = `
     <table style="${tableStyle}">
       <tr><th style="${subHeaderStyle}" colspan="6">TPC (Third Party Check) Details</th></tr>
+      <tr><td style="${labelCellStyle}" colspan="6">Business Reference</td></tr>
       <tr>
         <td style="${labelCellStyle}">Name</td>
         <td style="${labelCellStyle}">Address</td>
@@ -969,27 +968,15 @@ export const indiaShelterSenpTemplate = (
         <td style="${labelCellStyle}">Knowing Since (Months / Years)</td>
         <td style="${labelCellStyle}">Feedback</td>
       </tr>
-      ${
-        tpcRefs.length
-          ? tpcRefs
-              .map(
-                (ref: any) => `
-          <tr>
-            <td style="${valueCellStyle}">${formatMultiline(ref.name)}</td>
-            <td style="${valueCellStyle}">${formatMultiline(ref.address)}</td>
-            <td style="${valueCellStyle}">${formatMultiline(
-              ref.mobileNumber
-            )}</td>
-            <td style="${valueCellStyle}">${formatMultiline(
-              ref.knowingSince
-            )}</td>
-            <td style="${valueCellStyle}">${formatMultiline(ref.feedback)}</td>
-          </tr>
-        `
-              )
-              .join("")
-          : `<tr><td style="${valueCellStyle}" colspan="4">Not provided</td></tr>`
-      }
+      ${ensureArray(tpcRefs?.businessReferences).map((reference: any) => `
+        <tr>
+          <td style="${valueCellStyle}">${formatMultiline(reference.name)}</td>
+          <td style="${valueCellStyle}">${formatMultiline(reference.address)}</td>
+          <td style="${valueCellStyle}">${formatMultiline(reference.mobileNumber)}</td>
+          <td style="${valueCellStyle}">${formatMultiline(reference.knowingSince)}</td>
+          <td style="${valueCellStyle}">${formatMultiline(reference.feedback)}</td>
+        </tr>
+      `).join("")}
     </table>
   `;
 
@@ -1017,7 +1004,7 @@ export const indiaShelterSenpTemplate = (
       })}
       <tr>
         <td style="${labelCellStyle}">Signature of the PD Officer</td>
-        <td style="${valueCellStyle}"></td>
+        <td style="${valueCellStyle}" colspan="5"></td>
       </tr>
       ${renderKeyValueRow(
         "PD Status",
