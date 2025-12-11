@@ -912,6 +912,19 @@ export const indiaShelterSenpSchema = {
           usageAfterPurchase: {
             type: "string",
             title: "Usage of Property after Purchase",
+            enum: ["Self-Occupancy", "Investment", "Others", "Renting Purpose"],
+          },
+          usageOtherNotes: {
+            type: "string",
+            title: "Usage Other Notes",
+            dependencies: {
+              show: {
+                usageAfterPurchase: "Others",
+              },
+              required: {
+                usageAfterPurchase: "Others",
+              },
+            },
             ui: {
               widget: "textarea",
               rows: 3,
@@ -1199,11 +1212,6 @@ export const indiaShelterSenpSchema = {
                   title: "No. of Years known the applicant",
                   minimum: 0,
                 },
-                photoWithApplicant: {
-                  type: "string",
-                  title: "Photo with Applicant",
-                  enum: ["Yes", "No"],
-                },
               },
             },
           },
@@ -1245,7 +1253,7 @@ export const indiaShelterSenpSchema = {
                 feedback: {
                   type: "string",
                   title: "Feedback",
-                  enum: ["Positive", "Negative", "Neutral"],
+                  enum: ["Positive", "Negative"],
                 },
               },
             },
