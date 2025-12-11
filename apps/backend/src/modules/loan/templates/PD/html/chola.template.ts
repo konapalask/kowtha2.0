@@ -7,7 +7,7 @@ const labelCellStyle =
   "border:1px solid #ccc;padding:8px;font-weight:bold;vertical-align:top;line-height:1.5";
 const valueCellStyle =
   "border:1px solid #ccc;padding:8px;vertical-align:top;line-height:1.5";
-const paragraphStyle = "margin:8px 0;line-height:1.5;font-size:12px;color:#333";
+const paragraphStyle = "margin:8px 0;line-height:1.5;font-size:14px;color:#333";
 
 const hasValue = (value: any): boolean => {
   if (value === null || value === undefined) return false;
@@ -197,7 +197,8 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
   const recommendationsText =
     verificationData.Recommendations?.recommendations || "";
   const recommendations = recommendationsText ? String(recommendationsText).split("\n").filter((line: string) => line.trim()).map((line: string) => `<li>${line.trim()}</li>`).join("") : "";
-
+  
+  const incomeDetails = verificationData.incomeDetails || {};
   const businessList = [
     hasValue(aboutBusiness?.aboutTheApplicant)
       ? `<p style="${paragraphStyle}"><strong>About the Applicant:</strong><br>${
@@ -331,9 +332,21 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
         }
       </ul>
 
-      <p style="${paragraphStyle}"><strong>PD Status:</strong> ${html_data.approvedStatus || "Not provided"}</p>
 
       <p style="${paragraphStyle}"><strong>Disclaimer if any:</strong> ${verificationData?.disclaimer?.disclaimer || "Not provided"}</p>
+
+      <ul>
+        <li><strong>Total Gross Disposable Income (A):</strong> ${formatCurrency(incomeDetails?.totalGrossDisposableIncome)} per month</li>
+        <li><strong>Total Obligations (B):</strong> ${formatCurrency(incomeDetails?.totalObligations)} per month</li>
+        <li><strong>Net Disposable Income (C = A - B):</strong> ${formatCurrency(incomeDetails?.netDisposableIncome)} per month</li>
+      </ul>
+      <p style="${paragraphStyle}">Gross disposable income is sum of Net profit & interest depreciations</p>
+      <ul>
+        <li>Business premises photo with customer & Vendor’s Self to be attached in this report.</li>
+      </ul>
+
+      <p style="${paragraphStyle}"><strong>PD Status:</strong> ${html_data.approvedStatus || "Not provided"}</p>
+
     </div>
     ${pdBaseTemplateFooter(html_data)}
 

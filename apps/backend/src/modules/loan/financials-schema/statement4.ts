@@ -44,6 +44,7 @@ export const statement4Schema = {
       grossProfitAssessed: {
         type: "number",
         title: "Gross Profit - Assessed",
+        formula: "grandTotalIncome - (openingStockAssessed + purchasesAssessed)",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -393,7 +394,7 @@ export const statement4Schema = {
       totalPayments: {
         type: "number",
         title: "Total Payments",
-        formula: "grandTotal",
+        formula: "(salesEstimated + servicesEstimated - netProfit) / 12",
         readOnly: true,
         minimum: 0,
         formatter: {
@@ -406,8 +407,8 @@ export const statement4Schema = {
 
       netProfitMargin: {
         type: "number",
-        title: "Net Profit Margin",
-        formula: "(netProfit / grandTotal) * 100",
+        title: "Net Profit",
+        formula: "netProfit / 12",
         readOnly: true,
         formatter: {
           useIndianFormat: true,
@@ -420,8 +421,8 @@ export const statement4Schema = {
       // Margin Percentages
       gpMargin: {
         type: "number",
-        title: "GP Margin %",
-        formula: "(grossProfitAssessed / grandTotal) * 100",
+        title: "GP Margin",
+        formula: "grossProfitAssessed / salesEstimated",
         readOnly: true,
         minimum: 0,
         formatter: {
@@ -434,8 +435,8 @@ export const statement4Schema = {
 
       npMargin: {
         type: "number",
-        title: "NP Margin %",
-        formula: "(netProfit / grandTotal) * 100",
+        title: "NP Margin",
+        formula: "netProfit / (salesEstimated + servicesEstimated)",
         readOnly: true,
         minimum: 0,
         formatter: {

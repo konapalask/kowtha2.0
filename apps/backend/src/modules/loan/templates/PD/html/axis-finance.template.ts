@@ -209,6 +209,10 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
       value: personal?.applicantName || "Not Provided",
     },
     {
+      label: "Application Number",
+      value: personal?.applicationNumber || "Not Provided",
+    },
+    {
       label: "Interviewed By",
       value: personal?.interviewedBy || "Not Provided",
     },

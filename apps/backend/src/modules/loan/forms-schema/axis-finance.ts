@@ -15,6 +15,11 @@ export const axisFinanceSchema = {
             title: "Name of the Applicant",
             readOnly: true,
           },
+          applicationNumber:{
+            type: "string",
+            title: "Application Number",
+            readOnly: true,
+          },
           interviewedBy: {
             type: "string",
             title: "Interviewed By",
