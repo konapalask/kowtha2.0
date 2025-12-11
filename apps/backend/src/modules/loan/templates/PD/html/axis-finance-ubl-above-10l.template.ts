@@ -542,12 +542,12 @@ export const axisFinanceUBLTemplate = (
         ["Status:", html_data.approvedStatus || "Not provided"],
         [
           "AFL Verifier's Name & Emp Code:",
-          thirdPartySection.verifierNameEmpCode || "",
+          html_data.verifierName || "",
         ],
       ])}
       <table style="${tableStyle}">
         <tr>
-          <td style="${labelCellStyle}">Signature</td>
+          <td style="${labelCellStyle}">AFL Verifier's Signature</td>
           <td style="${cellStyle}"></td>
         </tr>
       </table>

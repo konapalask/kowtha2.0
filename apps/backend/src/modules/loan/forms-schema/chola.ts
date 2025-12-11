@@ -371,6 +371,46 @@ export const cholaSchema = {
         },
       },
     },
+    {
+      id: "incomeDetails",
+      label: "Income Details",
+      schema: {
+        type: "object",
+        properties: {
+          totalGrossDisposableIncome: {
+            type: "number",
+            title: "Total Gross disposable Income",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          totalObligations: {
+            type: "number",
+            title: "Total Obligations",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          netDisposableIncome: {
+            type: "number",
+            title: "Net Disposable Income",
+            formula: "totalGrossDisposableIncome - totalObligations",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+        },
+      },
+    },
 
     financialsSchema,
   ],
