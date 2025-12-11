@@ -1,3 +1,4 @@
+import { Dependencies } from "@nestjs/common";
 import financialsSchema from "../financials-schema/generic";
 export const indiaShelterSalariedSchema = {
   id: 22,
@@ -435,10 +436,16 @@ export const indiaShelterSalariedSchema = {
           purposes: {
             type: "string",
             title: "Purpose of Loan",
-            ui: {
-              widget: "textarea",
-              rows: 3,
-            },
+            enum: [
+              "Flat Purchase",
+              "House Purchase",
+              "Plot Purchase",
+              "Construction of Residential House Property",
+              "Business Development",
+              "Improvement/Extension",
+              "Balance Transfer",
+              "Plot + Construction",
+            ],
           },
           minimumLoanAmount: {
             type: "number",
@@ -484,10 +491,19 @@ export const indiaShelterSalariedSchema = {
           usageAfterPurchase: {
             type: "string",
             title: "Usage of Property After Purchase",
-            ui: {
-              widget: "textarea",
-              rows: 3,
-            },
+            enum: ["Self-Occupancy", "Investment", "Others","Renting Purpose"],
+          },
+          usageOtherNotes: {
+            type: "string",
+            title: "Usage Other Notes",
+            dependencies:{
+              show: {
+                usageAfterPurchase: "Others",
+              },
+              required: {
+                usageAfterPurchase: "Others",
+              },
+            }
           },
           propertyAddress: {
             type: "string",
