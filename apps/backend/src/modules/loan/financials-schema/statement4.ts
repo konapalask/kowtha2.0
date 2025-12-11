@@ -45,6 +45,7 @@ export const statement4Schema = {
         type: "number",
         title: "Gross Profit - Assessed",
         formula: "grandTotalIncome - (openingStockAssessed + purchasesAssessed)",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,

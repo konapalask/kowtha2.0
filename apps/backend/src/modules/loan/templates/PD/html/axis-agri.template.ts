@@ -175,13 +175,8 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
     <table style="${tableStyle}">
       <tr><th style="${subHeaderStyle}" colspan="4">Business Profile</th></tr>
       ${renderKeyValueRow("Type of Industry", profile.typeOfIndustry,undefined, {colSpan: 3})}
-      ${renderKeyValueRow("Nature of Business", profile.natureOfBusiness,undefined, {colSpan: 3})}
-      ${renderKeyValueRow(
-        "Details on management of business",
-        profile.managementDetails,
-        undefined,
-        { colSpan: 3 }
-      )}
+      ${renderKeyValueRow("Nature of Business", profile.natureOfBusiness.split("\n").map((item: string) => `<ul><li>${item}</li></ul>`).join(""),undefined, {colSpan: 3})}
+      ${renderKeyValueRow("Details on management of business", profile.managementDetails.split("\n").map((item: string) => `<ul><li>${item}</li></ul>`).join(""),undefined, {colSpan: 3})}
       ${renderKeyValueRow(
         "Total Experience in Same line Business",
         profile.totalExperience,

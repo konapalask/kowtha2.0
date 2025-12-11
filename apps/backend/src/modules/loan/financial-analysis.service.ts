@@ -717,13 +717,11 @@ export class FinancialAnalysisTemplatesService {
       { width: 30 }, // A - Particulars (left)
       { width: 20 }, // B - Previous Year Actuals
       { width: 20 }, // C - This Year Actuals
-      { width: 12 }, // D - Change %
-      { width: 15 }, // E - Estimated
-      { width: 30 }, // F - Particulars (right)
-      { width: 20 }, // G - Previous Year Actuals
-      { width: 20 }, // H - This Year Actuals
-      { width: 12 }, // I - Change %
-      { width: 15 }, // J - Estimated
+      { width: 15 }, // D - Estimated
+      { width: 30 }, // E - Particulars (right)
+      { width: 20 }, // F - Previous Year Actuals
+      { width: 20 }, // G - This Year Actuals
+      { width: 15 }, // H - Estimated
     ];
 
     // Helper function to get value safely
@@ -734,27 +732,11 @@ export class FinancialAnalysisTemplatesService {
       return value;
     };
 
-    // Helper function to format percentage
-    const formatPercentage = (value: any): any => {
-      if (value === null || value === undefined || value === "") return "";
-      if (typeof value === "number") {
-        return value;
-      }
-      if (
-        typeof value === "string" &&
-        !isNaN(Number(value)) &&
-        value.trim() !== ""
-      ) {
-        return Number(value);
-      }
-      return "";
-    };
-
     // Title
     const titleRow = worksheet.addRow([
       `M/s. ${financialAnalysis.businessName || loan.applicantName || "XXX"}`,
     ]);
-    worksheet.mergeCells("A1:E1");
+    worksheet.mergeCells("A1:D1");
     titleRow.font = { bold: true, size: 14 };
     titleRow.alignment = { horizontal: "center" };
 
@@ -762,7 +744,7 @@ export class FinancialAnalysisTemplatesService {
     const subTitleRow = worksheet.addRow([
       "Estimated Profit & Loss Account for the Year Ended 31st March 2026",
     ]);
-    worksheet.mergeCells("A2:E2");
+    worksheet.mergeCells("A2:D2");
     subTitleRow.font = { bold: true, size: 12 };
     subTitleRow.alignment = { horizontal: "center" };
     subTitleRow.height = 25;
@@ -774,12 +756,10 @@ export class FinancialAnalysisTemplatesService {
       "PARTICULARS",
       `${new Date().getFullYear() - 1} Actuals`,
       `${new Date().getFullYear()} Actuals`,
-      "Change %",
       "Estimated",
       "PARTICULARS",
       `${new Date().getFullYear() - 1} Actuals`,
       `${new Date().getFullYear()} Actuals`,
-      "Change %",
       "Estimated",
     ]);
     columnHeaderRow.font = { bold: true };
@@ -798,12 +778,10 @@ export class FinancialAnalysisTemplatesService {
       leftLabel: string,
       left2023: any,
       left2024: any,
-      leftChange: any,
       leftEstimated: any,
       rightLabel: string,
       right2023: any,
       right2024: any,
-      rightChange: any,
       rightEstimated: any,
       isBold = false
     ) => {
@@ -811,12 +789,10 @@ export class FinancialAnalysisTemplatesService {
         leftLabel,
         left2023,
         left2024,
-        formatPercentage(leftChange),
         leftEstimated,
         rightLabel,
         right2023,
         right2024,
-        formatPercentage(rightChange),
         rightEstimated,
       ]);
 
@@ -836,8 +812,8 @@ export class FinancialAnalysisTemplatesService {
         cell.alignment = { vertical: "middle" };
       });
 
-      // Format numeric columns (B, C, E, G, H, J)
-      [2, 3, 5, 7, 8, 10].forEach((colNum) => {
+      // Format numeric columns (B, C, D, F, G, H)
+      [2, 3, 4, 6, 7, 8].forEach((colNum) => {
         const cell = row.getCell(colNum);
         const value = cell.value;
         if (value !== null && value !== undefined && value !== "") {
@@ -858,27 +834,6 @@ export class FinancialAnalysisTemplatesService {
         }
       });
 
-      // Format percentage columns (D, I)
-      [4, 9].forEach((colNum) => {
-        const cell = row.getCell(colNum);
-        const value = cell.value;
-        if (value !== null && value !== undefined && value !== "") {
-          cell.alignment = {
-            horizontal: "right",
-            vertical: "middle",
-          };
-          if (typeof value === "number") {
-            cell.numFmt = "0.00";
-          } else if (
-            typeof value === "string" &&
-            !isNaN(Number(value)) &&
-            value.trim() !== ""
-          ) {
-            cell.value = Number(value);
-            cell.numFmt = "0.00";
-          }
-        }
-      });
     };
 
     // Add P&L data rows - Left side (Expenditure) and Right side (Income)
@@ -888,9 +843,7 @@ export class FinancialAnalysisTemplatesService {
       "To Opening Stock",
       getValue("openingStock_2023"),
       getValue("openingStock_2024"),
-      getValue("openingStockChange"),
       getValue("openingStockEstimated"),
-      "",
       "",
       "",
       "",
@@ -903,11 +856,9 @@ export class FinancialAnalysisTemplatesService {
       "",
       "",
       "",
-      "",
       "By Sales",
       getValue("sales_2023"),
       getValue("sales_2024"),
-      getValue("salesChange"),
       getValue("salesEstimated")
     );
 
@@ -916,9 +867,7 @@ export class FinancialAnalysisTemplatesService {
       "To Purchases",
       getValue("purchases_2023"),
       getValue("purchases_2024"),
-      getValue("purchasesChange"),
       getValue("purchasesEstimated"),
-      "",
       "",
       "",
       "",
@@ -931,11 +880,9 @@ export class FinancialAnalysisTemplatesService {
       "",
       "",
       "",
-      "",
       "To Majuri Charges",
       getValue("majuriCharges_2023"),
       getValue("majuriCharges_2024"),
-      getValue("majuriChargesChange"),
       getValue("majuriChargesEstimated")
     );
 
@@ -946,11 +893,9 @@ export class FinancialAnalysisTemplatesService {
       "",
       "",
       "",
-      "",
       "By Closing Stock",
       getValue("closingStock_2023"),
       getValue("closingStock_2024"),
-      getValue("closingStockChange"),
       getValue("closingStockEstimated")
     );
 
@@ -959,9 +904,7 @@ export class FinancialAnalysisTemplatesService {
       "To Gas & Liquid Items",
       getValue("gasLiquidItems_2023"),
       getValue("gasLiquidItems_2024"),
-      getValue("gasLiquidItemsChange"),
       getValue("gasLiquidItemsEstimated"),
-      "",
       "",
       "",
       "",
@@ -973,9 +916,7 @@ export class FinancialAnalysisTemplatesService {
       "To Gross Profit",
       getValue("grossProfit_2023"),
       getValue("grossProfit_2024"),
-      getValue("grossProfitChange"),
       getValue("grossProfitEstimated"),
-      "",
       "",
       "",
       "",
@@ -984,20 +925,18 @@ export class FinancialAnalysisTemplatesService {
     );
 
     // Empty row
-    addDataRow("", "", "", "", "", "", "", "", "", "");
+    addDataRow("", "", "", "", "", "", "", "");
 
     // Indirect Expenses (Left side)
     addDataRow(
       "To Salaries",
       getValue("salaries_2023"),
       getValue("salaries_2024"),
-      getValue("salariesChange"),
       getValue("salariesEstimated"),
      "By Gross Profit",
       getValue("grossProfit_2023"),
       getValue("grossProfit_2024"),
-      getValue("grossProfitChange"),
-      getValue("grossProfitEstimated"),
+      getValue("grossProfitEstimated")
     );
  
 
@@ -1005,9 +944,7 @@ export class FinancialAnalysisTemplatesService {
       "To Bonus",
       getValue("bonus_2023"),
       getValue("bonus_2024"),
-      getValue("bonusChange"),
       getValue("bonusEstimated"),
-      "",
       "",
       "",
       "",
@@ -1018,9 +955,7 @@ export class FinancialAnalysisTemplatesService {
       "To Shop Rents",
       getValue("shopRents_2023"),
       getValue("shopRents_2024"),
-      getValue("shopRentsChange"),
       getValue("shopRentsEstimated"),
-      "",
       "",
       "",
       "",
@@ -1031,9 +966,7 @@ export class FinancialAnalysisTemplatesService {
       "To Electricity Charges",
       getValue("electricityCharges_2023"),
       getValue("electricityCharges_2024"),
-      getValue("electricityChargesChange"),
       getValue("electricityChargesEstimated"),
-      "",
       "",
       "",
       "",
@@ -1044,9 +977,7 @@ export class FinancialAnalysisTemplatesService {
       "To Coal, Gas & Liquid",
       getValue("coalGasLiquid_2023"),
       getValue("coalGasLiquid_2024"),
-      getValue("coalGasLiquidChange"),
       getValue("coalGasLiquidEstimated"),
-      "",
       "",
       "",
       "",
@@ -1057,9 +988,7 @@ export class FinancialAnalysisTemplatesService {
       "To Spares & Machinery",
       getValue("sparesMachinery_2023"),
       getValue("sparesMachinery_2024"),
-      getValue("sparesMachineryChange"),
       getValue("sparesMachineryEstimated"),
-      "",
       "",
       "",
       "",
@@ -1070,9 +999,7 @@ export class FinancialAnalysisTemplatesService {
       "To Bank Interest",
       getValue("bankInterest_2023"),
       getValue("bankInterest_2024"),
-      getValue("bankInterestChange"),
       getValue("bankInterestEstimated"),
-      "",
       "",
       "",
       "",
@@ -1083,9 +1010,7 @@ export class FinancialAnalysisTemplatesService {
       "To Bank Charges",
       getValue("bankCharges_2023"),
       getValue("bankCharges_2024"),
-      getValue("bankChargesChange"),
       getValue("bankChargesEstimated"),
-      "",
       "",
       "",
       "",
@@ -1096,9 +1021,7 @@ export class FinancialAnalysisTemplatesService {
       "To Finance Charges/Professional Tax",
       getValue("financeCharges_2023"),
       getValue("financeCharges_2024"),
-      getValue("financeChargesChange"),
       getValue("financeChargesEstimated"),
-      "",
       "",
       "",
       "",
@@ -1109,9 +1032,7 @@ export class FinancialAnalysisTemplatesService {
       "To GST Late Fee",
       getValue("gstLateFee_2023"),
       getValue("gstLateFee_2024"),
-      getValue("gstLateFeeChange"),
       getValue("gstLateFeeEstimated"),
-      "",
       "",
       "",
       "",
@@ -1122,9 +1043,7 @@ export class FinancialAnalysisTemplatesService {
       "To Auditor Fee",
       getValue("auditorFee_2023"),
       getValue("auditorFee_2024"),
-      getValue("auditorFeeChange"),
       getValue("auditorFeeEstimated"),
-      "",
       "",
       "",
       "",
@@ -1135,9 +1054,7 @@ export class FinancialAnalysisTemplatesService {
       "To Telephone Charges",
       getValue("telephoneCharges_2023"),
       getValue("telephoneCharges_2024"),
-      getValue("telephoneChargesChange"),
       getValue("telephoneChargesEstimated"),
-      "",
       "",
       "",
       "",
@@ -1148,9 +1065,7 @@ export class FinancialAnalysisTemplatesService {
       "To Travelling Exp/Transport",
       getValue("travellingExp_2023"),
       getValue("travellingExp_2024"),
-      getValue("travellingExpChange"),
       getValue("travellingExpEstimated"),
-      "",
       "",
       "",
       "",
@@ -1161,9 +1076,7 @@ export class FinancialAnalysisTemplatesService {
       "To Vehicle Maintenance & Machinery",
       getValue("vehicleMaintenance_2023"),
       getValue("vehicleMaintenance_2024"),
-      getValue("vehicleMaintenanceChange"),
       getValue("vehicleMaintenanceEstimated"),
-      "",
       "",
       "",
       "",
@@ -1174,9 +1087,7 @@ export class FinancialAnalysisTemplatesService {
       "To Depreciation",
       getValue("depreciation_2023"),
       getValue("depreciation_2024"),
-      getValue("depreciationChange"),
       getValue("depreciationEstimated"),
-      "",
       "",
       "",
       "",
@@ -1187,9 +1098,7 @@ export class FinancialAnalysisTemplatesService {
       "To Interest",
       getValue("interest_2023"),
       getValue("interest_2024"),
-      getValue("interestChange"),
       getValue("interestEstimated"),
-      "",
       "",
       "",
       "",
@@ -1200,9 +1109,7 @@ export class FinancialAnalysisTemplatesService {
       "To Sadar",
       getValue("sadar_2023"),
       getValue("sadar_2024"),
-      getValue("sadarChange"),
       getValue("sadarEstimated"),
-      "",
       "",
       "",
       "",
@@ -1210,16 +1117,14 @@ export class FinancialAnalysisTemplatesService {
     );
 
     // Empty row
-    addDataRow("", "", "", "", "", "", "", "", "", "");
+    addDataRow("", "", "", "", "", "", "", "");
 
     // Net Profit (Right)
     addDataRow(
       "To Net Profit",
       getValue("netProfit_2023"),
       getValue("netProfit_2024"),
-      getValue("netProfitChange"),
       getValue("netProfitEstimated"),
-      "",
       "",
       "",
       "",
@@ -1232,12 +1137,10 @@ export class FinancialAnalysisTemplatesService {
       "Total",
       getValue("total_2023_left"),
       getValue("total_2024_left"),
-      "",
       getValue("total_estimated_left"),
       "",
       getValue("total_2023_right"),
       getValue("total_2024_right"),
-      "",
       getValue("total_estimated_right"),
       true
     );
@@ -1256,11 +1159,9 @@ export class FinancialAnalysisTemplatesService {
       "",
       "",
       "",
-      "",
-      "",
     ]);
     const monthlyHeaderRowNum = monthlyHeaderRow.number;
-    worksheet.mergeCells(`A${monthlyHeaderRowNum}:E${monthlyHeaderRowNum}`);
+    worksheet.mergeCells(`A${monthlyHeaderRowNum}:B${monthlyHeaderRowNum}`);
     monthlyHeaderRow.getCell(1).font = { bold: true, size: 12 };
     monthlyHeaderRow.getCell(1).alignment = { horizontal: "center" };
     monthlyHeaderRow.getCell(1).fill = {
@@ -1273,15 +1174,8 @@ export class FinancialAnalysisTemplatesService {
     const monthlyDataRow = worksheet.addRow([
       "Monthly Turnover",
       getValue("monthlyTurnover"),
-      "",
-      "",
-      "",
-      "Monthly Payments",
-      getValue("monthlyPayments"),
-      "",
-      "",
-      "",
     ]);
+
     monthlyDataRow.eachCell((cell, colNumber) => {
       if (colNumber === 1 || colNumber === 6) {
         cell.font = { bold: true };
@@ -1298,17 +1192,24 @@ export class FinancialAnalysisTemplatesService {
     const monthlyNetProfitRow = worksheet.addRow([
       "Monthly Net Profit",
       getValue("monthlyNetProfit"),
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
     ]);
     monthlyNetProfitRow.getCell(1).font = { bold: true };
     monthlyNetProfitRow.eachCell((cell, colNumber) => {
+      this.applyBorder(cell);
+      if (colNumber === 2) {
+        cell.alignment = { horizontal: "right" };
+        if (cell.value && typeof cell.value === "number") {
+          cell.numFmt = "#,##0.00";
+        }
+      }
+    });
+
+    const monthlyPaymentsRow = worksheet.addRow([
+      "Monthly Payments",
+      getValue("monthlyPayments"),
+    ]);
+    monthlyPaymentsRow.getCell(1).font = { bold: true };
+    monthlyPaymentsRow.eachCell((cell, colNumber) => {
       this.applyBorder(cell);
       if (colNumber === 2) {
         cell.alignment = { horizontal: "right" };
@@ -1331,11 +1232,9 @@ export class FinancialAnalysisTemplatesService {
       "",
       "",
       "",
-      "",
-      "",
     ]);
     const marginHeaderRowNum = marginHeaderRow.number;
-    worksheet.mergeCells(`A${marginHeaderRowNum}:E${marginHeaderRowNum}`);
+    worksheet.mergeCells(`A${marginHeaderRowNum}:B${marginHeaderRowNum}`);
     marginHeaderRow.getCell(1).font = { bold: true, size: 12 };
     marginHeaderRow.getCell(1).alignment = { horizontal: "center" };
     marginHeaderRow.getCell(1).fill = {
@@ -1348,14 +1247,6 @@ export class FinancialAnalysisTemplatesService {
     const marginDataRow = worksheet.addRow([
       "Gross Profit %",
       getValue("gpPercentage"),
-      "",
-      "",
-      "",
-      "Net Profit %",
-      getValue("npPercentage"),
-      "",
-      "",
-      "",
     ]);
     marginDataRow.eachCell((cell, colNumber) => {
       if (colNumber === 1 || colNumber === 6) {
@@ -1363,6 +1254,20 @@ export class FinancialAnalysisTemplatesService {
       }
       this.applyBorder(cell);
       if (colNumber === 2 || colNumber === 7) {
+        cell.alignment = { horizontal: "right" };
+        if (cell.value && typeof cell.value === "number") {
+          cell.numFmt = "0.00";
+        }
+      }
+    });
+    const marginNetProfitRow = worksheet.addRow([
+      "Net Profit %",
+      getValue("npPercentage"),
+    ]);
+    marginNetProfitRow.getCell(1).font = { bold: true };
+    marginNetProfitRow.eachCell((cell, colNumber) => {
+      this.applyBorder(cell);
+      if (colNumber === 2) {
         cell.alignment = { horizontal: "right" };
         if (cell.value && typeof cell.value === "number") {
           cell.numFmt = "0.00";
