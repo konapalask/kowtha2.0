@@ -397,7 +397,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
   // Recalculate formula fields whenever form values change
   useEffect(() => {
     const subscription = watch(value => {
-      // Calculate formula fields (including nested objects)
+      // Calculate formula fields (including nested objects and arrays)
       const formValues = value as AnyObject;
       const calculatedFields = evaluateNestedFormulas(
         schema.properties,
@@ -462,6 +462,71 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
           }
         });
       }
+
+      // Handle formulas inside array items
+      Object.entries(schema.properties).forEach(([fieldId, property]) => {
+        if (
+          property.type === 'array' &&
+          property.items?.type === 'object' &&
+          property.items?.properties
+        ) {
+          const arrayValue = formValues[fieldId];
+          if (Array.isArray(arrayValue) && arrayValue.length > 0) {
+            const itemProperties = property.items.properties;
+            if (!itemProperties) return;
+
+            const updatedArray = arrayValue.map((item: any, index: number) => {
+              if (!item || typeof item !== 'object') return item;
+
+              // Evaluate formulas for this array item
+              const itemCalculated = evaluateNestedFormulas(
+                itemProperties,
+                item,
+              );
+
+              // Check if any calculated values differ from current values
+              let hasItemChanges = false;
+              const updatedItem = {...item};
+
+              Object.entries(itemCalculated).forEach(([calcKey, calcVal]) => {
+                const currentItemValue = item[calcKey];
+                const currentStr =
+                  currentItemValue !== undefined && currentItemValue !== null
+                    ? String(currentItemValue)
+                    : '';
+                const newStr =
+                  calcVal !== undefined && calcVal !== null
+                    ? String(calcVal)
+                    : '';
+
+                if (currentStr !== newStr) {
+                  const currentNum = parseFloat(currentStr || '0');
+                  const newNum = parseFloat(newStr || '0');
+
+                  if (
+                    isNaN(currentNum) ||
+                    Math.abs(currentNum - newNum) > 0.0001
+                  ) {
+                    updatedItem[calcKey] = calcVal;
+                    hasItemChanges = true;
+                  }
+                }
+              });
+
+              return hasItemChanges ? updatedItem : item;
+            });
+
+            // Check if array actually changed
+            const arrayChanged = updatedArray.some(
+              (item: any, index: number) => item !== arrayValue[index],
+            );
+
+            if (arrayChanged) {
+              setValue(fieldId as any, updatedArray, {shouldValidate: false});
+            }
+          }
+        }
+      });
     });
     return () => subscription.unsubscribe();
   }, [watch, setValue, schema.properties]);
@@ -579,14 +644,23 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
     return (
       <View style={styles.dateFieldContainer}>
         <Text style={styles.label}>{title}</Text>
-        <TouchableOpacity
-          style={[styles.dateField, isReadOnly && styles.disabledDateField]}
-          onPress={() => !isReadOnly && showDatePicker(fieldKey, pickerMode)}
-          disabled={isReadOnly}>
-          <Text style={[styles.dateText, !value && styles.placeholderText]}>
-            {displayValue}
-          </Text>
-        </TouchableOpacity>
+        {isReadOnly ? (
+          <View style={[styles.dateField, styles.disabledDateField]}>
+            <Text
+              style={[styles.dateText, !value && styles.placeholderText]}
+              selectable={true}>
+              {displayValue}
+            </Text>
+          </View>
+        ) : (
+          <TouchableOpacity
+            style={styles.dateField}
+            onPress={() => showDatePicker(fieldKey, pickerMode)}>
+            <Text style={[styles.dateText, !value && styles.placeholderText]}>
+              {displayValue}
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
     );
   };

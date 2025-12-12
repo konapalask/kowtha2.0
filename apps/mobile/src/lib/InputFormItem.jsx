@@ -113,6 +113,32 @@ export function InputFormItem({data}) {
             data?.type === 'password';
           const shouldGrow = !isNumericOrPassword;
 
+          // For readonly fields, use a selectable Text component styled like an input
+          if (isDisabled) {
+            return (
+              <>
+                <View
+                  style={[
+                    styles.input,
+                    shouldGrow && {minHeight: height},
+                    styles.disabledInput,
+                    error && styles.errorBorder,
+                  ]}>
+                  <Text
+                    style={[
+                      styles.readonlyText,
+                      {fontSize: data?.name ? 20 : 14},
+                      shouldGrow && styles.readonlyTextMultiline,
+                    ]}
+                    selectable={true}>
+                    {displayValue || data?.placeholder || ''}
+                  </Text>
+                </View>
+                {error && <Text style={styles.errorText}>{error.message}</Text>}
+              </>
+            );
+          }
+
           return (
             <>
               <TextInput
@@ -180,6 +206,12 @@ const styles = StyleSheet.create({
   disabledInput: {
     backgroundColor: '#f2f2f2',
     color: '#000',
+  },
+  readonlyText: {
+    color: '#000',
+  },
+  readonlyTextMultiline: {
+    // Additional styling for multiline if needed
   },
   errorBorder: {
     borderColor: 'red',
