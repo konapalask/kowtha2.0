@@ -563,6 +563,14 @@ export const idfcHlMlSchema = {
             type: "string",
             title: "Other observation",
           },
+          remarks: {
+            type: "string",
+            title: "Remarks",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
           overallOutcome: {
             type: "string",
             title: "Overall outcome of the personal discussion",
