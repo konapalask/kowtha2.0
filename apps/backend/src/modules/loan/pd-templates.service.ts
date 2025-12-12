@@ -33,6 +33,7 @@ export class PDTemplateService {
     applicationNumber: string,
     synopsis: string,
     approvedStatus: string,
+    verifierName: string,
     financialAnalysis: any,
     loan?: any
   ): Promise<any> {
@@ -368,6 +369,7 @@ export class PDTemplateService {
       status: status,
       synopsis: synopsis,
       approvedStatus: getStyledApprovedStatus(approvedStatus),
+      verifierName: verifierName,
       imageDataUri: imageDataUri,
       imagesData: imagesData,
       fieldExecutive: fieldExecutive,
@@ -386,6 +388,7 @@ export class PDTemplateService {
     loan: any,
     synopsis: string,
     approvedStatus: string,
+    verifierName: string,
     financialAnalysis: any,
     schema?: any
   ): Promise<any> {
@@ -407,6 +410,7 @@ export class PDTemplateService {
         loan.applicationNumber,
         synopsis,
         approvedStatus,
+        verifierName,
         financialAnalysis,
         loan
       );
@@ -421,6 +425,7 @@ export class PDTemplateService {
         loan.applicationNumber,
         synopsis,
         approvedStatus,
+        verifierName,
         financialAnalysis,
         loan
       );
@@ -435,6 +440,7 @@ export class PDTemplateService {
         loan.applicationNumber,
         synopsis,
         approvedStatus,
+        verifierName,
         financialAnalysis,
         loan
       );
@@ -448,6 +454,7 @@ export class PDTemplateService {
         loan.applicationNumber,
         synopsis,
         approvedStatus,
+        verifierName,
         financialAnalysis,
         loan
       );
@@ -461,6 +468,7 @@ export class PDTemplateService {
         loan.applicationNumber,
         synopsis,
         approvedStatus,
+        verifierName,
         financialAnalysis,
         loan
       );
@@ -474,6 +482,7 @@ export class PDTemplateService {
         loan.applicationNumber,
         synopsis,
         approvedStatus,
+        verifierName,
         financialAnalysis,
         loan
       );
@@ -487,6 +496,7 @@ export class PDTemplateService {
         loan.applicationNumber,
         synopsis,
         approvedStatus,
+        verifierName,
         financialAnalysis,
         loan
       );
@@ -500,6 +510,7 @@ export class PDTemplateService {
         loan.applicationNumber,
         synopsis,
         approvedStatus,
+        verifierName,
         financialAnalysis,
         loan
       );
@@ -513,6 +524,7 @@ export class PDTemplateService {
         loan.applicationNumber,
         synopsis,
         approvedStatus,
+        verifierName,
         financialAnalysis,
         loan
       );
@@ -526,6 +538,7 @@ export class PDTemplateService {
         loan.applicationNumber,
         synopsis,
         approvedStatus,
+        verifierName,
         financialAnalysis,
         loan
       );
@@ -546,6 +559,7 @@ export class PDTemplateService {
         loan.applicationNumber,
         synopsis,
         approvedStatus,
+        verifierName,
         financialAnalysis,
         loan
       );
@@ -559,6 +573,7 @@ export class PDTemplateService {
         loan.applicationNumber,
         synopsis,
         approvedStatus,
+        verifierName,
         financialAnalysis,
         loan
       );
@@ -572,6 +587,7 @@ export class PDTemplateService {
         loan.applicationNumber,
         synopsis,
         approvedStatus,
+        verifierName,
         financialAnalysis,
         loan
       );
@@ -585,6 +601,7 @@ export class PDTemplateService {
         loan.applicationNumber,
         synopsis,
         approvedStatus,
+        verifierName,
         financialAnalysis,
         loan
       );
@@ -598,6 +615,7 @@ export class PDTemplateService {
         loan.applicationNumber,
         synopsis,
         approvedStatus,
+        verifierName,
         financialAnalysis,
         loan
       );
@@ -632,6 +650,7 @@ export class PDTemplateService {
         loan.applicationNumber,
         synopsis,
         approvedStatus,
+        verifierName,
         financialAnalysis,
         loan
       );
@@ -645,6 +664,7 @@ export class PDTemplateService {
         loan.applicationNumber,
         synopsis,
         approvedStatus,
+        verifierName,
         financialAnalysis,
         loan
       );
@@ -658,6 +678,7 @@ export class PDTemplateService {
         loan.applicationNumber,
         synopsis,
         approvedStatus,
+        verifierName,
         financialAnalysis,
         loan
       );
@@ -671,6 +692,7 @@ export class PDTemplateService {
         loan.applicationNumber,
         synopsis,
         approvedStatus,
+        verifierName,
         financialAnalysis,
         loan
       );
@@ -684,6 +706,7 @@ export class PDTemplateService {
         loan.applicationNumber,
         synopsis,
         approvedStatus,
+        verifierName,
         financialAnalysis,
         loan
       );
@@ -697,6 +720,7 @@ export class PDTemplateService {
         loan.applicationNumber,
         synopsis,
         approvedStatus,
+        verifierName,
         financialAnalysis,
         loan
       );
@@ -710,6 +734,7 @@ export class PDTemplateService {
         loan.applicationNumber,
         synopsis,
         approvedStatus,
+        verifierName,
         financialAnalysis,
         loan
       );
@@ -727,6 +752,7 @@ export class PDTemplateService {
         loan.applicationNumber,
         synopsis,
         approvedStatus,
+        verifierName,
         financialAnalysis,
         loan
       );
@@ -741,6 +767,7 @@ export class PDTemplateService {
         loan.applicationNumber,
         synopsis,
         approvedStatus,
+        verifierName,
         financialAnalysis,
         loan
       );
@@ -754,6 +781,7 @@ export class PDTemplateService {
         loan.applicationNumber,
         synopsis,
         approvedStatus,
+        verifierName,
         financialAnalysis,
         loan
       );
@@ -766,6 +794,7 @@ export class PDTemplateService {
         loan.applicationNumber,
         synopsis,
         approvedStatus,
+        verifierName,
         financialAnalysis,
         loan
       );
@@ -778,6 +807,7 @@ export class PDTemplateService {
         loan.applicationNumber,
         synopsis,
         approvedStatus,
+        verifierName,
         financialAnalysis,
         loan
       );
@@ -791,6 +821,7 @@ export class PDTemplateService {
         loan.applicationNumber,
         synopsis,
         approvedStatus,
+        verifierName,
         financialAnalysis,
         loan
       );
@@ -804,6 +835,7 @@ export class PDTemplateService {
         loan.applicationNumber,
         synopsis,
         approvedStatus,
+        verifierName,
         financialAnalysis,
         loan
       );
@@ -817,6 +849,7 @@ export class PDTemplateService {
         loan.applicationNumber,
         synopsis,
         approvedStatus,
+        verifierName,
         financialAnalysis,
         loan
       );
@@ -856,6 +889,7 @@ export class PDTemplateService {
         loan.applicationNumber,
         synopsis,
         approvedStatus,
+        verifierName,
         financialAnalysis,
         loan
       );
@@ -904,6 +938,7 @@ export class PDTemplateService {
               synopsis: true,
               financialAnalysis: true,
               fieldExecutive: { select: { name: true } },
+              verifier: { select: { name: true } },
             },
           },
         },
@@ -978,6 +1013,7 @@ export class PDTemplateService {
         loan,
         verification.synopsis,
         verification.approvedStatus,
+        verification.verifier?.name,
         verification.financialAnalysis,
         schema
       );
