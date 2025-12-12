@@ -82,6 +82,39 @@ const Footer: React.FC<{
     }
   };
 
+  const handleDownloadReport = async () => {
+    try {
+      const reportResponse = await generatePreviewReport(
+        id as string,
+        activeTab,
+        null
+      );
+      if (!reportResponse) {
+        throw new Error("No PDF data received");
+      }
+
+      const blob = new Blob([reportResponse], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+      
+   
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `verification-report-${id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+  
+      window.URL.revokeObjectURL(url);
+      
+      message.success("Report downloaded successfully");
+    } catch (error: any) {
+      console.error("Error downloading report:", error);
+      message.error(
+        error?.response?.data?.message ?? "Failed to download report"
+      );
+    }
+  };
+
   const handleExportExcel = async () => {
     try {
       const excelResponse = await exportFinancialAnalysis(id as string);
@@ -231,6 +264,17 @@ const Footer: React.FC<{
         </Button>
         {currentDepartment === "PD" && (
           <>
+            <Button
+              size="small"
+              icon={<DownloadOutlined />}
+              onClick={handleDownloadReport}
+              style={{
+                height: "32px",
+                fontSize: "14px",
+              }}
+            >
+              Download Report
+            </Button>
             <Button
               size="small"
               icon={<DownloadOutlined />}
