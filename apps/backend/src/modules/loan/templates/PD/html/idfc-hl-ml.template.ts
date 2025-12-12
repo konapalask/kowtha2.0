@@ -230,7 +230,7 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
     {
       instruction: `<p style="${paragraphStyle}"><strong>Phone No. of the applicant</strong></p>`,
       content: wrapParagraph(
-        formatMultiline(personal.applicantPhoneNumber || "")
+        personal.applicantPhoneNumber || ""
       ),
     },
     {
@@ -304,7 +304,7 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
   const businessRows = [
     {
       instruction: `<p style="${paragraphStyle}"><strong>Name of the Entity/ Employer Name</strong></p>`,
-      content: wrapParagraph(formatMultiline(businessDetails.entityName || "")),
+      content: wrapParagraph(formatMultiline(businessDetails.businessName || "")),
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>Constitution</strong></p>`,

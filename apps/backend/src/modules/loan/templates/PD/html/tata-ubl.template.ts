@@ -39,7 +39,7 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
         <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${member.qualification || ""}</p></td>
         <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${member.profession || ""}</p></td>
         <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${member.relation || ""}</p></td>
-        <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCurrency(member.monthlyIncome)}</p></td>
+        <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCurrency(member.monthlyIncome || 0)}</p></td>
       </tr>
     `
       )
@@ -60,10 +60,10 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
       <tr>
         <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${liability.bank || ""}</p></td>
         <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${liability.natureOfLoan || ""}</p></td>
-        <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCurrency(liability.loanAmount)}</p></td>
-        <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCurrency(liability.emi)}</p></td>
+        <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCurrency(liability.loanAmount || 0)}</p></td>
+        <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCurrency(liability.emi || 0)}</p></td>
         <td colspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${liability.tenure || ""}</p></td>
-        <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCurrency(liability.outstandingBalance)}</p></td>
+        <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCurrency(liability.outstandingBalance || 0)}</p></td>
       </tr>
     `
       )
