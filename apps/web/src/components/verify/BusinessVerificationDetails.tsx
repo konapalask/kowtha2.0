@@ -2344,7 +2344,6 @@ export const BusinessVerificationDetails: React.FC<
                   }}
                   isActive={activeSections.includes(section.id)}
                 />
-                {/* </Form> */}
               </div>
             </Collapse.Panel>
           ))}
@@ -2353,7 +2352,6 @@ export const BusinessVerificationDetails: React.FC<
     );
   };
 
-  // Formula evaluation utility
   const evaluateFormula = (
     formula: string,
     formValues: Record<string, any>
@@ -2361,41 +2359,34 @@ export const BusinessVerificationDetails: React.FC<
     if (!formula || typeof formula !== "string") return null;
 
     try {
-      // Extract field references from formula (words that match field names)
-      // Replace field references with their actual values
+      const fieldNameMatches = formula.match(/\b[a-zA-Z_][a-zA-Z0-9_]*\b/g);
+      const fieldNamesInFormula = fieldNameMatches || [];
+      
+      const jsKeywords = ['true', 'false', 'null', 'undefined', 'NaN', 'Infinity', 'if', 'else', 'return'];
+      const validFieldNames = fieldNamesInFormula.filter(name => !jsKeywords.includes(name));
+
       let evaluatedFormula = formula;
-
-      // Find all potential field names (words that appear in formValues)
-      const fieldNames = Object.keys(formValues).filter(
-        (key) =>
-          formValues[key] !== undefined &&
-          formValues[key] !== null &&
-          formValues[key] !== ""
-      );
-
-      // Replace field references with their numeric values
-      for (const fieldName of fieldNames) {
+      for (const fieldName of validFieldNames) {
         const regex = new RegExp(`\\b${fieldName}\\b`, "g");
         const value = formValues[fieldName];
-        const numValue =
-          typeof value === "number" ? value : parseFloat(String(value));
-        if (!isNaN(numValue)) {
-          evaluatedFormula = evaluatedFormula.replace(regex, String(numValue));
+        
+        let numValue = 0;
+        if (value !== undefined && value !== null && value !== "") {
+          const parsed = typeof value === "number" ? value : parseFloat(String(value));
+          if (!isNaN(parsed)) {
+            numValue = parsed;
+          }
         }
+        
+        evaluatedFormula = evaluatedFormula.replace(regex, String(numValue));
       }
 
-      // Check if formula still contains field references (meaning some values are missing)
-      // This is a simple check - if the formula contains words that look like field names, we might be missing values
-      // But we'll try to evaluate anyway and return null if it fails
-
-      // Safely evaluate the formula using Function constructor
-      // This allows us to evaluate expressions like "a + b" or "(a + b) * 100"
       const result = Function(
         '"use strict"; return (' + evaluatedFormula + ")"
       )();
       return typeof result === "number" && !isNaN(result) ? result : null;
     } catch (error) {
-      // If evaluation fails, return null (field dependencies might not be filled yet)
+      console.debug("Formula evaluation error:", error, "Formula:", formula, "Values:", formValues);
       return null;
     }
   };
@@ -2504,28 +2495,44 @@ export const BusinessVerificationDetails: React.FC<
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [formValues, isActive]);
 
-    // Form change handler - update section-level uncommitted changes and recalculate formulas
     const handleFormChange = useCallback(
       (changedValues: any, allValues: any) => {
-        // Recalculate formula fields
+        const workingValues = { ...allValues };
+        
         const calculatedFields: Record<string, any> = {};
-        section.fields?.forEach((field: any) => {
-          if (field.formula) {
-            const calculatedValue = evaluateFormula(field.formula, allValues);
-            if (calculatedValue !== null) {
-              calculatedFields[field.id] = calculatedValue;
-            }
-          }
-        });
+        const formulaFields = section.fields?.filter((field: any) => field.formula) || [];
+        const maxPasses = 10;
+        let pass = 0;
+        let hasNewCalculations = true;
 
-        // Update form with calculated values
+        while (hasNewCalculations && pass < maxPasses) {
+          hasNewCalculations = false;
+          pass++;
+
+          formulaFields.forEach((field: any) => {
+            const calculatedValue = evaluateFormula(field.formula, workingValues);
+            if (calculatedValue !== null) {
+              const currentValue = workingValues[field.id];
+              const currentNum =
+                typeof currentValue === "number"
+                  ? currentValue
+                  : parseFloat(String(currentValue || 0));
+              const newNum = calculatedValue;
+
+              if (isNaN(currentNum) || Math.abs(currentNum - newNum) > 0.0001) {
+                calculatedFields[field.id] = calculatedValue;
+                workingValues[field.id] = calculatedValue;
+                hasNewCalculations = true;
+              }
+            }
+          });
+        }
+
         if (Object.keys(calculatedFields).length > 0) {
           form.setFieldsValue(calculatedFields);
-          // Merge calculated fields into allValues for uncommitted changes
           Object.assign(allValues, calculatedFields);
         }
 
-        // Update section-level uncommitted changes
         setSectionUncommittedChanges((prev: any) => ({
           ...prev,
           [section.id]: allValues,
