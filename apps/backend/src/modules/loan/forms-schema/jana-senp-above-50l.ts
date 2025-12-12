@@ -309,7 +309,7 @@ export const janaSenpAbove50lSchema = {
             properties: {
               ay202425: {
                 type: "number",
-                title: "AY 2024-25",
+                title: `AY ${new Date().getFullYear() - 1}-${new Date().getFullYear()}`,
                 formatter: {
                   useIndianFormat: true,
                   locale: "en-IN",
@@ -319,7 +319,7 @@ export const janaSenpAbove50lSchema = {
               },
               ay202324: {
                 type: "number",
-                title: "AY 2023-24",
+                title: `AY ${new Date().getFullYear() - 2}-${new Date().getFullYear() - 1}`,
                 formatter: {
                   useIndianFormat: true,
                   locale: "en-IN",
@@ -333,10 +333,11 @@ export const janaSenpAbove50lSchema = {
           },
           grossProfit: {
             type: "object",
+            title: "Gross Profit",
             properties: {
               ay202425: {
                 type: "number",
-                title: "AY 2024-25",
+                title: `AY ${new Date().getFullYear() - 1}-${new Date().getFullYear()}`,
                 formatter: {
                   useIndianFormat: true,
                   locale: "en-IN",
@@ -346,7 +347,7 @@ export const janaSenpAbove50lSchema = {
               },
               ay202324: {
                 type: "number",
-                title: "AY 2023-24",
+                title: `AY ${new Date().getFullYear() - 2}-${new Date().getFullYear() - 1}`,
                 formatter: {
                   useIndianFormat: true,
                   locale: "en-IN",
@@ -361,8 +362,8 @@ export const janaSenpAbove50lSchema = {
             type: "object",
             title: "Gross Profit Margin",
             properties: {
-              ay202425: { type: "number", title: "AY 2024-25" },
-              ay202324: { type: "number", title: "AY 2023-24" },
+              ay202425: { type: "number", title: `AY ${new Date().getFullYear() - 1}-${new Date().getFullYear()}` },
+              ay202324: { type: "number", title: `AY ${new Date().getFullYear() - 2}-${new Date().getFullYear() - 1}` },
               Remarks: { type: "string", title: "Remarks" },
             },
           },
@@ -372,7 +373,7 @@ export const janaSenpAbove50lSchema = {
             properties: {
               ay202425: {
                 type: "number",
-                title: "AY 2024-25",
+                title: `AY ${new Date().getFullYear() - 1}-${new Date().getFullYear()}`,
                 formatter: {
                   useIndianFormat: true,
                   locale: "en-IN",
@@ -382,7 +383,7 @@ export const janaSenpAbove50lSchema = {
               },
               ay202324: {
                 type: "number",
-                title: "AY 2023-24",
+                title: `AY ${new Date().getFullYear() - 2}-${new Date().getFullYear() - 1}`,
                 formatter: {
                   useIndianFormat: true,
                   locale: "en-IN",
@@ -397,8 +398,8 @@ export const janaSenpAbove50lSchema = {
             type: "object",
             title: "Net Profit Margin",
             properties: {
-              ay202425: { type: "number", title: "AY 2024-25" },
-              ay202324: { type: "number", title: "AY 2023-24" },
+              ay202425: { type: "number", title: `AY ${new Date().getFullYear() - 1}-${new Date().getFullYear()}` },
+              ay202324: { type: "number", title: `AY ${new Date().getFullYear() - 2}-${new Date().getFullYear() - 1}` },
               Remarks: { type: "string", title: "Remarks" },
             },
           },
@@ -406,8 +407,8 @@ export const janaSenpAbove50lSchema = {
             type: "object",
             title: "Filled Date",
             properties: {
-              ay202425: { type: "string", title: "AY 2024-25", format: "date" },
-              ay202324: { type: "string", title: "AY 2023-24", format: "date" },
+              ay202425: { type: "string", title: `AY ${new Date().getFullYear() - 1}-${new Date().getFullYear()}`, format: "date" },
+              ay202324: { type: "string", title: `AY ${new Date().getFullYear() - 2}-${new Date().getFullYear() - 1}`, format: "date" },
               Remarks: { type: "string", title: "Remarks" },
             },
           },
