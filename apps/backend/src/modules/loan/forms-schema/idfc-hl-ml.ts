@@ -192,9 +192,10 @@ export const idfcHlMlSchema = {
       schema: {
         type: "object",
         properties: {
-          entityName: {
+          businessName: {
             type: "string",
             title: "Name of the Entity / Employer Name",
+            readOnly: true,
           },
           constitution: {
             type: "string",

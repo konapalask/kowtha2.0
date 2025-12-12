@@ -19,6 +19,11 @@ export const incredSchema = {
             title: "Name of the Applicant",
             readOnly: true,
           },
+          concernName: {
+            type: "string",
+            title: "Name of the Concern",
+            readOnly: true,
+          },
           nameOfCoApplicant: {
             type: "string",
             title: "Name of the Co-Applicant",

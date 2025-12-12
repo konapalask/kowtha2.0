@@ -112,6 +112,7 @@ export class FinancialAnalysisTemplatesService {
       const financialAnalysis =
         (verification.verificationData as any)?.financialAnalysis || {};
       const loan = verification.loan;
+      const businessName = verification.businessName || "";
 
       // Log for debugging if financial analysis is empty
       if (!financialAnalysis || Object.keys(financialAnalysis).length === 0) {
@@ -126,7 +127,8 @@ export class FinancialAnalysisTemplatesService {
         return await this.generateStandardFormat(
           ExcelJS,
           financialAnalysis,
-          loan
+          loan,
+          businessName
         );
       } else if (this.isDetailedBalanceSheetFormat(bankName)) {
         return await this.generateDetailedBalanceSheetFormat(
@@ -150,7 +152,8 @@ export class FinancialAnalysisTemplatesService {
         return await this.generateStandardFormat(
           ExcelJS,
           financialAnalysis,
-          loan
+          loan,
+          businessName
         );
       } else {
         // Default fallback to standard format if bank doesn't match any specific format
@@ -164,7 +167,8 @@ export class FinancialAnalysisTemplatesService {
         return await this.generateStandardFormat(
           ExcelJS,
           financialAnalysis,
-          loan
+          loan,
+          businessName
         );
       }
     } catch (error) {
@@ -250,7 +254,8 @@ export class FinancialAnalysisTemplatesService {
   private async generateStandardFormat(
     ExcelJS: any,
     financialAnalysis: any,
-    loan: any
+    loan: any,
+    businessName: string
   ): Promise<Buffer> {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Financial Analysis");
@@ -263,7 +268,7 @@ export class FinancialAnalysisTemplatesService {
     ];
 
     const titleRow = worksheet.addRow([
-      "Trading and Profit & Loss Account for the year ending 31.03.2026",
+      `Trading and Profit & Loss Account for the year ending 31.03.${new Date().getFullYear() + 1}`,
       "", // Column B
       "", // Column C
       "", // Column D
@@ -273,6 +278,37 @@ export class FinancialAnalysisTemplatesService {
     titleRow.alignment = { horizontal: "center", vertical: "middle" };
     titleRow.height = 30;
     titleRow.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFD9E1F2" },
+    };
+
+    const applicantNameRow = worksheet.addRow([
+      `M/S. ${loan.applicantName || "XXXX"}`,
+      "", // Column B
+      "", // Column C
+      "", // Column D
+    ]);
+    worksheet.mergeCells("A2:D2");
+    applicantNameRow.font = { bold: true, size: 16 };
+    applicantNameRow.alignment = { horizontal: "center" };
+    applicantNameRow.height = 25;
+    applicantNameRow.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFD9E1F2" },
+    };
+    const businessNameRow = worksheet.addRow([
+      `Business Name: ${businessName || ""}`,
+      "", // Column B
+      "", // Column C
+      "", // Column D
+    ]);
+    worksheet.mergeCells("A3:D3");
+    businessNameRow.font = { bold: true, size: 16 };
+    businessNameRow.alignment = { horizontal: "center" };
+    businessNameRow.height = 25;
+    businessNameRow.fill = {
       type: "pattern",
       pattern: "solid",
       fgColor: { argb: "FFD9E1F2" },
