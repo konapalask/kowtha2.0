@@ -10,6 +10,7 @@ import { Button, message, Modal, Popconfirm, Spin } from "antd";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { getCurrentDepartment } from "@/utils/utility";
+import DownloadAnimation from "./DownloadAnimation";
 
 const Footer: React.FC<{
   editorContent: any;
@@ -43,6 +44,10 @@ const Footer: React.FC<{
   // );
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
   const [sendingEmail, setSendingEmail] = useState(false);
+  const [downloadingReport, setDownloadingReport] = useState(false);
+  const [exportingExcel, setExportingExcel] = useState(false);
+  const [showDownloadAnimation, setShowDownloadAnimation] = useState(false);
+  const [downloadFileType, setDownloadFileType] = useState<"pdf" | "excel">("pdf");
 
   // const handleApprove = async () => {
   //   try {
@@ -82,8 +87,55 @@ const Footer: React.FC<{
     }
   };
 
+  const handleDownloadReport = async () => {
+    try {
+      setDownloadingReport(true);
+      setDownloadFileType("pdf");
+      setShowDownloadAnimation(true);
+      
+      const reportResponse = await generatePreviewReport(
+        id as string,
+        activeTab,
+        null
+      );
+      if (!reportResponse) {
+        throw new Error("No PDF data received");
+      }
+
+      const blob = new Blob([reportResponse], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+      
+   
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `verification-report-${id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+  
+      window.URL.revokeObjectURL(url);
+
+      setTimeout(() => {
+        setShowDownloadAnimation(false);
+        message.success("Report downloaded successfully");
+      }, 1500);
+    } catch (error: any) {
+      console.error("Error downloading report:", error);
+      setShowDownloadAnimation(false);
+      message.error(
+        error?.response?.data?.message ?? "Failed to download report"
+      );
+    } finally {
+      setDownloadingReport(false);
+    }
+  };
+
   const handleExportExcel = async () => {
     try {
+      setExportingExcel(true);
+      setDownloadFileType("excel");
+      setShowDownloadAnimation(true);
+      
       const excelResponse = await exportFinancialAnalysis(id as string);
 
       // Check if we have valid data
@@ -108,12 +160,19 @@ const Footer: React.FC<{
       // Clean up the blob URL
       window.URL.revokeObjectURL(url);
       
-      message.success("Excel file downloaded successfully");
+
+      setTimeout(() => {
+        setShowDownloadAnimation(false);
+        message.success("Excel file downloaded successfully");
+      }, 1500);
     } catch (error: any) {
       console.error("Error exporting Excel:", error);
+      setShowDownloadAnimation(false);
       message.error(
         error?.response?.data?.message ?? "Failed to export Excel file"
       );
+    } finally {
+      setExportingExcel(false);
     }
   };
 
@@ -198,6 +257,10 @@ const Footer: React.FC<{
 
   return (
     <>
+      <DownloadAnimation
+        fileType={downloadFileType}
+        isVisible={showDownloadAnimation}
+      />
       <div
         style={{
           position: "sticky",
@@ -234,7 +297,22 @@ const Footer: React.FC<{
             <Button
               size="small"
               icon={<DownloadOutlined />}
+              onClick={handleDownloadReport}
+              loading={downloadingReport}
+              disabled={downloadingReport || disabled}
+              style={{
+                height: "32px",
+                fontSize: "14px",
+              }}
+            >
+              Download Report
+            </Button>
+            <Button
+              size="small"
+              icon={<DownloadOutlined />}
               onClick={handleExportExcel}
+              loading={exportingExcel}
+              disabled={exportingExcel || disabled}
               style={{
                 height: "32px",
                 fontSize: "14px",
