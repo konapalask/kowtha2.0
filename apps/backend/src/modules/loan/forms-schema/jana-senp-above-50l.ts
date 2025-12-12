@@ -299,7 +299,7 @@ export const janaSenpAbove50lSchema = {
 
     {
       id: "financialDetails",
-      label: "Financial Details",
+      label: "Financial Comparison & Status",
       schema: {
         type: "object",
         properties: {

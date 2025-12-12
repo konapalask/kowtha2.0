@@ -236,6 +236,7 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
     {
       label: "Contact Number",
       value: personal?.applicantMobile || "Not Provided",
+      formatter: (value: any) => String(value),
     },
   ]);
 

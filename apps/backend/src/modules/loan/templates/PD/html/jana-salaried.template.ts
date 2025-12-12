@@ -278,7 +278,7 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
                 <td style="${labelCellStyle}">EMI Paid Bank</td>
                 <td style="${labelCellStyle}">Secured Against which Asset</td>
               </tr>
-              ${loanDetails?.loanDetails
+              ${(loanDetails?.loanDetails || [])
                 .map(
                   (item: any) => `
                 <tr>
@@ -312,7 +312,7 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
                 <td style="${labelCellStyle}">Account Type</td>
                 <td style="${labelCellStyle}">Operating Since (Year)</td>
               </tr>
-              ${bankingDetails?.bankingDetails
+              ${(bankingDetails?.bankingDetails || [])
                 .map(
                   (item: any) => `
                 <tr>
@@ -351,7 +351,7 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
                 <td style="${labelCellStyle}">OCR Paid Till Date (in Lakhs)</td>
                 <td style="${labelCellStyle}">OCR Source</td>
               </tr>
-              ${securityOffered?.securityDetails
+              ${(securityOffered?.securityDetails || [])
                 .map(
                   (item: any) => `
                 <tr>
@@ -380,7 +380,7 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
                 <td style="${labelCellStyle}">Details</td>
                 <td style="${labelCellStyle}">Reference</td>
               </tr>
-              ${otherIncome?.otherIncomes
+              ${(otherIncome?.otherIncomes || [])
                 .map(
                   (item: any) => `
                 <tr>
@@ -441,7 +441,7 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
                 <td style="${labelCellStyle}">Document Type</td>
                 <td style="${labelCellStyle}">Remarks</td>
               </tr>
-              ${documentsVerified?.documentsVerified
+              ${(documentsVerified?.documentsVerified || [])
                 .map(
                   (item: any) => `
                 <tr>

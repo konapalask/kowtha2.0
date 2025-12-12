@@ -605,12 +605,12 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>Remarks</strong></p>`,
-      content: wrapParagraph(html_data.approvedStatus|| "Not provided"),
+      content: wrapParagraph(formatMultiline(personalDiscussion.remarks || "")),
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>PD Conducted by</strong></p>`,
       content: wrapParagraph(
-        formatMultiline(personalDiscussion.pdConductedBy || "")
+        formatMultiline(html_data.verifierName || "")
       ),
     },
     {
@@ -620,6 +620,10 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
     {
       instruction: `<p style="${paragraphStyle}"><strong>Date</strong></p>`,
       content: wrapParagraph(formatMultiline(personalDiscussion.pdDate || "")),
+    },
+    {
+      instruction: `<p style="${paragraphStyle}"><strong>PD Status</strong></p>`,
+      content: wrapParagraph(html_data.approvedStatus|| "Not provided"),
     },
   ];
 

@@ -344,8 +344,12 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
               <td style="${valueCellStyle}">${specificForCashSalariedProfile?.attendanceNeighboursReferenceChecks?.map((reference: any) => `${reference.nameOfNeighbour} , ${reference.mobileNumberNeighbour} , ${reference.feedbackOnApplicant}`).join("<br> ")}</td>
             </tr>
             <tr>
-              <td style="${labelCellStyle}">Does the employer maintain any salary register or any salary paid receipt/voucher or any other documentary proof for salary being paid to the borrower (Y/N) If yes, verify the salary paid to the borrower and capture photos in the PD report</td>
+              <td style="${labelCellStyle}">Does the employer maintain any salary register or any salary paid receipt/voucher or any other documentary proof for salary being paid to the borrower (Y/N)</td>
               <td style="${valueCellStyle}">${specificForCashSalariedProfile?.proofOfSalaryMaintenance}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">If yes, verify the salary paid to the borrower and capture photos in the PD report</td>
+              <td style="${valueCellStyle}">${specificForCashSalariedProfile?.proofOfSalaryMaintenance === "Yes" ? specificForCashSalariedProfile?.ifYesVerifySalaryPaid : "NA"}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">If no, then do reference checks with other employees working in the same firm for salary confirmation. Minimum 2 references to be obtained. (Name & mobile number of the reference people to be documented).</td>
@@ -357,7 +361,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
             </tr>
             <tr>
               <td style="${labelCellStyle}">Does the employer has GST number? (Y/N). If yes, Try to collect GST of the employer.</td>
-              <td style="${valueCellStyle}">${specificForCashSalariedProfile?.employeHasGSTNumber} - ${specificForCashSalariedProfile?.gstNumber}</td>
+              <td style="${valueCellStyle}">${specificForCashSalariedProfile?.employeHasGSTNumber} ${specificForCashSalariedProfile?.employeHasGSTNumber === "Yes" ? `- ${specificForCashSalariedProfile?.gstNumber}` : ""}</td>
             </tr>
           </table>
         </td>

@@ -444,8 +444,21 @@ export const janaSenpBelow50lSchema = {
           proofOfSalaryMaintenance: {
             type: "string",
             title:
-              "Does the employer maintain any salary register or any salary paid receipt/voucher or any other documentary proof for salary being paid to the borrower If yes, verify the salary paid to the borrower and capture photos in the PD report",
+              "Does the employer maintain any salary register or any salary paid receipt/voucher or any other documentary proof for salary being paid to the borrower (Y/N)",
             enum: ["Yes", "No"],
+          },
+          ifYesVerifySalaryPaid: {
+            type: "string",
+            title: "If yes, verify the salary paid to the borrower and capture photos in the PD report",
+            ui: { widget: "textarea", rows: 3 },
+            dependencies: {
+              show: {
+                proofOfSalaryMaintenance: "Yes",
+              },
+              required: {
+                proofOfSalaryMaintenance: "Yes",
+              },
+            },
           },
 
           salaryReferenceCheckInSameFirm: {
@@ -481,6 +494,14 @@ export const janaSenpBelow50lSchema = {
           gstNumber: {
             type: "string",
             title: "If yes, Try to collect GST number of the employer.",
+            dependencies: {
+              show: {
+                employeHasGSTNumber: "Yes",
+              },
+              required: {
+                employeHasGSTNumber: "Yes",
+              },
+            },
           },
         },
       },

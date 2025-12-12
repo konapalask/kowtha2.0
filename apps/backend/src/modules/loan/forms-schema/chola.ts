@@ -62,7 +62,6 @@ export const cholaSchema = {
           "nameOfTheCoApplicant",
           "constitution",
           "visitedAddress",
-          "loanAmountRequested",
           "purposeOfLoan",
           "dateOfVisit",
           "personMet",
