@@ -79,274 +79,285 @@ const renderArrayTable = (headers: string[], rows: string[][]): string => {
 
 export const iiflTemplate = (verificationData: any, html_data: any) => {
   const basic = verificationData.basicDetails || {};
-  const caseDetails = verificationData.caseDetails || {};
-  const familyMembers = ensureArray(
-    verificationData.familyDetails?.familyMembers
-  );
+  const caseDetails = verificationData.briefCommentsObservation || {};
+  const familyDetails = verificationData.familyDetails || {};
   const profile = verificationData.applicantProfile || {};
   const observations = verificationData.observations || {};
-  const incomeReferences = verificationData.incomeReferences || {};
-  const assets = ensureArray(verificationData.assetsDetails?.assets);
-  const existingLoans = ensureArray(
-    verificationData.existingLoans?.existingLoans
-  );
-  const bankingDetails = ensureArray(
-    verificationData.bankingDetails?.bankingDetails
-  );
-  const pdOfficer = verificationData.pdOfficerDetails || {};
+  const incomeDetails = verificationData.incomeDetails || {};
+  const otherIncome = verificationData.otherIncome || {};
+  const references = verificationData.references || {};
 
-  const familyRows = familyMembers.map((member: any) => [
-    member.name || "",
-    member.relationship || "",
-    member.age || "",
-    member.qualification || "",
-    member.occupation || "",
-  ]);
 
-  const assetRows = assets.map((asset: any) => [
-    asset.assetType || "",
-    asset.description || "",
-    asset.marketValue || "",
-    asset.ownerName || "",
-  ]);
-
-  const existingLoanRows = existingLoans.map((loan: any) => [
-    loan.bankName || "",
-    loan.typeOfLoan || "",
-    formatMultiline(loan.loanAmount),
-    formatMultiline(loan.emi),
-    loan.status || "",
-  ]);
-
-  const bankingRows = bankingDetails.map((item: any) => [
-    item.bankName || "",
-    item.accountType || "",
-    item.relationshipSinceYears || "",
-  ]);
 
   return `
     ${pdBaseTemplate(html_data)}
     <div class="template-content iifl-template">
-      <h2 style="margin:0 0 16px;color:#1f2a37;font-size:16px;">Basic Details</h2>
+
       <table style="${tableStyle}">
-        ${renderKeyValue("Prospect No.", basic.prospectNo)}
-        ${renderKeyValue("Name of Applicant", basic.nameOfApplicant)}
-        ${renderKeyValue("Marital Status", basic.maritalStatus)}
+      <tr>
+        <td style="text-align: center; ${labelCellStyle}"colspan="7">PD Sheet - Self Employed Applicant</td>
+      </tr>
+      <tr>
+        <td style="${labelCellStyle}">Prospect No.</td>
+        <td style="${valueCellStyle}" colspan="6">${basic.prospectNo}</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; ${labelCellStyle}"colspan="7">Basic Details</td>
+      </tr>
+        ${renderKeyValue("Name of Applicant", basic.nameOfApplicant, undefined, { colspan: 6 })}
+        ${renderKeyValue("Marital Status", basic.maritalStatus, undefined, { colspan: 6 })}
         ${renderKeyValue(
           "Educational Qualification",
-          basic.educationalQualification
+          basic.educationalQualification,
+          undefined,
+          { colspan: 6 }
         )}
-        ${renderKeyValue("Category", basic.category)}
-        ${renderKeyValue(
-          "Dependents - Children",
-          basic.dependentsChildren
-        )}
-        ${renderKeyValue("Dependents - Adults", basic.dependentsAdults)}
-        ${renderKeyValue("Dependents - Others", basic.dependentsOthers)}
-        ${renderKeyValue(
-          "Years in Current Residence",
-          basic.yearsInCurrentResidence
-        )}
-        ${renderKeyValue(
-          "Current Residence House Size",
-          basic.currentResidenceHouseSize
-        )}
-        ${renderKeyValue("Previous Address", basic.previousAddress)}
-        ${renderKeyValue(
-          "Years Stayed at Previous Address",
-          basic.yearsStayedPreviousAddress
-        )}
-        ${renderKeyValue(
-          "Years in Current City",
-          basic.yearsInCurrentCity
-        )}
-        ${renderKeyValue("Previous City", basic.previousCity)}
-        ${renderKeyValue(
-          "Years in Previous City",
-          basic.yearsInPreviousCity
-        )}
-        ${renderKeyValue("Reason for Change", basic.reasonForChange)}
-        ${renderKeyValue(
-          "Parents Staying With",
-          basic.parentsStayingWith
-        )}
-        ${renderKeyValue("Property Usage", basic.propertyUsage)}
-        ${renderKeyValue("Comments / Observations", basic.comments)}
-      </table>
-
-      <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">Case Details</h2>
-      <table style="${tableStyle}">
-        ${renderKeyValue(
-          "Date of Case Initiated",
-          caseDetails.dateOfCaseInitiated
-        )}
-        ${renderKeyValue(
-          "Date of Appointment Provided",
-          caseDetails.dateOfAppointmentProvided
-        )}
-        ${renderKeyValue(
-          "Initiated Address",
-          caseDetails.initiatedAddress
-        )}
-        ${renderKeyValue("Visited Address", caseDetails.visitedAddress)}
-        ${renderKeyValue(
-          "Residential Address",
-          caseDetails.residentialAddress
-        )}
-        ${renderKeyValue(
-          "Contact Information",
-          caseDetails.contactInformation
-        )}
-        ${renderKeyValue(
-          "Loan Amount Required",
-          caseDetails.loanAmountRequired,
-          formatCurrency
-        )}
-        ${renderKeyValue("Purpose of Loan", caseDetails.purposeOfLoan)}
-        ${renderKeyValue("Profile Initiated", caseDetails.profileInitiated)}
-        ${renderKeyValue("Security Offered", caseDetails.securityOffered)}
-        ${renderKeyValue(
-          "Family Members (Narrative)",
-          caseDetails.familyMembersDescription
-        )}
-        ${renderKeyValue("Latitude", caseDetails.latitude)}
-        ${renderKeyValue("Longitude", caseDetails.longitude)}
-        ${renderKeyValue("Region", caseDetails.region)}
-        ${renderKeyValue("Location", caseDetails.location)}
-        ${renderKeyValue("Branch", caseDetails.branch)}
-      </table>
-
-      <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">Family Details</h2>
-      ${renderArrayTable(
-        ["Name", "Relationship", "Age", "Qualification", "Occupation"],
-        familyRows
-      )}
-
-      <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">Applicant Profile</h2>
-      <table style="${tableStyle}">
-        ${renderKeyValue(
-          "Applicant’s Education",
-          profile.applicantEducation
-        )}
-        ${renderKeyValue("Native Place", profile.nativePlace)}
-        ${renderKeyValue("Business / Employer Name", profile.businessName)}
-        ${renderKeyValue("Business Type / Constitution", profile.businessType)}
-        ${renderKeyValue(
-          "Years of Experience",
-          profile.yearsOfExperience
-        )}
-        ${renderKeyValue(
-          "Machinery / Equipment Used",
-          profile.machineryUsed
-        )}
-        ${renderKeyValue(
-          "Nature of Business / Services",
-          profile.natureOfBusiness
-        )}
-        ${renderKeyValue(
-          "Daily Output & Rates",
-          profile.dailyOutputRates
-        )}
-        ${renderKeyValue(
-          "Materials Purchased",
-          profile.materialsPurchased
-        )}
-        ${renderKeyValue(
-          "Number of Workers & Salaries",
-          profile.workersAndSalaries
-        )}
-        ${renderKeyValue("Customers", profile.customers)}
-        ${renderKeyValue("Business Premises", profile.businessPremises)}
-        ${renderKeyValue("Rent Paid (if any)", profile.rentPaid)}
-        ${renderKeyValue(
-          "Neighbour Enquiry Result",
-          profile.neighborEnquiryResult
-        )}
-      </table>
-
-      <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">Observations &amp; Concerns</h2>
-      <table style="${tableStyle}">
-        ${renderKeyValue(
-          "Business Vintage Documents Provided",
-          observations.businessVintageDocumentsProvided
-        )}
-        ${renderKeyValue(
-          "Business Name Board",
-          observations.businessNameBoard
-        )}
-        ${renderKeyValue(
-          "Workers Present at Time of Visit",
-          observations.workersPresentAtVisit
-        )}
-        ${renderKeyValue(
-          "Kacha Records Provided",
-          observations.kachaRecordsProvided
-        )}
-        ${renderKeyValue(
-          "UPI Payments Provided",
-          observations.upiPaymentsProvided
-        )}
-        ${renderKeyValue("Address Match", observations.addressMatch)}
-        ${renderKeyValue(
-          "Other Observations",
-          observations.otherObservations
-        )}
-      </table>
-
-      <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">Income &amp; References</h2>
-      <table style="${tableStyle}">
-        ${renderKeyValue(
-          "Net Margin %",
-          incomeReferences.netMarginPercent+"%"
-        )}
-        ${renderKeyValue("Other Incomes", incomeReferences.otherIncomes)}
-        ${renderKeyValue("Spouse Income", incomeReferences.spouseIncome)}
-        ${renderKeyValue(
-          "Reference Details",
-          incomeReferences.referencesSummary
-        )}
-        ${renderKeyValue(
-          "References (Name & Contact No.)",
-          incomeReferences.referenceContacts
-        )}
-      </table>
-
-      <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">Assets Details</h2>
-      ${renderArrayTable(
-        ["Asset Type", "Description", "Market Value", "Owner Name"],
-        assetRows
-      )}
-
-      <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">Existing Loans</h2>
-      ${renderArrayTable(
-        ["Bank Name", "Type of Loan", "Loan Amount", "EMI", "Status"],
-        existingLoanRows
-      )}
-
-      <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">Banking Details</h2>
-      ${renderArrayTable(
-        ["Bank Name", "Account Type", "No. of Years"],
-        bankingRows
-      )}
-
-      <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">PD Officer Details</h2>
-      <table style="${tableStyle}">
-        ${renderKeyValue("Name of PD Officer", pdOfficer.pdOfficerName)}
-        ${renderKeyValue(
-          "Date of Discussion",
-          pdOfficer.dateOfDiscussion
-        )}
+        ${renderKeyValue("Category", basic.category, undefined, { colspan: 6 })}
         <tr>
-          <td style="${labelCellStyle}">Signature</td>
-          <td style="${valueCellStyle}"></td>
+          <td style="${labelCellStyle}">Number of Dependents</td>
+          <td style="${labelCellStyle}">Children</td>
+          <td style="${valueCellStyle}">${basic.dependentsChildren}</td>
+          <td style="${labelCellStyle}">Adults</td>
+          <td style="${valueCellStyle}">${basic.dependentsAdults}</td>
+          <td style="${labelCellStyle}">Others</td>
+          <td style="${valueCellStyle}">${basic.dependentsOthers}</td>
+        </tr>
+        ${renderKeyValue("Number of Years in Current Residence", basic.yearsInCurrentResidence, undefined, { colspan: 6 })}
+        ${renderKeyValue("Current Residence House Size", basic.currentResidenceHouseSize, undefined, { colspan: 6 })}
+        <tr>
+          <td style="${labelCellStyle}">If <=1 Year, then Previous Address</td>
+          <td style="${valueCellStyle}" colspan="2">${basic.yearsInCurrentResidence  === "<=1 Year" ? basic.previousAddress : "NA"}</td>
+          <td style="${labelCellStyle}">Number of Years Stayed at Previous Address</td>
+          <td style="${valueCellStyle}" colspan="3">${basic.yearsInCurrentResidence  === "<=1 Year" ? basic.yearsStayedPreviousAddress : "NA"}</td>
         </tr>
         ${renderKeyValue(
-          "Pd Status",
-          `${html_data.approvedStatus|| "Not provided"}`
+          "Number of Years in Current City",
+          basic.yearsInCurrentCity,
+          undefined,
+          { colspan: 6 }
         )}
+        <tr>
+          <td style="${labelCellStyle}">If <=3 Years in current city, then mention</td>
+          <td style="border:1px solid #c7cdd1;padding:8px;" colspan="6">
+            <table style="${tableStyle}">
+              <tr>
+                <td style="${labelCellStyle}">Previous City</td>
+                <td style="${valueCellStyle}" colspan="2">${basic.yearsInCurrentCity  === "<=3 Years" ? basic.previousCity : "NA"}</td>
+                <td style="${labelCellStyle}">Number of Years in Previous City</td>
+                <td style="${valueCellStyle}" colspan="3">${basic.yearsInCurrentCity  === "<=3 Years" ? basic.yearsInPreviousCity : "NA"}</td>
+              </tr>
+              <tr>
+                <td style="${labelCellStyle}">Reason for Change</td>
+                <td style="${valueCellStyle}" colspan="5">${basic.yearsInCurrentCity  === "<=3 Years" ? basic.reasonForChange : "NA"}</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        ${renderKeyValue(
+          "Parents Staying With?",
+          basic.parentsStayingWith,
+          undefined,
+          { colspan: 6 }
+        )}
+        ${renderKeyValue("Usage of Property after Purchase", basic.propertyUsage, undefined, { colspan: 6 })}
       </table>
 
-      <p style="margin:24px 0 8px;color:#ccc;"><strong>Disclaimer Clause:</strong> <br>This report (including any attachments) has been prepared based on verbal information provided by the person contacted. IIFL HOME FINANCE LTD will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. M/s. KOWTHA & CO will not be held liable in any case.</p>
+      <table style="${tableStyle}">
+        <tr>
+          <td style="text-align: center; ${labelCellStyle}"colspan="7">Brief Comments/Observation of the case</td>
+        <td style="border:1px solid #ccc;padding:8px">
+          <table style="${tableStyle}">
+              <tr>
+                <td style="${labelCellStyle}">Date of Case Initiated</td>
+                <td style="${valueCellStyle}">${caseDetails.dateOfCaseInitiated}</td>
+              </tr>
+              <tr>
+                <td style="${labelCellStyle}">Date of Appointment Provided</td>
+                <td style="${valueCellStyle}">${caseDetails.dateOfAppointmentProvided}</td>
+              </tr>
+              <tr>
+                <td style="${labelCellStyle}">Initiated Address</td>
+                <td style="${valueCellStyle}">${caseDetails.initiatedAddress}</td>
+              </tr>
+              <tr>
+                <td style="${labelCellStyle}">Visited Address</td>
+                <td style="${valueCellStyle}">${caseDetails.visitedAddress}</td>
+              </tr>
+              <tr>
+                <td style="${labelCellStyle}">Residential Address</td>
+                <td style="${valueCellStyle}">${caseDetails.residentialAddress}</td>
+              </tr>
+              <tr>
+                <td style="${labelCellStyle}">Contact Information</td>
+                <td style="${valueCellStyle}">${caseDetails.contactInformation}</td>
+              </tr>
+              <tr>
+                <td style="${labelCellStyle}">Loan Amount Required</td>
+                <td style="${valueCellStyle}">${formatCurrency(caseDetails.loanAmountRequired)}</td>
+              </tr>
+              <tr>
+                <td style="${labelCellStyle}">Purpose of Loan</td>
+                <td style="${valueCellStyle}">${caseDetails.purposeOfLoan}</td>
+              </tr>
+              <tr>
+                <td style="${labelCellStyle}">Profile Initiated</td>
+                <td style="${valueCellStyle}">${caseDetails.profileInitiated}</td>
+              </tr>
+          </table>
+          <table style="${tableStyle}">
+            <tr>
+              <td style="${labelCellStyle}" colspan="5">Family Details</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">Name</td>
+              <td style="${labelCellStyle}">Relationship</td>
+              <td style="${labelCellStyle}">Age</td>
+              <td style="${labelCellStyle}">Qualification</td>
+              <td style="${labelCellStyle}">Occupation</td>
+            </tr>
+            ${familyDetails.familyMembers.map((member: any) => `
+              <tr>
+                <td style="${valueCellStyle}">${member.name}</td>
+                <td style="${valueCellStyle}">${member.relationship}</td>
+                <td style="${valueCellStyle}">${member.age}</td>
+                <td style="${valueCellStyle}">${member.qualification}</td>
+                <td style="${valueCellStyle}">${member.occupation}</td>
+              </tr>
+            `).join("")}
+          </table>
+          <table style="${tableStyle}">
+            <tr>
+              <td style="${labelCellStyle}">Applicant Profile</td>
+            </tr>
+            <tr>
+              <td style="${valueCellStyle}">${profile.applicantProfile.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("")}</td>
+            </tr>
+          </table>
+          <table style="${tableStyle}">
+            <tr>
+              <td style="${labelCellStyle}">Concerns</td>
+            </tr>
+            <tr>
+              <td style="${valueCellStyle}">${observations.concerns.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("")}</td>
+            </tr>
+          </table>
+          <table style="${tableStyle}">
+            <tr>
+              <td style="${labelCellStyle}">Other Observations</td>
+            </tr>
+            <tr>
+              <td style="${valueCellStyle}">${observations.otherObservations.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("")}</td>
+            </tr>
+          </table>
+          <table style="${tableStyle}">
+            <tr>
+              <td style="${labelCellStyle}" colspan="3">Income Details</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}"></td>
+              <td style="${labelCellStyle}"><u>Income</u></td>
+              <td style="${labelCellStyle}"></td>
+            <tr>
+              <td style="${labelCellStyle}"></td>
+              <td style="${labelCellStyle}">Gross Receipts</td>
+              <td style="${valueCellStyle}">${formatCurrency(incomeDetails.income.grossReceipts)}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">Add</td>
+              <td style="${labelCellStyle}">Other Incomes</td>
+              <td style="${valueCellStyle}">${formatCurrency(incomeDetails.income.otherIncomes)}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}"></td>
+              <td style="${labelCellStyle}">Total (A)</td>
+              <td style="${valueCellStyle}">${formatCurrency(incomeDetails.income.grossReceipts + incomeDetails.income.otherIncomes)}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">Less</td>
+              <td style="${labelCellStyle}"><u>Expenses</u></td>
+              <td style="${labelCellStyle}"></td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}"></td>
+              <td style="${labelCellStyle}">Purchases</td>
+              <td style="${valueCellStyle}">${formatCurrency(incomeDetails.expenses.purchases)}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}"></td>
+              <td style="${labelCellStyle}">Salaries</td>
+              <td style="${valueCellStyle}">${formatCurrency(incomeDetails.expenses.salaries)}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}"></td>
+              <td style="${labelCellStyle}">Electricity</td>
+              <td style="${valueCellStyle}">${formatCurrency(incomeDetails.expenses.electricity)}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}"></td>
+              <td style="${labelCellStyle}">Other Expenses</td>
+              <td style="${valueCellStyle}">${formatCurrency(incomeDetails.expenses.otherExpenses)}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}"></td>
+              <td style="${labelCellStyle}">Total (B)</td>
+              <td style="${valueCellStyle}">${formatCurrency(incomeDetails.expenses.purchases + incomeDetails.expenses.salaries + incomeDetails.expenses.electricity + incomeDetails.expenses.otherExpenses)}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}"></td>
+              <td style="${labelCellStyle}">Net Profit (A-B)</td>
+              <td style="${valueCellStyle}">${formatCurrency(incomeDetails.income.grossReceipts + incomeDetails.income.otherIncomes - (incomeDetails.expenses.purchases + incomeDetails.expenses.salaries + incomeDetails.expenses.electricity + incomeDetails.expenses.otherExpenses))}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}"></td>
+              <td style="${labelCellStyle}">Net Margin %</td>
+              <td style="${valueCellStyle}">${((incomeDetails.income.grossReceipts + incomeDetails.income.otherIncomes - (incomeDetails.expenses.purchases + incomeDetails.expenses.salaries + incomeDetails.expenses.electricity + incomeDetails.expenses.otherExpenses)) / (incomeDetails.income.grossReceipts + incomeDetails.income.otherIncomes) * 100).toFixed(2)}%</td>
+            </tr>
+          </table>
+          <table style="${tableStyle}">
+            <tr>
+              <td style="${labelCellStyle}">Other Income</td>
+            </tr>
+            <tr>
+              <td style="${valueCellStyle}">${otherIncome.otherIncome.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("")}</td>
+            </tr>
+          </table>
+          <table style="${tableStyle}">
+            <tr>
+              <td style="${labelCellStyle}">References (Name & Contact No.)</td>
+            </tr>
+            <tr>
+              <td style="${valueCellStyle}">${formatMultiline(references.references)}</td>
+            </tr>
+          </table>
+          <table style="${tableStyle}">
+            <tr>  
+              <td style="${labelCellStyle}">Status of the Case</td>
+            </tr>
+            <tr>
+              <td style="${valueCellStyle}">${html_data.approvedStatus}</td>
+            </tr>
+          </table>
+         </td>
+         </tr>
+      </table>
+      <table style="${tableStyle}">
+        <tr>
+          <td style="${labelCellStyle}">Name of PD Officer</td>
+          <td style="${valueCellStyle}">${html_data.verifierName}</td>
+        </tr>
+        <tr>
+          <td style="${labelCellStyle}">Date of Discussion</td>
+          <td style="${valueCellStyle}">${verificationData.dateOfDiscussion?.dateOfDiscussion || new Date().toLocaleDateString("en-IN")}</td>
+        </tr>
+        <tr>
+          <td style="${labelCellStyle}">Signature of the PD Officer</td>
+          <td style="${valueCellStyle}"></td>
+        </tr>
+      </table>
+
+
+
+      <p style="margin:24px 0 8px;"><strong>Disclaimer Clause:</strong> <br>This report (including any attachments) has been prepared based on verbal information provided by the person contacted. IIFL HOME FINANCE LTD will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. M/s. KOWTHA & CO will not be held liable in any case</p>
     </div>
     ${pdBaseTemplateFooter(html_data)}
   `;

@@ -176,7 +176,7 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
       <tr><th style="${subHeaderStyle}" colspan="4">Business Profile</th></tr>
       ${renderKeyValueRow("Type of Industry", profile.typeOfIndustry,undefined, {colSpan: 3})}
       ${renderKeyValueRow("Nature of Business", profile.natureOfBusiness.split("\n").map((item: string) => `<ul><li>${item}</li></ul>`).join(""),undefined, {colSpan: 3})}
-      ${renderKeyValueRow("Details on management of business", profile.managementDetails.split("\n").map((item: string) => `<ul><li>${item}</li></ul>`).join(""),undefined, {colSpan: 3})}
+      ${renderKeyValueRow("Details on management of business", formatMultiline(profile.managementDetails), undefined, {colSpan: 3})}
       ${renderKeyValueRow(
         "Total Experience in Same line Business",
         profile.totalExperience,
@@ -185,7 +185,7 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
       )}
       ${renderKeyValueRow(
         "Shareholding Details",
-        profile.shareholdingDetails,
+        formatMultiline(profile.shareholdingDetails),
         undefined,
         { colSpan: 3 }
       )}
@@ -197,19 +197,19 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
       )}
       ${renderKeyValueRow(
         "Business Premise setup / Ownership / Nameplate / Staff",
-        profile.premiseSetup,
+        formatMultiline(profile.premiseSetup),
         undefined,
         { colSpan: 3 }
       )}
       ${renderKeyValueRow(
         "Financial Brief",
-        profile.financialBrief,
+        formatMultiline(profile.financialBrief),
         undefined,
         { colSpan: 3 }
       )}
       ${renderKeyValueRow(
         "End use of the Loan & Loan amount Required", 
-        profile.endUseOfTheLoanAndLoanAmountRequired,
+        formatMultiline(profile.endUseOfTheLoanAndLoanAmountRequired),
         undefined,
         { colSpan: 3 }
       )}
@@ -221,13 +221,13 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
       )}
       ${renderKeyValueRow(
         "Business License Related Information",
-        profile.businessLicenseRelatedInformation,
+        formatMultiline(profile.businessLicenseRelatedInformation),
         undefined,
         { colSpan: 3 }
       )}
       ${renderKeyValueRow(
         "Documnets Provided during Visit",
-        profile.documentsProvidedDuringVisit,
+        formatMultiline(profile.documentsProvidedDuringVisit),
         undefined,
         { colSpan: 3 }
       )}

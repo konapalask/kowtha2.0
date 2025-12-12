@@ -511,7 +511,7 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
       })}
       <tr>
         <td style="${labelCellStyle}">PD Conducted By</td>
-        <td style="${valueCellStyle}">Name: ${formatMultiline(observations.pdConductedBy)}</td>
+        <td style="${valueCellStyle}">Name: ${formatMultiline(html_data.verifierName)}</td>
         <td style="${valueCellStyle}">Designation: ${formatMultiline(observations.pdDesignation)}</td>
       </tr>
       <tr>
