@@ -388,121 +388,120 @@ const Feedback: React.FC<FeedbackProps> = ({
     }
   };
 
+  const isPDDepartment = currentDepartment === "PD";
+
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: customStyles }} />
       <section style={{ marginBottom: 24 }}>
         <Card
-          title="Synopsis"
+          title={isPDDepartment ? "Feedback" : "Synopsis"}
           extra={null}
           bodyStyle={{ padding: 0 }}
         >
           <div
             style={{
-              minHeight: "300px",
+              minHeight: isPDDepartment ? "auto" : "300px",
               background: disabled ? "#f8f9fa" : "#fff",
               borderRadius: 8,
               border: disabled ? "1px solid #e9ecef" : "1px solid #d9d9d9",
             }}
           >
-            <ReactQuill
-              readOnly={disabled}
-              theme="snow"
-              value={editorContent}
-              onChange={handleEditorChange}
-              style={{ height: "250px" }}
-              modules={{
-                toolbar: false,
-              }}
-              formats={["list"]}
-            />
+            {!isPDDepartment && (
+              <>
+                <ReactQuill
+                  readOnly={disabled}
+                  theme="snow"
+                  value={editorContent}
+                  onChange={handleEditorChange}
+                  style={{ height: "250px" }}
+                  modules={{
+                    toolbar: false,
+                  }}
+                  formats={["list"]}
+                />
 
-            {/* Submit Synopsis Button - Between synopsis and feedback - Hidden for VerificationExecutive */}
-            {role !== "VerificationExecutive" && (
-              <div
-                style={{
-                  padding: "16px 24px",
-                  borderTop: "1px solid #f0f0f0",
-                  background: "#f8f9fa",
-                }}
-              >
-                <Row justify="end">
-                  <Col>
-                    <Button
-                      type="primary"
-                      size="small"
-                      onClick={async () => {
-                        // Sanitize content before saving
-                        const sanitized = sanitizeToListOnly(editorContent);
-                        const contentToSave = sanitized || "<ul><li><br></li></ul>";
-                        
-                        // For Verifier/Admin: Always use PATCH update when synopsis exists
-                        if (existingSynopsis) {
-                          try {
-                            setSynopsisLoading(true);
-                            await updateSynopsis(id as string, contentToSave);
-                            message.success("Synopsis updated successfully!");
-                            setExistingSynopsis(contentToSave);
-                            setEditorContent(contentToSave);
-                            setHasChanges(false);
-                          } catch (error) {
-                            console.error("Error updating synopsis:", error);
-                            message.error("Failed to update synopsis");
-                          } finally {
-                            setSynopsisLoading(false);
+                {role !== "VerificationExecutive" && (
+                  <div
+                    style={{
+                      padding: "16px 24px",
+                      borderTop: "1px solid #f0f0f0",
+                      background: "#f8f9fa",
+                    }}
+                  >
+                    <Row justify="end">
+                      <Col>
+                        <Button
+                          type="primary"
+                          size="small"
+                          onClick={async () => {
+                            const sanitized = sanitizeToListOnly(editorContent);
+                            const contentToSave = sanitized || "<ul><li><br></li></ul>";
+                            
+                            if (existingSynopsis) {
+                              try {
+                                setSynopsisLoading(true);
+                                await updateSynopsis(id as string, contentToSave);
+                                message.success("Synopsis updated successfully!");
+                                setExistingSynopsis(contentToSave);
+                                setEditorContent(contentToSave);
+                                setHasChanges(false);
+                              } catch (error) {
+                                console.error("Error updating synopsis:", error);
+                                message.error("Failed to update synopsis");
+                              } finally {
+                                setSynopsisLoading(false);
+                              }
+                            } else {
+                              setEditorContent(contentToSave);
+                              await handleSynopsisSubmit();
+                            }
+                          }}
+                          loading={synopsisLoading}
+                          disabled={
+                            disabled ||
+                            !editorContent ||
+                            editorContent.trim() === "<ul><li><br></li></ul>" ||
+                            synopsisLoading ||
+                            (!!existingSynopsis && !hasChanges)
                           }
-                        } else {
-                          // New synopsis submission - update editorContent with sanitized version first
-                          setEditorContent(contentToSave);
-                          await handleSynopsisSubmit();
-                        }
-                      }}
-                      loading={synopsisLoading}
-                      disabled={
-                        disabled ||
-                        !editorContent ||
-                        editorContent.trim() === "<ul><li><br></li></ul>" ||
-                        synopsisLoading ||
-                        (!!existingSynopsis && !hasChanges)
-                      }
-                      style={{
-                        background:
-                          existingSynopsis && !hasChanges
-                            ? "#9ca3af"
-                            : "#1e40af",
-                        border: "none",
-                        borderRadius: "6px",
-                        height: "32px",
-                        fontSize: "14px",
-                        fontWeight: "500",
-                        boxShadow:
-                          existingSynopsis && !hasChanges
-                            ? "none"
-                            : "0 2px 8px rgba(30, 64, 175, 0.3)",
-                        color: "#ffffff",
-                      }}
-                    >
-                      {existingSynopsis && !hasChanges
-                        ? "No Changes"
-                        : existingSynopsis
-                          ? "Save"
-                          : "Submit Synopsis"}
-                    </Button>
-                  </Col>
-                </Row>
-              </div>
+                          style={{
+                            background:
+                              existingSynopsis && !hasChanges
+                                ? "#9ca3af"
+                                : "#1e40af",
+                            border: "none",
+                            borderRadius: "6px",
+                            height: "32px",
+                            fontSize: "14px",
+                            fontWeight: "500",
+                            boxShadow:
+                              existingSynopsis && !hasChanges
+                                ? "none"
+                                : "0 2px 8px rgba(30, 64, 175, 0.3)",
+                            color: "#ffffff",
+                          }}
+                        >
+                          {existingSynopsis && !hasChanges
+                            ? "No Changes"
+                            : existingSynopsis
+                              ? "Save"
+                              : "Submit Synopsis"}
+                        </Button>
+                      </Col>
+                    </Row>
+                  </div>
+                )}
+              </>
             )}
 
             <div
               style={{
                 padding: "16px 24px",
-                borderTop: "1px solid #f0f0f0",
+                borderTop: isPDDepartment ? "none" : "1px solid #f0f0f0",
                 background: "#fafafa",
               }}
             >
-              <div style={{ marginBottom: 16 }}>
-                <strong>Feedback:</strong>
-              </div>
               <Radio.Group
                 value={verdict}
                 onChange={handleVerdictChange}
@@ -513,7 +512,6 @@ const Feedback: React.FC<FeedbackProps> = ({
                 <Radio value="credit_refer">Credit Refer</Radio>
               </Radio.Group>
 
-              {/* Template Selection Dropdown - Hidden for Verifier, Admin, and VerificationExecutive */}
               {false && (
                 <div style={{ marginTop: 16, marginBottom: 16 }}>
                   <div style={{ marginBottom: 8 }}>
@@ -535,7 +533,7 @@ const Feedback: React.FC<FeedbackProps> = ({
               )}
 
               {role !== "VerificationExecutive" && (
-                <div style={{ textAlign: "right" }}>
+                <div style={{ textAlign: "right", marginTop: 16 }}>
                   <Button
                     disabled={!verdict || disabled}
                     type="primary"
