@@ -553,7 +553,7 @@ export const axisFinanceSchema = {
           totalMonthlyExpensesPerMonth: {
             type: "number",
             title: "Total Monthly Expenses per Month",
-            formula: "overAllFamilyExpenses + plOrAutoLoanEMI + otherLoanEmi",
+            formula: "overAllFamilyExpenses + plOrAutoLoanEmi + otherLoanEmi",
             readOnly: true,
             formatter: {
               useIndianFormat: true,
