@@ -452,8 +452,8 @@ export const arkaFincapSchema = {
       required: true,
     },
     {
-      id: "monthlyGrossReceipts",
-      label: "Monthly Gross Receipts",
+      id: "IncomeDetails",
+      label: "Income Details",
       schema: {
         type: "object",
         properties: {
@@ -467,16 +467,6 @@ export const arkaFincapSchema = {
               minDecimalPlaces: 0,
             },
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "monthlyExpenses",
-      label: "Monthly Expenses",
-      schema: {
-        type: "object",
-        properties: {
           monthlyExpenses: {
             type: "number",
             title: "Monthly Expenses",
@@ -487,16 +477,6 @@ export const arkaFincapSchema = {
               minDecimalPlaces: 0,
             },
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "netProfit",
-      label: "Net Profit",
-      schema: {
-        type: "object",
-        properties: {
           netProfit: {
             type: "number",
             title: "Net Profit",
@@ -509,16 +489,6 @@ export const arkaFincapSchema = {
               minDecimalPlaces: 0,
             },
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "netMargin",
-      label: "Net Margin",
-      schema: {
-        type: "object",
-        properties: {
           netMargin: {
             type: "number",
             title: "Net Margin",
@@ -533,7 +503,6 @@ export const arkaFincapSchema = {
           },
         },
       },
-      required: true,
     },
     {
       id: "familyExpenses",
@@ -653,7 +622,20 @@ export const arkaFincapSchema = {
           },
         },
       },
-      required: true,
+    },
+    {
+        id: "pdStatus",
+        label: "PD Status",
+        schema: {
+          type: "object",
+          properties: {
+            pdStatus: {
+              type: "string",
+              title: "Status",
+              enum: ["Positive", "Negative", "Credit Refer"],
+          },
+        },
+      },
     },
     financialsSchema,
   ],
