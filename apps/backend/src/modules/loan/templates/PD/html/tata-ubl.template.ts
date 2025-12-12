@@ -263,7 +263,7 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                 </tr>
                 <tr>
                     <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Exp. Turnover (FY ${new Date().getFullYear()}-${new Date().getFullYear() + 1})</strong></p></td>
-                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.salesAndProfitDetails?.expectedTurnoverCurrentFinancialYear) || ""}</p></td>
+                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.salesAndProfitDetails?.expensesTurnoverCurrentFinancialYear) || ""}</p></td>
                 </tr>
                 <tr>
                     <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Monthly Turnover / Sales</strong></p></td>

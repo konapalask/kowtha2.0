@@ -332,9 +332,9 @@ export const tataUblSchema = {
               minDecimalPlaces: 0,
             },
           },
-          expectedTurnoverCurrentFinancialYear: {
+          expensesTurnoverCurrentFinancialYear: {
             type: "number",
-            title: `Expected Turnover (FY ${new Date().getFullYear()}-${new Date().getFullYear() + 1})`,
+            title: `Expenses Turnover (FY ${new Date().getFullYear() - 1}-${new Date().getFullYear()})`,
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
@@ -355,6 +355,8 @@ export const tataUblSchema = {
           netMonthlyIncome: {
             type: "number",
             title: "Net Monthly Income",
+            formula: "monthlyTurnoverSales - (expensesTurnoverCurrentFinancialYear / 12)",
+            readOnly: true,
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
@@ -365,9 +367,11 @@ export const tataUblSchema = {
           profitMargin: {
             type: "number",
             title: "Profit Margin",
+            formula: "monthlyTurnoverSales > 0 ? (netMonthlyIncome / monthlyTurnoverSales) * 100 : 0",
+            readOnly: true,
             formatter: {
               useIndianFormat: true,
-              locale: "en-IN",
+                locale: "en-IN",
               maxDecimalPlaces: 2,
               minDecimalPlaces: 0,
             },
@@ -725,7 +729,7 @@ export const tataUblSchema = {
           dateOfPD: {
             type: "string",
             title: "Date of PD",
-            format: "date",
+            format: "date-time",
           },
           personMet: {
             type: "string",
