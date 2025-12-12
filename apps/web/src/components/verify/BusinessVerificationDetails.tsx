@@ -2454,6 +2454,69 @@ export const BusinessVerificationDetails: React.FC<
     // Watch form values to recalculate formulas
     const formValues = Form.useWatch([], form);
 
+    const calculateFormulasInArrayItemForEffect = (
+      arrayField: any,
+      arrayIndex: number,
+      formValues: any,
+      prefix: string = ""
+    ): Record<string, any> => {
+      const calculatedFields: Record<string, any> = {};
+      const itemFields = arrayField.arrayItemFields || [];
+      
+      const itemValues: Record<string, any> = {};
+      itemFields.forEach((itemField: any) => {
+        const flatKey = prefix ? `${prefix}[${arrayIndex}].${itemField.id}` : `${arrayField.id}[${arrayIndex}].${itemField.id}`;
+        const value = formValues[flatKey];
+        if (value !== undefined && value !== null && value !== "") {
+          itemValues[itemField.id] = typeof value === "number" ? value : parseFloat(String(value)) || 0;
+        } else {
+          itemValues[itemField.id] = 0;
+        }
+      });
+
+      const workingItemValues = { ...itemValues };
+      const formulaItemFields = itemFields.filter((field: any) => field.formula);
+      const maxPasses = 10;
+      let pass = 0;
+      let hasNewCalculations = true;
+
+      while (hasNewCalculations && pass < maxPasses) {
+        hasNewCalculations = false;
+        pass++;
+
+        formulaItemFields.forEach((itemField: any) => {
+          const calculatedValue = evaluateFormula(itemField.formula, workingItemValues);
+          if (calculatedValue !== null) {
+            const currentValue = workingItemValues[itemField.id];
+            const currentNum = typeof currentValue === "number" ? currentValue : parseFloat(String(currentValue || 0));
+            const newNum = calculatedValue;
+
+            if (isNaN(currentNum) || Math.abs(currentNum - newNum) > 0.0001) {
+              const flatKey = prefix ? `${prefix}[${arrayIndex}].${itemField.id}` : `${arrayField.id}[${arrayIndex}].${itemField.id}`;
+              calculatedFields[flatKey] = calculatedValue;
+              workingItemValues[itemField.id] = calculatedValue;
+              hasNewCalculations = true;
+            }
+          }
+        });
+      }
+
+      itemFields.forEach((itemField: any) => {
+        if (itemField.type === "array" && itemField.arrayItemFields) {
+          const nestedArrayValue = formValues[prefix ? `${prefix}[${arrayIndex}].${itemField.id}` : `${arrayField.id}[${arrayIndex}].${itemField.id}`];
+          if (Array.isArray(nestedArrayValue)) {
+            nestedArrayValue.forEach((_, nestedIndex: number) => {
+              const nestedPrefix = prefix ? `${prefix}[${arrayIndex}].${itemField.id}` : `${arrayField.id}[${arrayIndex}].${itemField.id}`;
+              const nestedCalculated = calculateFormulasInArrayItemForEffect(itemField, nestedIndex, formValues, nestedPrefix);
+              Object.assign(calculatedFields, nestedCalculated);
+            });
+          }
+        }
+      });
+
+      return calculatedFields;
+    };
+
     // Calculate formula fields whenever form values change
     React.useEffect(() => {
       if (!isActive || !formValues) return; // Only calculate when section is active
@@ -2466,6 +2529,16 @@ export const BusinessVerificationDetails: React.FC<
           const calculatedValue = evaluateFormula(field.formula, formValues);
           if (calculatedValue !== null) {
             calculatedFields[field.id] = calculatedValue;
+          }
+        }
+
+        if (field.type === "array" && field.arrayItemFields) {
+          const arrayValue = formValues[field.id];
+          if (Array.isArray(arrayValue)) {
+            arrayValue.forEach((_, index: number) => {
+              const arrayCalculated = calculateFormulasInArrayItemForEffect(field, index, formValues);
+              Object.assign(calculatedFields, arrayCalculated);
+            });
           }
         }
       });
@@ -2494,6 +2567,69 @@ export const BusinessVerificationDetails: React.FC<
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [formValues, isActive]);
+
+    const calculateFormulasInArrayItem = (
+      arrayField: any,
+      arrayIndex: number,
+      allValues: any,
+      prefix: string = ""
+    ): Record<string, any> => {
+      const calculatedFields: Record<string, any> = {};
+      const itemFields = arrayField.arrayItemFields || [];
+      
+      const itemValues: Record<string, any> = {};
+      itemFields.forEach((itemField: any) => {
+        const flatKey = prefix ? `${prefix}[${arrayIndex}].${itemField.id}` : `${arrayField.id}[${arrayIndex}].${itemField.id}`;
+        const value = allValues[flatKey];
+        if (value !== undefined && value !== null && value !== "") {
+          itemValues[itemField.id] = typeof value === "number" ? value : parseFloat(String(value)) || 0;
+        } else {
+          itemValues[itemField.id] = 0;
+        }
+      });
+
+      const workingItemValues = { ...itemValues };
+      const formulaItemFields = itemFields.filter((field: any) => field.formula);
+      const maxPasses = 10;
+      let pass = 0;
+      let hasNewCalculations = true;
+
+      while (hasNewCalculations && pass < maxPasses) {
+        hasNewCalculations = false;
+        pass++;
+
+        formulaItemFields.forEach((itemField: any) => {
+          const calculatedValue = evaluateFormula(itemField.formula, workingItemValues);
+          if (calculatedValue !== null) {
+            const currentValue = workingItemValues[itemField.id];
+            const currentNum = typeof currentValue === "number" ? currentValue : parseFloat(String(currentValue || 0));
+            const newNum = calculatedValue;
+
+            if (isNaN(currentNum) || Math.abs(currentNum - newNum) > 0.0001) {
+              const flatKey = prefix ? `${prefix}[${arrayIndex}].${itemField.id}` : `${arrayField.id}[${arrayIndex}].${itemField.id}`;
+              calculatedFields[flatKey] = calculatedValue;
+              workingItemValues[itemField.id] = calculatedValue;
+              hasNewCalculations = true;
+            }
+          }
+        });
+      }
+
+      itemFields.forEach((itemField: any) => {
+        if (itemField.type === "array" && itemField.arrayItemFields) {
+          const nestedArrayValue = allValues[prefix ? `${prefix}[${arrayIndex}].${itemField.id}` : `${arrayField.id}[${arrayIndex}].${itemField.id}`];
+          if (Array.isArray(nestedArrayValue)) {
+            nestedArrayValue.forEach((_, nestedIndex: number) => {
+              const nestedPrefix = prefix ? `${prefix}[${arrayIndex}].${itemField.id}` : `${arrayField.id}[${arrayIndex}].${itemField.id}`;
+              const nestedCalculated = calculateFormulasInArrayItem(itemField, nestedIndex, allValues, nestedPrefix);
+              Object.assign(calculatedFields, nestedCalculated);
+            });
+          }
+        }
+      });
+
+      return calculatedFields;
+    };
 
     const handleFormChange = useCallback(
       (changedValues: any, allValues: any) => {
@@ -2527,6 +2663,18 @@ export const BusinessVerificationDetails: React.FC<
             }
           });
         }
+
+        section.fields?.forEach((field: any) => {
+          if (field.type === "array" && field.arrayItemFields) {
+            const arrayValue = allValues[field.id];
+            if (Array.isArray(arrayValue)) {
+              arrayValue.forEach((_, index: number) => {
+                const arrayCalculated = calculateFormulasInArrayItem(field, index, allValues);
+                Object.assign(calculatedFields, arrayCalculated);
+              });
+            }
+          }
+        });
 
         if (Object.keys(calculatedFields).length > 0) {
           form.setFieldsValue(calculatedFields);
@@ -3870,11 +4018,98 @@ export const BusinessVerificationDetails: React.FC<
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [field.id, form]);
 
+    const calculateFormulasInArrayItemLocal = (
+      arrayField: any,
+      arrayIndex: number,
+      allFormValues: any,
+      prefix: string = ""
+    ): Record<string, any> => {
+      const calculatedFields: Record<string, any> = {};
+      const itemFields = arrayField.arrayItemFields || [];
+      
+      const itemValues: Record<string, any> = {};
+      itemFields.forEach((itemField: any) => {
+        const flatKey = prefix ? `${prefix}[${arrayIndex}].${itemField.id}` : `${arrayField.id}[${arrayIndex}].${itemField.id}`;
+        const value = allFormValues[flatKey];
+        if (value !== undefined && value !== null && value !== "") {
+          itemValues[itemField.id] = typeof value === "number" ? value : parseFloat(String(value)) || 0;
+        } else {
+          itemValues[itemField.id] = 0;
+        }
+      });
+
+      const workingItemValues = { ...itemValues };
+      const formulaItemFields = itemFields.filter((field: any) => field.formula);
+      const maxPasses = 10;
+      let pass = 0;
+      let hasNewCalculations = true;
+
+      while (hasNewCalculations && pass < maxPasses) {
+        hasNewCalculations = false;
+        pass++;
+
+        formulaItemFields.forEach((itemField: any) => {
+          const calculatedValue = evaluateFormula(itemField.formula, workingItemValues);
+          if (calculatedValue !== null) {
+            const currentValue = workingItemValues[itemField.id];
+            const currentNum = typeof currentValue === "number" ? currentValue : parseFloat(String(currentValue || 0));
+            const newNum = calculatedValue;
+
+            if (isNaN(currentNum) || Math.abs(currentNum - newNum) > 0.0001) {
+              const flatKey = prefix ? `${prefix}[${arrayIndex}].${itemField.id}` : `${arrayField.id}[${arrayIndex}].${itemField.id}`;
+              calculatedFields[flatKey] = calculatedValue;
+              workingItemValues[itemField.id] = calculatedValue;
+              hasNewCalculations = true;
+            }
+          }
+        });
+      }
+
+      itemFields.forEach((itemField: any) => {
+        if (itemField.type === "array" && itemField.arrayItemFields) {
+          const nestedArrayValue = allFormValues[prefix ? `${prefix}[${arrayIndex}].${itemField.id}` : `${arrayField.id}[${arrayIndex}].${itemField.id}`];
+          if (Array.isArray(nestedArrayValue)) {
+            nestedArrayValue.forEach((_, nestedIndex: number) => {
+              const nestedPrefix = prefix ? `${prefix}[${arrayIndex}].${itemField.id}` : `${arrayField.id}[${arrayIndex}].${itemField.id}`;
+              const nestedCalculated = calculateFormulasInArrayItemLocal(itemField, nestedIndex, allFormValues, nestedPrefix);
+              Object.assign(calculatedFields, nestedCalculated);
+            });
+          }
+        }
+      });
+
+      return calculatedFields;
+    };
+
     // Array form change handler - update section-level uncommitted changes
     const handleArrayFormChange = useCallback(
       (changedValues: any, allValues: any) => {
         // Get ALL form values to ensure we capture everything, not just changed fields
         const allFormValues = form.getFieldsValue();
+
+        // Calculate formulas for array items
+        const calculatedFields: Record<string, any> = {};
+        if (field.arrayItemFields) {
+          const arrayIndices = new Set<number>();
+          Object.keys(allFormValues).forEach((key) => {
+            if (key.startsWith(`${field.id}[`)) {
+              const match = key.match(new RegExp(`${field.id}\\[(\\d+)\\]\\.(.+)`));
+              if (match) {
+                arrayIndices.add(parseInt(match[1]));
+              }
+            }
+          });
+
+          arrayIndices.forEach((index) => {
+            const arrayCalculated = calculateFormulasInArrayItemLocal(field, index, allFormValues);
+            Object.assign(calculatedFields, arrayCalculated);
+          });
+        }
+
+        if (Object.keys(calculatedFields).length > 0) {
+          form.setFieldsValue(calculatedFields);
+          Object.assign(allFormValues, calculatedFields);
+        }
 
         // Convert form values back to array format
         const arrayData: any[] = [];
@@ -3905,7 +4140,7 @@ export const BusinessVerificationDetails: React.FC<
           },
         }));
       },
-      [field.id, sectionId, setSectionUncommittedChanges, form, items.length]
+      [field.id, field.arrayItemFields, sectionId, setSectionUncommittedChanges, form, items.length]
     );
 
     // Sync form values and trigger change handler when items are ADDED (not removed)
@@ -4092,7 +4327,8 @@ export const BusinessVerificationDetails: React.FC<
     ) => {
       const fieldKey = `${field.id}[${itemIndex}].${itemFieldId}`;
       const isItemCoordField = isCoordinateField(itemFieldId);
-      const itemFieldReadOnly = readOnly || isItemCoordField;
+      const isItemFormulaField = !!itemField.formula;
+      const itemFieldReadOnly = readOnly || isItemCoordField || isItemFormulaField;
 
       // Handle enum fields (select dropdown) in arrays
       if (itemField.enum && itemField.enum.length > 0) {
