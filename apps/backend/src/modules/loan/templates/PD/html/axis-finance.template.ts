@@ -552,12 +552,6 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
       value: formatCurrency(budget.netSurplus || "Not Provided"),
       formatter: formatCurrency,
     },
-    {
-      sno: "",
-      label: "<strong>Affordable EMI</strong>",
-      value: formatCurrency(budget.affordableEmi || "Not Provided"),
-      formatter: formatCurrency,
-    },
   ];
 
   const budgetTable = `

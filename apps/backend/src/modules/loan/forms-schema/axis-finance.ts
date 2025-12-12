@@ -553,6 +553,8 @@ export const axisFinanceSchema = {
           totalMonthlyExpensesPerMonth: {
             type: "number",
             title: "Total Monthly Expenses per Month",
+            formula: "overAllFamilyExpenses + plOrAutoLoanEmi + otherLoanEmi",
+            readOnly: true,
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
@@ -561,18 +563,10 @@ export const axisFinanceSchema = {
             },
           },         
           netSurplus: {
-            type: "string",
-            title: "Net Surplus",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
-          },
-          affordableEmi: {
             type: "number",
-            title: "Affordable EMI",
+            title: "Net Surplus",
+            formula: "totalMonthlyIncomePerMonth - totalMonthlyExpensesPerMonth",
+            readOnly: true,
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
