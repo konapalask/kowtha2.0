@@ -17,10 +17,10 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
   const documentsObserved = verificationData.documentsObserved || {};
   const gstRegistration = verificationData.gstRegistration || {};
   const itrDetails = verificationData.itrDetails || {};
-  const monthlyGrossReceipts = verificationData.monthlyGrossReceipts || {};
-  const monthlyExpenses = verificationData.monthlyExpenses || {};
-  const netProfit = verificationData.netProfit || {};
-  const netMargin = verificationData.netMargin || {};
+  const monthlyGrossReceipts = verificationData.IncomeDetails?.monthlyGrossReceipts || {};
+  const monthlyExpenses = verificationData.IncomeDetails?.monthlyExpenses || {};
+  const netProfit = verificationData.IncomeDetails?.netProfit || {};
+  const netMargin = verificationData.IncomeDetails?.netMargin || {};
   const familyExpenses = verificationData.familyExpenses || {};
   const employees = verificationData.employees || {};
   const concerns = verificationData.concerns || {};
@@ -765,25 +765,25 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Monthly Gross Receipts</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCurrency(
-                  monthlyGrossReceipts.monthlyGrossReceipts
+                  monthlyGrossReceipts
                 )}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Monthly Expenses</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCurrency(
-                  monthlyExpenses.monthlyExpenses
+                  monthlyExpenses
                 )}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Net Profit</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCurrency(
-                  netProfit.netProfit
+                  netProfit
                 )}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Net Margin</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${
-                  getValue(netMargin.netMargin) + "%"
+                  getValue(netMargin) + "%"
                 }</p></td>
             </tr>
             <tr>
