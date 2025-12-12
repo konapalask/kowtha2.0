@@ -4875,29 +4875,26 @@ export const BusinessVerificationDetails: React.FC<
               </Card>
             </section>
 
-            {/* Synopsis Section - Using Feedback component (hidden for PD) */}
-            {currentDepartment !== "PD" && (
-              <Feedback
-                disabled={!!verificationData?.approvedStatus || hasEditRequest}
-                verdict={verdict}
-                setVerdict={setVerdict}
-                editorContent={editorContent}
-                setEditorContent={setEditorContent}
-                handleSave={handleSave}
-                verificationData={{
-                  ...verificationData,
-                  // Pass completeVerificationData so Feedback can access synopsis from API
-                  verifications: completeVerificationData
-                    ? [completeVerificationData]
-                    : verificationData?.verifications,
-                  synopsis:
-                    completeVerificationData?.synopsis ||
-                    verificationData?.synopsis,
-                }}
-                currentDepartment={currentDepartment}
-                hasEditRequest={hasEditRequest}
-              />
-            )}
+            {/* Synopsis Section - Using Feedback component */}
+            <Feedback
+              disabled={!!verificationData?.approvedStatus || hasEditRequest}
+              verdict={verdict}
+              setVerdict={setVerdict}
+              editorContent={editorContent}
+              setEditorContent={setEditorContent}
+              handleSave={handleSave}
+              verificationData={{
+                ...verificationData,
+                verifications: completeVerificationData
+                  ? [completeVerificationData]
+                  : verificationData?.verifications,
+                synopsis:
+                  completeVerificationData?.synopsis ||
+                  verificationData?.synopsis,
+              }}
+              currentDepartment={currentDepartment}
+              hasEditRequest={hasEditRequest}
+            />
           </>
         ) : /* FI Department - Use Static Components */
         currentDepartment === "FI" ? (
