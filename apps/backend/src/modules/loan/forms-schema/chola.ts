@@ -63,7 +63,6 @@ export const cholaSchema = {
           "constitution",
           "visitedAddress",
           "purposeOfLoan",
-          "dateOfVisit",
           "personMet",
         ],
       },
