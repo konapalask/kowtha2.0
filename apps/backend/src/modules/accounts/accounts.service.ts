@@ -106,10 +106,15 @@ export class AccountsService {
 
       const userRoles = await getUserWithDepartmentRoles(this.prisma, user.id);
 
-      const hasRole = userRoles.departmentRoles.some(r => r.role === UserRole.FieldExecutive);
+      // Check if user has FieldExecutive role in PD or FI departments
+      const hasFieldExecutiveRole = userRoles.departmentRoles.some(
+        r => r.role === UserRole.FieldExecutive && 
+        (r.department === Department.PD || r.department === Department.FI)
+      );
 
-      if (isMobile && !hasRole) {
-        throw new BadRequestException('Access denied: You are not authorized to login');
+      // If mobile login is requested, user must be FieldExecutive in PD or FI
+      if (isMobile && !hasFieldExecutiveRole) {
+        throw new BadRequestException('Access denied: You are not authorized to login via mobile app');
       }
 
       const otp = this.generateRandomOTP();
@@ -153,6 +158,10 @@ export class AccountsService {
         where: { mobile, status: 'Active' },
       });
 
+      if (!user) {
+        throw new NotFoundException('Access denied: User not found with this mobile number');
+      }
+
       const userRoles = await getUserWithDepartmentRoles(this.prisma, user.id);
 
       await this.loggingService.info('User found', {
@@ -162,20 +171,17 @@ export class AccountsService {
         deviceId: deviceId
       });
 
-      if (!user) {
-        throw new NotFoundException('Access denied: User not found with this mobile number');
-      }
+      // Check if user has FieldExecutive role in PD or FI departments
+      const fieldExecutiveRoles = userRoles.departmentRoles.filter(
+        r => r.role === UserRole.FieldExecutive && 
+        (r.department === Department.PD || r.department === Department.FI)
+      );
+      const hasFieldExecutiveRole = fieldExecutiveRoles.length > 0;
 
-      const hasRole = userRoles.departmentRoles.some(r => r.role === UserRole.FieldExecutive);
-
-      if(hasRole && !deviceId){
-        throw new UnauthorizedException('Access denied: Please contact administrator');
-      }
-      
-      if(deviceId){
-
-        if(!hasRole){
-          throw new UnauthorizedException('Access denied: You are not Authorized to login');
+      // If deviceId is provided (mobile login), user must be FieldExecutive in PD or FI
+      if (deviceId) {
+        if (!hasFieldExecutiveRole) {
+          throw new UnauthorizedException('Access denied: You are not authorized to login via mobile app');
         }
 
         let updateUser = null;
@@ -232,6 +238,49 @@ export class AccountsService {
             });
             throw new BadRequestException('Device has been changed. Please contact administrator');
           }          
+        }
+      }
+
+      // If FieldExecutive user logs in via web (no deviceId), automatically set defaultDepartment to opposite department
+      if (!deviceId && hasFieldExecutiveRole && fieldExecutiveRoles.length > 0) {
+        const fieldExecutiveInFI = fieldExecutiveRoles.some(r => r.department === Department.FI);
+        const fieldExecutiveInPD = fieldExecutiveRoles.some(r => r.department === Department.PD);
+        
+        // Check if user has any department role in PD and FI
+        const hasRoleInPD = userRoles.departmentRoles.some(r => r.department === Department.PD);
+        const hasRoleInFI = userRoles.departmentRoles.some(r => r.department === Department.FI);
+        
+        let targetDepartment: Department | null = null;
+        
+        if (fieldExecutiveInFI && !fieldExecutiveInPD && hasRoleInPD) {
+          // User is FieldExecutive only in FI and has role in PD → set defaultDepartment to PD
+          targetDepartment = Department.PD;
+        } else if (fieldExecutiveInPD && !fieldExecutiveInFI && hasRoleInFI) {
+          // User is FieldExecutive only in PD and has role in FI → set defaultDepartment to FI
+          targetDepartment = Department.FI;
+        } else if (fieldExecutiveInFI && fieldExecutiveInPD) {
+          // User is FieldExecutive in both departments → set to opposite of current defaultDepartment
+          if (userRoles.defaultDepartment === Department.FI && hasRoleInPD) {
+            targetDepartment = Department.PD;
+          } else if (userRoles.defaultDepartment === Department.PD && hasRoleInFI) {
+            targetDepartment = Department.FI;
+          } else if (!userRoles.defaultDepartment) {
+            // If no defaultDepartment is set, default to PD if they have role in PD, otherwise FI
+            targetDepartment = hasRoleInPD ? Department.PD : Department.FI;
+          }
+        }
+
+        // Update defaultDepartment if needed and user has role in target department
+        if (targetDepartment && userRoles.defaultDepartment !== targetDepartment) {
+          await this.prisma.user.update({
+            where: { id: user.id },
+            data: { defaultDepartment: targetDepartment }
+          });
+          await this.loggingService.info('Default department auto-set for FieldExecutive web login', {
+            userId: user.id,
+            previousDepartment: userRoles.defaultDepartment,
+            newDepartment: targetDepartment
+          });
         }
       }
 
