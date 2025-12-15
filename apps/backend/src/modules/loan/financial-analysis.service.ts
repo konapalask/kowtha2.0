@@ -134,7 +134,8 @@ export class FinancialAnalysisTemplatesService {
         return await this.generateDetailedBalanceSheetFormat(
           ExcelJS,
           financialAnalysis,
-          loan
+          loan,
+          businessName
         );
       } else if (this.isProprietorGstFormat(bankName)) {
         return await this.generateProprietorGstFormat(
@@ -251,6 +252,26 @@ export class FinancialAnalysisTemplatesService {
     );
   }
 
+  /**
+   * Calculates the financial year ending date (31.03.YEAR) based on current date
+   * Financial year runs from April 1 to March 31
+   * - April 1, 2025 to March 31, 2026 → returns 2026
+   * - April 1, 2026 to March 31, 2027 → returns 2027
+   */
+  private getFinancialYearEndingYear(): number {
+    const now = new Date();
+    const currentMonth = now.getMonth(); // 0-indexed: 0=Jan, 1=Feb, ..., 3=Apr, ..., 11=Dec
+    const currentYear = now.getFullYear();
+    
+    // If we're in April (3) or later, the financial year ending is next year
+    // If we're in Jan-Mar (0-2), the financial year ending is this year
+    if (currentMonth >= 3) {
+      return currentYear + 1;
+    } else {
+      return currentYear;
+    }
+  }
+
   private async generateStandardFormat(
     ExcelJS: any,
     financialAnalysis: any,
@@ -261,14 +282,15 @@ export class FinancialAnalysisTemplatesService {
     const worksheet = workbook.addWorksheet("Financial Analysis");
 
     worksheet.columns = [
-      { width: 25 },
-      { width: 15 },
-      { width: 25 },
-      { width: 15 },
+      { width: 30 },
+      { width:  20},
+      { width: 30 },
+      { width: 20 },
     ];
+    
 
     const titleRow = worksheet.addRow([
-      `Trading and Profit & Loss Account for the year ending 31.03.${new Date().getFullYear() + 1}`,
+      `Estimated Trading and Profit & Loss Account for the year ending 31.03.${this.getFinancialYearEndingYear()}`,
       "", // Column B
       "", // Column C
       "", // Column D
@@ -284,7 +306,7 @@ export class FinancialAnalysisTemplatesService {
     };
 
     const applicantNameRow = worksheet.addRow([
-      `M/S. ${loan.applicantName || "XXXX"}`,
+      `PROPRIETOR/PARTNER/DIRECTOR: ${loan.applicantName || "XXXX"}`,
       "", // Column B
       "", // Column C
       "", // Column D
@@ -348,7 +370,7 @@ export class FinancialAnalysisTemplatesService {
       { label: "To Packing Charges", key: "packingCharges" },
       { label: "", key: "" },
       { label: "To Gross Profit", key: "grossProfitDebit", isBold: true },
-      { label: "", key: "" },
+      { label: "TOTAL", key: "totalDebit"},
       { label: "To Salaries", key: "salaries" },
       { label: "To Rent", key: "rent" },
       { label: "To Electricity Charges", key: "electricityCharges" },
@@ -366,7 +388,7 @@ export class FinancialAnalysisTemplatesService {
       { label: "To Interest on Loan", key: "interestOnLoan" },
       { label: "", key: "" },
       { label: "To Net Profit", key: "netProfit", isBold: true },
-      { label: "", key: "" },
+      { label: "TOTAL", key: "totalExpenses"},
     ];
 
     // Credit side fields (right) - matching the order in generic.ts credit array
@@ -374,11 +396,13 @@ export class FinancialAnalysisTemplatesService {
       { label: "By Sales", key: "sales" },
       { label: "By Services", key: "services" },
       { label: "By Closing Stock", key: "closingStock" },
-      ...Array(7).fill({ label: "", key: "" }),
+      ...Array(6).fill({ label: "", key: "" }),
+      { label: "TOTAL", key: "totalCredit"},
       { label: "By Gross Profit", key: "grossProfitCredit" },
       { label: "By Rent Received", key: "rentReceived" },
       { label: "By Commission Received", key: "commissionReceived" },
-      ...Array(17).fill({ label: "", key: "" }),
+      ...Array(14).fill({ label: "", key: "" }),
+      { label: "TOTAL", key: "totalExpenses"},
     ];
 
     // Add data rows
@@ -402,6 +426,17 @@ export class FinancialAnalysisTemplatesService {
         getValue(rightItem.key), // Actuals column
       ]);
 
+      if (leftItem.label === "TOTAL" || rightItem.label === "TOTAL") {
+        row.font = { bold: true };
+        row.eachCell((cell) => {
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFFFFF00" },
+          };
+        });
+      }
+
       if (leftItem.isBold || rightItem.isBold) {
         row.font = { bold: true };
         row.eachCell((cell) => {
@@ -412,7 +447,6 @@ export class FinancialAnalysisTemplatesService {
           };
         });
       }
-
       row.eachCell((cell) => {
         cell.border = {
           top: { style: "thin" },
@@ -561,7 +595,8 @@ export class FinancialAnalysisTemplatesService {
   private async generateDetailedBalanceSheetFormat(
     ExcelJS: any,
     financialAnalysis: any,
-    loan: any
+    loan: any,
+    businessName: string
   ): Promise<Buffer> {
     console.log("financialAnalysis", financialAnalysis);
     const workbook = new ExcelJS.Workbook();
@@ -575,7 +610,7 @@ export class FinancialAnalysisTemplatesService {
 
     // Title
     const titleRow = worksheet.addRow([
-      `M/s. ${financialAnalysis.businessName || "XXX"}`,
+      `Business Name: ${businessName || "XXX"}`,
       "", // Column B
     ]);
     worksheet.mergeCells("A1:B1");
@@ -584,7 +619,7 @@ export class FinancialAnalysisTemplatesService {
 
     // Second title row
     const partnerRow = worksheet.addRow([
-      `Partners : ${financialAnalysis.partnersNames || "Mrs. XXX"}`,
+      `PROPRIETOR/PARTNER/DIRECTOR: ${loan.applicantName || "Mr. XXX"}`,
       "", // Column B
     ]);
     worksheet.mergeCells("A2:B2");
@@ -592,7 +627,7 @@ export class FinancialAnalysisTemplatesService {
     partnerRow.alignment = { horizontal: "center" };
 
     const subTitleRow = worksheet.addRow([
-      "Estimated Profit & Loss Account for the Year Ended 31st March 2026",
+      `Estimated Profit & Loss Account for the Year Ended 31st March ${this.getFinancialYearEndingYear()}`,
       "", // Column B
     ]);
     worksheet.mergeCells("A3:B3");
@@ -772,15 +807,15 @@ export class FinancialAnalysisTemplatesService {
     const titleRow = worksheet.addRow([
       `M/s. ${financialAnalysis.businessName || loan.applicantName || "XXX"}`,
     ]);
-    worksheet.mergeCells("A1:D1");
+    worksheet.mergeCells("A1:H1");
     titleRow.font = { bold: true, size: 14 };
     titleRow.alignment = { horizontal: "center" };
 
     // Subtitle
     const subTitleRow = worksheet.addRow([
-      "Estimated Profit & Loss Account for the Year Ended 31st March 2026",
+      `Estimated Profit & Loss Account for the Year Ended 31st March ${this.getFinancialYearEndingYear()}`,
     ]);
-    worksheet.mergeCells("A2:D2");
+    worksheet.mergeCells("A2:H2");
     subTitleRow.font = { bold: true, size: 12 };
     subTitleRow.alignment = { horizontal: "center" };
     subTitleRow.height = 25;
@@ -790,12 +825,12 @@ export class FinancialAnalysisTemplatesService {
     // Column headers row
     const columnHeaderRow = worksheet.addRow([
       "PARTICULARS",
-      `${new Date().getFullYear() - 1} Actuals`,
-      `${new Date().getFullYear()} Actuals`,
+      `${this.getFinancialYearEndingYear() - 2} Actuals`,
+      `${this.getFinancialYearEndingYear() - 1} Actuals`,
       "Estimated",
       "PARTICULARS",
-      `${new Date().getFullYear() - 1} Actuals`,
-      `${new Date().getFullYear()} Actuals`,
+      `${this.getFinancialYearEndingYear() - 2} Actuals`,
+      `${this.getFinancialYearEndingYear() - 1} Actuals`,
       "Estimated",
     ]);
     columnHeaderRow.font = { bold: true };
@@ -1385,7 +1420,7 @@ export class FinancialAnalysisTemplatesService {
 
     // Subtitle
     const subTitleRow = worksheet.addRow([
-      "Estimated Profit & Loss Account for the Year Ended 31st March 2026",
+      `Estimated Profit & Loss Account for the Year Ended 31st March ${this.getFinancialYearEndingYear()}`,
     ]);
     worksheet.mergeCells("A3:D3");
     subTitleRow.font = { bold: true };
