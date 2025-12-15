@@ -14,7 +14,7 @@ import { CreateDepartmentRoleDto } from './dto/create-department-role.dto';
 import { UpdateDepartmentRoleDto } from './dto/update-department-role.dto';
 import { getUserWithDepartmentRoles } from '../common/types/request.types';
 import { UpdateUserDepartmentRolesDto } from './dto/update-user-department-roles.dto';
-import { EditRequestStatus, EditRequestType, UserRole, Department } from '@prisma/client';
+import { EditRequestStatus, EditRequestType, UserRole, Department, UserStatus } from '@prisma/client';
 import { Injectable, UnauthorizedException, BadRequestException, NotFoundException, ConflictException } from '@nestjs/common';
 
 @Injectable()
@@ -782,6 +782,33 @@ export class AccountsService {
           throw new BadRequestException('Cannot set default department to a department where user has FieldExecutive role');
         }
       }
+
+      // Prevent deactivating the last active admin
+      if (updateUserDto.status === UserStatus.Inactive) {
+        const isAdmin = await this.prisma.departmentRole.findFirst({
+          where: {
+            userId,
+            role: UserRole.Admin,
+          },
+        });
+
+        if (isAdmin) {
+          const otherActiveAdmins = await this.prisma.user.count({
+            where: {
+              id: { not: userId },
+              status: UserStatus.Active,
+              departmentRoles: {
+                some: { role: UserRole.Admin },
+              },
+            },
+          });
+
+          if (otherActiveAdmins === 0) {
+            throw new BadRequestException('At least one active admin is required');
+          }
+        }
+      }
+      
 
       // Update user
       const updatedUser = await this.prisma.user.update({

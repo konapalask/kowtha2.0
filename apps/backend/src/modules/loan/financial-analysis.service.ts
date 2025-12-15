@@ -627,7 +627,7 @@ export class FinancialAnalysisTemplatesService {
     partnerRow.alignment = { horizontal: "center" };
 
     const subTitleRow = worksheet.addRow([
-      `Estimated Profit & Loss Account for the Year Ended 31st March ${this.getFinancialYearEndingYear()}`,
+      `Estimated Trading and Profit & Loss Account for the Year Ended 31st March ${this.getFinancialYearEndingYear()}`,
       "", // Column B
     ]);
     worksheet.mergeCells("A3:B3");
