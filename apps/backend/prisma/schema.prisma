@@ -29,6 +29,7 @@ model User {
   verifications            Verification[]        @relation("VerificationFieldExecutive")
   verificationsVerifier    Verification[]        @relation("VerificationVerifier")
   verificationRetries      VerificationRetries[]
+  closedLoans              Loan[]                @relation("UserClosedLoans")
 }
 
 model DepartmentRole {
@@ -84,12 +85,15 @@ model Loan {
   operationsExecutiveId Int?
   createdAt             DateTime       @default(now())
   updatedAt             DateTime       @updatedAt
+  closedAt              DateTime?     
+  closedById            Int?          
   applicantType         String?
   department            Department?
   reassignCount         Int            @default(0)
   templateName          String?
   editRequests          EditRequest[]
   office                Office         @relation(fields: [officeId], references: [id])
+  closedBy              User?          @relation("UserClosedLoans", fields: [closedById], references: [id])
   operationsExecutive   User?          @relation("OperationsExecutive", fields: [operationsExecutiveId], references: [id])
   pdEmailLogs           PDEmailLog[]
   verifications         Verification[]
