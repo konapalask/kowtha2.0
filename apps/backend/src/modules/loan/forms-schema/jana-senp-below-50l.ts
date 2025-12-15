@@ -388,13 +388,31 @@ export const janaSenpBelow50lSchema = {
           nameOfBorrowerReflectingInAttendance: {
             type: "string",
             title:
-              "f yes, is the name of the borrower reflecting in the attendance register",
+              "If yes, is the name of the borrower reflecting in the attendance register",
             enum: ["Yes", "No"],
+            dependencies: {
+              show: {
+                employerMaintainAttendanceSheet: "Yes",
+              },
+              required: {
+                employerMaintainAttendanceSheet: "Yes",
+              },
+            },
           },
           howManyMonthsReflectingInAttendance: {
             type: "string",
             title:
               "for how many months (try to check last 6 months attendance register)",
+            dependencies: {
+              show: {
+                employerMaintainAttendanceSheet: "Yes",
+                nameOfBorrowerReflectingInAttendance: "Yes",
+              },
+              required: {
+                employerMaintainAttendanceSheet: "Yes",
+                nameOfBorrowerReflectingInAttendance: "Yes",
+              },
+            },
           },
 
           attendanceReferenceChecksinSameFirm: {
