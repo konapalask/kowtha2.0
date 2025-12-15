@@ -582,21 +582,43 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
             if (!hasFormulas) return;
 
             // Reconstruct array items from form values to get latest values
-            // React Hook Form stores nested fields with dot notation, so we need to reconstruct
-            // First, collect all dot notation keys for this array field
-            const arrayDotNotationKeys: Record<string, any> = {};
+            // React Hook Form stores array paths using bracket notation (field[0].subField)
+            // but in some cases dot notation can also appear; support both.
+            const arrayPathValues: Record<string, any> = {};
+            const parseArrayPath = (key: string) => {
+              const bracketMatch = key.match(
+                new RegExp(`^${fieldId}\\[(\\d+)\\]\\.([^.]+.*)$`),
+              );
+              if (bracketMatch) {
+                return {
+                  index: parseInt(bracketMatch[1], 10),
+                  fieldName: bracketMatch[2],
+                };
+              }
+              const dotMatch = key.match(
+                new RegExp(`^${fieldId}\\.(\\d+)\\.(.+)$`),
+              );
+              if (dotMatch) {
+                return {
+                  index: parseInt(dotMatch[1], 10),
+                  fieldName: dotMatch[2],
+                };
+              }
+              return null;
+            };
+
             Object.keys(formValues).forEach(key => {
-              if (key.startsWith(`${fieldId}.`)) {
-                const match = key.match(
-                  new RegExp(`^${fieldId}\\.(\\d+)\\.(.+)$`),
-                );
-                if (match) {
-                  const index = parseInt(match[1]);
-                  const fieldName = match[2];
-                  if (!arrayDotNotationKeys[index]) {
-                    arrayDotNotationKeys[index] = {};
+              if (
+                key.startsWith(`${fieldId}[`) ||
+                key.startsWith(`${fieldId}.`)
+              ) {
+                const parsed = parseArrayPath(key);
+                if (parsed) {
+                  const {index, fieldName} = parsed;
+                  if (!arrayPathValues[index]) {
+                    arrayPathValues[index] = {};
                   }
-                  arrayDotNotationKeys[index][fieldName] = formValues[key];
+                  arrayPathValues[index][fieldName] = formValues[key];
                 }
               }
             });
@@ -609,7 +631,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                 // Start with item from array, then overlay with latest dot notation values
                 const reconstructedItem: any = {
                   ...item,
-                  ...(arrayDotNotationKeys[index] || {}),
+                  ...(arrayPathValues[index] || {}),
                 };
 
                 // Also ensure all item properties are present (in case they're missing)
@@ -640,8 +662,8 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
 
                 // Store calculated fields with dot notation keys for later update
                 Object.entries(itemCalculated).forEach(([calcKey, calcVal]) => {
-                  const dotNotationKey = `${fieldId}.${index}.${calcKey}`;
-                  calculatedFieldsMap[dotNotationKey] = calcVal;
+                  const fieldPath = `${fieldId}[${index}].${calcKey}`;
+                  calculatedFieldsMap[fieldPath] = calcVal;
                 });
 
                 // Check if any calculated values differ from current values
@@ -685,8 +707,8 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
             if (arrayChanged) {
               // Update individual calculated fields first using dot notation
               Object.entries(calculatedFieldsMap).forEach(
-                ([dotNotationKey, calcVal]) => {
-                  setValue(dotNotationKey as any, calcVal, {
+                ([fieldPath, calcVal]) => {
+                  setValue(fieldPath as any, calcVal, {
                     shouldValidate: false,
                     shouldDirty: false,
                   });
