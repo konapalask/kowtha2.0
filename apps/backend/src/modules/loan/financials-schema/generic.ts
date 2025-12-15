@@ -95,6 +95,19 @@ export const financialsSchema = {
           minDecimalPlaces: 0,
         },
       },
+      totalDebit: {
+        type: "number",
+        title: "To Total Debit",
+        formula: "openingStock + purchase + costOfServices + wages + hamaliCharges + manufacturingExpenses + packingCharges + grossProfitDebit",
+        readOnly: true,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
       salaries: {
         type: "number",
         title: "To Salaries",
@@ -275,6 +288,19 @@ export const financialsSchema = {
           minDecimalPlaces: 0,
         },
       },
+      totalExpenses: {
+        type: "number",
+        title: "To Total Expenses",
+        formula: "salaries + rent + electricityCharges + printingStationery + telephoneCharges + postageTelegram + officeMaintenance + repairsMaintenance + sadarExpenses + auditFee + advertisement + bankCharges + insurance + depreciation + interestOnLoan + netProfit",
+        readOnly: true,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
 
       // Credit side (By ...)
       sales: {
@@ -314,6 +340,19 @@ export const financialsSchema = {
         type: "number",
         title: "By Gross Profit",
         formula: "grossProfitDebit",
+        readOnly: true,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      totalCredit: {
+        type: "number",
+        title: "By Total Credit",
+        formula: "sales + services + closingStock",
         readOnly: true,
         minimum: 0,
         formatter: {
@@ -364,6 +403,8 @@ export const financialsSchema = {
       "packingCharges",
       // Gross Profit (Debit)
       "grossProfitDebit",
+      // Total Debit
+      "totalDebit",
       // Salaries
       "salaries",
       // Rent
@@ -406,6 +447,8 @@ export const financialsSchema = {
       "closingStock",
       // Gross Profit (Credit)
       "grossProfitCredit",
+      // Total Credit
+      "totalCredit",
       // Rent Received
       "rentReceived",
       // Commission Received
