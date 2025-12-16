@@ -111,7 +111,7 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
         ${renderKeyValue("Visited Premise / Business Address", general.visitedPremiseBusinessAddress)}
         ${renderKeyValue("Person Meet/owner of the business with Contact No", general.personMeetOwnerOfTheBusinessWithContactNo)}
         ${renderKeyValue("Date & time of Visit", general.dateTimeOfVisit)}
-        ${renderKeyValue("PD Done by with Designation", general.pdDoneByWithDesignation)}
+        ${renderKeyValue("PD Done by with Designation", html_data.verifierName)}
         ${renderKeyValue("Loan Amt. Applied and Purpose", general.loanAmtApplied + " <br>" + (general.purposeOfLoan ? "<strong>Purpose of Loan:</strong> " + general.purposeOfLoan : ""))}
 
         ${renderKeyValue("About the Applicant/Business", formatMultiline(applicantAndBusinessDetails.aboutTheApplicantOrBusiness))}

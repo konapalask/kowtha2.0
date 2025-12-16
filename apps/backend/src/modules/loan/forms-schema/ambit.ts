@@ -554,6 +554,11 @@ export const ambitSchema = {
               rows: 3,
             },
           },
+          statusOfPd: {
+            type: "string",
+            title: "Status",
+            enum: ["Positive", "Negative", "Credit Refer"],
+          },
         },
       },
     },

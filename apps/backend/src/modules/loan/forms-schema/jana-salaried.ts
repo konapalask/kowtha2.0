@@ -584,6 +584,11 @@ export const janaSalariedSchema = {
             title: "Case Weakness",
             ui: { widget: "textarea", rows: 3 },
           },
+          pdStatus: {
+            type: "string",
+            title: "PD Status",
+            enum: ["Positive", "Negative", "Credit Refer"],
+          },
           nameOfAgencyExecutive: {
             type: "string",
             title: "Name of Agency Executive",

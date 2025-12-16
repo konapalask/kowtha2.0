@@ -46,10 +46,6 @@ export const incredSchema = {
             title: "Date & time of Visit",
             format: "datetime",
           },
-          pdDoneByWithDesignation: {
-            type: "string",
-            title: "PD Done by with Designation",
-          },
           loanAmtApplied: {
             type: "number",
             title: "Loan Amt. Applied",

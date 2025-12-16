@@ -565,7 +565,7 @@ export const niwasSenpTemplate = (verificationData: any, html_data: any) => {
         ${renderKeyValue("Other observations", pdComments.otherObservations)}
         ${renderKeyValue("Concerns", pdComments.concerns.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join(""))}
         ${renderKeyValue("Status of the case", html_data.approvedStatus || "Not provided")}
-        ${renderKeyValue("Name of PD Officer", pdComments.pdOfficerName)}
+        ${renderKeyValue("Name of PD Officer", html_data.verifierName)}
         ${renderKeyValue("Date of Discussion", pdComments.discussionDate)}
         <tr>
           <td style="${labelCellStyle}">Signature of the PD Officer</td>

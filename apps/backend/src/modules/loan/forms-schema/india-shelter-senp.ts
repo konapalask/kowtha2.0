@@ -1301,6 +1301,11 @@ export const indiaShelterSenpSchema = {
             title: "Time of Visit",
             format: "time",
           },
+          pdStatus: {
+            type: "string",
+            title: "PD Status",
+            enum: ["Positive", "Negative","Referred"],
+          },
         },
       },
     },

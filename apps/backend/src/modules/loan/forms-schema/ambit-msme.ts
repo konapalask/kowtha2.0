@@ -741,11 +741,25 @@ export const ambitMsmeSchema = {
         properties: {
           observations: {
             type: "string",
-            title: "Other Observations",
+            title: "Level of Activity & Stocks along with Other Observations",
             ui: {
               widget: "textarea",
               rows: 3,
             },
+          },
+        },
+      },
+    },
+    {
+      id: "overallPdStatus",
+      label: "Overall PD Status",
+      schema: {
+        type: "object",
+        properties: {
+          overallPdStatus: {
+            type: "string",
+            title: "Overall PD Status",
+            enum: ["Positive", "Negative", "Credit Refer"],
           },
         },
       },

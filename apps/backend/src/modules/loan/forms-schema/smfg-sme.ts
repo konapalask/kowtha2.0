@@ -438,6 +438,11 @@ export const smfgSmeSchema = {
             title: "Concerns",
             ui: { widget: "textarea", rows: 3 },
           },
+          pdStatus: {
+            type: "string",
+            title: "PD Status",
+            enum: ["Positive", "Negative", "Credit Refer"],
+          },
           pdDate: {
             type: "string",
             title: "PD Date",

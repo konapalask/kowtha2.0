@@ -158,11 +158,11 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
           pdDetails.nameOfPersonMet
         )}</td>
         <td style="${labelCellStyle}">Designation</td>
-        <td style="${valueCellStyle}">${formatMultiline(pdDetails.designation)}</td>
+        <td style="${valueCellStyle}">${pdDetails.designation || "PD EXECUTIVE"}</td>
       </tr>
       ${renderKeyValueRow(
         "Name of PD Official",
-        pdDetails.nameOfPdOfficial,
+        html_data.verfierName,
         undefined,
         { colSpan: 3 }
       )}

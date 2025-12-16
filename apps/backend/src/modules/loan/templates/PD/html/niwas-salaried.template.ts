@@ -548,7 +548,7 @@ export const niwasSalariedTemplate = (
         ${renderKeyValue("Brief Comments / Observations of the case", pdComments.comments)}
         ${renderKeyValue(
           "Name of PD Officer",
-          pdComments.pdOfficerName
+          html_data.verifierName
         )}
         ${renderKeyValue(
           "Date of Discussion",

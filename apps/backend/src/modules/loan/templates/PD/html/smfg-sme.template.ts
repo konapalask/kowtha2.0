@@ -512,7 +512,7 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
       <tr>
         <td style="${labelCellStyle}">PD Conducted By</td>
         <td style="${valueCellStyle}">Name: ${formatMultiline(html_data.verifierName)}</td>
-        <td style="${valueCellStyle}">Designation: ${formatMultiline(observations.pdDesignation)}</td>
+        <td style="${valueCellStyle}">Designation: ${observations.pdDesignation || "PD Executive"}</td>
       </tr>
       <tr>
         <td style="${labelCellStyle}">Signature</td>

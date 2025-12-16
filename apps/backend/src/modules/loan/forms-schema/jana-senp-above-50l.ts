@@ -940,6 +940,16 @@ export const janaSenpAbove50lSchema = {
         },
       },
     },
+    {
+      id: "pdStatus",
+      label: "Status",
+      schema: {
+        type: "object",
+        properties: {
+          pdStatus: { type: "string", title: "Status", enum: ["Positive", "Negative", "Credit Refer"] },
+        },
+      },
+    },
     financialsSchema,
   ],
 };

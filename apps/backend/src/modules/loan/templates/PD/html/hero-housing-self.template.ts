@@ -757,9 +757,13 @@ export const heroHousingSelfTemplate = (
       right: documentChecksValue,
     },
     {
-      left: `<p style="${paragraphStyle}"><strong>Final PD status (Positive/Negative) with comment for reason of status</strong></p>`,
+      left: `<p style="${paragraphStyle}"><strong>Final PD status (Positive/Negative)</strong></p>`,
       right: `${html_data.approvedStatus|| "Not provided"}`,
     },
+    {
+      left: `<p style="${paragraphStyle}"><strong>Comment for reason of status</strong></p>`,
+      right: `${finalStatus.commentforreasonofstatus || "Not provided"}`,
+    }
   ];
 
   const profileTable = renderInstructionTable(profileRows);
