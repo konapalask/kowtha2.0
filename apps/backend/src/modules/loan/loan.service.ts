@@ -2021,12 +2021,19 @@ export class LoanService {
         throw new NotFoundException("Loan not found");
       }
 
+      const updateData: any = {
+        ...editLoanDto,
+        updatedAt: new Date(),
+      };
+
+      // Convert closedAt string to Date object if provided
+      if (editLoanDto.closedAt) {
+        updateData.closedAt = new Date(editLoanDto.closedAt);
+      }
+
       const updatedLoan = await this.prisma.loan.update({
         where: { id: loanId },
-        data: {
-          ...editLoanDto,
-          updatedAt: new Date(),
-        },
+        data: updateData,
       });
 
       await this.loggingService.info("Loan updated successfully", {
