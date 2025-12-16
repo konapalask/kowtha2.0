@@ -335,6 +335,7 @@ export class LoanController {
             bankName: { type: "string" },
             loanAmount: { type: "number" },
             updatedAt: { type: "string", format: "date-time" },
+            closedAt: { type: "string", format: "date-time", nullable: true },
           },
         },
       },
