@@ -454,6 +454,19 @@ export const axisFinanceUblBelow10lSchema = {
         },
       },
     },
+    {
+      id: "aflVerifierNameAndEmpCode",
+      label: "AFL Verifier's Name & Emp Code",
+      schema: {
+        type: "object",
+        properties: {
+          aflVerifierNameAndEmpCode: {
+            type: "string",
+            title: "AFL Verifier's Name & Emp Code",
+          },
+        },
+      },
+    },
 
     financialsSchema,
   ],

@@ -328,32 +328,32 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
               <td style="${valueCellStyle}">${specificForCashSalariedProfile?.didPdAgentMetTheEmployer} <br> ${specificForCashSalariedProfile?.employerName} <br> ${specificForCashSalariedProfile?.mobileNumberOfEmployer}</td>
             </tr> 
             <tr>
-              <td style="${labelCellStyle}">Does the employer maintain the attendance register (Y/N) <br> </td>
-              <td style="${valueCellStyle}">${specificForCashSalariedProfile?.employerMaintainAttendanceSheet}</td>
+              <td style="border-bottom: 0px !important;${labelCellStyle}">Does the employer maintain the attendance register (Y/N) <br> </td>
+              <td style="border-bottom: 0px !important;${valueCellStyle}">${specificForCashSalariedProfile?.employerMaintainAttendanceSheet}</td>
               </tr>
               <tr>
-                <td style="${labelCellStyle}">If yes, is the name of the borrower reflecting in the attendance register (Y/N) & for how many months (try to check last 6 months attendance register)</td>
-              <td style="${valueCellStyle}">${specificForCashSalariedProfile?.nameOfBorrowerReflectingInAttendance} , ${specificForCashSalariedProfile?.howManyMonthsReflectingInAttendance}</td>
+                <td style="border-top: 0px !important;${labelCellStyle}">If yes, is the name of the borrower reflecting in the attendance register (Y/N) & for how many months (try to check last 6 months attendance register)</td>
+              <td style="border-top: 0px !important;${valueCellStyle}">${specificForCashSalariedProfile?.nameOfBorrowerReflectingInAttendance} , ${specificForCashSalariedProfile?.howManyMonthsReflectingInAttendance}</td>
             </tr>
             <tr>
-              <td style="${labelCellStyle}">If no, then do reference checks for employment confirmation with other employees working in the same firm. Minimum 2 references to be obtain. (Name & mobile number of the reference people to be documented)</td>
-              <td style="${valueCellStyle}">${specificForCashSalariedProfile?.attendanceReferenceChecksinSameFirm?.map((reference: any) => `${reference.nameOfReferencePeople} , ${reference.mobileNumberReferencePeople}`).join("<br> ")}</td>
+              <td style="border-bottom: 0px !important;${labelCellStyle}">If no, then do reference checks for employment confirmation with other employees working in the same firm. Minimum 2 references to be obtain. (Name & mobile number of the reference people to be documented)</td>
+              <td style="border-bottom: 0px !important;${valueCellStyle}">${specificForCashSalariedProfile?.attendanceReferenceChecksinSameFirm?.map((reference: any) => `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;"><li style="margin-left: 8px;">${reference.nameOfReferencePeople} , ${reference.mobileNumberReferencePeople}</li></ul>`).join("<br> ")}</td>
             </tr>
             <tr>
-              <td style="${labelCellStyle}">Neighbour two reference checks to confirm applicant’s employer information is correct. (name & contact number along with feedback to be documented)</td>
-              <td style="${valueCellStyle}">${specificForCashSalariedProfile?.attendanceNeighboursReferenceChecks?.map((reference: any) => `${reference.nameOfNeighbour} , ${reference.mobileNumberNeighbour} , ${reference.feedbackOnApplicant}`).join("<br> ")}</td>
+              <td style="border-top: 0px !important;${labelCellStyle}">Neighbour two reference checks to confirm applicant’s employer information is correct. (name & contact number along with feedback to be documented)</td>
+              <td style="border-top: 0px !important;${valueCellStyle}">${specificForCashSalariedProfile?.attendanceNeighboursReferenceChecks?.map((reference: any) => `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;"><li style="margin-left: 8px;">${reference.nameOfNeighbour} , ${reference.mobileNumberNeighbour} , ${reference.feedbackOnApplicant}</li></ul>`).join("<br> ")}</td>
             </tr>
             <tr>
-              <td style="${labelCellStyle}">Does the employer maintain any salary register or any salary paid receipt/voucher or any other documentary proof for salary being paid to the borrower (Y/N)</td>
-              <td style="${valueCellStyle}">${specificForCashSalariedProfile?.proofOfSalaryMaintenance}</td>
+              <td style="border-bottom: 0px !important;${labelCellStyle}">Does the employer maintain any salary register or any salary paid receipt/voucher or any other documentary proof for salary being paid to the borrower (Y/N)</td>
+              <td style="border-bottom: 0px !important;${valueCellStyle}">${specificForCashSalariedProfile?.proofOfSalaryMaintenance}</td>
             </tr>
             <tr>
-              <td style="${labelCellStyle}">If yes, verify the salary paid to the borrower and capture photos in the PD report</td>
-              <td style="${valueCellStyle}">${specificForCashSalariedProfile?.proofOfSalaryMaintenance === "Yes" ? specificForCashSalariedProfile?.ifYesVerifySalaryPaid : "NA"}</td>
+              <td style="border-top: 0px !important;${labelCellStyle}">If yes, verify the salary paid to the borrower and capture photos in the PD report</td>
+              <td style="border-top: 0px !important;${valueCellStyle}">${specificForCashSalariedProfile?.proofOfSalaryMaintenance === "Yes" ? specificForCashSalariedProfile?.ifYesVerifySalaryPaid : "NA"}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">If no, then do reference checks with other employees working in the same firm for salary confirmation. Minimum 2 references to be obtained. (Name & mobile number of the reference people to be documented).</td>
-              <td style="${valueCellStyle}">${specificForCashSalariedProfile?.salaryReferenceCheckInSameFirm?.map((reference: any) => `${reference.nameOfReferencePeople} , ${reference.mobileNumberReferencePeople}`).join("<br> ")}</td>
+              <td style="${valueCellStyle}">${specificForCashSalariedProfile?.salaryReferenceCheckInSameFirm?.map((reference: any) => `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;"><li style="margin-left: 8px;">${reference.nameOfReferencePeople} , ${reference.mobileNumberReferencePeople}</li></ul>`).join("<br> ")}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Any variation in the salary paid amount as per salary certificate & as per salary register verified during the visit.</td>

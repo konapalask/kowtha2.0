@@ -394,13 +394,118 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
     return calculatedFields;
   };
 
+  // Helper function to calculate formulas in array items with multiple passes for chained formulas
+  const calculateArrayItemFormulas = (
+    item: any,
+    itemProperties: Record<string, JsonSchemaProperty>,
+  ): Record<string, any> => {
+    const calculatedFields: Record<string, any> = {};
+
+    // Collect all item field values (convert to numbers for formula evaluation)
+    const itemValues: Record<string, any> = {};
+    Object.entries(itemProperties).forEach(([itemFieldId, itemProperty]) => {
+      const value = item[itemFieldId];
+      if (value !== undefined && value !== null && value !== '') {
+        if (itemProperty.type === 'number' || itemProperty.type === 'integer') {
+          itemValues[itemFieldId] =
+            typeof value === 'number' ? value : parseFloat(String(value)) || 0;
+        } else {
+          itemValues[itemFieldId] = 0;
+        }
+      } else {
+        itemValues[itemFieldId] = 0;
+      }
+    });
+
+    // Use working copy that gets updated during passes (for chained formulas)
+    const workingItemValues = {...itemValues};
+    const formulaItemFields = Object.entries(itemProperties).filter(
+      ([_, prop]) => !!(prop as any).formula,
+    );
+
+    if (formulaItemFields.length === 0) {
+      return calculatedFields;
+    }
+
+    const maxPasses = 10;
+    let pass = 0;
+    let hasNewCalculations = true;
+
+    // Multiple passes to handle chained formulas
+    while (hasNewCalculations && pass < maxPasses) {
+      hasNewCalculations = false;
+      pass++;
+
+      formulaItemFields.forEach(([itemFieldId, itemProperty]) => {
+        const formula = (itemProperty as any).formula;
+        if (!formula) return;
+
+        const calculatedValue = evaluateFormula(formula, workingItemValues);
+        if (calculatedValue !== null) {
+          const currentValue = workingItemValues[itemFieldId];
+          const currentNum =
+            typeof currentValue === 'number'
+              ? currentValue
+              : parseFloat(String(currentValue || 0));
+          const newNum = calculatedValue;
+
+          // Only update if value actually changed
+          if (isNaN(currentNum) || Math.abs(currentNum - newNum) > 0.0001) {
+            calculatedFields[itemFieldId] = calculatedValue;
+            // Update working copy so next formula can use this value
+            workingItemValues[itemFieldId] = calculatedValue;
+            hasNewCalculations = true;
+          }
+        }
+      });
+    }
+
+    return calculatedFields;
+  };
+
+  // Track if we're currently processing to prevent infinite loops
+  const isProcessingRef = useRef(false);
+
   // Recalculate formula fields whenever form values change
   useEffect(() => {
     const subscription = watch(value => {
-      // Calculate formula fields (including nested objects)
-      const formValues = value as AnyObject;
+      // Skip if already processing to prevent recursive updates
+      if (isProcessingRef.current) {
+        return;
+      }
+
+      isProcessingRef.current = true;
+
+      // Use setTimeout to ensure all setValue calls complete before allowing next processing
+      setTimeout(() => {
+        isProcessingRef.current = false;
+      }, 50);
+
+      // Get latest form values - this ensures we have the most current data
+      // Merge watch callback value (which has the latest change) with getValues() (which has complete state)
+      const watchValues = value as AnyObject;
+      const formValuesFromGet = getValues();
+
+      // Merge to ensure we have the latest changes
+      // Watch values might have the field that just changed, getValues has the complete state
+      const formValues = {...formValuesFromGet};
+
+      // Merge watch values (these have the latest changes)
+      Object.keys(watchValues).forEach(key => {
+        if (watchValues[key] !== undefined) {
+          formValues[key] = watchValues[key];
+        }
+      });
+
+      // Calculate formula fields for non-array fields
+      const nonArrayProperties = Object.fromEntries(
+        Object.entries(schema.properties).filter(
+          ([_, prop]) => prop.type !== 'array',
+        ),
+      );
+
       const calculatedFields = evaluateNestedFormulas(
-        schema.properties,
+        nonArrayProperties,
         formValues,
       );
 
@@ -410,7 +515,6 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
           if (typeof val === 'object' && val !== null && !Array.isArray(val)) {
             // Handle nested objects (e.g., cashFlowAnalysisDuringPD)
             const currentValue = formValues[key] || {};
-            // Start with all current values to preserve existing fields
             const updatedNested: Record<string, any> = {...currentValue};
             let hasChanges = false;
 
@@ -425,12 +529,10 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                   ? String(nestedVal)
                   : '';
 
-              // Compare as strings first (faster), then as numbers if different
               if (currentStr !== newStr) {
                 const currentNum = parseFloat(currentStr || '0');
                 const newNum = parseFloat(newStr || '0');
 
-                // Only update if value has actually changed (avoid infinite loops)
                 if (
                   isNaN(currentNum) ||
                   Math.abs(currentNum - newNum) > 0.0001
@@ -441,7 +543,6 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
               }
             });
 
-            // Update the nested object only if there are changes
             if (hasChanges) {
               setValue(key as any, updatedNested, {shouldValidate: false});
             }
@@ -455,16 +556,177 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
             const newNum =
               typeof val === 'number' ? val : parseFloat(String(val || '0'));
 
-            // Only update if value has actually changed (avoid infinite loops)
             if (isNaN(currentNum) || Math.abs(currentNum - newNum) > 0.0001) {
               setValue(key as any, val, {shouldValidate: false});
             }
           }
         });
       }
+
+      // Handle formulas inside array items with multi-pass approach
+      Object.entries(schema.properties).forEach(([fieldId, property]) => {
+        if (
+          property.type === 'array' &&
+          property.items?.type === 'object' &&
+          property.items?.properties
+        ) {
+          const arrayValue = formValues[fieldId];
+          if (Array.isArray(arrayValue) && arrayValue.length > 0) {
+            const itemProperties = property.items.properties;
+            if (!itemProperties) return;
+
+            // Check if there are any formula fields in the array items
+            const hasFormulas = Object.values(itemProperties).some(
+              prop => !!(prop as any).formula,
+            );
+            if (!hasFormulas) return;
+
+            // Reconstruct array items from form values to get latest values
+            // React Hook Form stores array paths using bracket notation (field[0].subField)
+            // but in some cases dot notation can also appear; support both.
+            const arrayPathValues: Record<string, any> = {};
+            const parseArrayPath = (key: string) => {
+              const bracketMatch = key.match(
+                new RegExp(`^${fieldId}\\[(\\d+)\\]\\.([^.]+.*)$`),
+              );
+              if (bracketMatch) {
+                return {
+                  index: parseInt(bracketMatch[1], 10),
+                  fieldName: bracketMatch[2],
+                };
+              }
+              const dotMatch = key.match(
+                new RegExp(`^${fieldId}\\.(\\d+)\\.(.+)$`),
+              );
+              if (dotMatch) {
+                return {
+                  index: parseInt(dotMatch[1], 10),
+                  fieldName: dotMatch[2],
+                };
+              }
+              return null;
+            };
+
+            Object.keys(formValues).forEach(key => {
+              if (
+                key.startsWith(`${fieldId}[`) ||
+                key.startsWith(`${fieldId}.`)
+              ) {
+                const parsed = parseArrayPath(key);
+                if (parsed) {
+                  const {index, fieldName} = parsed;
+                  if (!arrayPathValues[index]) {
+                    arrayPathValues[index] = {};
+                  }
+                  arrayPathValues[index][fieldName] = formValues[key];
+                }
+              }
+            });
+
+            // Reconstruct array using dot notation values (which have latest data) merged with array structure
+            const reconstructedArray = arrayValue.map(
+              (item: any, index: number) => {
+                if (!item || typeof item !== 'object') return item;
+
+                // Start with item from array, then overlay with latest dot notation values
+                const reconstructedItem: any = {
+                  ...item,
+                  ...(arrayPathValues[index] || {}),
+                };
+
+                // Also ensure all item properties are present (in case they're missing)
+                Object.keys(itemProperties).forEach(itemFieldId => {
+                  const dotNotationKey = `${fieldId}.${index}.${itemFieldId}`;
+                  const formValue = formValues[dotNotationKey];
+                  if (formValue !== undefined) {
+                    reconstructedItem[itemFieldId] = formValue;
+                  }
+                });
+
+                return reconstructedItem;
+              },
+            );
+
+            let arrayChanged = false;
+            const calculatedFieldsMap: Record<string, any> = {}; // Store calculated fields by dot notation key
+
+            const updatedArray = reconstructedArray.map(
+              (item: any, index: number) => {
+                if (!item || typeof item !== 'object') return item;
+
+                // Calculate formulas for this array item using multi-pass approach
+                const itemCalculated = calculateArrayItemFormulas(
+                  item,
+                  itemProperties,
+                );
+
+                // Store calculated fields with dot notation keys for later update
+                Object.entries(itemCalculated).forEach(([calcKey, calcVal]) => {
+                  const fieldPath = `${fieldId}[${index}].${calcKey}`;
+                  calculatedFieldsMap[fieldPath] = calcVal;
+                });
+
+                // Check if any calculated values differ from current values
+                if (Object.keys(itemCalculated).length === 0) {
+                  return item;
+                }
+
+                const updatedItem = {...item};
+                let hasItemChanges = false;
+
+                Object.entries(itemCalculated).forEach(([calcKey, calcVal]) => {
+                  const currentItemValue = item[calcKey];
+                  const currentNum =
+                    typeof currentItemValue === 'number'
+                      ? currentItemValue
+                      : parseFloat(String(currentItemValue || '0'));
+                  const newNum =
+                    typeof calcVal === 'number'
+                      ? calcVal
+                      : parseFloat(String(calcVal || '0'));
+
+                  if (
+                    isNaN(currentNum) ||
+                    Math.abs(currentNum - newNum) > 0.0001
+                  ) {
+                    updatedItem[calcKey] = calcVal;
+                    hasItemChanges = true;
+                  }
+                });
+
+                if (hasItemChanges) {
+                  arrayChanged = true;
+                  return updatedItem;
+                }
+
+                return item;
+              },
+            );
+
+            // Update array if any item changed
+            if (arrayChanged) {
+              // Update individual calculated fields first using dot notation
+              Object.entries(calculatedFieldsMap).forEach(
+                ([fieldPath, calcVal]) => {
+                  setValue(fieldPath as any, calcVal, {
+                    shouldValidate: false,
+                    shouldDirty: false,
+                  });
+                },
+              );
+
+              // Then update the entire array to ensure consistency
+              setValue(fieldId as any, updatedArray, {
+                shouldValidate: false,
+                shouldDirty: false,
+              });
+            }
+          }
+        }
+      });
     });
     return () => subscription.unsubscribe();
-  }, [watch, setValue, schema.properties]);
+  }, [watch, setValue, getValues, schema.properties]);
 
   // Handle save button click - removed auto-save on change
   const handleSave = () => {
@@ -579,14 +841,23 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
     return (
       <View style={styles.dateFieldContainer}>
         <Text style={styles.label}>{title}</Text>
-        <TouchableOpacity
-          style={[styles.dateField, isReadOnly && styles.disabledDateField]}
-          onPress={() => !isReadOnly && showDatePicker(fieldKey, pickerMode)}
-          disabled={isReadOnly}>
-          <Text style={[styles.dateText, !value && styles.placeholderText]}>
-            {displayValue}
-          </Text>
-        </TouchableOpacity>
+        {isReadOnly ? (
+          <View style={[styles.dateField, styles.disabledDateField]}>
+            <Text
+              style={[styles.dateText, !value && styles.placeholderText]}
+              selectable={true}>
+              {displayValue}
+            </Text>
+          </View>
+        ) : (
+          <TouchableOpacity
+            style={styles.dateField}
+            onPress={() => showDatePicker(fieldKey, pickerMode)}>
+            <Text style={[styles.dateText, !value && styles.placeholderText]}>
+              {displayValue}
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
     );
   };

@@ -43,6 +43,24 @@ export const TextAreaFormItem = ({data}) => {
             setHeight(Math.max(minHeight, Math.min(newHeight + 20, maxHeight)));
           };
 
+          // For readonly fields, use a selectable Text component styled like a textarea
+          if (data?.disabled === true) {
+            return (
+              <View
+                style={[
+                  styles.textArea,
+                  {minHeight: height},
+                  error && styles.errorBorder,
+                ]}>
+                <Text
+                  style={styles.readonlyTextArea}
+                  selectable={true}>
+                  {value || data?.placeholder || ''}
+                </Text>
+              </View>
+            );
+          }
+
           return (
             <TextInput
               style={[
@@ -99,6 +117,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     backgroundColor: '#fff',
+    color: '#000',
+  },
+  readonlyTextArea: {
     color: '#000',
   },
   errorBorder: {

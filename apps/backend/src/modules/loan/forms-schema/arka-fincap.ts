@@ -492,7 +492,7 @@ export const arkaFincapSchema = {
           netMargin: {
             type: "number",
             title: "Net Margin",
-            formula: "netProfit / monthlyGrossReceipts * 100",
+            formula: "(netProfit / monthlyGrossReceipts) * 100",
             readOnly: true,
             formatter: {
               useIndianFormat: true,

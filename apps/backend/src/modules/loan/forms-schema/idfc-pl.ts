@@ -361,6 +361,11 @@ export const idfcPlSchema = {
             type: "string",
             title: "Designation & Signature",
           },
+          pdStatus: {
+            type: "string",
+            title: "PD Status",
+            enum: ["Positive", "Negative", "Credit Refer"],
+          },
           interviewersRemarks: {
             type: "string",
             title: "Interviewer's Remarks",
