@@ -46,9 +46,14 @@ export const UserProvider: React.FC<UserProviderProps> = ({children}) => {
   const [currentDept, setCurrentDeptState] = useState<string>('FI');
   const [isLoading, setIsLoading] = useState(true);
 
-  // Get available departments from user details
+  // Get available departments where user is FieldExecutive
+  console.log('userDetails', userDetails);
   const availableDepartments =
-    userDetails?.departmentRoles?.map(role => role.department) || [];
+    userDetails?.departmentRoles
+      ?.filter((role: DepartmentRole) => role.role === 'FieldExecutive')
+      .map((role: DepartmentRole) => role.department) || [];
+  console.log('availableDepartments', availableDepartments);
+  // Only show switcher if user is FieldExecutive in multiple departments
   const hasMultipleDepartments = availableDepartments.length > 1;
 
   // Set current department and persist it
@@ -67,22 +72,38 @@ export const UserProvider: React.FC<UserProviderProps> = ({children}) => {
       if (details) {
         setUserDetails(details);
 
-        // Determine initial department
-        const departments =
-          details.departmentRoles?.map(role => role.department) || [];
+        // Determine initial department - only consider departments where user is FieldExecutive
+        const fieldExecutiveDepartments =
+          details.departmentRoles
+            ?.filter((role: DepartmentRole) => role.role === 'FieldExecutive')
+            .map((role: DepartmentRole) => role.department) || [];
 
-        if (departments.length === 1) {
-          // User has only one department
-          setCurrentDeptState(departments[0]);
-          await setItem('currentDept', departments[0]);
-        } else if (departments.length > 1) {
-          // User has multiple departments
-          if (savedDept && departments.includes(savedDept)) {
+        if (fieldExecutiveDepartments.length === 0) {
+          // No FieldExecutive departments - fallback to first available department
+          const allDepartments =
+            details.departmentRoles?.map(
+              (role: DepartmentRole) => role.department,
+            ) || [];
+          if (allDepartments.length > 0) {
+            setCurrentDeptState(allDepartments[0]);
+            await setItem('currentDept', allDepartments[0]);
+          }
+        } else if (fieldExecutiveDepartments.length === 1) {
+          // User has only one FieldExecutive department
+          setCurrentDeptState(fieldExecutiveDepartments[0]);
+          await setItem('currentDept', fieldExecutiveDepartments[0]);
+        } else {
+          // User has multiple FieldExecutive departments
+          if (savedDept && fieldExecutiveDepartments.includes(savedDept)) {
             // Use saved department if it's still valid
             setCurrentDeptState(savedDept);
           } else {
-            // Use default department or first available
-            const defaultDept = details.defaultDepartment || departments[0];
+            // Use default department if it's a FieldExecutive department, otherwise first FieldExecutive department
+            const defaultDept =
+              details.defaultDepartment &&
+              fieldExecutiveDepartments.includes(details.defaultDepartment)
+                ? details.defaultDepartment
+                : fieldExecutiveDepartments[0];
             setCurrentDeptState(defaultDept);
             await setItem('currentDept', defaultDept);
           }
