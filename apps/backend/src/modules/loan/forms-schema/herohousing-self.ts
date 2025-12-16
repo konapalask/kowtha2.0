@@ -511,6 +511,24 @@ export const herohousingSelfSchema = {
       },
     },
     {
+      id: "finalPdStatus",
+      label: "Final PD status",
+      schema: {
+        type: "object",
+        properties: {
+          finalPdStatus: {
+            type: "string",
+            title: "Final PD status",
+            enum: ["Positive", "Negative"],
+          },
+          commentforreasonofstatus: {
+            type: "string",
+            title: "Comment for reason of status",
+          },
+        },
+      },
+    },
+    {
       id: "incomeAssessment",
       label: "Income assessment details",
       schema: {

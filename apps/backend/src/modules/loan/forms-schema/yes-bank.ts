@@ -418,6 +418,11 @@ export const yesBankSchema = {
             type: "string",
             title: "Level of activity & stocks observed / other observations",
           },
+          pdStatus: {
+            type: "string",
+            title: "PD Status",
+            enum: ["Positive", "Negative", "Credit Refer"],
+          },
           remarks: {
             type: "string",
             title: "Remarks for Positive / Negative / Referred cases",

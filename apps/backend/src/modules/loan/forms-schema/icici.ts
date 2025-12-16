@@ -58,10 +58,6 @@ export const iciciSchema = {
             title: "Location Address of PD",
             readOnly: true,
           },
-          pdConductedBy: {
-            type: "string",
-            title: "PD Conducted by (Name)",
-          },
           personMetAtPd: {
             type: "string",
             title: "Person Met at PD",

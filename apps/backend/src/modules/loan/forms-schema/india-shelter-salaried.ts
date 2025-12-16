@@ -704,6 +704,11 @@ export const indiaShelterSalariedSchema = {
               rows: 3,
             },
           },
+          pdStatus: {
+            type: "string",
+            title: "PD Status",
+            enum: ["Positive", "Negative","Referred"],
+          },
           visitDate: {
             type: "string",
             title: "Date of Visit",

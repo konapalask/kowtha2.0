@@ -304,6 +304,16 @@ export const iiflSchema = {
       },
     },
     {
+      id: "finalPdStatus",
+      label: "Final PD status",
+      schema: {
+        type: "object",
+        properties: {
+          finalPdStatus: { type: "string", title: "Status of the case", enum: ["Positive", "Negative","Credit Refer"] },
+        },
+      },
+    },
+    {
       id: "dateOfDiscussion",
       label: "Date of Discussion",
       schema: {

@@ -628,7 +628,7 @@ export const indiaShelterSalariedTemplate = (
         <td style="${valueCellStyle}">${html_data.approvedStatus|| "Not provided"}</td>
         <td style="${labelCellStyle}">Name of PD Officer</td>
         <td style="${valueCellStyle}">${formatMultiline(
-          pdReview.pdOfficerName
+          html_data.verifierName
         )}</td>
       </tr>
       <tr>
@@ -642,6 +642,13 @@ export const indiaShelterSalariedTemplate = (
         <td style="${valueCellStyle}"></td>
       </tr>
     </table>
+  `;
+
+  const disclaimerTable = `
+    <p style="margin:24px 0 8px;font-size:14px;"><strong><u>Disclaimer Clause</u></strong> </p>
+    <p style="margin:0 0 24px;color:#333;font-size:12px;">
+        This report (including any attachments) has been prepared based on verbal information provided by the person contacted. INDIA SHELTER FINANCE CORPORATION LTD will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. M/s. KOWTHA & CO will not be held liable in any case.
+    </p>
   `;
 
   return `
@@ -666,6 +673,7 @@ export const indiaShelterSalariedTemplate = (
       ${tpcTable}
       ${documentsTable}
       ${pdReviewTable}
+      ${disclaimerTable}
     </div>
     ${pdBaseTemplateFooter(html_data)}
   `;

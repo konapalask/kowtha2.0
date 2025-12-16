@@ -162,7 +162,7 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
           <td style="${valueCellStyle}">${pdDetails?.pdConductedDate || ""}</td>
           <td style="${valueCellStyle}">${pdDetails?.locationOfPd || ""}</td>
           <td style="${valueCellStyle}">${pdDetails?.locationAddressOfPd || ""}</td>
-          <td style="${valueCellStyle}">${pdDetails?.pdConductedBy || ""}</td>
+          <td style="${valueCellStyle}">${html_data?.verifierName || ""}</td>
           <td style="${valueCellStyle}">${pdDetails?.personMetAtPd || ""}</td>
           <td style="${valueCellStyle}">${pdDetails?.relationshipWithApplicant || ""}</td>
           <td style="${valueCellStyle}">${pdDetails?.distanceFromHfcBranch || ""}</td>

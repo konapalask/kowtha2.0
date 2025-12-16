@@ -992,7 +992,7 @@ export const indiaShelterSenpTemplate = (
       </tr>
       ${renderKeyValueRow(
         "Name of PD Officer",
-        pdReview.pdOfficerName,
+        html_data.verifierName,
         undefined,
         { colSpan: 5 }
       )}
@@ -1016,6 +1016,12 @@ export const indiaShelterSenpTemplate = (
       )}
     </table>
   `;
+  const disclaimerTable = `
+    <p style="margin:24px 0 8px;font-size:14px;"><strong><u>Disclaimer Clause</u></strong> </p>
+    <p style="margin:0 0 24px;color:#333;font-size:12px;">
+      This report (including any attachments) has been prepared based on verbal information provided by the person contacted. INDIA SHELTER FINANCE CORPORATION LTD will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. M/s. KOWTHA & CO will not be held liable in any case.
+    </p>
+  `;
 
   return `
     ${pdBaseTemplate(html_data)}
@@ -1036,6 +1042,7 @@ export const indiaShelterSenpTemplate = (
       ${referencesTable}
       ${tpcTable}
       ${pdReviewTable}
+      ${disclaimerTable}
     </div>
     ${pdBaseTemplateFooter(html_data)}
   `;
