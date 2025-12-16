@@ -8,6 +8,7 @@ interface DeptModalProps {
   setCurrentDept: (value: string) => void;
   openDeptModal: boolean;
   setOpenDeptModal: (value: boolean) => void;
+  availableDepartments: string[];
 }
 
 const DeptModal: React.FC<DeptModalProps> = ({
@@ -15,6 +16,7 @@ const DeptModal: React.FC<DeptModalProps> = ({
   currentDept,
   openDeptModal,
   setOpenDeptModal,
+  availableDepartments,
 }) => {
   const handleDeptSelect = async (dept: string) => {
     try {
@@ -36,35 +38,23 @@ const DeptModal: React.FC<DeptModalProps> = ({
         <View style={styles.modalContent}>
           <Text style={styles.title}>Select Department</Text>
 
-          <TouchableOpacity
-            style={[
-              styles.optionButton,
-              {
-                backgroundColor:
-                  currentDept === 'FI' ? '#f0f0f0' : 'transparent',
-              },
-            ]}
-            onPress={() => handleDeptSelect('FI')}>
-            <Text style={styles.optionText}>FI</Text>
-            {currentDept === 'FI' && (
-              <Icon name="check" size={24} color="green" />
-            )}
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.optionButton,
-              {
-                backgroundColor:
-                  currentDept === 'PD' ? '#f0f0f0' : 'transparent',
-              },
-            ]}
-            onPress={() => handleDeptSelect('PD')}>
-            <Text style={styles.optionText}>PD</Text>
-            {currentDept === 'PD' && (
-              <Icon name="check" size={24} color="green" />
-            )}
-          </TouchableOpacity>
+          {availableDepartments.map(dept => (
+            <TouchableOpacity
+              key={dept}
+              style={[
+                styles.optionButton,
+                {
+                  backgroundColor:
+                    currentDept === dept ? '#f0f0f0' : 'transparent',
+                },
+              ]}
+              onPress={() => handleDeptSelect(dept)}>
+              <Text style={styles.optionText}>{dept}</Text>
+              {currentDept === dept && (
+                <Icon name="check" size={24} color="green" />
+              )}
+            </TouchableOpacity>
+          ))}
 
           <TouchableOpacity
             style={styles.cancelButton}

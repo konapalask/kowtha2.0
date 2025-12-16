@@ -56,7 +56,12 @@ interface VerificationItem {
 
 const VerificationListScreen = () => {
   const navigation = useNavigation<VerificationListScreenNavigationProp>();
-  const {currentDept, setCurrentDept, hasMultipleDepartments} = useUser();
+  const {
+    currentDept,
+    setCurrentDept,
+    hasMultipleDepartments,
+    availableDepartments,
+  } = useUser();
   const [data, setData] = useState<VerificationItem[]>([]);
   const [selectedFilter, setSelectedFilter] = useState<string>('Pending');
   const [refreshing, setRefreshing] = useState(false);
@@ -654,7 +659,7 @@ const VerificationListScreen = () => {
             elevation: 1000,
             zIndex: 1000,
           }}>
-          {hasMultipleDepartments && (
+          {hasMultipleDepartments ? (
             <Pressable
               onPress={() => {
                 setOpenDeptModal(true);
@@ -668,6 +673,13 @@ const VerificationListScreen = () => {
                 <Icon name="repeat" size={24} color="#666" />
               </View>
             </Pressable>
+          ) : (
+            // availableDepartments.length > 0 && (
+            //   <View style={styles.deptTag}>
+            //     <Text style={styles.deptTagText}>{currentDept}</Text>
+            //   </View>
+            // )
+            <></>
           )}
           <Settings isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
         </View>
@@ -725,6 +737,7 @@ const VerificationListScreen = () => {
           setCurrentDept={updateCurrentDept}
           openDeptModal={openDeptModal}
           setOpenDeptModal={setOpenDeptModal}
+          availableDepartments={availableDepartments}
         />
       )}
 
@@ -758,6 +771,18 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
+  },
+  deptTag: {
+    backgroundColor: '#e3f2fd',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginRight: 8,
+  },
+  deptTagText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1976d2',
   },
   list: {
     padding: 16,

@@ -33,7 +33,8 @@ import {
 import { UploadOutlined } from "@ant-design/icons";
 
 const { TextArea } = Input;
-import React, { useEffect, useState, useCallback, useMemo, useRef } from "react";
+import React, {
+  useEffect,useLayoutEffect,useState,useCallback,useMemo,useRef,} from "react";
 import "react-quill/dist/quill.snow.css";
 
 const COORDINATE_FIELD_KEYS = [
@@ -317,64 +318,39 @@ export const BusinessVerificationDetails: React.FC<
   );
   const [loading, setLoading] = useState(false);
 
-  // Effect to restore scroll position after data refresh
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (savedSectionRef.current && savedSectionScrollRef.current !== null) {
-      const sectionId = savedSectionRef.current;
       const scrollPosition = savedSectionScrollRef.current;
+      const sectionId = savedSectionRef.current;
+      const prevViewportTop = savedSectionViewportTopRef.current;
 
-      // Try multiple times to find the element (DOM might not be ready immediately)
-      let attempts = 0;
-      const maxAttempts = 10;
+      const sectionElement = document.getElementById(`section-${sectionId}`);
+      if (sectionElement && typeof prevViewportTop === "number") {
+        const newViewportTop = sectionElement.getBoundingClientRect().top;
+        const delta = newViewportTop - prevViewportTop;
+        window.scrollTo({
+          top: (window.scrollY || window.pageYOffset) + delta,
+          behavior: "auto",
+        });
+      } else {
+        window.scrollTo({ top: scrollPosition, behavior: "auto" });
+      }
 
-      const tryScroll = () => {
-        attempts++;
-        const sectionElement = document.getElementById(`section-${sectionId}`);
-
-        if (sectionElement) {
-          // Found the element, scroll to it
-          // Use requestAnimationFrame for smoother scroll
-          requestAnimationFrame(() => {
-            sectionElement.scrollIntoView({
-              behavior: "smooth",
-              block: "start",
-            });
-            // Add a small offset to account for any fixed headers
-            setTimeout(() => {
-              const rect = sectionElement.getBoundingClientRect();
-              const scrollTop =
-                window.pageYOffset || document.documentElement.scrollTop;
-              const targetY = rect.top + scrollTop - 20; // 20px offset
-              window.scrollTo({ top: targetY, behavior: "smooth" });
-            }, 100);
-          });
-
-          // Clear the refs
-          savedSectionRef.current = null;
-          savedSectionScrollRef.current = null;
-        } else if (attempts < maxAttempts) {
-          // Element not found yet, try again after a short delay
-          setTimeout(tryScroll, 100);
-        } else {
-          // Max attempts reached, fallback to stored scroll position
-          window.scrollTo({ top: scrollPosition, behavior: "smooth" });
-          savedSectionRef.current = null;
-          savedSectionScrollRef.current = null;
-        }
-      };
-
-      // Start trying after initial delay
-      setTimeout(tryScroll, 200);
+      savedSectionRef.current = null;
+      savedSectionScrollRef.current = null;
+      savedSectionViewportTopRef.current = null;
     }
   }, [verificationData, completeVerificationData]); // Trigger when data updates
 
   // New dynamic form states
   const [schemaForm, setSchemaForm] = useState<WebFormDefinition | null>(null);
   const [useNewApproach, setUseNewApproach] = useState(false);
+  const schemaCacheKeyRef = useRef<string | null>(null);
 
   // Ref to track section that was just saved (for scroll restoration)
   const savedSectionRef = React.useRef<string | null>(null);
   const savedSectionScrollRef = React.useRef<number | null>(null);
+  const savedSectionViewportTopRef = React.useRef<number | null>(null);
   const [useGenericApproach, setUseGenericApproach] = useState(false);
   const [formLoading, setFormLoading] = useState(true);
   const [dynamicFormData, setDynamicFormData] = useState<WebFormData>({});
@@ -494,12 +470,9 @@ export const BusinessVerificationDetails: React.FC<
     };
   }, [id, activeTab, editLogsUpdated, localEditLogsUpdated]);
 
-  // Load dynamic form schema from backend based on bank name
   useEffect(() => {
     const loadDynamicSchema = async () => {
       try {
-        setFormLoading(true);
-
         // Get bank name from completeVerificationData (which has the full verification object)
         const bankName =
           completeVerificationData?.bankName ||
@@ -512,16 +485,90 @@ export const BusinessVerificationDetails: React.FC<
           verificationData?.loan?.templateName ||
           "";
 
-        // Skip if no bank name or template name
+        const deptKey = currentDepartment || "PD";
+        const schemaKey = `${deptKey}::${bankName}::${templateName}`;
+
         if (!bankName && !templateName) {
           console.log(
             "No bank name or template name found, skipping dynamic schema"
           );
           setUseNewApproach(false);
+          setUseGenericApproach(false);
+          schemaCacheKeyRef.current = null;
           setFormLoading(false);
           return;
         }
 
+        const rawFormData =
+          verificationData?.verificationData || verificationData || {};
+
+        const cleanEmptyStrings = (obj: any, schema?: any): any => {
+          if (typeof obj === "string") {
+            return obj.trim() === "" ? undefined : obj;
+          }
+          if (Array.isArray(obj)) {
+            return obj.map((item) => cleanEmptyStrings(item, schema));
+          }
+          if (typeof obj === "object" && obj !== null) {
+            const cleaned: any = {};
+            for (const key in obj) {
+              const cleanedValue = cleanEmptyStrings(obj[key], schema);
+              if (cleanedValue !== undefined) {
+                // Convert empty strings to false for boolean fields
+                if (cleanedValue === "" && schema?.fields) {
+                  const field = schema.fields.find((f: any) => f.id === key);
+                  if (field?.type === "boolean") {
+                    cleaned[key] = false;
+                  } else {
+                    cleaned[key] = cleanedValue;
+                  }
+                } else {
+                  cleaned[key] = cleanedValue;
+                }
+              }
+            }
+            return cleaned;
+          }
+          return obj;
+        };
+
+        const transformDataForSchema = (rawData: any, schema: any) => {
+          const transformed: any = {};
+
+          schema.sections?.forEach((section: any) => {
+            const sectionId = section.id;
+            const sectionData = rawData[sectionId];
+
+            if (sectionData) {
+              if (section.fields && Array.isArray(section.fields)) {
+                const sectionTransformed: any = {};
+
+                section.fields.forEach((field: any) => {
+                  const fieldData = sectionData[field.id];
+                  if (fieldData !== undefined) {
+                    sectionTransformed[field.id] = fieldData;
+                  }
+                });
+
+                transformed[sectionId] = sectionTransformed;
+              } else {
+                transformed[sectionId] = sectionData;
+              }
+            }
+          });
+
+          return transformed;
+        };
+
+        if (schemaForm && useGenericApproach && schemaCacheKeyRef.current === schemaKey) {
+          const transformedData = transformDataForSchema(rawFormData, schemaForm);
+          const formData = cleanEmptyStrings(transformedData, schemaForm);
+          setDynamicFormData(formData);
+          setFormLoading(false);
+          return;
+        }
+
+        setFormLoading(true);
         console.log(
           "Loading PD schema from backend for bank:",
           bankName,
@@ -534,7 +581,7 @@ export const BusinessVerificationDetails: React.FC<
             await import("@/services/schema.service");
           const backendResponse = await getSchemaFromBackend(
             bankName,
-            currentDepartment || "PD",
+            deptKey,
             templateName || undefined
           );
 
@@ -550,79 +597,9 @@ export const BusinessVerificationDetails: React.FC<
             setSchemaForm(schema);
             setUseGenericApproach(true);
             setUseNewApproach(false);
+            schemaCacheKeyRef.current = schemaKey;
 
             // Initialize form data from existing verification data
-            // Extract the actual form data from verificationData.verificationData
-            const rawFormData =
-              verificationData?.verificationData || verificationData || {};
-
-            // Clean empty strings from form data and convert empty strings to false for boolean fields
-            const cleanEmptyStrings = (obj: any, schema?: any): any => {
-              if (typeof obj === "string") {
-                return obj.trim() === "" ? undefined : obj;
-              }
-              if (Array.isArray(obj)) {
-                return obj.map((item) => cleanEmptyStrings(item, schema));
-              }
-              if (typeof obj === "object" && obj !== null) {
-                const cleaned: any = {};
-                for (const key in obj) {
-                  const cleanedValue = cleanEmptyStrings(obj[key], schema);
-                  if (cleanedValue !== undefined) {
-                    // Convert empty strings to false for boolean fields
-                    if (cleanedValue === "" && schema?.fields) {
-                      const field = schema.fields.find(
-                        (f: any) => f.id === key
-                      );
-                      if (field?.type === "boolean") {
-                        cleaned[key] = false;
-                      } else {
-                        cleaned[key] = cleanedValue;
-                      }
-                    } else {
-                      cleaned[key] = cleanedValue;
-                    }
-                  }
-                }
-                return cleaned;
-              }
-              return obj;
-            };
-
-            // Transform the data structure to match the schema
-            const transformDataForSchema = (rawData: any, schema: any) => {
-              console.log("rawData: ", rawData);
-              console.log("schema: ", schema);
-              const transformed: any = {};
-
-              // Process each section in the schema
-              schema.sections?.forEach((section: any) => {
-                const sectionId = section.id;
-                const sectionData = rawData[sectionId];
-
-                if (sectionData) {
-                  // Handle the actual schema structure with fields array
-                  if (section.fields && Array.isArray(section.fields)) {
-                    const sectionTransformed: any = {};
-
-                    section.fields.forEach((field: any) => {
-                      const fieldData = sectionData[field.id];
-                      if (fieldData !== undefined) {
-                        sectionTransformed[field.id] = fieldData;
-                      }
-                    });
-
-                    transformed[sectionId] = sectionTransformed;
-                  } else {
-                    transformed[sectionId] = sectionData;
-                  }
-                }
-              });
-
-              console.log("transformed data: ", transformed);
-              return transformed;
-            };
-
             const transformedData = transformDataForSchema(rawFormData, schema);
             const formData = cleanEmptyStrings(transformedData, schema);
 
@@ -668,7 +645,7 @@ export const BusinessVerificationDetails: React.FC<
     if (verificationData) {
       loadDynamicSchema();
     }
-  }, [verificationData]);
+  }, [verificationData, currentDepartment, useGenericApproach, schemaForm]);
 
   // Handle dynamic form data changes
   const handleDynamicFormDataChange = (sectionId: string, data: any) => {
@@ -1097,6 +1074,10 @@ export const BusinessVerificationDetails: React.FC<
     const scrollPosition = window.scrollY || window.pageYOffset;
     savedSectionRef.current = "photoCapture";
     savedSectionScrollRef.current = scrollPosition;
+    savedSectionViewportTopRef.current =
+      document
+        .getElementById("section-photoCapture")
+        ?.getBoundingClientRect().top ?? null;
 
     if (role === "VerificationExecutive") {
       const currentItems = savedSectionData?.uploadedItems ||
@@ -1342,6 +1323,10 @@ export const BusinessVerificationDetails: React.FC<
     const scrollPosition = window.scrollY || window.pageYOffset;
     savedSectionRef.current = "photoCapture";
     savedSectionScrollRef.current = scrollPosition;
+    savedSectionViewportTopRef.current =
+      document
+        .getElementById("section-photoCapture")
+        ?.getBoundingClientRect().top ?? null;
 
     const uploadPromises = newFiles.map(async (file: File) => {
       try {
@@ -1550,6 +1535,10 @@ export const BusinessVerificationDetails: React.FC<
       const scrollPosition = window.scrollY || window.pageYOffset;
       savedSectionRef.current = "photoCapture";
       savedSectionScrollRef.current = scrollPosition;
+      savedSectionViewportTopRef.current =
+        document
+          .getElementById("section-photoCapture")
+          ?.getBoundingClientRect().top ?? null;
 
       if (role === "VerificationExecutive") {
         const updatedItems = [...existingItems, newItem];
@@ -1752,6 +1741,10 @@ export const BusinessVerificationDetails: React.FC<
       const scrollPosition = window.scrollY || window.pageYOffset;
       savedSectionRef.current = sectionId;
       savedSectionScrollRef.current = scrollPosition;
+      savedSectionViewportTopRef.current =
+        document
+          .getElementById(`section-${sectionId}`)
+          ?.getBoundingClientRect().top ?? null;
 
       // Ensure section stays expanded
       if (!activeSections.includes(sectionId)) {

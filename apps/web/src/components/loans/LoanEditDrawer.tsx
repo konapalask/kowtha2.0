@@ -445,6 +445,17 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                     const verification = loanDetails?.verifications?.find(
                       (v: any) => v.type === type
                     );
+                      const isPostponed =
+                        verification?.isPostponed === true &&
+                        verification?.status === "Pending";
+                      const statusLabel = isPostponed
+                        ? "Postponed"
+                        : verification?.status;
+                      const statusColor = isPostponed
+                        ? "volcano"
+                        : verification?.status === "Completed"
+                          ? "green"
+                          : "orange";
                     return (
                       <Col md={12} lg={12} xl={12} xxl={12} key={type}>
                         <Card
@@ -472,17 +483,9 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                             <>
                               {verification && (
                                 <Tag
-                                  color={
-                                    verification?.isPostponed
-                                      ? "volcano"
-                                      : verification.status === "Completed"
-                                        ? "green"
-                                        : "orange"
-                                  }
+                                  color={statusColor}
                                 >
-                                  {verification?.isPostponed
-                                    ? "Postponed"
-                                    : verification.status}
+                                  {statusLabel}
                                 </Tag>
                               )}
                             </>
