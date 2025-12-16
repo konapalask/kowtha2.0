@@ -936,6 +936,20 @@ export const iciciSchema = {
       },
       required: true,
     },
+    {
+      id: "pdStatus",
+      label: "PD Status",
+      schema: {
+        type: "object",
+        properties: {
+          pdStatus: {
+            type: "string",
+            title: "PD Status",
+            enum: ["Positive", "Negative", "Credit Refer"],
+          },
+        },
+      },
+    },
     financialsSchema,
   ],
 } as const;

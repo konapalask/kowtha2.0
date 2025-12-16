@@ -106,7 +106,7 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
       <table style="${tableStyle}">
         ${renderKeyValue("Application No:", general.applicationNo)}
         ${renderKeyValue("Name of Applicant", general.nameOfApplicant)}
-        ${renderKeyValue("Name of Concern", general.nameOfConcern)}
+        ${renderKeyValue("Name of Concern", general.concernName)}
         ${renderKeyValue("Name of Co-Applicant / Co-applicant's", general.nameOfCoApplicant)}
         ${renderKeyValue("Visited Premise / Business Address", general.visitedPremiseBusinessAddress)}
         ${renderKeyValue("Person Meet/owner of the business with Contact No", general.personMeetOwnerOfTheBusinessWithContactNo)}

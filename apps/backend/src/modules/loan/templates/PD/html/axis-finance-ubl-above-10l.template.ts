@@ -542,7 +542,7 @@ export const axisFinanceUBLTemplate = (
         ["Status:", html_data.approvedStatus || "Not provided"],
         [
           "AFL Verifier's Name & Emp Code:",
-          html_data.verifierName || "",
+          thirdPartySection?.aflVerifierNameAndEmpCode || "",
         ],
       ])}
       <table style="${tableStyle}">

@@ -563,6 +563,10 @@ export const idfcHlMlSchema = {
             type: "string",
             title: "Other observation",
           },
+          overallOutcome: {
+            type: "string",
+            title: "Overall outcome of the personal discussion",
+          },
           remarks: {
             type: "string",
             title: "Remarks",
@@ -570,10 +574,6 @@ export const idfcHlMlSchema = {
               widget: "textarea",
               rows: 3,
             },
-          },
-          overallOutcome: {
-            type: "string",
-            title: "Overall outcome of the personal discussion",
           },
           pdDate: {
             type: "string",

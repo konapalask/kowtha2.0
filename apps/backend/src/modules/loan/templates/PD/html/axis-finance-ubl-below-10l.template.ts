@@ -121,7 +121,7 @@ export const axisFinanceUBLBelow10lTemplate = (
   const documentsSeen = verificationData.documentsSeen || {};
   const thirdPartyCheck = verificationData.thirdPartyCheck || {};
   const overallDetails = verificationData.overallDetails || {};
-
+  const aflVerifierNameAndEmpCode = verificationData.aflVerifierNameAndEmpCode || {};
 
   return `
     ${pdBaseTemplate(html_data)}
@@ -317,8 +317,8 @@ export const axisFinanceUBLBelow10lTemplate = (
       </tr>
       <tr>
         <td style="${labelCellStyle}">AFL Verifier's Name & Emp Code</td>
-        <td style="${cellStyle}">${overallDetails?.aflVerifierName || "Not provided"} ${overallDetails?.aflVerifierEmpCode ? "-"+overallDetails?.aflVerifierEmpCode : ""}</td>
-        <td style="${labelCellStyle}">PD Officer Signature</td>
+        <td style="${cellStyle}">${aflVerifierNameAndEmpCode?.aflVerifierName || "Not provided"} ${aflVerifierNameAndEmpCode?.aflVerifierEmpCode ? "-"+aflVerifierNameAndEmpCode?.aflVerifierEmpCode : ""}</td>
+        <td style="${labelCellStyle}">PD Officer Signature</td> 
         <td style="${cellStyle}"></td>
       </tr>
       <tr>
