@@ -337,11 +337,11 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
             </tr>
             <tr>
               <td style="border-bottom: 0px !important;${labelCellStyle}">If no, then do reference checks for employment confirmation with other employees working in the same firm. Minimum 2 references to be obtain. (Name & mobile number of the reference people to be documented)</td>
-              <td style="border-bottom: 0px !important;${valueCellStyle}">${specificForCashSalariedProfile?.attendanceReferenceChecksinSameFirm?.map((reference: any) => `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;"><li style="margin-left: 8px;">${reference.nameOfReferencePeople} , ${reference.mobileNumberReferencePeople}</li></ul>`).join("<br> ")}</td>
+              <td style="border-bottom: 0px !important;${valueCellStyle}">${ensureArray(specificForCashSalariedProfile?.attendanceReferenceChecksinSameFirm).map((reference: any) => `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;"><li style="margin-left: 8px;">${reference.nameOfReferencePeople} , ${reference.mobileNumberReferencePeople}</li></ul>`).join("<br> ")}</td>
             </tr>
             <tr>
-              <td style="border-top: 0px !important;${labelCellStyle}">Neighbour two reference checks to confirm applicant’s employer information is correct. (name & contact number along with feedback to be documented)</td>
-              <td style="border-top: 0px !important;${valueCellStyle}">${specificForCashSalariedProfile?.attendanceNeighboursReferenceChecks?.map((reference: any) => `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;"><li style="margin-left: 8px;">${reference.nameOfNeighbour} , ${reference.mobileNumberNeighbour} , ${reference.feedbackOnApplicant}</li></ul>`).join("<br> ")}</td>
+              <td style="border-top: 0px !important;${labelCellStyle}">Neighbour two reference checks to confirm applicant's employer information is correct. (name & contact number along with feedback to be documented)</td>
+              <td style="border-top: 0px !important;${valueCellStyle}">${ensureArray(specificForCashSalariedProfile?.attendanceNeighboursReferenceChecks).map((reference: any) => `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;"><li style="margin-left: 8px;">${reference.nameOfNeighbour} , ${reference.mobileNumberNeighbour} , ${reference.feedbackOnApplicant}</li></ul>`).join("<br> ")}</td>
             </tr>
             <tr>
               <td style="border-bottom: 0px !important;${labelCellStyle}">Does the employer maintain any salary register or any salary paid receipt/voucher or any other documentary proof for salary being paid to the borrower (Y/N)</td>
@@ -353,7 +353,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
             </tr>
             <tr>
               <td style="${labelCellStyle}">If no, then do reference checks with other employees working in the same firm for salary confirmation. Minimum 2 references to be obtained. (Name & mobile number of the reference people to be documented).</td>
-              <td style="${valueCellStyle}">${specificForCashSalariedProfile?.salaryReferenceCheckInSameFirm?.map((reference: any) => `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;"><li style="margin-left: 8px;">${reference.nameOfReferencePeople} , ${reference.mobileNumberReferencePeople}</li></ul>`).join("<br> ")}</td>
+              <td style="${valueCellStyle}">${ensureArray(specificForCashSalariedProfile?.salaryReferenceCheckInSameFirm).map((reference: any) => `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;"><li style="margin-left: 8px;">${reference.nameOfReferencePeople} , ${reference.mobileNumberReferencePeople}</li></ul>`).join("<br> ")}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Any variation in the salary paid amount as per salary certificate & as per salary register verified during the visit.</td>
@@ -561,11 +561,11 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
               </tr>
               <tr>
                 <td style="${labelCellStyle}">Randomly call 2 to 3 clients to verify the contract details and document the feedback in the PD report along with details of the client called for confirmation.</td>
-                <td style="${valueCellStyle}">${specificForContractorProfile?.clientReferenceCheck?.map((client: any) => `${client.nameOfClient} - ${client.mobileNumberOfClient} - ${formatCurrency(client.feedbackOnClient)}`).join("<br> ")}</td>
+                <td style="${valueCellStyle}">${ensureArray(specificForContractorProfile?.clientReferenceCheck).map((client: any) => `${client.nameOfClient} - ${client.mobileNumberOfClient} - ${formatCurrency(client.feedbackOnClient)}`).join("<br> ")}</td>
               </tr>
               <tr>
-                <td style="${labelCellStyle}">Neighbour two reference checks to confirm applicant’s employer information is correct. (name & contact number along with feedback to be documented)</td>
-                <td style="${valueCellStyle}">${specificForContractorProfile?.neighbourReferenceCheck?.map((neighbour: any) => `${neighbour.nameOfNeighbour} - ${neighbour.mobileNumberOfNeighbour} - ${neighbour.feedbackDetails}`).join("<br> ")}</td>
+                <td style="${labelCellStyle}">Neighbour two reference checks to confirm applicant's employer information is correct. (name & contact number along with feedback to be documented)</td>
+                <td style="${valueCellStyle}">${ensureArray(specificForContractorProfile?.neighbourReferenceCheck).map((neighbour: any) => `${neighbour.nameOfNeighbour} - ${neighbour.mobileNumberOfNeighbour} - ${neighbour.feedbackDetails}`).join("<br> ")}</td>
               </tr>
               <tr>
                 <td style="${labelCellStyle}">Stability or vintage in the same line of business</td>

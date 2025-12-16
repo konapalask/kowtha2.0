@@ -306,7 +306,7 @@ export const adityaBirlaSchema = {
             title: "Concerns / Deviations",
             ui: { widget: "textarea", rows: 4 },
           },
-          statusOfPd: { type: "string", title: "Status" },
+          statusOfPd: { type: "string", title: "Status" ,enum: ["Positive", "Negative", "Credit Refer"]},
         },
       },
     },
