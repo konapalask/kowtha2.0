@@ -714,6 +714,15 @@ export const axisFinanceUblAbove10lSchema = {
               rows: 3,
             },
           },
+          pdStatus: {
+            type: "string",
+            title: "Status",
+            enum: ["Positive", "Negative", "Credit Refer"],
+          },
+          aflVerifierNameAndEmpCode: {
+            type: "string",
+            title: "AFL Verifier's Name & Emp Code",
+          },
         },
       },
       required: true,

@@ -726,6 +726,11 @@ export const tataUblSchema = {
             title: "Document Seen",
             ui: { widget: "textarea", rows: 3 },
           },
+          pdStatus: {
+            type: "string",
+            title: "Financial Status",
+            enum: ["Positive", "Negative", "Credit Refer"],
+          },
           dateOfPD: {
             type: "string",
             title: "Date of PD",
