@@ -305,12 +305,12 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
         });
 
         // Include previously calculated values (for formulas that depend on other calculated fields)
+        // Always let calculated values override raw values so chained formulas (B depends on A)
+        // use the latest value of A in the same evaluation pass.
         Object.entries(currentCalculated).forEach(([key, val]) => {
-          if (!(key in numericValues)) {
-            const numVal =
-              typeof val === 'number' ? val : parseFloat(String(val));
-            numericValues[key] = isNaN(numVal) ? 0 : numVal;
-          }
+          const numVal =
+            typeof val === 'number' ? val : parseFloat(String(val));
+          numericValues[key] = isNaN(numVal) ? 0 : numVal;
         });
 
         // Ensure all schema properties are included (in case formula references fields not yet in objectValues)
