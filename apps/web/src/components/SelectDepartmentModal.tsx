@@ -145,32 +145,42 @@ const SelectDepartmentModal: React.FC<SelectDepartmentModalProps> = ({
         style={{ width: "100%" }}
         aria-labelledby="department-modal-description"
       >
-        {departmentRoles.map(({ department, role }) => (
-          <Radio
-            key={department}
-            value={department}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              width: "100%",
-              marginBottom: 16,
-              padding: "16px 20px",
-              border: "2px solid #e2e8f0",
-              borderRadius: 8,
-              background: "white",
-              transition: "all 0.3s ease",
-              cursor: "pointer",
-            }}
-            aria-label={`Select ${department} department with role ${role}`}
-          >
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <span style={{ fontWeight: 600, color: "#1e293b", fontSize: 16 }}>
-                {department}
-              </span>
-              <span style={{ color: "#64748b", fontSize: 14 }}>Role: {role}</span>
-            </div>
-          </Radio>
-        ))}
+        {departmentRoles.map(({ department, role }) => {
+          const isDisabled = role === "FieldExecutive" && (department === "PD" || department === "FI");
+          return (
+            <Radio
+              key={department}
+              value={department}
+              disabled={isDisabled}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                width: "100%",
+                marginBottom: 16,
+                padding: "16px 20px",
+                border: "2px solid #e2e8f0",
+                borderRadius: 8,
+                background: isDisabled ? "#f1f5f9" : "white",
+                transition: "all 0.3s ease",
+                cursor: isDisabled ? "not-allowed" : "pointer",
+                opacity: isDisabled ? 0.6 : 1,
+              }}
+              aria-label={`Select ${department} department with role ${role}`}
+            >
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <span style={{ fontWeight: 600, color: isDisabled ? "#94a3b8" : "#1e293b", fontSize: 16 }}>
+                  {department}
+                  {isDisabled && (
+                    <span style={{ marginLeft: 8, fontSize: 12, color: "#ef4444" }}>
+                      (Not supported for FieldExecutive)
+                    </span>
+                  )}
+                </span>
+                <span style={{ color: isDisabled ? "#94a3b8" : "#64748b", fontSize: 14 }}>Role: {role}</span>
+              </div>
+            </Radio>
+          );
+        })}
       </Radio.Group>
     </Modal>
   );

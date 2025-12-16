@@ -3,8 +3,9 @@ import {
   generateFinalReport,
   generatePreviewReport,
   exportFinancialAnalysis,
+  getVerificationData,
 } from "@/services/verifier.services";
-import { sendPdEmailReplyApi } from "@/services/loans.services";
+import { sendPdEmailReplyApi, updateLoanApi, getLoansByIdApi } from "@/services/loans.services";
 import { EyeOutlined, DownloadOutlined, MailOutlined } from "@ant-design/icons";
 import { Button, message, Modal, Popconfirm, Spin } from "antd";
 import { useRouter } from "next/router";
@@ -92,6 +93,25 @@ const Footer: React.FC<{
       setDownloadingReport(true);
       setDownloadFileType("pdf");
       setShowDownloadAnimation(true);
+    
+      const verificationResponse = await getVerificationData(id as string);
+      const loanIdFromVerification = verificationResponse?.data?.loanId || loanId;
+      
+      if (!loanIdFromVerification) {
+        throw new Error("Loan ID not found");
+      }
+      const loanResponse = await getLoansByIdApi(loanIdFromVerification.toString());
+      const loanData = loanResponse?.data?.data?.items?.[0] || loanResponse?.data?.data?.items || loanResponse?.data?.data || loanResponse?.data;
+
+      if (loanData && loanData.closedAt === null) {
+        try {
+          await updateLoanApi(loanIdFromVerification, {
+            closedAt: new Date().toISOString(),
+          });
+        } catch (updateError: any) {
+          console.error("Error updating closedAt:", updateError);
+        }
+      }
       
       const reportResponse = await generatePreviewReport(
         id as string,
@@ -117,13 +137,13 @@ const Footer: React.FC<{
 
       setTimeout(() => {
         setShowDownloadAnimation(false);
-        message.success("Report downloaded successfully");
+        message.success("Final report downloaded successfully");
       }, 1500);
     } catch (error: any) {
       console.error("Error downloading report:", error);
       setShowDownloadAnimation(false);
       message.error(
-        error?.response?.data?.message ?? "Failed to download report"
+        error?.response?.data?.message ?? "Failed to download final report"
       );
     } finally {
       setDownloadingReport(false);
@@ -305,7 +325,7 @@ const Footer: React.FC<{
                 fontSize: "14px",
               }}
             >
-              Download Report
+              Download Final Report
             </Button>
             <Button
               size="small"
