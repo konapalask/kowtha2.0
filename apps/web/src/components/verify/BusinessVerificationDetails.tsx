@@ -2516,12 +2516,64 @@ export const BusinessVerificationDetails: React.FC<
 
       const calculatedFields: Record<string, any> = {};
 
+      const calculateFormulasInObject = (
+        objectField: any,
+        objectValues: Record<string, any>
+      ): Record<string, any> => {
+        const calculatedFields: Record<string, any> = {};
+        const objectFields = objectField.objectFields || [];
+        
+        const workingValues: Record<string, any> = { ...objectValues };
+        const formulaFields = objectFields.filter((field: any) => field.formula);
+        const maxPasses = 10;
+        let pass = 0;
+        let hasNewCalculations = true;
+
+        while (hasNewCalculations && pass < maxPasses) {
+          hasNewCalculations = false;
+          pass++;
+
+          formulaFields.forEach((field: any) => {
+            const calculatedValue = evaluateFormula(field.formula, workingValues);
+            if (calculatedValue !== null) {
+              const currentValue = workingValues[field.id];
+              const currentNum =
+                typeof currentValue === "number"
+                  ? currentValue
+                  : parseFloat(String(currentValue || 0));
+              const newNum = calculatedValue;
+
+              if (isNaN(currentNum) || Math.abs(currentNum - newNum) > 0.0001) {
+                calculatedFields[field.id] = calculatedValue;
+                workingValues[field.id] = calculatedValue;
+                hasNewCalculations = true;
+              }
+            }
+          });
+        }
+
+        return calculatedFields;
+      };
+
       // Find all fields with formulas and calculate them
       section.fields?.forEach((field: any) => {
         if (field.formula) {
           const calculatedValue = evaluateFormula(field.formula, formValues);
           if (calculatedValue !== null) {
             calculatedFields[field.id] = calculatedValue;
+          }
+        }
+
+        if (field.type === "object" && field.objectFields) {
+          const objectValue = formValues[field.id];
+          if (objectValue && typeof objectValue === "object" && !Array.isArray(objectValue)) {
+            const objectCalculated = calculateFormulasInObject(field, objectValue);
+            if (Object.keys(objectCalculated).length > 0) {
+              calculatedFields[field.id] = {
+                ...objectValue,
+                ...objectCalculated,
+              };
+            }
           }
         }
 
@@ -2657,7 +2709,59 @@ export const BusinessVerificationDetails: React.FC<
           });
         }
 
+        const calculateFormulasInObjectForChange = (
+          objectField: any,
+          objectValues: Record<string, any>
+        ): Record<string, any> => {
+          const calculated: Record<string, any> = {};
+          const objectFields = objectField.objectFields || [];
+          
+          const workingObjectValues: Record<string, any> = { ...objectValues };
+          const formulaFields = objectFields.filter((field: any) => field.formula);
+          const maxPasses = 10;
+          let pass = 0;
+          let hasNewCalculations = true;
+
+          while (hasNewCalculations && pass < maxPasses) {
+            hasNewCalculations = false;
+            pass++;
+
+            formulaFields.forEach((field: any) => {
+              const calculatedValue = evaluateFormula(field.formula, workingObjectValues);
+              if (calculatedValue !== null) {
+                const currentValue = workingObjectValues[field.id];
+                const currentNum =
+                  typeof currentValue === "number"
+                    ? currentValue
+                    : parseFloat(String(currentValue || 0));
+                const newNum = calculatedValue;
+
+                if (isNaN(currentNum) || Math.abs(currentNum - newNum) > 0.0001) {
+                  calculated[field.id] = calculatedValue;
+                  workingObjectValues[field.id] = calculatedValue;
+                  hasNewCalculations = true;
+                }
+              }
+            });
+          }
+
+          return calculated;
+        };
+
         section.fields?.forEach((field: any) => {
+          if (field.type === "object" && field.objectFields) {
+            const objectValue = allValues[field.id];
+            if (objectValue && typeof objectValue === "object" && !Array.isArray(objectValue)) {
+              const objectCalculated = calculateFormulasInObjectForChange(field, objectValue);
+              if (Object.keys(objectCalculated).length > 0) {
+                calculatedFields[field.id] = {
+                  ...objectValue,
+                  ...objectCalculated,
+                };
+              }
+            }
+          }
+
           if (field.type === "array" && field.arrayItemFields) {
             const arrayValue = allValues[field.id];
             if (Array.isArray(arrayValue)) {
