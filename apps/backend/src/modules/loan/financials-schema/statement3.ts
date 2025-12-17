@@ -1561,7 +1561,7 @@ export const statement3Schema = {
           },
           eleWeightsMeasurements_2023: {
             type: "number",
-            title: `Ele. Weights & Measurements - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+            title: `Measurements - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1572,7 +1572,7 @@ export const statement3Schema = {
           },
           eleWeightsMeasurements_2024: {
             type: "number",
-            title: `Ele. Weights & Measurements - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+            title: `Measurements - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1583,7 +1583,7 @@ export const statement3Schema = {
           },
           eleWeightsMeasurementsEstimated: {
             type: "number",
-            title: "Ele. Weights & Measurements - Estimated",
+            title: "Measurements - Estimated",
             minimum: 0,
             formatter: {
               useIndianFormat: true,
