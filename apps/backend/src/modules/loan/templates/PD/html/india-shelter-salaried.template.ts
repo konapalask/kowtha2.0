@@ -639,7 +639,7 @@ export const indiaShelterSalariedTemplate = (
       </tr>
       <tr>
         <td style="${labelCellStyle}">Signature of the PD Officer</td>
-        <td style="${valueCellStyle}"></td>
+        <td style="${valueCellStyle}"colspan="3"></td>
       </tr>
     </table>
   `;

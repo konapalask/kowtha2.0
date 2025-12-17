@@ -790,6 +790,30 @@ export const niwasSalariedSchema = {
         },
       },
     },
+    {
+      id: "pdOfficerComments",
+      label: "To be filled by PD Officer",
+      schema: {
+        type: "object",
+        properties: {
+          comments: {
+            type: "string",
+            title: "Brief Comments / Observations of the case",
+            ui: { widget: "textarea", rows: 4 },
+          },
+          discussionDate: {
+            type: "string",
+            title: "Date of Discussion",
+            format: "date",
+          },
+          statusOfCase: {
+            type: "string",
+            title: "PD Status",
+            enum: ["Positive", "Negative", "Credit Refer"],
+          },
+        },
+      },
+    },
     financialsSchema,
   ],
 } as const;
