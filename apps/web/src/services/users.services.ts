@@ -100,11 +100,8 @@ export const updateUserApi = async (userId: number, userData: any) => {
     status: userData.status,
     locality: userData.locality,
     defaultDepartment: userData.defaultDepartment,
+    email: userData.email !== undefined && userData.email !== null ? userData.email.trim() : "",
   };
- 
-  if (userData.email && userData.email.trim() !== "") {
-    payload.email = userData.email.trim();
-  }
   
   const updateResponse = await patchWithDepartment(
     `/accounts/users/${userId}/`,
