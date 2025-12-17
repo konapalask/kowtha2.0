@@ -545,7 +545,7 @@ export const niwasSalariedTemplate = (
         To be Filled by PD Officer
       </h2>
       <table style="${tableStyle}">
-        ${renderKeyValue("Brief Comments / Observations of the case", pdComments.comments)}
+        ${renderKeyValue("Brief Comments / Observations of the case", pdComments.comments.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join(""))}
         ${renderKeyValue(
           "Name of PD Officer",
           html_data.verifierName

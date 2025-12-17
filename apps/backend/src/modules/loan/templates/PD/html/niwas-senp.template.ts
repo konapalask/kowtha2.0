@@ -557,12 +557,12 @@ export const niwasSenpTemplate = (verificationData: any, html_data: any) => {
         </tr>
         ${renderKeyValue(
           "Brief Comments/Observations of the case",
-          pdComments.comments
+          pdComments.comments.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("")
         )}
         ${renderKeyValue("Initiated address", pdComments.initiatedAddress)}
         ${renderKeyValue("Visited address", pdComments.visitedAddress)}
         ${renderKeyValue("Residential address", pdComments.residentialAddress)}
-        ${renderKeyValue("Other observations", pdComments.otherObservations)}
+        ${renderKeyValue("Other observations", pdComments.otherObservations.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join(""))}
         ${renderKeyValue("Concerns", pdComments.concerns.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join(""))}
         ${renderKeyValue("Status of the case", html_data.approvedStatus || "Not provided")}
         ${renderKeyValue("Name of PD Officer", html_data.verifierName)}
