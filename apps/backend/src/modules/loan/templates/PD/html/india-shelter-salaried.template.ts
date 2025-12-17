@@ -405,13 +405,13 @@ export const indiaShelterSalariedTemplate = (
       )}
       ${renderKeyValueRow(
         "Applicant's Job Profile",
-        employer.jobProfile,
+        employer.jobProfile.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join(""),
         undefined,
         { colSpan: 3 }
       )}
       ${renderKeyValueRow(
         "About the company",
-        employer.companyOverview,
+        employer.companyOverview.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join(""),
         undefined,
         { colSpan: 3 }
       )}
@@ -613,14 +613,14 @@ export const indiaShelterSalariedTemplate = (
       <tr><th style="${subHeaderStyle}" colspan="4">To be filled by PD officer</th></tr>
       ${renderKeyValueRow(
         "Major Observations / Comments / Concerns",
-        pdReview.majorObservations,
+        pdReview.majorObservations.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join(""),
         undefined,
         { colSpan: 3 }
       )}
-      ${renderKeyValueRow("Case Strengths", pdReview.caseStrengths, undefined, {
+      ${renderKeyValueRow("Case Strengths", pdReview.caseStrengths.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join(""), undefined, {
         colSpan: 3,
       })}
-      ${renderKeyValueRow("Case Weakness", pdReview.caseWeakness, undefined, {
+      ${renderKeyValueRow("Case Weakness", pdReview.caseWeakness.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join(""), undefined, {
         colSpan: 3,
       })}
       <tr>
