@@ -204,192 +204,192 @@ export const statement4Schema = {
         },
       },
 
-      // Balance Sheet Section
-      balanceSheet: {
-        type: "object",
-        title: "Balance Sheet",
-        ui: { widget: "card", collapsible: true },
-        properties: {
-          // Liabilities
-          capitalAccount: {
-            type: "number",
-            title: "Capital Account",
-            minimum: 0,
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
-          },
-          sundryCreditors: {
-            type: "number",
-            title: "Sundry Creditors",
-            minimum: 0,
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
-          },
-          provisions: {
-            type: "number",
-            title: "Provisions",
-            minimum: 0,
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
-          },
-          auditPayable: {
-            type: "number",
-            title: "Audit Payable",
-            minimum: 0,
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
-          },
-          accountantFees: {
-            type: "number",
-            title: "Accountant Fees",
-            minimum: 0,
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
-          },
-          newLoan: {
-            type: "number",
-            title: "New Loan",
-            minimum: 0,
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
-          },
+      // // Balance Sheet Section
+      // balanceSheet: {
+      //   type: "object",
+      //   title: "Balance Sheet",
+      //   ui: { widget: "card", collapsible: true },
+      //   properties: {
+      //     // Liabilities
+      //     capitalAccount: {
+      //       type: "number",
+      //       title: "Capital Account",
+      //       minimum: 0,
+      //       formatter: {
+      //         useIndianFormat: true,
+      //         locale: "en-IN",
+      //         maxDecimalPlaces: 2,
+      //         minDecimalPlaces: 0,
+      //       },
+      //     },
+      //     sundryCreditors: {
+      //       type: "number",
+      //       title: "Sundry Creditors",
+      //       minimum: 0,
+      //       formatter: {
+      //         useIndianFormat: true,
+      //         locale: "en-IN",
+      //         maxDecimalPlaces: 2,
+      //         minDecimalPlaces: 0,
+      //       },
+      //     },
+      //     provisions: {
+      //       type: "number",
+      //       title: "Provisions",
+      //       minimum: 0,
+      //       formatter: {
+      //         useIndianFormat: true,
+      //         locale: "en-IN",
+      //         maxDecimalPlaces: 2,
+      //         minDecimalPlaces: 0,
+      //       },
+      //     },
+      //     auditPayable: {
+      //       type: "number",
+      //       title: "Audit Payable",
+      //       minimum: 0,
+      //       formatter: {
+      //         useIndianFormat: true,
+      //         locale: "en-IN",
+      //         maxDecimalPlaces: 2,
+      //         minDecimalPlaces: 0,
+      //       },
+      //     },
+      //     accountantFees: {
+      //       type: "number",
+      //       title: "Accountant Fees",
+      //       minimum: 0,
+      //       formatter: {
+      //         useIndianFormat: true,
+      //         locale: "en-IN",
+      //         maxDecimalPlaces: 2,
+      //         minDecimalPlaces: 0,
+      //       },
+      //     },
+      //     newLoan: {
+      //       type: "number",
+      //       title: "New Loan",
+      //       minimum: 0,
+      //       formatter: {
+      //         useIndianFormat: true,
+      //         locale: "en-IN",
+      //         maxDecimalPlaces: 2,
+      //         minDecimalPlaces: 0,
+      //       },
+      //     },
 
-          // Assets - Loans and Advances
-          loansAndAdvances: {
-            type: "number",
-            title: "Loans and Advances",
-            minimum: 0,
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
-          },
+      //     // Assets - Loans and Advances
+      //     loansAndAdvances: {
+      //       type: "number",
+      //       title: "Loans and Advances",
+      //       minimum: 0,
+      //       formatter: {
+      //         useIndianFormat: true,
+      //         locale: "en-IN",
+      //         maxDecimalPlaces: 2,
+      //         minDecimalPlaces: 0,
+      //       },
+      //     },
 
-          // Assets - Current Assets
-          currentAssets: {
-            type: "object",
-            title: "Current Assets",
-            properties: {
-              prepaidInsurance: {
-                type: "number",
-                title: "Prepaid Insurance",
-                minimum: 0,
-                formatter: {
-                  useIndianFormat: true,
-                  locale: "en-IN",
-                  maxDecimalPlaces: 2,
-                  minDecimalPlaces: 0,
-                },
-              },
-              closingStock: {
-                type: "number",
-                title: "Closing Stock",
-                minimum: 0,
-                formatter: {
-                  useIndianFormat: true,
-                  locale: "en-IN",
-                  maxDecimalPlaces: 2,
-                  minDecimalPlaces: 0,
-                },
-              },
-              sundryDebtors: {
-                type: "number",
-                title: "Sundry Debtors",
-                minimum: 0,
-                formatter: {
-                  useIndianFormat: true,
-                  locale: "en-IN",
-                  maxDecimalPlaces: 2,
-                  minDecimalPlaces: 0,
-                },
-              },
-            },
-          },
+      //     // Assets - Current Assets
+      //     currentAssets: {
+      //       type: "object",
+      //       title: "Current Assets",
+      //       properties: {
+      //         prepaidInsurance: {
+      //           type: "number",
+      //           title: "Prepaid Insurance",
+      //           minimum: 0,
+      //           formatter: {
+      //             useIndianFormat: true,
+      //             locale: "en-IN",
+      //             maxDecimalPlaces: 2,
+      //             minDecimalPlaces: 0,
+      //           },
+      //         },
+      //         closingStock: {
+      //           type: "number",
+      //           title: "Closing Stock",
+      //           minimum: 0,
+      //           formatter: {
+      //             useIndianFormat: true,
+      //             locale: "en-IN",
+      //             maxDecimalPlaces: 2,
+      //             minDecimalPlaces: 0,
+      //           },
+      //         },
+      //         sundryDebtors: {
+      //           type: "number",
+      //           title: "Sundry Debtors",
+      //           minimum: 0,
+      //           formatter: {
+      //             useIndianFormat: true,
+      //             locale: "en-IN",
+      //             maxDecimalPlaces: 2,
+      //             minDecimalPlaces: 0,
+      //           },
+      //         },
+      //       },
+      //     },
 
-          // Other Assets
-          gstRefund: {
-            type: "number",
-            title: "GST Refund",
-            minimum: 0,
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
-          },
-          gstSetOff: {
-            type: "number",
-            title: "GST Set Off",
-            minimum: 0,
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
-          },
-          dcbBank: {
-            type: "number",
-            title: "DCB Bank",
-            minimum: 0,
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
-          },
-          cashInHand: {
-            type: "number",
-            title: "Cash in Hand",
-            minimum: 0,
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
-          },
-          additionalProperty: {
-            type: "number",
-            title: "Additional Property",
-            minimum: 0,
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
-          },
-        },
-      },
+      //     // Other Assets
+      //     gstRefund: {
+      //       type: "number",
+      //       title: "GST Refund",
+      //       minimum: 0,
+      //       formatter: {
+      //         useIndianFormat: true,
+      //         locale: "en-IN",
+      //         maxDecimalPlaces: 2,
+      //         minDecimalPlaces: 0,
+      //       },
+      //     },
+      //     gstSetOff: {
+      //       type: "number",
+      //       title: "GST Set Off",
+      //       minimum: 0,
+      //       formatter: {
+      //         useIndianFormat: true,
+      //         locale: "en-IN",
+      //         maxDecimalPlaces: 2,
+      //         minDecimalPlaces: 0,
+      //       },
+      //     },
+      //     dcbBank: {
+      //       type: "number",
+      //       title: "DCB Bank",
+      //       minimum: 0,
+      //       formatter: {
+      //         useIndianFormat: true,
+      //         locale: "en-IN",
+      //         maxDecimalPlaces: 2,
+      //         minDecimalPlaces: 0,
+      //       },
+      //     },
+      //     cashInHand: {
+      //       type: "number",
+      //       title: "Cash in Hand",
+      //       minimum: 0,
+      //       formatter: {
+      //         useIndianFormat: true,
+      //         locale: "en-IN",
+      //         maxDecimalPlaces: 2,
+      //         minDecimalPlaces: 0,
+      //       },
+      //     },
+      //     additionalProperty: {
+      //       type: "number",
+      //       title: "Additional Property",
+      //       minimum: 0,
+      //       formatter: {
+      //         useIndianFormat: true,
+      //         locale: "en-IN",
+      //         maxDecimalPlaces: 2,
+      //         minDecimalPlaces: 0,
+      //       },
+      //     },
+      //   },
+      // },
 
       // Payment Calculations
       totalPayments: {

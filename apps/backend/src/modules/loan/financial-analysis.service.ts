@@ -793,6 +793,9 @@ export class FinancialAnalysisTemplatesService {
       { width: 20 }, // F - Previous Year Actuals
       { width: 20 }, // G - This Year Actuals
       { width: 15 }, // H - Estimated
+      { width: 10 }, // I - Empty
+      { width: 25 }, // J - Monthly Calculations / Margin Percentages
+      { width: 25 }, // K - Values
     ];
 
     // Helper function to get value safely
@@ -911,7 +914,7 @@ export class FinancialAnalysisTemplatesService {
 
     // Opening Stock (Left)
     addDataRow(
-      "To Opening Stock",
+      "Opening Stock",
       getValue("openingStock_2023"),
       getValue("openingStock_2024"),
       getValue("openingStockEstimated"),
@@ -927,7 +930,7 @@ export class FinancialAnalysisTemplatesService {
       "",
       "",
       "",
-      "By Sales",
+      "Sales",
       getValue("sales_2023"),
       getValue("sales_2024"),
       getValue("salesEstimated")
@@ -935,7 +938,7 @@ export class FinancialAnalysisTemplatesService {
 
     // Purchases (Left)
     addDataRow(
-      "To Purchases",
+      "Purchases",
       getValue("purchases_2023"),
       getValue("purchases_2024"),
       getValue("purchasesEstimated"),
@@ -951,7 +954,7 @@ export class FinancialAnalysisTemplatesService {
       "",
       "",
       "",
-      "To Majuri Charges",
+      "Majuri Charges",
       getValue("majuriCharges_2023"),
       getValue("majuriCharges_2024"),
       getValue("majuriChargesEstimated")
@@ -964,7 +967,7 @@ export class FinancialAnalysisTemplatesService {
       "",
       "",
       "",
-      "By Closing Stock",
+      "Closing Stock",
       getValue("closingStock_2023"),
       getValue("closingStock_2024"),
       getValue("closingStockEstimated")
@@ -972,7 +975,7 @@ export class FinancialAnalysisTemplatesService {
 
     // Gas & Liquid Items (Left)
     addDataRow(
-      "To Gas & Liquid Items",
+      "Gas & Liquid Items",
       getValue("gasLiquidItems_2023"),
       getValue("gasLiquidItems_2024"),
       getValue("gasLiquidItemsEstimated"),
@@ -984,7 +987,7 @@ export class FinancialAnalysisTemplatesService {
 
     // Gross Profit (Left)
     addDataRow(
-      "To Gross Profit",
+      "Gross Profit",
       getValue("grossProfit_2023"),
       getValue("grossProfit_2024"),
       getValue("grossProfitEstimated"),
@@ -1000,11 +1003,11 @@ export class FinancialAnalysisTemplatesService {
 
     // Indirect Expenses (Left side)
     addDataRow(
-      "To Salaries",
+      "Salaries",
       getValue("salaries_2023"),
       getValue("salaries_2024"),
       getValue("salariesEstimated"),
-     "By Gross Profit",
+     "Gross Profit",
       getValue("grossProfit_2023"),
       getValue("grossProfit_2024"),
       getValue("grossProfitEstimated")
@@ -1012,7 +1015,7 @@ export class FinancialAnalysisTemplatesService {
  
 
     addDataRow(
-      "To Bonus",
+      "Bonus",
       getValue("bonus_2023"),
       getValue("bonus_2024"),
       getValue("bonusEstimated"),
@@ -1023,7 +1026,7 @@ export class FinancialAnalysisTemplatesService {
     );
 
     addDataRow(
-      "To Shop Rents",
+      "Shop Rents",
       getValue("shopRents_2023"),
       getValue("shopRents_2024"),
       getValue("shopRentsEstimated"),
@@ -1034,7 +1037,7 @@ export class FinancialAnalysisTemplatesService {
     );
 
     addDataRow(
-      "To Electricity Charges",
+      "Electricity Charges",
       getValue("electricityCharges_2023"),
       getValue("electricityCharges_2024"),
       getValue("electricityChargesEstimated"),
@@ -1045,7 +1048,7 @@ export class FinancialAnalysisTemplatesService {
     );
 
     addDataRow(
-      "To Coal, Gas & Liquid",
+      "Coal, Gas & Liquid",
       getValue("coalGasLiquid_2023"),
       getValue("coalGasLiquid_2024"),
       getValue("coalGasLiquidEstimated"),
@@ -1056,7 +1059,7 @@ export class FinancialAnalysisTemplatesService {
     );
 
     addDataRow(
-      "To Spares & Machinery",
+      "Spares & Machinery",
       getValue("sparesMachinery_2023"),
       getValue("sparesMachinery_2024"),
       getValue("sparesMachineryEstimated"),
@@ -1067,7 +1070,7 @@ export class FinancialAnalysisTemplatesService {
     );
 
     addDataRow(
-      "To Bank Interest",
+      "Bank Interest",
       getValue("bankInterest_2023"),
       getValue("bankInterest_2024"),
       getValue("bankInterestEstimated"),
@@ -1078,7 +1081,7 @@ export class FinancialAnalysisTemplatesService {
     );
 
     addDataRow(
-      "To Bank Charges",
+      "Bank Charges",
       getValue("bankCharges_2023"),
       getValue("bankCharges_2024"),
       getValue("bankChargesEstimated"),
@@ -1089,7 +1092,7 @@ export class FinancialAnalysisTemplatesService {
     );
 
     addDataRow(
-      "To Finance Charges/Professional Tax",
+      "Finance Charges/Professional Tax",
       getValue("financeCharges_2023"),
       getValue("financeCharges_2024"),
       getValue("financeChargesEstimated"),
@@ -1100,7 +1103,7 @@ export class FinancialAnalysisTemplatesService {
     );
 
     addDataRow(
-      "To GST Late Fee",
+      "GST Late Fee",
       getValue("gstLateFee_2023"),
       getValue("gstLateFee_2024"),
       getValue("gstLateFeeEstimated"),
@@ -1111,7 +1114,7 @@ export class FinancialAnalysisTemplatesService {
     );
 
     addDataRow(
-      "To Auditor Fee",
+      "Auditor Fee",
       getValue("auditorFee_2023"),
       getValue("auditorFee_2024"),
       getValue("auditorFeeEstimated"),
@@ -1122,7 +1125,7 @@ export class FinancialAnalysisTemplatesService {
     );
 
     addDataRow(
-      "To Telephone Charges",
+      "Telephone Charges",
       getValue("telephoneCharges_2023"),
       getValue("telephoneCharges_2024"),
       getValue("telephoneChargesEstimated"),
@@ -1133,7 +1136,7 @@ export class FinancialAnalysisTemplatesService {
     );
 
     addDataRow(
-      "To Travelling Exp/Transport",
+      "Travelling Exp/Transport",
       getValue("travellingExp_2023"),
       getValue("travellingExp_2024"),
       getValue("travellingExpEstimated"),
@@ -1144,7 +1147,7 @@ export class FinancialAnalysisTemplatesService {
     );
 
     addDataRow(
-      "To Vehicle Maintenance & Machinery",
+      "Vehicle Maintenance & Machinery",
       getValue("vehicleMaintenance_2023"),
       getValue("vehicleMaintenance_2024"),
       getValue("vehicleMaintenanceEstimated"),
@@ -1155,7 +1158,7 @@ export class FinancialAnalysisTemplatesService {
     );
 
     addDataRow(
-      "To Depreciation",
+      "Depreciation",
       getValue("depreciation_2023"),
       getValue("depreciation_2024"),
       getValue("depreciationEstimated"),
@@ -1166,7 +1169,7 @@ export class FinancialAnalysisTemplatesService {
     );
 
     addDataRow(
-      "To Interest",
+      "Interest",
       getValue("interest_2023"),
       getValue("interest_2024"),
       getValue("interestEstimated"),
@@ -1177,7 +1180,7 @@ export class FinancialAnalysisTemplatesService {
     );
 
     addDataRow(
-      "To Sadar",
+      "Sadar",
       getValue("sadar_2023"),
       getValue("sadar_2024"),
       getValue("sadarEstimated"),
@@ -1192,7 +1195,7 @@ export class FinancialAnalysisTemplatesService {
 
     // Net Profit (Right)
     addDataRow(
-      "To Net Profit",
+      "Net Profit",
       getValue("netProfit_2023"),
       getValue("netProfit_2024"),
       getValue("netProfitEstimated"),
@@ -1216,135 +1219,351 @@ export class FinancialAnalysisTemplatesService {
       true
     );
 
-    // Empty rows before monthly calculations
-    worksheet.addRow([]);
-    worksheet.addRow([]);
-
-    // Monthly Calculations Section
-    const monthlyHeaderRow = worksheet.addRow([
-      "Monthly Calculations",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-    ]);
-    const monthlyHeaderRowNum = monthlyHeaderRow.number;
-    worksheet.mergeCells(`A${monthlyHeaderRowNum}:B${monthlyHeaderRowNum}`);
-    monthlyHeaderRow.getCell(1).font = { bold: true, size: 12 };
-    monthlyHeaderRow.getCell(1).alignment = { horizontal: "center" };
-    monthlyHeaderRow.getCell(1).fill = {
+    // Monthly Calculations Section (Right side - starting from J8)
+    const monthlyHeaderRow = worksheet.getRow(8);
+    monthlyHeaderRow.getCell(10).value = "Monthly Calculations";
+    worksheet.mergeCells(`J8:K8`);
+    monthlyHeaderRow.getCell(10).font = { bold: true, size: 12 };
+    monthlyHeaderRow.getCell(10).alignment = { horizontal: "center" };
+    monthlyHeaderRow.getCell(10).fill = {
       type: "pattern",
       pattern: "solid",
       fgColor: { argb: "FFD9E1F2" },
     };
-    this.applyBorder(monthlyHeaderRow.getCell(1));
+    this.applyBorder(monthlyHeaderRow.getCell(10));
 
-    const monthlyDataRow = worksheet.addRow([
-      "Monthly Turnover",
-      getValue("monthlyTurnover"),
-    ]);
+    const monthlyDataRow = worksheet.getRow(9);
+    monthlyDataRow.getCell(10).value = "Monthly Turnover";
+    monthlyDataRow.getCell(11).value = getValue("monthlyTurnover");
+    monthlyDataRow.getCell(10).font = { bold: true };
+    this.applyBorder(monthlyDataRow.getCell(10));
+    this.applyBorder(monthlyDataRow.getCell(11));
+    monthlyDataRow.getCell(11).alignment = { horizontal: "right" };
+    if (monthlyDataRow.getCell(11).value && typeof monthlyDataRow.getCell(11).value === "number") {
+      monthlyDataRow.getCell(11).numFmt = "#,##0.00";
+    }
 
-    monthlyDataRow.eachCell((cell, colNumber) => {
-      if (colNumber === 1 || colNumber === 6) {
-        cell.font = { bold: true };
-      }
-      this.applyBorder(cell);
-      if (colNumber === 2 || colNumber === 7) {
-        cell.alignment = { horizontal: "right" };
-        if (cell.value && typeof cell.value === "number") {
-          cell.numFmt = "#,##0.00";
-        }
-      }
-    });
+    const monthlyNetProfitRow = worksheet.getRow(10);
+    monthlyNetProfitRow.getCell(10).value = "Monthly Net Profit";
+    monthlyNetProfitRow.getCell(11).value = getValue("monthlyNetProfit");
+    monthlyNetProfitRow.getCell(10).font = { bold: true };
+    this.applyBorder(monthlyNetProfitRow.getCell(10));
+    this.applyBorder(monthlyNetProfitRow.getCell(11));
+    monthlyNetProfitRow.getCell(11).alignment = { horizontal: "right" };
+    if (monthlyNetProfitRow.getCell(11).value && typeof monthlyNetProfitRow.getCell(11).value === "number") {
+      monthlyNetProfitRow.getCell(11).numFmt = "#,##0.00";
+    }
 
-    const monthlyNetProfitRow = worksheet.addRow([
-      "Monthly Net Profit",
-      getValue("monthlyNetProfit"),
-    ]);
-    monthlyNetProfitRow.getCell(1).font = { bold: true };
-    monthlyNetProfitRow.eachCell((cell, colNumber) => {
-      this.applyBorder(cell);
-      if (colNumber === 2) {
-        cell.alignment = { horizontal: "right" };
-        if (cell.value && typeof cell.value === "number") {
-          cell.numFmt = "#,##0.00";
-        }
-      }
-    });
+    const monthlyPaymentsRow = worksheet.getRow(11);
+    monthlyPaymentsRow.getCell(10).value = "Monthly Payments";
+    monthlyPaymentsRow.getCell(11).value = getValue("monthlyPayments");
+    monthlyPaymentsRow.getCell(10).font = { bold: true };
+    this.applyBorder(monthlyPaymentsRow.getCell(10));
+    this.applyBorder(monthlyPaymentsRow.getCell(11));
+    monthlyPaymentsRow.getCell(11).alignment = { horizontal: "right" };
+    if (monthlyPaymentsRow.getCell(11).value && typeof monthlyPaymentsRow.getCell(11).value === "number") {
+      monthlyPaymentsRow.getCell(11).numFmt = "#,##0.00";
+    }
 
-    const monthlyPaymentsRow = worksheet.addRow([
-      "Monthly Payments",
-      getValue("monthlyPayments"),
-    ]);
-    monthlyPaymentsRow.getCell(1).font = { bold: true };
-    monthlyPaymentsRow.eachCell((cell, colNumber) => {
-      this.applyBorder(cell);
-      if (colNumber === 2) {
-        cell.alignment = { horizontal: "right" };
-        if (cell.value && typeof cell.value === "number") {
-          cell.numFmt = "#,##0.00";
-        }
-      }
-    });
-
-    // Empty rows before margin percentages
-    worksheet.addRow([]);
-
-    // Margin Percentages Section
-    const marginHeaderRow = worksheet.addRow([
-      "Margin Percentages",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-    ]);
-    const marginHeaderRowNum = marginHeaderRow.number;
-    worksheet.mergeCells(`A${marginHeaderRowNum}:B${marginHeaderRowNum}`);
-    marginHeaderRow.getCell(1).font = { bold: true, size: 12 };
-    marginHeaderRow.getCell(1).alignment = { horizontal: "center" };
-    marginHeaderRow.getCell(1).fill = {
+    // Margin Percentages Section (Right side - continuing the flow)
+    const marginHeaderRow = worksheet.getRow(12);
+    marginHeaderRow.getCell(10).value = "Margin Percentages";
+    worksheet.mergeCells(`J12:K12`);
+    marginHeaderRow.getCell(10).font = { bold: true, size: 12 };
+    marginHeaderRow.getCell(10).alignment = { horizontal: "center" };
+    marginHeaderRow.getCell(10).fill = {
       type: "pattern",
       pattern: "solid",
       fgColor: { argb: "FFD9E1F2" },
     };
-    this.applyBorder(marginHeaderRow.getCell(1));
+    this.applyBorder(marginHeaderRow.getCell(10));
 
-    const marginDataRow = worksheet.addRow([
-      "Gross Profit %",
-      getValue("gpPercentage"),
+    const marginDataRow = worksheet.getRow(13);
+    marginDataRow.getCell(10).value = "Gross Profit %";
+    marginDataRow.getCell(11).value = getValue("gpPercentage");
+    marginDataRow.getCell(10).font = { bold: true };
+    this.applyBorder(marginDataRow.getCell(10));
+    this.applyBorder(marginDataRow.getCell(11));
+    marginDataRow.getCell(11).alignment = { horizontal: "right" };
+    if (marginDataRow.getCell(11).value && typeof marginDataRow.getCell(11).value === "number") {
+      marginDataRow.getCell(11).numFmt = "0.00";
+    }
+    
+    const marginNetProfitRow = worksheet.getRow(14);
+    marginNetProfitRow.getCell(10).value = "Net Profit %";
+    marginNetProfitRow.getCell(11).value = getValue("npPercentage");
+    marginNetProfitRow.getCell(10).font = { bold: true };
+    this.applyBorder(marginNetProfitRow.getCell(10));
+    this.applyBorder(marginNetProfitRow.getCell(11));
+    marginNetProfitRow.getCell(11).alignment = { horizontal: "right" };
+    if (marginNetProfitRow.getCell(11).value && typeof marginNetProfitRow.getCell(11).value === "number") {
+      marginNetProfitRow.getCell(11).numFmt = "0.00";
+    }
+
+    // Empty rows before balance sheet
+    worksheet.addRow([]);
+    worksheet.addRow([]);
+
+    // Balance Sheet Section
+    // Helper function to get balance sheet value safely
+    const getBalanceSheetValue = (side: "left" | "right", key: string): any => {
+      if (!key) return "";
+      const balanceSheet = side === "left" 
+        ? financialAnalysis.balanceSheetleft 
+        : financialAnalysis.balanceSheetright;
+      if (!balanceSheet) return "";
+      const value = balanceSheet[key];
+      if (value === null || value === undefined || value === "") return "";
+      return value;
+    };
+
+    // Balance Sheet Header
+    const balanceSheetTitleRow = worksheet.addRow([
+      `ESTIMATED BALANCE SHEET AS ON 31.03.${this.getFinancialYearEndingYear()}`,
     ]);
-    marginDataRow.eachCell((cell, colNumber) => {
-      if (colNumber === 1 || colNumber === 6) {
-        cell.font = { bold: true };
-      }
+    worksheet.mergeCells(`A${balanceSheetTitleRow.number}:H${balanceSheetTitleRow.number}`);
+    balanceSheetTitleRow.font = { bold: true, size: 12 };
+    balanceSheetTitleRow.alignment = { horizontal: "center" };
+    balanceSheetTitleRow.height = 25;
+    balanceSheetTitleRow.eachCell((cell) => {
       this.applyBorder(cell);
-      if (colNumber === 2 || colNumber === 7) {
-        cell.alignment = { horizontal: "right" };
-        if (cell.value && typeof cell.value === "number") {
-          cell.numFmt = "0.00";
-        }
-      }
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFD9E1F2" },
+      };
     });
-    const marginNetProfitRow = worksheet.addRow([
-      "Net Profit %",
-      getValue("npPercentage"),
+    
+    // Balance Sheet Column Headers (same as financials)
+    const balanceSheetHeaderRow = worksheet.addRow([
+      "LIABILITIES",
+      `${this.getFinancialYearEndingYear() - 2} Actuals`,
+      `${this.getFinancialYearEndingYear() - 1} Actuals`,
+      "Estimated",
+      "ASSETS",
+      `${this.getFinancialYearEndingYear() - 2} Actuals`,
+      `${this.getFinancialYearEndingYear() - 1} Actuals`,
+      "Estimated",
     ]);
-    marginNetProfitRow.getCell(1).font = { bold: true };
-    marginNetProfitRow.eachCell((cell, colNumber) => {
+    balanceSheetHeaderRow.font = { bold: true };
+    balanceSheetHeaderRow.alignment = { horizontal: "center", vertical: "middle" };
+    balanceSheetHeaderRow.eachCell((cell) => {
       this.applyBorder(cell);
-      if (colNumber === 2) {
-        cell.alignment = { horizontal: "right" };
-        if (cell.value && typeof cell.value === "number") {
-          cell.numFmt = "0.00";
-        }
-      }
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFD9E1F2" },
+      };
     });
+
+    // Balance Sheet - Left and Right sides side by side
+    // Row 1: Capital (Left) and Cash on Hand (Right)
+    addDataRow(
+      "Capital",
+      getBalanceSheetValue("left", "capital_2023"),
+      getBalanceSheetValue("left", "capital_2024"),
+      getBalanceSheetValue("left", "capitalEstimated"),
+      "Cash on Hand",
+      getBalanceSheetValue("right", "cashOnHand_2023"),
+      getBalanceSheetValue("right", "cashOnHand_2024"),
+      getBalanceSheetValue("right", "cashOnHandEstimated")
+    );
+
+    // Row 2: SBI CC (Left) and Federal bank (Right)
+    addDataRow(
+      "SBI CC",
+      getBalanceSheetValue("left", "sbiCc_2023"),
+      getBalanceSheetValue("left", "sbiCc_2024"),
+      getBalanceSheetValue("left", "sbiCcEstimated"),
+      "Federal bank",
+      getBalanceSheetValue("right", "federalBank_2023"),
+      getBalanceSheetValue("right", "federalBank_2024"),
+      getBalanceSheetValue("right", "federalBankEstimated")
+    );
+
+    // Row 3: HDFC VL (Left) and SBH CA/HDFC CA (Right)
+    addDataRow(
+      "HDFC VL",
+      getBalanceSheetValue("left", "hdfcVl_2023"),
+      getBalanceSheetValue("left", "hdfcVl_2024"),
+      getBalanceSheetValue("left", "hdfcVlEstimated"),
+      "SBH CA/HDFC CA",
+      getBalanceSheetValue("right", "sbhCaHdfcCa_2023"),
+      getBalanceSheetValue("right", "sbhCaHdfcCa_2024"),
+      getBalanceSheetValue("right", "sbhCaHdfcCaEstimated")
+    );
+
+    // Row 4: Sundry Creditors (Left) and SBH SB/ HDFC SB (Right)
+    addDataRow(
+      "Sundry Creditors",
+      getBalanceSheetValue("left", "sundryCreditors_2023"),
+      getBalanceSheetValue("left", "sundryCreditors_2024"),
+      getBalanceSheetValue("left", "sundryCreditorsEstimated"),
+      "SBH SB/ HDFC SB",
+      getBalanceSheetValue("right", "sbhSbHdfcSb_2023"),
+      getBalanceSheetValue("right", "sbhSbHdfcSb_2024"),
+      getBalanceSheetValue("right", "sbhSbHdfcSbEstimated")
+    );
+
+    // Row 5: Prov Auditor Fee (Left) and KARNATAKA BANK (Right)
+    addDataRow(
+      "Prov Auditor Fee",
+      getBalanceSheetValue("left", "provAuditorFee_2023"),
+      getBalanceSheetValue("left", "provAuditorFee_2024"),
+      getBalanceSheetValue("left", "provAuditorFeeEstimated"),
+      "KARNATAKA BANK",
+      getBalanceSheetValue("right", "karnatakaBank_2023"),
+      getBalanceSheetValue("right", "karnatakaBank_2024"),
+      getBalanceSheetValue("right", "karnatakaBankEstimated")
+    );
+
+    // Row 6: Growth Score Loan (Left) and Furniture (Right)
+    addDataRow(
+      "Growth Score Loan",
+      getBalanceSheetValue("left", "growthScoreLoan_2023"),
+      getBalanceSheetValue("left", "growthScoreLoan_2024"),
+      getBalanceSheetValue("left", "growthScoreLoanEstimated"),
+      "Furniture",
+      getBalanceSheetValue("right", "furniture_2023"),
+      getBalanceSheetValue("right", "furniture_2024"),
+      getBalanceSheetValue("right", "furnitureEstimated")
+    );
+
+    // Row 7: Poonwala Fincorp (Left) and Ele. Weights & Measurements (Right)
+    addDataRow(
+      "Poonwala Fincorp",
+      getBalanceSheetValue("left", "poonwalaFincorp_2023"),
+      getBalanceSheetValue("left", "poonwalaFincorp_2024"),
+      getBalanceSheetValue("left", "poonwalaFincorpEstimated"),
+      "Measurements",
+      getBalanceSheetValue("right", "eleWeightsMeasurements_2023"),
+      getBalanceSheetValue("right", "eleWeightsMeasurements_2024"),
+      getBalanceSheetValue("right", "eleWeightsMeasurementsEstimated")
+    );
+
+    // Row 8: Lending Kart Loan (Left) and Machinery (Right)
+    addDataRow(
+      "Lending Kart Loan",
+      getBalanceSheetValue("left", "lendingKartLoan_2023"),
+      getBalanceSheetValue("left", "lendingKartLoan_2024"),
+      getBalanceSheetValue("left", "lendingKartLoanEstimated"),
+      "Machinery",
+      getBalanceSheetValue("right", "machinery_2023"),
+      getBalanceSheetValue("right", "machinery_2024"),
+      getBalanceSheetValue("right", "machineryEstimated")
+    );
+
+    // Row 9: TDS/TCS Payable (Left) and Car (Right)
+    addDataRow(
+      "TDS/TCS Payable",
+      getBalanceSheetValue("left", "tdsTcsPayable_2023"),
+      getBalanceSheetValue("left", "tdsTcsPayable_2024"),
+      getBalanceSheetValue("left", "tdsTcsPayableEstimated"),
+      "Car",
+      getBalanceSheetValue("right", "car_2023"),
+      getBalanceSheetValue("right", "car_2024"),
+      getBalanceSheetValue("right", "carEstimated")
+    );
+
+    // Row 10: Empty (Left) and Open Plots (Right) - Left side finished, continue with right
+    addDataRow(
+      "",
+      "",
+      "",
+      "",
+      "Open Plots",
+      getBalanceSheetValue("right", "openPlots_2023"),
+      getBalanceSheetValue("right", "openPlots_2024"),
+      getBalanceSheetValue("right", "openPlotsEstimated")
+    );
+
+    // Row 11: Empty (Left) and House Property (Right)
+    addDataRow(
+      "",
+      "",
+      "",
+      "",
+      "House Property",
+      getBalanceSheetValue("right", "houseProperty_2023"),
+      getBalanceSheetValue("right", "houseProperty_2024"),
+      getBalanceSheetValue("right", "housePropertyEstimated")
+    );
+
+    // Row 12: Empty (Left) and HouseConstruction (Right)
+    addDataRow(
+      "",
+      "",
+      "",
+      "",
+      "HouseConstruction",
+      getBalanceSheetValue("right", "houseConstruction_2023"),
+      getBalanceSheetValue("right", "houseConstruction_2024"),
+      getBalanceSheetValue("right", "houseConstructionEstimated")
+    );
+
+    // Row 13: Empty (Left) and Closing Stock (Right)
+    addDataRow(
+      "",
+      "",
+      "",
+      "",
+      "Closing Stock",
+      getBalanceSheetValue("right", "closingStock_2023"),
+      getBalanceSheetValue("right", "closingStock_2024"),
+      getBalanceSheetValue("right", "closingStockEstimated")
+    );
+
+    // Row 14: Empty (Left) and GST Receivable (Right)
+    addDataRow(
+      "",
+      "",
+      "",
+      "",
+      "GST Receivable",
+      getBalanceSheetValue("right", "gstReceivable_2023"),
+      getBalanceSheetValue("right", "gstReceivable_2024"),
+      getBalanceSheetValue("right", "gstReceivableEstimated")
+    );
+
+    // Row 15: Empty (Left) and Deposits (Right)
+    addDataRow(
+      "",
+      "",
+      "",
+      "",
+      "Deposits",
+      getBalanceSheetValue("right", "deposits_2023"),
+      getBalanceSheetValue("right", "deposits_2024"),
+      getBalanceSheetValue("right", "depositsEstimated")
+    );
+
+    // Row 16: Empty (Left) and Sundry Debtors (Right)
+    addDataRow(
+      "",
+      "",
+      "",
+      "",
+      "Sundry Debtors",
+      getBalanceSheetValue("right", "sundryDebtors_2023"),
+      getBalanceSheetValue("right", "sundryDebtors_2024"),
+      getBalanceSheetValue("right", "sundryDebtorsEstimated")
+    );
+
+    // Empty row before totals
+    addDataRow("", "", "", "", "", "", "", "");
+
+    // Totals row - both side by side
+    addDataRow(
+      "Total",
+      getBalanceSheetValue("left", "total_2023"),
+      getBalanceSheetValue("left", "total_2024"),
+      getBalanceSheetValue("left", "totalEstimated"),
+      "Total",
+      getBalanceSheetValue("right", "total_2023"),
+      getBalanceSheetValue("right", "total_2024"),
+      getBalanceSheetValue("right", "totalEstimated"),
+      true
+    );
 
     await this.addSignature(workbook, worksheet);
     return await this.finalizeWorkbook(workbook, loan.id);
@@ -1618,160 +1837,160 @@ export class FinancialAnalysisTemplatesService {
     worksheet.addRow([]);
     worksheet.addRow([]);
 
-    // Balance Sheet title directly above balance sheet table
-    const balanceSheetTitleRowNumber = worksheet.lastRow.number + 1;
-    worksheet.getCell(`A${balanceSheetTitleRowNumber}`).value =
-      `Balance Sheet as on 31st March 2024`;
-    worksheet.mergeCells(
-      `A${balanceSheetTitleRowNumber}:D${balanceSheetTitleRowNumber}`
-    );
-    worksheet.getCell(`A${balanceSheetTitleRowNumber}`).font = {
-      bold: true,
-      size: 12,
-    };
-    worksheet.getCell(`A${balanceSheetTitleRowNumber}`).alignment = {
-      horizontal: "center",
-    };
-
-    const balanceSheetPartnerRowNumber = balanceSheetTitleRowNumber + 1;
-    worksheet.getCell(`A${balanceSheetPartnerRowNumber}`).value = `${
-      financialAnalysis.partnersNames || "XXX"
-    }`;
-    worksheet.mergeCells(
-      `A${balanceSheetPartnerRowNumber}:D${balanceSheetPartnerRowNumber}`
-    );
-    worksheet.getCell(`A${balanceSheetPartnerRowNumber}`).font = { bold: true };
-    worksheet.getCell(`A${balanceSheetPartnerRowNumber}`).alignment = {
-      horizontal: "center",
-    };
-
-    // Balance Sheet Section - Liabilities (Left) and Assets (Right)
-
-    // Balance Sheet Headers
-    const balanceSheetHeaderRow = worksheet.addRow([
-      "LIABILITIES",
-      "Estimated",
-      "ASSETS",
-      "Estimated",
-    ]);
-    balanceSheetHeaderRow.font = { bold: true, size: 12 };
-    balanceSheetHeaderRow.alignment = {
-      horizontal: "center",
-      vertical: "middle",
-    };
-    balanceSheetHeaderRow.eachCell((cell, colNumber) => {
-      if (colNumber) {
-        this.applyBorder(cell);
-        cell.fill = {
-          type: "pattern",
-          pattern: "solid",
-          fgColor: { argb: "FFD9E1F2" },
-        };
-      }
-    });
+    // // Balance Sheet title directly above balance sheet table
+    // const balanceSheetTitleRowNumber = worksheet.lastRow.number + 1;
+    // worksheet.getCell(`A${balanceSheetTitleRowNumber}`).value =
+    //   `Balance Sheet as on 31st March 2024`;
     // worksheet.mergeCells(
-    //   `A${balanceSheetHeaderRow.number}:E${balanceSheetHeaderRow.number}`
+    //   `A${balanceSheetTitleRowNumber}:D${balanceSheetTitleRowNumber}`
     // );
+    // worksheet.getCell(`A${balanceSheetTitleRowNumber}`).font = {
+    //   bold: true,
+    //   size: 12,
+    // };
+    // worksheet.getCell(`A${balanceSheetTitleRowNumber}`).alignment = {
+    //   horizontal: "center",
+    // };
+
+    // const balanceSheetPartnerRowNumber = balanceSheetTitleRowNumber + 1;
+    // worksheet.getCell(`A${balanceSheetPartnerRowNumber}`).value = `${
+    //   financialAnalysis.partnersNames || "XXX"
+    // }`;
     // worksheet.mergeCells(
-    //   `F${balanceSheetHeaderRow.number}:J${balanceSheetHeaderRow.number}`
+    //   `A${balanceSheetPartnerRowNumber}:D${balanceSheetPartnerRowNumber}`
+    // );
+    // worksheet.getCell(`A${balanceSheetPartnerRowNumber}`).font = { bold: true };
+    // worksheet.getCell(`A${balanceSheetPartnerRowNumber}`).alignment = {
+    //   horizontal: "center",
+    // };
+
+    // // Balance Sheet Section - Liabilities (Left) and Assets (Right)
+
+    // // Balance Sheet Headers
+    // const balanceSheetHeaderRow = worksheet.addRow([
+    //   "LIABILITIES",
+    //   "Estimated",
+    //   "ASSETS",
+    //   "Estimated",
+    // ]);
+    // balanceSheetHeaderRow.font = { bold: true, size: 12 };
+    // balanceSheetHeaderRow.alignment = {
+    //   horizontal: "center",
+    //   vertical: "middle",
+    // };
+    // balanceSheetHeaderRow.eachCell((cell, colNumber) => {
+    //   if (colNumber) {
+    //     this.applyBorder(cell);
+    //     cell.fill = {
+    //       type: "pattern",
+    //       pattern: "solid",
+    //       fgColor: { argb: "FFD9E1F2" },
+    //     };
+    //   }
+    // });
+    // // worksheet.mergeCells(
+    // //   `A${balanceSheetHeaderRow.number}:E${balanceSheetHeaderRow.number}`
+    // // );
+    // // worksheet.mergeCells(
+    // //   `F${balanceSheetHeaderRow.number}:J${balanceSheetHeaderRow.number}`
+    // // );
+
+    // // Liabilities (Left side)
+    // addDataRow(
+    //   "Capital Account",
+    //   getBalanceSheetValue("capitalAccount"),
+    //   "",
+    //   ""
     // );
 
-    // Liabilities (Left side)
-    addDataRow(
-      "Capital Account",
-      getBalanceSheetValue("capitalAccount"),
-      "",
-      ""
-    );
+    // addDataRow(
+    //   "Sundry Creditors",
+    //   getBalanceSheetValue("sundryCreditors"),
+    //   "",
+    //   ""
+    // );
 
-    addDataRow(
-      "Sundry Creditors",
-      getBalanceSheetValue("sundryCreditors"),
-      "",
-      ""
-    );
+    // addDataRow(
+    //   "Provisions",
+    //   getBalanceSheetValue("provisions"),
+    //   "",
+    //   ""
+    // );
 
-    addDataRow(
-      "Provisions",
-      getBalanceSheetValue("provisions"),
-      "",
-      ""
-    );
+    // addDataRow(
+    //   "Audit Payable",
+    //   getBalanceSheetValue("auditPayable"),
+    //   "",
+    //   ""
+    // );
 
-    addDataRow(
-      "Audit Payable",
-      getBalanceSheetValue("auditPayable"),
-      "",
-      ""
-    );
+    // addDataRow(
+    //   "Accountant Fees",
+    //   getBalanceSheetValue("accountantFees"),
+    //   "",
+    //   ""
+    // );
 
-    addDataRow(
-      "Accountant Fees",
-      getBalanceSheetValue("accountantFees"),
-      "",
-      ""
-    );
+    // addDataRow(
+    //   "New Loan",
+    //   getBalanceSheetValue("newLoan"),
+    //   "",
+    //   ""
+    // );
 
-    addDataRow(
-      "New Loan",
-      getBalanceSheetValue("newLoan"),
-      "",
-      ""
-    );
+    // // Assets (Right side)
+    // addDataRow(
+    //   "",
+    //   "",
+    //   "Loans and Advances",
+    //   getBalanceSheetValue("loansAndAdvances")
+    // );
 
-    // Assets (Right side)
-    addDataRow(
-      "",
-      "",
-      "Loans and Advances",
-      getBalanceSheetValue("loansAndAdvances")
-    );
+    // addDataRow(
+    //   "",
+    //   "",
+    //   "Current Assets",
+    //   getBalanceSheetValue("currentAssets")
+    // );
 
-    addDataRow(
-      "",
-      "",
-      "Current Assets",
-      getBalanceSheetValue("currentAssets")
-    );
+    // addDataRow(
+    //   "",
+    //   "",
+    //   "GST Refund",
+    //   getBalanceSheetValue("gstRefund")
+    // );
 
-    addDataRow(
-      "",
-      "",
-      "GST Refund",
-      getBalanceSheetValue("gstRefund")
-    );
+    // addDataRow(
+    //   "",
+    //   "",
+    //   "GST Set Off",
+    //   getBalanceSheetValue("gstSetOff")
+    // );
 
-    addDataRow(
-      "",
-      "",
-      "GST Set Off",
-      getBalanceSheetValue("gstSetOff")
-    );
+    // addDataRow(
+    //   "",
+    //   "",
+    //   "DCB Bank",
+    //   getBalanceSheetValue("dcbBank")
+    // );
 
-    addDataRow(
-      "",
-      "",
-      "DCB Bank",
-      getBalanceSheetValue("dcbBank")
-    );
+    // addDataRow(
+    //   "",
+    //   "",
+    //   "Cash in Hand",
+    //   getBalanceSheetValue("cashInHand")
+    // );
 
-    addDataRow(
-      "",
-      "",
-      "Cash in Hand",
-      getBalanceSheetValue("cashInHand")
-    );
+    // addDataRow(
+    //   "",
+    //   "",
+    //   "Additional Property",
+    //   getBalanceSheetValue("additionalProperty")
+    // );
 
-    addDataRow(
-      "",
-      "",
-      "Additional Property",
-      getBalanceSheetValue("additionalProperty")
-    );
-
-    // Empty rows before payment calculations
-    worksheet.addRow([]);
-    worksheet.addRow([]);
+    // // Empty rows before payment calculations
+    // worksheet.addRow([]);
+    // worksheet.addRow([]);
 
     // Payment Calculations Section
     const paymentHeaderRow = worksheet.addRow([
