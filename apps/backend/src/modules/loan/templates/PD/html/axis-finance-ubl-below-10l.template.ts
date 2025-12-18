@@ -290,7 +290,7 @@ export const axisFinanceUBLBelow10lTemplate = (
         <td style="${labelCellStyle}">Type of loan applied</td>
         <td style="${cellStyle}">${loanapplied?.loanType || "Not provided"}</td>
         <td style="${labelCellStyle}">Loan Purpose</td>
-        <td style="${cellStyle}">${loanapplied?.loanPurpose || "Not provided"}</td>
+        <td style="${cellStyle}">${loanapplied?.purposeOfLoan || "Not provided"}</td>
       </tr>
       <tr>
         <td style="${labelCellStyle}">Loan Amount & Affordable EMI</td>

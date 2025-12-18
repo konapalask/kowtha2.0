@@ -377,7 +377,7 @@ export const axisFinanceUblBelow10lSchema = {
         type: "object",
         properties: {
           loanType: { type: "string", title: "Type of Loan" },
-          loanPurpose: { type: "string", title: "Loan Purpose" },
+          purposeOfLoan: { type: "string", title: "Loan Purpose", readOnly: true },
           loanAmount: {
             type: "number",
             title: "Loan Amount",
@@ -387,6 +387,7 @@ export const axisFinanceUblBelow10lSchema = {
               maxDecimalPlaces: 2,
               minDecimalPlaces: 0,
             },
+            readOnly: true,
           },
           affordableEMI: {
             type: "number",
