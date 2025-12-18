@@ -1164,59 +1164,45 @@ export const BusinessVerificationDetails: React.FC<
 
   const handleViewDocument = async (item: any) => {
     try {
-      const fileName = item.fileName || item.s3ImageUrl.split("/").pop() || "document";
-      
-      setPdfLoading(true);
-      setPdfViewerVisible(true);
-      setCurrentPdfFileName(fileName);
-      
       const presignedUrl = await getS3ImageUrl(item.s3ImageUrl);
       
       if (!presignedUrl) {
         message.error("Failed to load document URL. Please try again.");
-        setPdfViewerVisible(false);
-        setPdfLoading(false);
         return;
       }
       
-      try {
-        const response = await fetch(presignedUrl, {
-          method: 'GET',
-          mode: 'cors',
-        });
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const blob = await response.blob();
-        const blobUrl = window.URL.createObjectURL(blob);
-        setCurrentPdfUrl(blobUrl);
-        setPdfLoading(false);
-      } catch (fetchError) {
-        console.error("Error fetching PDF blob:", fetchError);
-        setCurrentPdfUrl(presignedUrl);
-        setPdfLoading(false);
-        message.warning("PDF may not display properly. Use 'Open in New Tab' or 'Download' if needed.");
-      }
+      window.open(presignedUrl, '_blank', 'noopener,noreferrer');
     } catch (error) {
       console.error("Error loading document:", error);
       message.error("Failed to load document. Please try again.");
-      setPdfViewerVisible(false);
-      setPdfLoading(false);
-      setCurrentPdfUrl(null);
     }
   };
 
   const handleDownloadDocument = async (item: any) => {
     try {
-      const url = await getS3ImageUrl(item.s3ImageUrl);
+      const presignedUrl = await getS3ImageUrl(item.s3ImageUrl);
+      const fileName = item.fileName || item.s3ImageUrl.split("/").pop() || "document";
+      
+      const response = await fetch(presignedUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch file: ${response.status}`);
+      }
+      
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      
       const link = document.createElement("a");
-      link.href = url;
-      link.download = item.fileName || item.s3ImageUrl.split("/").pop() || "document";
+      link.href = blobUrl;
+      link.download = fileName;
+      link.style.display = "none";
       document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
+      
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(blobUrl);
+      }, 100);
+      
       message.success("Document download started");
     } catch (error) {
       console.error("Error downloading document:", error);
@@ -2264,16 +2250,16 @@ export const BusinessVerificationDetails: React.FC<
             hasChanges && (
               <Button
                 type="primary"
-                size="small"
+                size="middle"
                 onClick={(e) => {
                   e.stopPropagation(); // Prevent collapse toggle
                   onSave();
                 }}
                 style={{
                   marginLeft: "8px",
-                  fontSize: "12px",
-                  height: "24px",
-                  padding: "0 8px",
+                  fontSize: "14px",
+                  height: "30px",
+                  padding: "0 16px",
                 }}
               >
                 Save
