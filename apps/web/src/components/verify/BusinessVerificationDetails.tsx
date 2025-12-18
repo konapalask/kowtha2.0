@@ -2264,16 +2264,16 @@ export const BusinessVerificationDetails: React.FC<
             hasChanges && (
               <Button
                 type="primary"
-                size="small"
+                size="middle"
                 onClick={(e) => {
                   e.stopPropagation(); // Prevent collapse toggle
                   onSave();
                 }}
                 style={{
                   marginLeft: "8px",
-                  fontSize: "12px",
-                  height: "24px",
-                  padding: "0 8px",
+                  fontSize: "14px",
+                  height: "30px",
+                  padding: "0 16px",
                 }}
               >
                 Save
