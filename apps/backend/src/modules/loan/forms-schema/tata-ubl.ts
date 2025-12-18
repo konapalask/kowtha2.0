@@ -324,7 +324,7 @@ export const tataUblSchema = {
         properties: {
           turnoverPreviousFinancialYear: {
             type: "number",
-            title: `Turnover (FY ${new Date().getFullYear() - 1}-${new Date().getFullYear()})`,
+            title: `Turnover previous financial year`,
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
@@ -334,7 +334,7 @@ export const tataUblSchema = {
           },
           expensesTurnoverCurrentFinancialYear: {
             type: "number",
-            title: `Expenses Turnover (FY ${new Date().getFullYear() - 1}-${new Date().getFullYear()})`,
+            title: `Expected Turnover in this financial year`,
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
@@ -355,8 +355,6 @@ export const tataUblSchema = {
           netMonthlyIncome: {
             type: "number",
             title: "Net Monthly Income",
-            formula: "monthlyTurnoverSales - (expensesTurnoverCurrentFinancialYear / 12)",
-            readOnly: true,
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",

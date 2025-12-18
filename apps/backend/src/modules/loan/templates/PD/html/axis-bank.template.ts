@@ -469,7 +469,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
             </tr>
             <tr>
                 <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Gross and Net margin of business.</strong></p></td>
-                <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Gross:</strong> ${formatCurrency(verificationData.annexure1?.grossAndNetMargin || "NotProvided")} <br> <strong>Net Margin:</strong> ${verificationData.annexure1?.netMargin + "%" || ""}<br> approx (Confirmed by customer during PD).</p></td>
+                <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Gross Margin:</strong> ${verificationData.annexure1?.grossAndNetMargin ? verificationData.annexure1?.grossAndNetMargin + "%" : "Not provided"} <br> <strong>Net Margin:</strong> ${verificationData.annexure1?.netMargin ? verificationData.annexure1?.netMargin + "%" : "Not provided"}<br> approx (Confirmed by customer during PD).</p></td>
             </tr>
             <tr>
                 <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Estimated income</strong></p></td>

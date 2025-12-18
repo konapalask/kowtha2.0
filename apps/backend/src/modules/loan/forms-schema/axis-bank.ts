@@ -613,6 +613,8 @@ export const axisBankSchema = {
               grossMonthlyIncomeTotal: {
                 type: "number",
                 title: "Gross monthly income (total)",
+                formula: "monthlyToGrossReceiptsEstimated + anyOtherIncome",
+                readOnly: true,
                 formatter: {
                   useIndianFormat: true,
                   locale: "en-IN",
@@ -674,6 +676,8 @@ export const axisBankSchema = {
               incomeLeftForDomesticExpenses: {
                 type: "number",
                 title: "Income left for domestic expenses",
+                formula: "grossMonthlyIncomeTotal - lessDirectExpenses - lessRentalExpenses - lessStaffSalary - lessElectricity - lessAnyotherExpenses",
+                readOnly: true,
                 formatter: {
                   useIndianFormat: true,
                   locale: "en-IN",
@@ -734,6 +738,8 @@ export const axisBankSchema = {
               netmonthlyincomepostallexpenses: {
                 type: "number",
                 title: "Net monthly income post all expenses",
+                formula: "incomeLeftForDomesticExpenses - foodExpenses - childrenEducation - houseRent - medicalExpenses - otherHouseHoldExpenses",
+                readOnly: true,
                 formatter: {
                   useIndianFormat: true,
                   locale: "en-IN",
@@ -774,6 +780,8 @@ export const axisBankSchema = {
               netSurplus: {
                 type: "number",
                 title: "Net Surplus income post all expenses & obligations",
+                formula: "netmonthlyincomepostallexpenses - lessSavingsInvestmentsInsurancePremium - lessExistingEmisObligations - emiAllocatedFoTheProposedLoan",
+                readOnly: true,
                 formatter: {
                   useIndianFormat: true,
                   locale: "en-IN",
