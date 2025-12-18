@@ -80,7 +80,7 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
     
     <div class="template-content">
         <div class="report-title">Personal Discussion Report</div>
-        <div class="report-subtitle">(For Tata Capital Limited)</div>
+        <div class="report-title">(For Tata Capital Financial Services Limited)</div>
             
             <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
                 <tr>
@@ -258,11 +258,11 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                 <tr>
                     <td rowspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>13</strong></p></td>
                     <td rowspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Sales and Profit Details</strong></p></td>
-                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Turnover (FY ${new Date().getFullYear() - 1}-${new Date().getFullYear()})</strong></p></td>
+                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Turnover previous financial year</strong></p></td>
                     <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.salesAndProfitDetails?.turnoverPreviousFinancialYear) || ""}</p></td>
                 </tr>
                 <tr>
-                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Exp. Turnover (FY ${new Date().getFullYear()}-${new Date().getFullYear() + 1})</strong></p></td>
+                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Expected Turnover in this financial year</strong></p></td>
                     <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.salesAndProfitDetails?.expensesTurnoverCurrentFinancialYear) || ""}</p></td>
                 </tr>
                 <tr>
@@ -275,7 +275,7 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                 </tr>
                 <tr>
                     <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Profit Margin</strong></p></td>
-                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.salesAndProfitDetails?.profitMargin || ""}</p></td>
+                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.salesAndProfitDetails?.profitMargin ? verificationData.salesAndProfitDetails?.profitMargin + "%" : "Not provided"}</p></td>
                 </tr>
                 <tr>
                     <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Is there any effect on turnover due to Covid</strong></p></td>
@@ -610,9 +610,10 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                     <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.otherObservations?.videoLink || ""}</p></td>
                 </tr>
             </table>
-            
-            <p style="margin:8px 0;line-height:1.5"><strong>Acknowledgment of Site Visit</strong></p>
-            <p style="margin:8px 0;line-height:1.5">(For Tata Capital Limited)</p>
+            <br>
+            <br>
+            <p style="margin:8px 0;line-height:1.5;text-align:center"><strong>Acknowledgment of Site Visit</strong></p>
+            <p style="margin:8px 0;line-height:1.5;text-align:center">(For Tata Capital Financial Services Limited)</p>
             <p style="margin:8px 0;line-height:1.5">I, the undersigned, have applied for Micro Business Loan with Tata Capital Limited. In this regard, I have met ${verificationData.basicDetails?.personMet || ""} from (Name of the Agency) on ${verificationData.basicDetails?.pdDate || istDate.split(" ")[0]} at ${verificationData.basicDetails?.pdTime || ""} AM/PM for Personal Discussion.</p>
             <p style="margin:8px 0;line-height:1.5">I am informed that Executive is not authorized to collect any money. </p>
             <p style="margin:8px 0;line-height:1.5"><strong>Person Interviewed / Met:</strong> ${verificationData.otherObservations?.personMet || ""}</p>
