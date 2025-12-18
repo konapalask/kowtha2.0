@@ -271,9 +271,9 @@ export const axisAgriSchema = {
             title: "PD Final Status",
             enum: ["Positive", "Negative", "Credit Refer"],
           },
-          pdVendorAddress: {
+          pdVendorDetails: {
             type: "string",
-            title: "PD Vendor Address",
+            title: "PD Vendor Name & Address",
             ui: { widget: "textarea", rows: 2 },
           },
         },

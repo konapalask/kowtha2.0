@@ -162,7 +162,7 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
       </tr>
       ${renderKeyValueRow(
         "Name of PD Official",
-        html_data.verfierName,
+        html_data.verifierName,
         undefined,
         { colSpan: 3 }
       )}
@@ -365,14 +365,8 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
         { colSpan: 3 }
       )}
       ${renderKeyValueRow(
-        "PD Vendor Name",
-        html_data.verfierName,
-        undefined,
-        { colSpan: 3 }
-      )}
-      ${renderKeyValueRow(
-        "PD Vendor Name",
-        observations.pdVendorAddress,
+        "PD Vendor Name & Address",
+        observations.pdVendorDetails,
         undefined,
         { colSpan: 3 }
       )}
