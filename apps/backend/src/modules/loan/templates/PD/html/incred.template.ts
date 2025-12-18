@@ -119,7 +119,7 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
 
         <tr>
             <td style="${labelCellStyle}">As Per Audited ITR's</td>
-            <td style="${valueCellStyle}">Turnover: ${formatCurrency(applicantAndBusinessDetails.asPerAuditedItrsTurnover)} <br> Net Profit: ${formatCurrency(applicantAndBusinessDetails.asPerAuditedItrsNetProfit)} </td>
+            <td style="${valueCellStyle}"><strong>Turnover:</strong> ${formatCurrency(applicantAndBusinessDetails.asPerAuditedItrsTurnover)} <br> <strong>Net Profit:</strong> ${formatCurrency(applicantAndBusinessDetails.asPerAuditedItrsNetProfit)} </td>
         </tr>
 
         <tr>
