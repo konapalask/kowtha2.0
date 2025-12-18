@@ -376,8 +376,8 @@ export const axisFinanceUblBelow10lSchema = {
       schema: {
         type: "object",
         properties: {
-          loanType: { type: "string", title: "Type of Loan" },
-          purposeOfLoan: { type: "string", title: "Loan Purpose", readOnly: true },
+          loanType: { type: "string", title: "Type of Loan", readOnly: true },
+          loanPurpose: { type: "string", title: "Loan Purpose"},
           loanAmount: {
             type: "number",
             title: "Loan Amount",
