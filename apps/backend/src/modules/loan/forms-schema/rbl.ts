@@ -48,10 +48,9 @@ export const rblSchema = {
       schema: {
         type: "object",
         properties: {
-          addressVisited: {
+          address: {
             type: "string",
             title: "Address Visited",
-            readOnly: true,
           },
           personMet: {
             type: "string",

@@ -265,8 +265,8 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
     "";
 
   const clientAddress =
-    meetingDetails.addressVisited ||
-    caseDetails.addressVisited ||
+    meetingDetails.address ||
+    caseDetails.address ||
     businessDetails.shopAddress ||
     html_data?.loanDetails?.applicantAddress ||
     "";
@@ -402,7 +402,7 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
       ${renderTwoColumnTable([
         {
           label: "Address Visited",
-          value: meetingDetails.addressVisited,
+          value: meetingDetails.address,
         },
       ])}
       ${renderTwoColumnTable([
@@ -509,17 +509,25 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
         {
           label: "Business Process",
           value: businessDetails.businessProcess
-            .split("\n")
-            .map((line: string) => `<ul><li>${line}</li></ul>`)
-            .join(""),
+            ? typeof businessDetails.businessProcess === "string"
+              ? businessDetails.businessProcess
+                  .split("\n")
+                  .map((line: string) => `<ul><li>${line}</li></ul>`)
+                  .join("")
+              : formatMultiline(businessDetails.businessProcess)
+            : "",
         },
         { label: "Margins", value: businessDetails.margins },
         {
           label: "Documents Observed",
           value: businessDetails.documentsObserved
-            .split("\n")
-            .map((line: string) => `<ul><li>${line}</li></ul>`)
-            .join(""),
+            ? typeof businessDetails.documentsObserved === "string"
+              ? businessDetails.documentsObserved
+                  .split("\n")
+                  .map((line: string) => `<ul><li>${line}</li></ul>`)
+                  .join("")
+              : formatMultiline(businessDetails.documentsObserved)
+            : "",
         },
         { label: "Activity Observed", value: businessDetails.activityObserved },
       ])}
