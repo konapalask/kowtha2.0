@@ -35,7 +35,8 @@ export class PDTemplateService {
     approvedStatus: string,
     verifierName: string,
     financialAnalysis: any,
-    loan?: any
+    loan?: any,
+    fieldExecutiveName?: string
   ): Promise<any> {
     const signaturePath = path.resolve(
       process.cwd(),
@@ -46,7 +47,7 @@ export class PDTemplateService {
 
     const status = verification?.approvedStatus || "";
 
-    const fieldExecutive = verification.fieldExecutive?.name || "";
+    const fieldExecutive = fieldExecutiveName || "";
 
     const uploadedItems = verification?.uploadedItems || [];
 
@@ -346,16 +347,24 @@ export class PDTemplateService {
 
     const getStyledApprovedStatus = (status: string): string => {
       if (!status) return "Not provided";
-      
+
       const statusLower = status.toLowerCase().trim();
       let color = "#333";
       let fontWeight = "bold";
-      
+
       if (statusLower === "positive" || statusLower.includes("positive")) {
         color = "#28a745"; // Green for positive
-      } else if (statusLower === "negative" || statusLower.includes("negative")) {
+      } else if (
+        statusLower === "negative" ||
+        statusLower.includes("negative")
+      ) {
         color = "#dc3545"; // Red for negative
-      } else if (statusLower === "creditrefer" || statusLower.includes("creditrefer") || statusLower === "credit refer" || statusLower.includes("credit refer")) {
+      } else if (
+        statusLower === "creditrefer" ||
+        statusLower.includes("creditrefer") ||
+        statusLower === "credit refer" ||
+        statusLower.includes("credit refer")
+      ) {
         color = "#ffa500"; // Yellow/Orange for credit refer
       }
       return `<span style="color: ${color}; font-weight: ${fontWeight};">${status}</span>`;
@@ -390,7 +399,8 @@ export class PDTemplateService {
     approvedStatus: string,
     verifierName: string,
     financialAnalysis: any,
-    schema?: any
+    schema?: any,
+    fieldExecutiveName?: string
   ): Promise<any> {
     // Helper function to check if templateName matches any key in templatesAndFooters
     const matchesTemplate = (templateKey: string): boolean => {
@@ -401,7 +411,10 @@ export class PDTemplateService {
     // Match by templateName first, then fallback to bankName for backward compatibility
     const matchKey = templateName || bankName;
     // Banks with custom templates - match by templateName
-    if (matchesTemplate("AXIS FINANCE-UBL ABOVE 10L") || matchKey === "Axis Finance UBL Above 10L") {
+    if (
+      matchesTemplate("AXIS FINANCE-UBL ABOVE 10L") ||
+      matchKey === "Axis Finance UBL Above 10L"
+    ) {
       // const verificationData = (verification?.verificationData ||
       // verification) as AxisFinanceUBLInterface;
       const html_data = await this.FormatPDImages(
@@ -412,13 +425,17 @@ export class PDTemplateService {
         approvedStatus,
         verifierName,
         financialAnalysis,
-        loan
+        loan,
+        fieldExecutiveName
       );
       return templates.axisFinanceUBLTemplate(verification, html_data);
     }
-    if (matchesTemplate("AXIS FINANCE-UBL BELOW 10L") || matchKey === "Axis Finance UBL Below 10L") {
+    if (
+      matchesTemplate("AXIS FINANCE-UBL BELOW 10L") ||
+      matchKey === "Axis Finance UBL Below 10L"
+    ) {
       // const verificationData = (verification?.verificationData ||
-        // verification) as AxisFinanceUBLInterface;
+      // verification) as AxisFinanceUBLInterface;
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -427,7 +444,8 @@ export class PDTemplateService {
         approvedStatus,
         verifierName,
         financialAnalysis,
-        loan
+        loan,
+        fieldExecutiveName
       );
       return templates.axisFinanceUBLBelow10lTemplate(verification, html_data);
     }
@@ -442,7 +460,8 @@ export class PDTemplateService {
         approvedStatus,
         verifierName,
         financialAnalysis,
-        loan
+        loan,
+        fieldExecutiveName
       );
       return templates.rblTemplate(verification, html_data);
     }
@@ -456,7 +475,8 @@ export class PDTemplateService {
         approvedStatus,
         verifierName,
         financialAnalysis,
-        loan
+        loan,
+        fieldExecutiveName
       );
       return templates.iciciTemplate(verification, html_data);
     }
@@ -470,7 +490,8 @@ export class PDTemplateService {
         approvedStatus,
         verifierName,
         financialAnalysis,
-        loan
+        loan,
+        fieldExecutiveName
       );
       return templates.cholaTemplate(verification, html_data);
     }
@@ -484,7 +505,8 @@ export class PDTemplateService {
         approvedStatus,
         verifierName,
         financialAnalysis,
-        loan
+        loan,
+        fieldExecutiveName
       );
       return templates.heroFincorpTemplate(verification, html_data);
     }
@@ -498,7 +520,8 @@ export class PDTemplateService {
         approvedStatus,
         verifierName,
         financialAnalysis,
-        loan
+        loan,
+        fieldExecutiveName
       );
       return templates.iiflTemplate(verification, html_data);
     }
@@ -512,7 +535,8 @@ export class PDTemplateService {
         approvedStatus,
         verifierName,
         financialAnalysis,
-        loan
+        loan,
+        fieldExecutiveName
       );
       return templates.yesBankTemplate(verification, html_data);
     }
@@ -526,7 +550,8 @@ export class PDTemplateService {
         approvedStatus,
         verifierName,
         financialAnalysis,
-        loan
+        loan,
+        fieldExecutiveName
       );
       return templates.tataUblTemplate(verification, html_data);
     }
@@ -540,7 +565,8 @@ export class PDTemplateService {
         approvedStatus,
         verifierName,
         financialAnalysis,
-        loan
+        loan,
+        fieldExecutiveName
       );
       return templates.axisBankTemplate(verification, html_data);
     }
@@ -561,7 +587,8 @@ export class PDTemplateService {
         approvedStatus,
         verifierName,
         financialAnalysis,
-        loan
+        loan,
+        fieldExecutiveName
       );
       return templates.axisFinanceTemplate(verification, html_data);
     }
@@ -575,7 +602,8 @@ export class PDTemplateService {
         approvedStatus,
         verifierName,
         financialAnalysis,
-        loan
+        loan,
+        fieldExecutiveName
       );
       return templates.axisAgriTemplate(verification, html_data);
     }
@@ -589,7 +617,8 @@ export class PDTemplateService {
         approvedStatus,
         verifierName,
         financialAnalysis,
-        loan
+        loan,
+        fieldExecutiveName
       );
       return templates.smfgSmeTemplate(verification, html_data);
     }
@@ -603,7 +632,8 @@ export class PDTemplateService {
         approvedStatus,
         verifierName,
         financialAnalysis,
-        loan
+        loan,
+        fieldExecutiveName
       );
       return templates.niwasSalariedTemplate(verification, html_data);
     }
@@ -617,7 +647,8 @@ export class PDTemplateService {
         approvedStatus,
         verifierName,
         financialAnalysis,
-        loan
+        loan,
+        fieldExecutiveName
       );
       return templates.niwasSenpTemplate(verification, html_data);
     }
@@ -652,7 +683,8 @@ export class PDTemplateService {
         approvedStatus,
         verifierName,
         financialAnalysis,
-        loan
+        loan,
+        fieldExecutiveName
       );
       return templates.arkaFincapTemplate(verification, html_data);
     }
@@ -666,7 +698,8 @@ export class PDTemplateService {
         approvedStatus,
         verifierName,
         financialAnalysis,
-        loan
+        loan,
+        fieldExecutiveName
       );
       return templates.heroHousingSelfTemplate(verification, html_data);
     }
@@ -680,7 +713,8 @@ export class PDTemplateService {
         approvedStatus,
         verifierName,
         financialAnalysis,
-        loan
+        loan,
+        fieldExecutiveName
       );
       return templates.herohousingSalariedTemplate(verification, html_data);
     }
@@ -694,7 +728,8 @@ export class PDTemplateService {
         approvedStatus,
         verifierName,
         financialAnalysis,
-        loan
+        loan,
+        fieldExecutiveName
       );
       return templates.indiaShelterSenpTemplate(verification, html_data);
     }
@@ -708,7 +743,8 @@ export class PDTemplateService {
         approvedStatus,
         verifierName,
         financialAnalysis,
-        loan
+        loan,
+        fieldExecutiveName
       );
       return templates.indiaShelterSalariedTemplate(verification, html_data);
     }
@@ -722,7 +758,8 @@ export class PDTemplateService {
         approvedStatus,
         verifierName,
         financialAnalysis,
-        loan
+        loan,
+        fieldExecutiveName
       );
       return templates.idfcPlTemplate(verification, html_data);
     }
@@ -736,7 +773,8 @@ export class PDTemplateService {
         approvedStatus,
         verifierName,
         financialAnalysis,
-        loan
+        loan,
+        fieldExecutiveName
       );
       return templates.idfcHlMlTemplate(verification, html_data);
     }
@@ -754,7 +792,8 @@ export class PDTemplateService {
         approvedStatus,
         verifierName,
         financialAnalysis,
-        loan
+        loan,
+        fieldExecutiveName
       );
       return templates.adityaBirlaTemplate(verification, html_data);
     }
@@ -769,7 +808,8 @@ export class PDTemplateService {
         approvedStatus,
         verifierName,
         financialAnalysis,
-        loan
+        loan,
+        fieldExecutiveName
       );
       return templates.dcbTemplate(verification, html_data);
     }
@@ -783,7 +823,8 @@ export class PDTemplateService {
         approvedStatus,
         verifierName,
         financialAnalysis,
-        loan
+        loan,
+        fieldExecutiveName
       );
       return templates.incredTemplate(verification, html_data);
     }
@@ -796,7 +837,8 @@ export class PDTemplateService {
         approvedStatus,
         verifierName,
         financialAnalysis,
-        loan
+        loan,
+        fieldExecutiveName
       );
       return templates.ambitTemplate(verification, html_data);
     }
@@ -809,7 +851,8 @@ export class PDTemplateService {
         approvedStatus,
         verifierName,
         financialAnalysis,
-        loan
+        loan,
+        fieldExecutiveName
       );
       return templates.ambitMsmeTemplate(verification, html_data);
     }
@@ -823,7 +866,8 @@ export class PDTemplateService {
         approvedStatus,
         verifierName,
         financialAnalysis,
-        loan
+        loan,
+        fieldExecutiveName
       );
       return templates.janaSalariedTemplate(verification, html_data);
     }
@@ -837,7 +881,8 @@ export class PDTemplateService {
         approvedStatus,
         verifierName,
         financialAnalysis,
-        loan
+        loan,
+        fieldExecutiveName
       );
       return templates.janaSenpAbove50lTemplate(verification, html_data);
     }
@@ -851,7 +896,8 @@ export class PDTemplateService {
         approvedStatus,
         verifierName,
         financialAnalysis,
-        loan
+        loan,
+        fieldExecutiveName
       );
       return templates.janaSenpBelow50lTemplate(verification, html_data);
     }
@@ -891,7 +937,8 @@ export class PDTemplateService {
         approvedStatus,
         verifierName,
         financialAnalysis,
-        loan
+        loan,
+        fieldExecutiveName
       );
       return templates.genericPDTemplate(verification, schemaToUse, html_data);
     } catch (error) {
@@ -1015,7 +1062,8 @@ export class PDTemplateService {
         verification.approvedStatus,
         verification.verifier?.name,
         verification.financialAnalysis,
-        schema
+        schema,
+        verification.fieldExecutive?.name
       );
 
       // Get footer name from templatesAndFooters using templateName, fallback to templateName, then bankName
@@ -1055,5 +1103,4 @@ export class PDTemplateService {
       throw error;
     }
   }
-
 }

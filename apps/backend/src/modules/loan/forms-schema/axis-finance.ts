@@ -15,7 +15,7 @@ export const axisFinanceSchema = {
             title: "Name of the Applicant",
             readOnly: true,
           },
-          applicationNumber:{
+          applicationNumber: {
             type: "string",
             title: "Application Number",
             readOnly: true,
@@ -315,7 +315,7 @@ export const axisFinanceSchema = {
                 type: "string",
                 title: "Business Bank Accounts",
               },
-              },
+            },
           },
           previousFinancialYear: {
             type: "object",
@@ -383,7 +383,7 @@ export const axisFinanceSchema = {
                 type: "string",
                 title: "Business Bank Accounts",
               },
-              },
+            },
           },
         },
       },
@@ -512,7 +512,8 @@ export const axisFinanceSchema = {
         properties: {
           totalMonthlyIncomePerMonth: {
             type: "number",
-            title: "Total Monthly Net Income per month (Business income + Other Income)",
+            title:
+              "Total Monthly Net Income per month (Business income + Other Income)",
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
@@ -561,11 +562,12 @@ export const axisFinanceSchema = {
               maxDecimalPlaces: 2,
               minDecimalPlaces: 0,
             },
-          },         
+          },
           netSurplus: {
             type: "number",
             title: "Net Surplus",
-            formula: "totalMonthlyIncomePerMonth - totalMonthlyExpensesPerMonth",
+            formula:
+              "totalMonthlyIncomePerMonth - totalMonthlyExpensesPerMonth",
             readOnly: true,
             formatter: {
               useIndianFormat: true,
@@ -601,23 +603,6 @@ export const axisFinanceSchema = {
           otherObservations: {
             type: "string",
             title: "Other Observations",
-            ui: {
-              widget: "textarea",
-              rows: 6,
-            },
-          },
-        },
-      },
-    },
-    {
-      id: "overallPositivesOrNegatives",
-      label: "Overall Positives or Negatives",
-      schema: {
-        type: "object",
-        properties: {
-          overallPositivesOrNegatives: {
-            type: "string",
-            title: "Overall Positives or Negatives",
             ui: {
               widget: "textarea",
               rows: 6,

@@ -5,11 +5,11 @@ export const statement4Schema = {
     type: "object",
     properties: {
       // Header Information
-      synopsis: {
-        type: "string",
-        title: "Synopsis of the verification",
-        ui: { widget: "textarea", rows: 3 },
-      },
+      // synopsis: {
+      //   type: "string",
+      //   title: "Synopsis of the verification",
+      //   ui: { widget: "textarea", rows: 3 },
+      // },
       businessName: { type: "string", title: "Business Name", readOnly: true },
       partnersNames: {
         type: "string",
@@ -44,7 +44,8 @@ export const statement4Schema = {
       grossProfitAssessed: {
         type: "number",
         title: "Gross Profit - Assessed",
-        formula: "grandTotalIncome - (openingStockAssessed + purchasesAssessed)",
+        formula:
+          "grandTotalIncome - (openingStockAssessed + purchasesAssessed)",
         readOnly: true,
         minimum: 0,
         formatter: {
@@ -194,7 +195,8 @@ export const statement4Schema = {
       netProfit: {
         type: "number",
         title: "Net Profit",
-        formula: "byGrossProfitEstimated - (electricity + rent + salaries + travellingCharges + otherExpenses)",
+        formula:
+          "byGrossProfitEstimated - (electricity + rent + salaries + travellingCharges + otherExpenses)",
         readOnly: true,
         formatter: {
           useIndianFormat: true,

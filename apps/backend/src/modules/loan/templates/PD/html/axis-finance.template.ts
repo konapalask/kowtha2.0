@@ -23,6 +23,26 @@ const centeredTitleStyle =
   "text-align:center;font-size:18px;font-weight:bold;margin:16px 0;text-transform:uppercase;color:#222";
 const paragraphStyle = "margin:8px 0;line-height:1.6;font-size:12px;color:#333";
 
+/**
+ * Calculates the financial year ending date (31.03.YEAR) based on current date
+ * Financial year runs from April 1 to March 31
+ * - April 1, 2025 to March 31, 2026 → returns 2026
+ * - April 1, 2026 to March 31, 2027 → returns 2027
+ */
+const getFinancialYearEndingYear = (): number => {
+  const now = new Date();
+  const currentMonth = now.getMonth(); // 0-indexed: 0=Jan, 1=Feb, ..., 3=Apr, ..., 11=Dec
+  const currentYear = now.getFullYear();
+
+  // If we're in April (3) or later, the financial year ending is next year
+  // If we're in Jan-Mar (0-2), the financial year ending is this year
+  if (currentMonth >= 3) {
+    return currentYear + 1;
+  } else {
+    return currentYear;
+  }
+};
+
 const hasValue = (value: any): boolean => {
   if (value === null || value === undefined) return false;
   if (typeof value === "string") return value.trim().length > 0;
@@ -85,14 +105,15 @@ const renderTwoColumnTable = (
   const items = rows.filter((row) => hasValue(row.value));
   if (items.length === 0) return "";
 
-  const headerRow = headers?.left || headers?.right
-    ? `
+  const headerRow =
+    headers?.left || headers?.right
+      ? `
       <tr>
         <td style="${headerCellStyle};width:35%;">${headers.left || ""}</td>
         <td style="${headerCellStyle}">${headers.right || ""}</td>
       </tr>
     `
-    : "";
+      : "";
 
   return `
     <table style="${tableStyle}">
@@ -193,7 +214,8 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
   const otherIncome = verificationData.otherIncome || {};
   const assets = verificationData.assets || {};
   const liabilitiesRaw =
-    verificationData?.otherLiabilitiesIncludingCcLimitsOwnCoApplicants?.otherLiabilities || [];
+    verificationData?.otherLiabilitiesIncludingCcLimitsOwnCoApplicants
+      ?.otherLiabilities || [];
   const budget = verificationData.budgetAnalysis || {};
   const endUseOfFunds = verificationData.endUseOfFunds || {};
   const otherObservations = verificationData.otherObservations || {};
@@ -266,7 +288,8 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
       },
       {
         header: "Relation",
-        valueGetter: (item) => item.relation || item.relationToApplicant || "Not Provided",
+        valueGetter: (item) =>
+          item.relation || item.relationToApplicant || "Not Provided",
       },
       {
         header: "Age",
@@ -274,7 +297,8 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
       },
       {
         header: "Education",
-        valueGetter: (item) => item.education || item.qualification || "Not Provided",
+        valueGetter: (item) =>
+          item.education || item.qualification || "Not Provided",
       },
       {
         header: "Occupation",
@@ -289,7 +313,9 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
     {
       label: "NO. OF. DEPENDANTS",
       value:
-        familySection.noOfDependants || familySection.totalDependants || "Not Provided",
+        familySection.noOfDependants ||
+        familySection.totalDependants ||
+        "Not Provided",
     },
     {
       label: "GENERAL LIFESTYLE/PERSONALITY",
@@ -328,7 +354,8 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
     {
       label: "Nature of Business Entity / Employer Details",
       value:
-        employment.natureOfBusinessEntityEmployerDetailsProprietoryPartnershipPvtLtd || "Not Provided",
+        employment.natureOfBusinessEntityEmployerDetailsProprietoryPartnershipPvtLtd ||
+        "Not Provided",
     },
     {
       label: "Key Manager to the Business",
@@ -383,13 +410,21 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
     },
     {
       label: "GROSS MARGIN %",
-      accountingYear: businessData.accountingYear?.grossMargin ? `${businessData.accountingYear.grossMargin}%` : "Not Provided",
-      previousFinancialYear: businessData.previousFinancialYear?.grossMargin ? `${businessData.previousFinancialYear.grossMargin}%` : "Not Provided",
+      accountingYear: businessData.accountingYear?.grossMargin
+        ? `${businessData.accountingYear.grossMargin}%`
+        : "Not Provided",
+      previousFinancialYear: businessData.previousFinancialYear?.grossMargin
+        ? `${businessData.previousFinancialYear.grossMargin}%`
+        : "Not Provided",
     },
     {
       label: "PBDIT MARGIN %",
-      accountingYear: businessData.accountingYear?.pbditMargin ? `${businessData.accountingYear.pbditMargin}%` : "Not Provided",
-      previousFinancialYear: businessData.previousFinancialYear?.pbditMargin ? `${businessData.previousFinancialYear.pbditMargin}%` : "Not Provided",
+      accountingYear: businessData.accountingYear?.pbditMargin
+        ? `${businessData.accountingYear.pbditMargin}%`
+        : "Not Provided",
+      previousFinancialYear: businessData.previousFinancialYear?.pbditMargin
+        ? `${businessData.previousFinancialYear.pbditMargin}%`
+        : "Not Provided",
     },
     {
       label: "DEBTORS CYCLE",
@@ -404,24 +439,28 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
     {
       label: "CAPITAL INVESTED",
       accountingYear: businessData.accountingYear?.capitalInvested,
-      previousFinancialYear: businessData.previousFinancialYear?.capitalInvested,
+      previousFinancialYear:
+        businessData.previousFinancialYear?.capitalInvested,
       formatter: formatCurrency,
     },
     {
       label: "LOAN FUNDS (INCL. CC LIMIT)",
       accountingYear: businessData.accountingYear?.loanFundsInclCcLimit,
-      previousFinancialYear: businessData.previousFinancialYear?.loanFundsInclCcLimit,
+      previousFinancialYear:
+        businessData.previousFinancialYear?.loanFundsInclCcLimit,
       formatter: formatCurrency,
     },
     {
       label: "STOCK MAINTAINED",
       accountingYear: businessData.accountingYear?.stockMaintained,
-      previousFinancialYear: businessData.previousFinancialYear?.stockMaintained,
+      previousFinancialYear:
+        businessData.previousFinancialYear?.stockMaintained,
     },
     {
       label: "BUSINESS BANK ACCOUNTS",
       accountingYear: businessData.accountingYear?.businessBankAccounts,
-      previousFinancialYear: businessData.previousFinancialYear?.businessBankAccounts,
+      previousFinancialYear:
+        businessData.previousFinancialYear?.businessBankAccounts,
     },
   ];
 
@@ -490,7 +529,7 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
     },
   ]);
 
-  const liabilitiesTable =`
+  const liabilitiesTable = `
     <div>
       <p style="${sectionTitleStyle}"><strong><u>Other Liabilities Including CC Limits (Own/Co Applicants)</u></strong></p>
       <table style="${tableStyle}">
@@ -501,8 +540,12 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
           <td style="${headerCellStyle};">EMI</td>
           <td style="${headerCellStyle};">Will Close / Continue</td>
         </tr>
-        ${ensureArray(liabilitiesRaw).length > 0 ? `
-        ${ensureArray(liabilitiesRaw).map((liability, index) => `
+        ${
+          ensureArray(liabilitiesRaw).length > 0
+            ? `
+        ${ensureArray(liabilitiesRaw)
+          .map(
+            (liability, index) => `
           <tr>
             <td style="${cellStyle}">${liability.from || "Not Provided"}</td>
             <td style="${cellStyle}">${liability.natureOfLoan || "Not Provided"}</td>
@@ -510,7 +553,11 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
             <td style="${cellStyle}">${formatCurrency(liability.emi || "Not Provided")}</td>
             <td style="${cellStyle}">${liability.willCloseContinue || "Not Provided"}</td>
           </tr>
-        `).join("")}`: `<tr><td colspan="5" style="${cellStyle};text-align:center;">No other liabilities provided</td></tr>`}
+        `
+          )
+          .join("")}`
+            : `<tr><td colspan="5" style="${cellStyle};text-align:center;">No other liabilities provided</td></tr>`
+        }
       </table>
     </div>
     `;
@@ -518,8 +565,11 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
   const budgetRows = [
     {
       sno: 1,
-      label: "<strong>Total Monthly Net Income per month (Business income + Other Income)</strong>",
-      value: formatCurrency(budget.totalMonthlyIncomePerMonth || "Not Provided"),
+      label:
+        "<strong>Total Monthly Net Income per month (Business income + Other Income)</strong>",
+      value: formatCurrency(
+        budget.totalMonthlyIncomePerMonth || "Not Provided"
+      ),
     },
     {
       sno: 2,
@@ -529,8 +579,7 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
     },
     {
       sno: 3,
-      label:
-        "PL or Auto Loan EMI",
+      label: "PL or Auto Loan EMI",
       value: formatCurrency(budget.plOrAutoLoanEMI || "Not Provided"),
       formatter: formatCurrency,
     },
@@ -543,7 +592,9 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
     {
       sno: "",
       label: "<strong>Total Monthly Expenses per month</strong>",
-      value: formatCurrency(budget.totalMonthlyExpensesPerMonth || "Not Provided"),
+      value: formatCurrency(
+        budget.totalMonthlyExpensesPerMonth || "Not Provided"
+      ),
       formatter: formatCurrency,
     },
     {
@@ -587,14 +638,24 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
   const otherObservationsTable = `
     <div>
       <p style="${sectionTitleStyle}"><strong><u>Other Observations</u></strong></p>
-      <ul>${otherObservations?.otherObservations?.split("\n").map(line => `<li style="margin:8px 0;">${line}</li>`).join("")}</ul>
+      <ul>${otherObservations?.otherObservations
+        ?.split("\n")
+        .map((line) => `<li style="margin:8px 0;">${line}</li>`)
+        .join("")}</ul>
     </div>
   `;
+
+  // Get years in business and PBDIT margin for fixed content template
+  const yearsInBusiness = employment.noOfYearsInBusinessEmployment || "";
+  const pbditMargin =
+    businessData.accountingYear?.pbditMargin ||
+    estimatedIncome?.pbditMargin ||
+    "";
 
   const overallPositivesOrNegativesTable = `
     <div>
       <p style="${sectionTitleStyle}"><strong><u>Overall Positives or Negatives</u></strong></p>
-      <p style="${paragraphStyle}">${formatMultiline(overallPositivesOrNegatives.overallPositivesOrNegatives)}</p>
+      <p style="${paragraphStyle}">The applicant has been doing this business for ${yearsInBusiness || "Not Provided"} years. As per oral information and submitted documents we prepared the estimated financial statement. As per the nature of business the PBDIT Margin is ${pbditMargin ? `${pbditMargin}%` : "Not Provided"}. The business is subject to market conditions and other factors and of course competition.</p>
     </div>
   `;
   const tradeReferenceTable = renderMultiColumnTable(
@@ -616,7 +677,7 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
     <table style="${tableStyle}">
       <tr>
         <td style="${headerCellStyle};width:35%;">PD Status</td>
-        <td style="${cellStyle}">${html_data.approvedStatus|| "Not provided"}</td>
+        <td style="${cellStyle}">${html_data.approvedStatus || "Not provided"}</td>
       </tr>
     </table>
   `;
@@ -624,7 +685,7 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
   const noteBlock = `
     <div style="font-size:12px;line-height:1.6;margin-top:16px;">
       <p style="${paragraphStyle}">
-        <strong>Note:</strong> The estimated financials and qualitative remarks furnished above are based on the applicant’s disclosures and on-site observations captured during the personal discussion.
+        <strong>Note:</strong>We have taken the estimated figures based on customer feedback and the gross profit has been calculated taking into consideration market information gathered on our experience.
       </p>
       <p style="${paragraphStyle}">
         <strong>Disclaimer:</strong>The Report (Including any attachments) has been prepared on the basis of verbal information provided by the person contacted.
@@ -635,11 +696,44 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
     </div>
   `;
 
+  // Get business name from various sources
+  const businessName =
+    html_data?.loanDetails?.businessName ||
+    employment.nameOfBusinessEmployment ||
+    company?.detailedProfileOfTheBusiness?.split("\n")[0] ||
+    "Not Provided";
+
+  // Get annual sales/turnover for the textual overview
+  const annualSales =
+    businessData.accountingYear?.annualSales ||
+    estimatedIncome?.annualSales ||
+    "Not Provided";
+
+  // Get PBDIT Margin
+  const pbditMarginValue =
+    businessData.accountingYear?.pbditMargin ||
+    estimatedIncome?.pbditMargin ||
+    "Not Provided";
+
+  // Get PAT
+  const patValue = estimatedIncome?.patOfTheBusinessConcern || "Not Provided";
+
+  // Format annual sales for text
+  const annualSalesFormatted =
+    annualSales !== "Not Provided" && hasValue(annualSales)
+      ? formatCurrency(annualSales)
+      : "Not Provided";
+
   const estimatedIncomeTable = `
     <div> 
-    <p style="${sectionTitleStyle}"><strong><u>Estimated Income</u></strong></p>
-    <p style="${paragraphStyle}">${formatMultiline(estimatedIncome?.estimatedIncomeDetails || "Not Provided")}</p>
-    ${estimatedIncome?.patOfTheBusinessConcern ? `<p style="${paragraphStyle}"><strong>The PAT of the Business Concern (Rs.)</strong> ${formatCurrency(estimatedIncome?.patOfTheBusinessConcern)}</p>` : ""}
+      <p style="${sectionTitleStyle};text-align:center;"><strong><u>ESTIMATED INCOME</u></strong></p>
+      <p style="${paragraphStyle};text-align:center;"><strong>${businessName}</strong></p>
+      <p style="${paragraphStyle}">As per customer the sales/turnover will be around Rs. ${annualSalesFormatted} per annum.</p>
+      <p style="${paragraphStyle}">Out of the total Gross Receipts, some are cash and some are credit.</p>
+      <p style="${paragraphStyle}">The estimated profit for the period 31.03.${getFinancialYearEndingYear()} is based on previous figures and submissions by the customer.</p>
+      <p style="${paragraphStyle}"><strong>The Gross Sales as per our assumptions:</strong> - ${annualSalesFormatted}</p>
+      <p style="${paragraphStyle}"><strong>PBDIT Margin:</strong> - ${pbditMarginValue !== "Not Provided" && hasValue(pbditMarginValue) ? `${pbditMarginValue}%` : "Not Provided"}</p>
+      <p style="${paragraphStyle}"><strong>The PAT of the Business Concern:</strong> - ${patValue !== "Not Provided" && hasValue(patValue) ? formatCurrency(patValue) : "Not Provided"}</p>
     </div>
   `;
   const acceptRejectPDTable = `
@@ -651,7 +745,6 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
     </table>
   `;
 
-
   return `
     ${pdBaseTemplate(html_data)}
     <div class="template-content axis-finance">
@@ -659,7 +752,13 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
       ${renderSection("Personal Details", personalDetailsTable)}
       ${renderSection("Family Background", familyMembersTable + familySummaryTable)}
       ${renderSection("Place of Residence/Office", residenceTable)}
-      ${renderTextSection("Company Profile", company?.detailedProfileOfTheBusiness?.split("\n").map(line => `<ul><li style="margin-left:10px;">${line}</li></ul>`).join(""))}
+      ${renderTextSection(
+        "Company Profile",
+        company?.detailedProfileOfTheBusiness
+          ?.split("\n")
+          .map((line) => `<ul><li style="margin-left:10px;">${line}</li></ul>`)
+          .join("")
+      )}
       ${renderSection("Self Employed/Salaried", employmentTable)}
       ${renderBusinessSection("BUSINESS DETAILS", businessDetailsTable)}
       ${renderBusinessSection("EMPLOYEE/OTHER MAJOR COST", employeeCostsTable)}
