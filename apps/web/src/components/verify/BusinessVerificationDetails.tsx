@@ -3013,7 +3013,7 @@ export const BusinessVerificationDetails: React.FC<
       const isCoordField = isCoordinateField(fieldId);
       const fieldReadOnly = readOnly || isFormulaField || isCoordField;
 
-      // Handle array fields
+      const readonlyFieldStyle = fieldReadOnly ? { color: '#262626' } : undefined;
       if (field.type === "array" && field.arrayItemFields) {
         return (
           <div key={fieldId} style={{ marginBottom: 16 }}>
@@ -3053,6 +3053,7 @@ export const BusinessVerificationDetails: React.FC<
             <Select
               disabled={fieldReadOnly}
               placeholder={`Select ${field.label}`}
+              style={readonlyFieldStyle}
             >
               {field.enum.map((option: string) => (
                 <Select.Option key={option} value={option}>
@@ -3073,7 +3074,7 @@ export const BusinessVerificationDetails: React.FC<
               name={fieldId}
               label={showLabel ? field.label : undefined}
             >
-              <Radio.Group disabled={fieldReadOnly}>
+              <Radio.Group disabled={fieldReadOnly} style={readonlyFieldStyle}>
                 <Radio value={true}>Yes</Radio>
                 <Radio value={false}>No</Radio>
               </Radio.Group>
@@ -3130,7 +3131,7 @@ export const BusinessVerificationDetails: React.FC<
                 disabled={fieldReadOnly}
                 placeholder={`Select ${field.label}`}
                 format="hh:mm A"
-                style={{ width: "100%" }}
+                style={fieldReadOnly ? { width: "100%", ...readonlyFieldStyle } : { width: "100%" }}
                 suffixIcon={<ClockCircleOutlined />}
               />
             </Form.Item>
@@ -3250,7 +3251,7 @@ export const BusinessVerificationDetails: React.FC<
                   placeholder={`Select ${field.label}`}
                   format="DD/MM/YYYY HH:mm A"
                   showTime={{ format: "HH:mm A" }}
-                  style={{ width: "100%" }}
+                  style={fieldReadOnly ? { width: "100%", ...readonlyFieldStyle } : { width: "100%" }}
                 />
               </Form.Item>
             );
@@ -3292,7 +3293,7 @@ export const BusinessVerificationDetails: React.FC<
                   disabled={fieldReadOnly}
                   placeholder={`Select ${field.label}`}
                   format="DD/MM/YYYY"
-                  style={{ width: "100%" }}
+                  style={fieldReadOnly ? { width: "100%", ...readonlyFieldStyle } : { width: "100%" }}
                 />
               </Form.Item>
             );
@@ -3314,6 +3315,7 @@ export const BusinessVerificationDetails: React.FC<
                   disabled={fieldReadOnly}
                   placeholder={field.placeholder || field.label}
                   autoSize={{ minRows: minRows }}
+                  style={readonlyFieldStyle}
                 />
               </Form.Item>
             );
@@ -3330,6 +3332,7 @@ export const BusinessVerificationDetails: React.FC<
                 disabled={fieldReadOnly}
                 placeholder={field.placeholder || field.label}
                 autoSize={{ minRows: 1 }}
+                style={readonlyFieldStyle}
               />
             </Form.Item>
           );
@@ -3344,7 +3347,7 @@ export const BusinessVerificationDetails: React.FC<
             >
               <InputNumber
                 disabled={fieldReadOnly}
-                style={{ width: "100%" }}
+                style={fieldReadOnly ? { width: "100%", ...readonlyFieldStyle } : { width: "100%" }}
                 placeholder={field.placeholder || field.label}
                 formatter={
                   field.formatter?.useIndianFormat
@@ -3415,6 +3418,7 @@ export const BusinessVerificationDetails: React.FC<
               <Select
                 disabled={fieldReadOnly}
                 placeholder={`Select ${field.label}`}
+                style={readonlyFieldStyle}
               >
                 {field.options?.map((option: string) => (
                   <Select.Option key={option} value={option}>
@@ -3444,8 +3448,8 @@ export const BusinessVerificationDetails: React.FC<
                       const isNestedCoordField = isCoordinateField(objectField.id);
                       const objectFieldReadOnly = readOnly || objectField.readOnly || isNestedCoordField || false;
                       const objectFieldRequired = objectField.required || false;
-                      
-                      // Render nested field based on its type
+               
+                      const readonlyNestedFieldStyle = objectFieldReadOnly ? { color: '#262626' } : undefined;
                       const renderNestedField = () => {
                         switch (objectField.type) {
                           case "text":
@@ -3455,6 +3459,7 @@ export const BusinessVerificationDetails: React.FC<
                                 disabled={objectFieldReadOnly}
                                 placeholder={objectField.placeholder || objectField.label}
                                 maxLength={objectField.maxLength}
+                                style={readonlyNestedFieldStyle}
                               />
                             );
                           
@@ -3463,7 +3468,7 @@ export const BusinessVerificationDetails: React.FC<
                             return (
                               <InputNumber
                                 disabled={objectFieldReadOnly}
-                                style={{ width: "100%" }}
+                                style={objectFieldReadOnly ? { width: "100%", ...readonlyNestedFieldStyle } : { width: "100%" }}
                                 placeholder={objectField.placeholder || objectField.label}
                                 formatter={
                                   objectField.formatter?.useIndianFormat
@@ -3488,6 +3493,7 @@ export const BusinessVerificationDetails: React.FC<
                               <Select
                                 disabled={objectFieldReadOnly}
                                 placeholder={`Select ${objectField.label}`}
+                                style={readonlyNestedFieldStyle}
                               >
                                 {objectField.options?.map((option: string) => (
                                   <Select.Option key={option} value={option}>
@@ -3509,6 +3515,7 @@ export const BusinessVerificationDetails: React.FC<
                                 placeholder={objectField.placeholder || objectField.label}
                                 rows={objectField.textAreaRows || 3}
                                 maxLength={objectField.maxLength}
+                                style={readonlyNestedFieldStyle}
                               />
                             );
                           
@@ -3517,6 +3524,7 @@ export const BusinessVerificationDetails: React.FC<
                               <Input
                                 disabled={objectFieldReadOnly}
                                 placeholder={objectField.placeholder || objectField.label}
+                                style={readonlyNestedFieldStyle}
                               />
                             );
                         }
@@ -3565,6 +3573,7 @@ export const BusinessVerificationDetails: React.FC<
                 disabled={fieldReadOnly}
                 placeholder={field.placeholder || field.label}
                 autoSize={{ minRows: 1 }}
+                style={readonlyFieldStyle}
               />
             </Form.Item>
           );
@@ -4412,6 +4421,8 @@ export const BusinessVerificationDetails: React.FC<
       const isItemCoordField = isCoordinateField(itemFieldId);
       const isItemFormulaField = !!itemField.formula;
       const itemFieldReadOnly = readOnly || isItemCoordField || isItemFormulaField;
+      
+      const readonlyItemFieldStyle = itemFieldReadOnly ? { color: '#262626' } : undefined;
 
       // Handle enum fields (select dropdown) in arrays
       if (itemField.enum && itemField.enum.length > 0) {
@@ -4420,6 +4431,7 @@ export const BusinessVerificationDetails: React.FC<
             <Select
               disabled={itemFieldReadOnly}
               placeholder={`Select ${itemField.label}`}
+              style={readonlyItemFieldStyle}
             >
               {itemField.enum.map((option: string) => (
                 <Select.Option key={option} value={option}>
@@ -4440,7 +4452,7 @@ export const BusinessVerificationDetails: React.FC<
               name={fieldKey}
               label={itemField.label}
             >
-              <Radio.Group disabled={itemFieldReadOnly}>
+              <Radio.Group disabled={itemFieldReadOnly} style={readonlyItemFieldStyle}>
                 <Radio value={true}>Yes</Radio>
                 <Radio value={false}>No</Radio>
               </Radio.Group>
@@ -4497,7 +4509,7 @@ export const BusinessVerificationDetails: React.FC<
                 disabled={itemFieldReadOnly}
                 placeholder={`Select ${itemField.label}`}
                 format="hh:mm A"
-                style={{ width: "100%" }}
+                style={itemFieldReadOnly ? { width: "100%", ...readonlyItemFieldStyle } : { width: "100%" }}
                 suffixIcon={<ClockCircleOutlined />}
               />
             </Form.Item>
@@ -4513,7 +4525,7 @@ export const BusinessVerificationDetails: React.FC<
             >
               <InputNumber
                 disabled={itemFieldReadOnly}
-                style={{ width: "100%" }}
+                style={itemFieldReadOnly ? { width: "100%", ...readonlyItemFieldStyle } : { width: "100%" }}
                 placeholder={itemField.placeholder || itemField.label}
                 formatter={
                   itemField.formatter?.useIndianFormat
@@ -4569,7 +4581,7 @@ export const BusinessVerificationDetails: React.FC<
                 disabled={itemFieldReadOnly}
                 placeholder={`Select ${itemField.label}`}
                 format="DD/MM/YYYY"
-                style={{ width: "100%" }}
+                style={itemFieldReadOnly ? { width: "100%", ...readonlyItemFieldStyle } : { width: "100%" }}
               />
             </Form.Item>
           );
@@ -4690,7 +4702,7 @@ export const BusinessVerificationDetails: React.FC<
                   placeholder={`Select ${itemField.label}`}
                   format="DD/MM/YYYY HH:mm A"
                   showTime={{ format: "HH:mm A" }}
-                  style={{ width: "100%" }}
+                  style={itemFieldReadOnly ? { width: "100%", ...readonlyItemFieldStyle } : { width: "100%" }}
                 />
               </Form.Item>
             );
@@ -4754,6 +4766,7 @@ export const BusinessVerificationDetails: React.FC<
                   disabled={itemFieldReadOnly}
                   placeholder={itemField.placeholder || itemField.label}
                   autoSize={{ minRows: minRows }}
+                  style={readonlyItemFieldStyle}
                 />
               </Form.Item>
             );
@@ -4770,6 +4783,7 @@ export const BusinessVerificationDetails: React.FC<
                 disabled={itemFieldReadOnly}
                 placeholder={itemField.placeholder || itemField.label}
                 autoSize={{ minRows: 1 }}
+                style={readonlyItemFieldStyle}
               />
             </Form.Item>
           );
@@ -4781,7 +4795,7 @@ export const BusinessVerificationDetails: React.FC<
               name={fieldKey}
               label={itemField.label}
             >
-              <Radio.Group disabled={itemFieldReadOnly}>
+              <Radio.Group disabled={itemFieldReadOnly} style={readonlyItemFieldStyle}>
                 <Radio value={true}>Yes</Radio>
                 <Radio value={false}>No</Radio>
               </Radio.Group>
@@ -4799,6 +4813,7 @@ export const BusinessVerificationDetails: React.FC<
                 disabled={itemFieldReadOnly}
                 placeholder={itemField.placeholder || itemField.label}
                 autoSize={{ minRows: 1 }}
+                style={readonlyItemFieldStyle}
               />
             </Form.Item>
           );
