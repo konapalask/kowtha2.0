@@ -591,7 +591,7 @@ export class LoanController {
   }
 
   @Patch(":id/verification/:type")
-  @Roles(UserRole.Admin, UserRole.Verifier)
+  @Roles(UserRole.Admin, UserRole.Verifier, UserRole.VerificationExecutive)
   @ApiOperation({ summary: "Edit verification data" })
   @ApiResponse({
     status: 200,
