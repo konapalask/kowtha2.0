@@ -448,6 +448,31 @@ export const statement4Schema = {
         },
       },
     },
+    // Debit side (expenses/costs) - Left column
+    debit: [
+      "openingStockAssessed",
+      "purchasesAssessed",
+      "grandTotalExpenditure",
+      "electricity",
+      "rent",
+      "salaries",
+      "travellingCharges",
+      "otherExpenses",
+      "netProfit",
+      "totalPayments",
+      "netProfitMargin",
+    ],
+    // Credit side (income/receipts) - Right column
+    credit: [
+      "salesEstimated",
+      "servicesEstimated",
+      "closingStockEstimated",
+      "grandTotalIncome",
+      "grossProfitAssessed",
+      "byGrossProfitEstimated",
+      "gpMargin",
+      "npMargin",
+    ],
   },
 } as const;
 
