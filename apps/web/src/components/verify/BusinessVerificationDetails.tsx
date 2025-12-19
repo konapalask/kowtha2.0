@@ -2743,14 +2743,14 @@ export const BusinessVerificationDetails: React.FC<
     // Helper functions for financial analysis field grouping
     const isFinancialAnalysisSection = () => {
       // Exclude detailed financial analysis as it has its own special rendering
-      if (section.id === "financialAnalysisDetailed" || 
-          section.label?.toLowerCase().includes("detailed financial analysis with balance sheet")) {
+      if (section.id === "financialAnalysisDetailed") {
         return false;
       }
       return (
         section.id === "financialAnalysis" ||
         section.id === "financialAnalysisComprehensive" ||
-        section.label?.toLowerCase().includes("financial")
+        section.label?.toLowerCase().includes("financial") ||
+        section.label?.toLowerCase().includes("comprehensive actuals") 
       );
     };
 
