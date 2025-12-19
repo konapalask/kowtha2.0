@@ -1506,10 +1506,29 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
     }
   };
 
+  // Determine field order: if schema has debit/credit arrays, use them; otherwise use properties order
+  const getFieldOrder = (): string[] => {
+    const schemaAny = schema as any;
+    if (
+      schemaAny.credit &&
+      schemaAny.debit &&
+      Array.isArray(schemaAny.credit) &&
+      Array.isArray(schemaAny.debit)
+    ) {
+      // For financial schema: render credit first, then debit
+      return [...schemaAny.credit, ...schemaAny.debit];
+    }
+    // Default: use properties order
+    return Object.keys(schema.properties || {});
+  };
+
+  const fieldOrder = getFieldOrder();
+
   return (
     <>
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        {Object.entries(schema.properties || {}).map(([fieldId, property]) => {
+        {fieldOrder.map(fieldId => {
+          const property = schema.properties?.[fieldId];
           if (!property || !(property as any).type) {
             return (
               <View key={fieldId} style={styles.schemaErrorBox}>
