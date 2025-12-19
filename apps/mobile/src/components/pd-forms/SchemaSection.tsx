@@ -1516,7 +1516,15 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
       Array.isArray(schemaAny.debit)
     ) {
       // For financial schema: render credit first, then debit
-      return [...schemaAny.credit, ...schemaAny.debit];
+      const orderedFields = [...schemaAny.credit, ...schemaAny.debit];
+
+      // Include any properties not in debit/credit arrays (e.g., nested objects like balanceSheetleft/balanceSheetright)
+      const allPropertyKeys = Object.keys(schema.properties || {});
+      const missingFields = allPropertyKeys.filter(
+        key => !orderedFields.includes(key),
+      );
+
+      return [...orderedFields, ...missingFields];
     }
     // Default: use properties order
     return Object.keys(schema.properties || {});
