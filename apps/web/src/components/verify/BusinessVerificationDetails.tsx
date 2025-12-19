@@ -355,7 +355,7 @@ export const BusinessVerificationDetails: React.FC<
   const [formLoading, setFormLoading] = useState(true);
   const [dynamicFormData, setDynamicFormData] = useState<WebFormData>({});
 
-  // Local storage for VerificationExecutive saved sections (no API call)
+
   const [savedSectionData, setSavedSectionData] = useState<Record<string, any>>(
     {}
   );
@@ -1949,39 +1949,7 @@ export const BusinessVerificationDetails: React.FC<
           return;
         }
 
-        // For VerificationExecutive: Save locally only (no API call)
-        if (role === "VerificationExecutive") {
-          // Save to local state
-          setSavedSectionData((prev: any) => ({
-            ...prev,
-            [sectionId]: sectionData,
-          }));
 
-          // Update the form instance directly so saved values are immediately visible
-          const formInstance = formInstancesRef.current[sectionId];
-          if (formInstance) {
-            // Merge saved data with current form values to preserve any new changes
-            const currentFormValues = formInstance.getFieldsValue();
-            formInstance.setFieldsValue({
-              ...currentFormValues,
-              ...sectionData,
-            });
-          }
-
-          // Clear section uncommitted changes
-          setSectionUncommittedChanges((prev: any) => {
-            const newChanges = { ...prev };
-            delete newChanges[sectionId];
-            return newChanges;
-          });
-
-          message.success(
-            `Section "${schema?.sections?.find((s: any) => s.id === sectionId)?.label}" saved locally`
-          );
-          return;
-        }
-
-        // For Verifier/Admin: Save to backend API
         try {
           // Get all initial data (contains all sections from backend)
           const rawApiData =
@@ -2775,14 +2743,14 @@ export const BusinessVerificationDetails: React.FC<
     // Helper functions for financial analysis field grouping
     const isFinancialAnalysisSection = () => {
       // Exclude detailed financial analysis as it has its own special rendering
-      if (section.id === "financialAnalysisDetailed" || 
-          section.label?.toLowerCase().includes("detailed financial analysis with balance sheet")) {
+      if (section.id === "financialAnalysisDetailed") {
         return false;
       }
       return (
         section.id === "financialAnalysis" ||
         section.id === "financialAnalysisComprehensive" ||
-        section.label?.toLowerCase().includes("financial")
+        section.label?.toLowerCase().includes("financial") ||
+        section.label?.toLowerCase().includes("comprehensive actuals") 
       );
     };
 
@@ -4654,7 +4622,11 @@ export const BusinessVerificationDetails: React.FC<
               schema={schemaForm}
               formData={dynamicFormData}
               onEdit={handleDynamicSectionEdit}
-              readOnly={!!verificationData?.approvedStatus || hasEditRequest}
+              readOnly={
+                role === "VerificationExecutive"
+                  ? hasEditRequest 
+                  : !!verificationData?.approvedStatus || hasEditRequest // Others follow original logic
+              }
               activeSections={activeSections}
               setActiveSections={setActiveSections}
               role={role}
