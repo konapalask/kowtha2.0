@@ -1,3 +1,16 @@
+export const getFinancialYearEndingYear = (): number => {
+  const now = new Date();
+  const currentMonth = now.getMonth(); // 0-indexed: 0=Jan, 1=Feb, ..., 3=Apr, ..., 11=Dec
+  const currentYear = now.getFullYear();
+  
+  // If we're in April (3) or later, the financial year ending is next year
+  // If we're in Jan-Mar (0-2), the financial year ending is this year
+  if (currentMonth >= 3) {
+    return currentYear + 1;
+  } else {
+    return currentYear;
+  }
+}
 export const statement3Schema = {
   id: "financialAnalysis",
   label: "Comprehensive Actuals vs Estimated Analysis",
@@ -5,17 +18,16 @@ export const statement3Schema = {
     type: "object",
     properties: {
       // Header Information
-      synopsis: {
-        type: "string",
-        title: "Synopsis of the verification",
-        ui: { widget: "textarea", rows: 3 },
-      },
+      // synopsis: {
+      //   type: "string",
+      //   title: "Synopsis of the verification",
+      //   ui: { widget: "textarea", rows: 3 },
+      // },
       businessName: { type: "string", title: "Business Name", readOnly: true },
-
       // Opening Stock
       openingStock_2023: {
         type: "number",
-        title: `Opening Stock - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        title: `Opening Stock - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -26,7 +38,7 @@ export const statement3Schema = {
       },
       openingStock_2024: {
         type: "number",
-        title: `Opening Stock - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        title: `Opening Stock - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -50,7 +62,7 @@ export const statement3Schema = {
       // Purchases
       purchases_2023: {
         type: "number",
-        title: `Purchases - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        title: `Purchases - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -61,7 +73,7 @@ export const statement3Schema = {
       },
       purchases_2024: {
         type: "number",
-        title: `Purchases - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        title: `Purchases - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -85,7 +97,7 @@ export const statement3Schema = {
       // Gas & Liquid Items
       gasLiquidItems_2023: {
         type: "number",
-        title: `Gas & Liquid Items - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        title: `Gas & Liquid Items - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -96,7 +108,7 @@ export const statement3Schema = {
       },
       gasLiquidItems_2024: {
         type: "number",
-        title: `Gas & Liquid Items - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        title: `Gas & Liquid Items - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -120,7 +132,7 @@ export const statement3Schema = {
       // Gross Profit
       grossProfit_2023: {
         type: "number",
-        title: `Gross Profit - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        title: `Gross Profit - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
         formula: "sales_2023 + majuriCharges_2023 + closingStock_2023 - (openingStock_2023 + purchases_2023 + gasLiquidItems_2023)",
         readOnly: true,
         minimum: 0,
@@ -133,7 +145,7 @@ export const statement3Schema = {
       },
       grossProfit_2024: {
         type: "number",
-        title: `Gross Profit - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        title: `Gross Profit - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
         formula: "sales_2024 + majuriCharges_2024 + closingStock_2024 - (openingStock_2024 + purchases_2024 + gasLiquidItems_2024)",
         readOnly: true,
         minimum: 0,
@@ -161,7 +173,7 @@ export const statement3Schema = {
       // Sales (Income Side)
       sales_2023: {
         type: "number",
-        title: `Sales - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        title: `Sales - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -172,7 +184,7 @@ export const statement3Schema = {
       },
       sales_2024: {
         type: "number",
-        title: `Sales - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        title: `Sales - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -196,7 +208,7 @@ export const statement3Schema = {
       // Majuri Charges
       majuriCharges_2023: {
         type: "number",
-        title: `Majuri Charges - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        title: `Majuri Charges - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -207,7 +219,7 @@ export const statement3Schema = {
       },
       majuriCharges_2024: {
         type: "number",
-        title: `Majuri Charges - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        title: `Majuri Charges - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -231,7 +243,7 @@ export const statement3Schema = {
       // Closing Stock
       closingStock_2023: {
         type: "number",
-        title: `Closing Stock - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        title: `Closing Stock - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -242,7 +254,7 @@ export const statement3Schema = {
       },
       closingStock_2024: {
         type: "number",
-        title: `Closing Stock - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        title: `Closing Stock - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -266,7 +278,7 @@ export const statement3Schema = {
       // Indirect Expenses (Estimated Only)
       salaries_2023: {
         type: "number",
-        title: `Salaries - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        title: `Salaries - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -277,7 +289,7 @@ export const statement3Schema = {
       },
       salaries_2024: {
         type: "number",
-        title: `Salaries - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        title: `Salaries - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -299,7 +311,7 @@ export const statement3Schema = {
       },
       bonus_2023: {
         type: "number",
-        title: `Bonus - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        title: `Bonus - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -310,7 +322,7 @@ export const statement3Schema = {
       },
       bonus_2024: {
         type: "number",
-        title: `Bonus - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        title: `Bonus - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -332,7 +344,7 @@ export const statement3Schema = {
       },
       electricityCharges_2023: {
         type: "number",
-        title: `Electricity Charges - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        title: `Electricity Charges - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -343,7 +355,7 @@ export const statement3Schema = {
       },
       electricityCharges_2024: {
         type: "number",
-        title: `Electricity Charges - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        title: `Electricity Charges - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -365,7 +377,7 @@ export const statement3Schema = {
       },
       sadar_2023: {
         type: "number",
-        title: `Sadar - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        title: `Sadar - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -376,7 +388,7 @@ export const statement3Schema = {
       },
       sadar_2024: {
         type: "number",
-        title: `Sadar - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        title: `Sadar - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -398,7 +410,7 @@ export const statement3Schema = {
       },
       coalGasLiquid_2023: { 
         type: "number",
-        title: `Coal, Gas & Liquid - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        title: `Coal, Gas & Liquid - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -409,7 +421,7 @@ export const statement3Schema = {
       },
       coalGasLiquid_2024: {
         type: "number",
-        title: `Coal, Gas & Liquid - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        title: `Coal, Gas & Liquid - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -431,7 +443,7 @@ export const statement3Schema = {
       },
       sparesMachinery_2023: {
         type: "number",
-        title: `Spares & Machinery - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        title: `Spares & Machinery - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -442,7 +454,7 @@ export const statement3Schema = {
       },
       sparesMachinery_2024: {
         type: "number",
-        title: `Spares & Machinery - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        title: `Spares & Machinery - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -464,7 +476,7 @@ export const statement3Schema = {
       },
       bankInterest_2023: {
         type: "number",
-        title: `Bank Interest - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        title: `Bank Interest - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -475,7 +487,7 @@ export const statement3Schema = {
       },
       bankInterest_2024: {
         type: "number",
-          title: `Bank Interest - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+          title: `Bank Interest - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -497,7 +509,7 @@ export const statement3Schema = {
       },
       bankCharges_2023: {
         type: "number",
-        title: `Bank Charges - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        title: `Bank Charges - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -508,7 +520,7 @@ export const statement3Schema = {
       },
       bankCharges_2024: {
         type: "number",
-        title: `Bank Charges - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        title: `Bank Charges - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -530,7 +542,7 @@ export const statement3Schema = {
       },
       financeCharges_2023: {
         type: "number",
-        title: `Finance Charges/Professional Tax - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        title: `Finance Charges/Professional Tax - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -541,7 +553,7 @@ export const statement3Schema = {
       },
       financeCharges_2024: {
         type: "number",
-        title: `Finance Charges/Professional Tax - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        title: `Finance Charges/Professional Tax - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -563,7 +575,7 @@ export const statement3Schema = {
       },
       shopRents_2023: {
         type: "number",
-        title: `Shop Rents - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        title: `Shop Rents - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -574,7 +586,7 @@ export const statement3Schema = {
       },
       shopRents_2024: {
         type: "number",
-        title: `Shop Rents - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        title: `Shop Rents - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -596,7 +608,7 @@ export const statement3Schema = {
       },
       gstLateFee_2023: {
         type: "number",
-        title: `GST Late Fee - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        title: `GST Late Fee - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -607,7 +619,7 @@ export const statement3Schema = {
       },
       gstLateFee_2024: {
         type: "number",
-        title: `GST Late Fee - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        title: `GST Late Fee - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -629,7 +641,7 @@ export const statement3Schema = {
       },
       auditorFee_2023: {
         type: "number",
-        title: `Auditor Fee - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        title: `Auditor Fee - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -640,7 +652,7 @@ export const statement3Schema = {
       },
       auditorFee_2024: {
         type: "number",
-        title: `Auditor Fee - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        title: `Auditor Fee - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -662,7 +674,7 @@ export const statement3Schema = {
       },
       telephoneCharges_2023: {
         type: "number",
-        title: `Telephone Charges - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        title: `Telephone Charges - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -673,7 +685,7 @@ export const statement3Schema = {
       },
       telephoneCharges_2024: {
         type: "number",
-          title: `Telephone Charges - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+          title: `Telephone Charges - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -695,7 +707,7 @@ export const statement3Schema = {
       },
       travellingExp_2023: {
         type: "number",
-        title: `Travelling Exp/Transport - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        title: `Travelling Exp/Transport - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -706,7 +718,7 @@ export const statement3Schema = {
       },
       travellingExp_2024: {
         type: "number",
-        title: `Travelling Exp/Transport - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        title: `Travelling Exp/Transport - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -728,7 +740,7 @@ export const statement3Schema = {
       },
       vehicleMaintenance_2023: {
         type: "number",
-        title: `Vehicle Maintenance & machinery - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        title: `Vehicle Maintenance & machinery - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -739,7 +751,7 @@ export const statement3Schema = {
       },
       vehicleMaintenance_2024: {
         type: "number",
-        title: `Vehicle Maintenance & machinery - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        title: `Vehicle Maintenance & machinery - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -761,7 +773,7 @@ export const statement3Schema = {
       },
       depreciation_2023: {
         type: "number",
-        title: `Depreciation - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        title: `Depreciation - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -772,7 +784,7 @@ export const statement3Schema = {
       },
       depreciation_2024: {
         type: "number",
-        title: `Depreciation - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        title: `Depreciation - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -794,7 +806,7 @@ export const statement3Schema = {
       },
       interest_2023: {
         type: "number",
-        title: `Interest - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        title: `Interest - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -805,7 +817,7 @@ export const statement3Schema = {
       },
       interest_2024: {
         type: "number",
-        title: `Interest - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        title: `Interest - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -827,7 +839,7 @@ export const statement3Schema = {
       },
       netProfit_2023: {
         type: "number",
-        title: `Net Profit - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        title: `Net Profit - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
         formula: "grossProfit_2023 - (salaries_2023 + bonus_2023 + electricityCharges_2023 + sadar_2023 + coalGasLiquid_2023 + sparesMachinery_2023 + bankInterest_2023 + bankCharges_2023 + financeCharges_2023 + shopRents_2023 + gstLateFee_2023 + auditorFee_2023 + telephoneCharges_2023 + travellingExp_2023 + vehicleMaintenance_2023 + depreciation_2023 + interest_2023)",
         readOnly: true,
         minimum: 0,
@@ -840,7 +852,7 @@ export const statement3Schema = {
       },
       netProfit_2024: {
         type: "number",
-        title: `Net Profit - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        title: `Net Profit - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
         formula: "grossProfit_2024 - (salaries_2024 + bonus_2024 + electricityCharges_2024 + sadar_2024 + coalGasLiquid_2024 + sparesMachinery_2024 + bankInterest_2024 + bankCharges_2024 + financeCharges_2024 + shopRents_2024 + gstLateFee_2024 + auditorFee_2024 + telephoneCharges_2024 + travellingExp_2024 + vehicleMaintenance_2024 + depreciation_2024 + interest_2024)",
         readOnly: true,
         minimum: 0,
@@ -868,7 +880,7 @@ export const statement3Schema = {
       // Total (Left And Right)
       total_2023_left: {
         type: "number",
-        title: `Total - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        title: `Total - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
         formula: "openingStock_2023 + purchases_2023 + gasLiquidItems_2023 + grossProfit_2023 + salaries_2023 + bonus_2023 + electricityCharges_2023 + sadar_2023 + coalGasLiquid_2023 + sparesMachinery_2023 + bankInterest_2023 + bankCharges_2023 + financeCharges_2023 + shopRents_2023 + gstLateFee_2023 + auditorFee_2023 + telephoneCharges_2023 + travellingExp_2023 + vehicleMaintenance_2023 + depreciation_2023 + interest_2023 + netProfit_2023",
         readOnly: true,
         minimum: 0,
@@ -881,7 +893,7 @@ export const statement3Schema = {
       },
       total_2024_left: {
         type: "number",
-        title: `Total - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        title: `Total - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
         formula: "openingStock_2024 + purchases_2024 + gasLiquidItems_2024 + grossProfit_2024 + salaries_2024 + bonus_2024 + electricityCharges_2024 + sadar_2024 + coalGasLiquid_2024 + sparesMachinery_2024 + bankInterest_2024 + bankCharges_2024 + financeCharges_2024 + shopRents_2024 + gstLateFee_2024 + auditorFee_2024 + telephoneCharges_2024 + travellingExp_2024 + vehicleMaintenance_2024 + depreciation_2024 + interest_2024 + netProfit_2024",
         readOnly: true,
         minimum: 0,
@@ -907,7 +919,7 @@ export const statement3Schema = {
       },
       total_2023_right: {
         type: "number",
-        title: `Total - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+        title: `Total - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
         formula: "sales_2023 + majuriCharges_2023 + closingStock_2023 + grossProfit_2023",
         readOnly: true,
         minimum: 0,
@@ -920,7 +932,7 @@ export const statement3Schema = {
       },  
       total_2024_right: {
         type: "number",
-        title: `Total - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+        title: `Total - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
         formula: "sales_2024 + majuriCharges_2024 + closingStock_2024 + grossProfit_2024",
         readOnly: true,
         minimum: 0,
@@ -944,76 +956,6 @@ export const statement3Schema = {
           minDecimalPlaces: 0,
         },
       },
-
-      // Monthly Calculations
-      monthlyTurnover: {
-        type: "number",
-        title: "Monthly Turnover",
-        formula: "(salesEstimated) / 12",
-        readOnly: true,
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      monthlyPayments: {
-        type: "number",
-        title: "Monthly Payments",
-        formula: "monthlyTurnover - (monthlyNetProfit)",
-        readOnly: true,
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      monthlyNetProfit: {
-        type: "number",
-        title: "Monthly Net Profit",
-        formula: "netProfitEstimated / 12",
-        readOnly: true,
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-
-      // Margin Percentages
-      gpPercentage: {
-        type: "number",
-        title: "Gross Profit %",
-        formula: "grossProfitEstimated / (salesEstimated+majuriChargesEstimated+closingStockEstimated)",
-        readOnly: true,
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      npPercentage: {
-        type: "number",
-        title: "Net Profit %",
-        formula: "netProfitEstimated / (salesEstimated+majuriChargesEstimated+closingStockEstimated)",
-        readOnly: true,
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-
       // Balance Sheet
       balanceSheetleft: {
         type: "object",
@@ -1021,7 +963,7 @@ export const statement3Schema = {
         properties: {
           capital_2023: {
             type: "number",
-            title: `Capital - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+            title: `Capital - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1032,7 +974,7 @@ export const statement3Schema = {
           },
           capital_2024: {
             type: "number",
-            title: `Capital - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+            title: `Capital - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1054,7 +996,7 @@ export const statement3Schema = {
           },
           sbiCc_2023: {
             type: "number",
-            title: `SBI CC - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+            title: `SBI CC - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1065,7 +1007,7 @@ export const statement3Schema = {
           },
           sbiCc_2024: {
             type: "number",
-            title: `SBI CC - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+            title: `SBI CC - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1087,7 +1029,7 @@ export const statement3Schema = {
           },
           hdfcVl_2023: {
             type: "number",
-            title: `HDFC VL - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+            title: `HDFC VL - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1098,7 +1040,7 @@ export const statement3Schema = {
           },
           hdfcVl_2024: {
             type: "number",
-            title: `HDFC VL - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+            title: `HDFC VL - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1120,7 +1062,7 @@ export const statement3Schema = {
           },
           sundryCreditors_2023: {
             type: "number",
-            title: `Sundry Creditors - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+            title: `Sundry Creditors - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1131,7 +1073,7 @@ export const statement3Schema = {
           },
           sundryCreditors_2024: {
             type: "number",
-            title: `Sundry Creditors - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+            title: `Sundry Creditors - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1153,7 +1095,7 @@ export const statement3Schema = {
           },
           provAuditorFee_2023: {
             type: "number",
-            title: `Prov Auditor Fee - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+            title: `Prov Auditor Fee - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1164,7 +1106,7 @@ export const statement3Schema = {
           },
           provAuditorFee_2024: {
             type: "number",
-            title: `Prov Auditor Fee - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+            title: `Prov Auditor Fee - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1186,7 +1128,7 @@ export const statement3Schema = {
           },
           growthScoreLoan_2023: {
             type: "number",
-            title: `Growth Score Loan - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+            title: `Growth Score Loan - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1197,7 +1139,7 @@ export const statement3Schema = {
           },
           growthScoreLoan_2024: {
             type: "number",
-            title: `Growth Score Loan - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+            title: `Growth Score Loan - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1219,7 +1161,7 @@ export const statement3Schema = {
           },
           poonwalaFincorp_2023: {
             type: "number",
-            title: `Poonwala Fincorp - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+            title: `Poonwala Fincorp - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1230,7 +1172,7 @@ export const statement3Schema = {
           },
           poonwalaFincorp_2024: {
             type: "number",
-            title: `Poonwala Fincorp - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+            title: `Poonwala Fincorp - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1252,7 +1194,7 @@ export const statement3Schema = {
           },
           lendingKartLoan_2023: {
             type: "number",
-            title: `Lending Kart Loan - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+            title: `Lending Kart Loan - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1263,7 +1205,7 @@ export const statement3Schema = {
           },
           lendingKartLoan_2024: {
             type: "number",
-            title: `Lending Kart Loan - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+            title: `Lending Kart Loan - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1285,7 +1227,7 @@ export const statement3Schema = {
           },
           tdsTcsPayable_2023: {
             type: "number",
-            title: `TDS/TCS Payable - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+            title: `TDS/TCS Payable - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1296,7 +1238,7 @@ export const statement3Schema = {
           },
           tdsTcsPayable_2024: {
             type: "number",
-            title: `TDS/TCS Payable - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+            title: `TDS/TCS Payable - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1318,7 +1260,7 @@ export const statement3Schema = {
           },
           total_2023: {
             type: "number",
-            title: `Total - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+            title: `Total - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
             formula: "capital_2023 + sbiCc_2023 + hdfcVl_2023 + sundryCreditors_2023 + provAuditorFee_2023 + growthScoreLoan_2023 + poonwalaFincorp_2023 + lendingKartLoan_2023 + tdsTcsPayable_2023",
             readOnly: true,
             minimum: 0,
@@ -1331,7 +1273,7 @@ export const statement3Schema = {
           },
           total_2024: {
             type: "number",
-            title: `Total - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+            title: `Total - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
             formula: "capital_2024 + sbiCc_2024 + hdfcVl_2024 + sundryCreditors_2024 + provAuditorFee_2024 + growthScoreLoan_2024 + poonwalaFincorp_2024 + lendingKartLoan_2024 + tdsTcsPayable_2024",
             readOnly: true,
             minimum: 0,
@@ -1363,7 +1305,7 @@ export const statement3Schema = {
         properties: {
           cashOnHand_2023: {
             type: "number",
-            title: `Cash on Hand - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+            title: `Cash on Hand - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1374,7 +1316,7 @@ export const statement3Schema = {
           },
           cashOnHand_2024: {
             type: "number",
-            title: `Cash on Hand - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+            title: `Cash on Hand - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1396,7 +1338,7 @@ export const statement3Schema = {
           },
           federalBank_2023: {
             type: "number",
-            title: `Federal bank - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+            title: `Federal bank - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1407,7 +1349,7 @@ export const statement3Schema = {
           },
           federalBank_2024: {
             type: "number",
-            title: `Federal bank - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+            title: `Federal bank - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1429,7 +1371,7 @@ export const statement3Schema = {
           },
           sbhCaHdfcCa_2023: {
             type: "number",
-            title: `SBH CA/HDFC CA - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+            title: `SBH CA/HDFC CA - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1440,7 +1382,7 @@ export const statement3Schema = {
           },
           sbhCaHdfcCa_2024: {
             type: "number",
-            title: `SBH CA/HDFC CA - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+            title: `SBH CA/HDFC CA - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1462,7 +1404,7 @@ export const statement3Schema = {
           },
           sbhSbHdfcSb_2023: {
             type: "number",
-            title: `SBH SB/ HDFC SB - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+            title: `SBH SB/ HDFC SB - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1473,7 +1415,7 @@ export const statement3Schema = {
           },
           sbhSbHdfcSb_2024: {
             type: "number",
-            title: `SBH SB/ HDFC SB - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+            title: `SBH SB/ HDFC SB - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1495,7 +1437,7 @@ export const statement3Schema = {
           },
           karnatakaBank_2023: {
             type: "number",
-            title: `KARNATAKA BANK - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+            title: `KARNATAKA BANK - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1506,7 +1448,7 @@ export const statement3Schema = {
           },
           karnatakaBank_2024: {
             type: "number",
-            title: `KARNATAKA BANK - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+            title: `KARNATAKA BANK - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1528,7 +1470,7 @@ export const statement3Schema = {
           },
           furniture_2023: {
             type: "number",
-            title: `Furniture - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+            title: `Furniture - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1539,7 +1481,7 @@ export const statement3Schema = {
           },
           furniture_2024: {
             type: "number",
-            title: `Furniture - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+            title: `Furniture - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1561,7 +1503,7 @@ export const statement3Schema = {
           },
           eleWeightsMeasurements_2023: {
             type: "number",
-            title: `Measurements - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+            title: `Measurements - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1572,7 +1514,7 @@ export const statement3Schema = {
           },
           eleWeightsMeasurements_2024: {
             type: "number",
-            title: `Measurements - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+            title: `Measurements - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1594,7 +1536,7 @@ export const statement3Schema = {
           },
           machinery_2023: {
             type: "number",
-            title: `Machinery - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+            title: `Machinery - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1605,7 +1547,7 @@ export const statement3Schema = {
           },
           machinery_2024: {
             type: "number",
-            title: `Machinery - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+            title: `Machinery - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1627,7 +1569,7 @@ export const statement3Schema = {
           },
           car_2023: {
             type: "number",
-            title: `Car - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+            title: `Car - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1638,7 +1580,7 @@ export const statement3Schema = {
           },
           car_2024: {
             type: "number",
-            title: `Car - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+            title: `Car - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1660,7 +1602,7 @@ export const statement3Schema = {
           },
           openPlots_2023: {
             type: "number",
-            title: `Open Plots - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+            title: `Open Plots - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1671,7 +1613,7 @@ export const statement3Schema = {
           },
           openPlots_2024: {
             type: "number",
-            title: `Open Plots - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+            title: `Open Plots - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1693,7 +1635,7 @@ export const statement3Schema = {
           },
           houseProperty_2023: {
             type: "number",
-            title: `House Property - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+            title: `House Property - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1704,7 +1646,7 @@ export const statement3Schema = {
           },
           houseProperty_2024: {
             type: "number",
-            title: `House Property - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+            title: `House Property - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1726,7 +1668,7 @@ export const statement3Schema = {
           },
           houseConstruction_2023: {
             type: "number",
-            title: `HouseConstruction - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+            title: `HouseConstruction - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1737,7 +1679,7 @@ export const statement3Schema = {
           },
           houseConstruction_2024: {
             type: "number",
-            title: `HouseConstruction - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+            title: `HouseConstruction - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1759,7 +1701,7 @@ export const statement3Schema = {
           },
           closingStock_2023: {
             type: "number",
-            title: `Closing Stock - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+            title: `Closing Stock - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1770,7 +1712,7 @@ export const statement3Schema = {
           },
           closingStock_2024: {
             type: "number",
-            title: `Closing Stock - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+            title: `Closing Stock - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1792,7 +1734,7 @@ export const statement3Schema = {
           },
           gstReceivable_2023: {
             type: "number",
-            title: `GST Receivable - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+            title: `GST Receivable - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1803,7 +1745,7 @@ export const statement3Schema = {
           },
           gstReceivable_2024: {
             type: "number",
-            title: `GST Receivable - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+            title: `GST Receivable - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1825,7 +1767,7 @@ export const statement3Schema = {
           },
           deposits_2023: {
             type: "number",
-            title: `Deposits - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+            title: `Deposits - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1836,7 +1778,7 @@ export const statement3Schema = {
           },
           deposits_2024: {
             type: "number",
-            title: `Deposits - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+            title: `Deposits - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1858,7 +1800,7 @@ export const statement3Schema = {
           },
           sundryDebtors_2023: {
             type: "number",
-            title: `Sundry Debtors - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+            title: `Sundry Debtors - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1869,7 +1811,7 @@ export const statement3Schema = {
           },
           sundryDebtors_2024: {
             type: "number",
-            title: `Sundry Debtors - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+            title: `Sundry Debtors - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
             minimum: 0,
             formatter: {
               useIndianFormat: true,
@@ -1891,7 +1833,7 @@ export const statement3Schema = {
           },
           total_2023: {
             type: "number",
-            title: `Total - Actuals as on 31/03/${new Date().getFullYear() - 2}`,
+            title: `Total - Actuals as on 31/03/${getFinancialYearEndingYear() - 2}`,
             formula: "cashOnHand_2023 + federalBank_2023 + sbhCaHdfcCa_2023 + sbhSbHdfcSb_2023 + karnatakaBank_2023 + furniture_2023 + eleWeightsMeasurements_2023 + machinery_2023 + car_2023 + openPlots_2023 + houseProperty_2023 + houseConstruction_2023 + closingStock_2023 + gstReceivable_2023 + deposits_2023 + sundryDebtors_2023",
             readOnly: true,
             minimum: 0,
@@ -1904,7 +1846,7 @@ export const statement3Schema = {
           },
           total_2024: {
             type: "number",
-            title: `Total - Actuals as on 31/03/${new Date().getFullYear() - 1}`,
+            title: `Total - Actuals as on 31/03/${getFinancialYearEndingYear() - 1}`,
             formula: "cashOnHand_2024 + federalBank_2024 + sbhCaHdfcCa_2024 + sbhSbHdfcSb_2024 + karnatakaBank_2024 + furniture_2024 + eleWeightsMeasurements_2024 + machinery_2024 + car_2024 + openPlots_2024 + houseProperty_2024 + houseConstruction_2024 + closingStock_2024 + gstReceivable_2024 + deposits_2024 + sundryDebtors_2024",
             readOnly: true,
             minimum: 0,
@@ -1933,6 +1875,7 @@ export const statement3Schema = {
     },
     // Debit side (expenses/costs) - Left column
     debit: [
+      "businessName",
       "openingStock_2023",
       "openingStock_2024",
       "openingStockEstimated",

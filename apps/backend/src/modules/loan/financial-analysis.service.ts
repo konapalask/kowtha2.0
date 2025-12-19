@@ -808,7 +808,7 @@ export class FinancialAnalysisTemplatesService {
 
     // Title
     const titleRow = worksheet.addRow([
-      `M/s. ${financialAnalysis.businessName || loan.applicantName || "XXX"}`,
+      `Business Name: ${financialAnalysis.businessName || loan.applicantName || "XXX"}`,
     ]);
     worksheet.mergeCells("A1:H1");
     titleRow.font = { bold: true, size: 14 };
@@ -1219,87 +1219,6 @@ export class FinancialAnalysisTemplatesService {
       true
     );
 
-    // Monthly Calculations Section (Right side - starting from J8)
-    const monthlyHeaderRow = worksheet.getRow(8);
-    monthlyHeaderRow.getCell(10).value = "Monthly Calculations";
-    worksheet.mergeCells(`J8:K8`);
-    monthlyHeaderRow.getCell(10).font = { bold: true, size: 12 };
-    monthlyHeaderRow.getCell(10).alignment = { horizontal: "center" };
-    monthlyHeaderRow.getCell(10).fill = {
-      type: "pattern",
-      pattern: "solid",
-      fgColor: { argb: "FFD9E1F2" },
-    };
-    this.applyBorder(monthlyHeaderRow.getCell(10));
-
-    const monthlyDataRow = worksheet.getRow(9);
-    monthlyDataRow.getCell(10).value = "Monthly Turnover";
-    monthlyDataRow.getCell(11).value = getValue("monthlyTurnover");
-    monthlyDataRow.getCell(10).font = { bold: true };
-    this.applyBorder(monthlyDataRow.getCell(10));
-    this.applyBorder(monthlyDataRow.getCell(11));
-    monthlyDataRow.getCell(11).alignment = { horizontal: "right" };
-    if (monthlyDataRow.getCell(11).value && typeof monthlyDataRow.getCell(11).value === "number") {
-      monthlyDataRow.getCell(11).numFmt = "#,##0.00";
-    }
-
-    const monthlyNetProfitRow = worksheet.getRow(10);
-    monthlyNetProfitRow.getCell(10).value = "Monthly Net Profit";
-    monthlyNetProfitRow.getCell(11).value = getValue("monthlyNetProfit");
-    monthlyNetProfitRow.getCell(10).font = { bold: true };
-    this.applyBorder(monthlyNetProfitRow.getCell(10));
-    this.applyBorder(monthlyNetProfitRow.getCell(11));
-    monthlyNetProfitRow.getCell(11).alignment = { horizontal: "right" };
-    if (monthlyNetProfitRow.getCell(11).value && typeof monthlyNetProfitRow.getCell(11).value === "number") {
-      monthlyNetProfitRow.getCell(11).numFmt = "#,##0.00";
-    }
-
-    const monthlyPaymentsRow = worksheet.getRow(11);
-    monthlyPaymentsRow.getCell(10).value = "Monthly Payments";
-    monthlyPaymentsRow.getCell(11).value = getValue("monthlyPayments");
-    monthlyPaymentsRow.getCell(10).font = { bold: true };
-    this.applyBorder(monthlyPaymentsRow.getCell(10));
-    this.applyBorder(monthlyPaymentsRow.getCell(11));
-    monthlyPaymentsRow.getCell(11).alignment = { horizontal: "right" };
-    if (monthlyPaymentsRow.getCell(11).value && typeof monthlyPaymentsRow.getCell(11).value === "number") {
-      monthlyPaymentsRow.getCell(11).numFmt = "#,##0.00";
-    }
-
-    // Margin Percentages Section (Right side - continuing the flow)
-    const marginHeaderRow = worksheet.getRow(12);
-    marginHeaderRow.getCell(10).value = "Margin Percentages";
-    worksheet.mergeCells(`J12:K12`);
-    marginHeaderRow.getCell(10).font = { bold: true, size: 12 };
-    marginHeaderRow.getCell(10).alignment = { horizontal: "center" };
-    marginHeaderRow.getCell(10).fill = {
-      type: "pattern",
-      pattern: "solid",
-      fgColor: { argb: "FFD9E1F2" },
-    };
-    this.applyBorder(marginHeaderRow.getCell(10));
-
-    const marginDataRow = worksheet.getRow(13);
-    marginDataRow.getCell(10).value = "Gross Profit %";
-    marginDataRow.getCell(11).value = getValue("gpPercentage");
-    marginDataRow.getCell(10).font = { bold: true };
-    this.applyBorder(marginDataRow.getCell(10));
-    this.applyBorder(marginDataRow.getCell(11));
-    marginDataRow.getCell(11).alignment = { horizontal: "right" };
-    if (marginDataRow.getCell(11).value && typeof marginDataRow.getCell(11).value === "number") {
-      marginDataRow.getCell(11).numFmt = "0.00";
-    }
-    
-    const marginNetProfitRow = worksheet.getRow(14);
-    marginNetProfitRow.getCell(10).value = "Net Profit %";
-    marginNetProfitRow.getCell(11).value = getValue("npPercentage");
-    marginNetProfitRow.getCell(10).font = { bold: true };
-    this.applyBorder(marginNetProfitRow.getCell(10));
-    this.applyBorder(marginNetProfitRow.getCell(11));
-    marginNetProfitRow.getCell(11).alignment = { horizontal: "right" };
-    if (marginNetProfitRow.getCell(11).value && typeof marginNetProfitRow.getCell(11).value === "number") {
-      marginNetProfitRow.getCell(11).numFmt = "0.00";
-    }
-
     // Empty rows before balance sheet
     worksheet.addRow([]);
     worksheet.addRow([]);
@@ -1623,7 +1542,7 @@ export class FinancialAnalysisTemplatesService {
 
     // Title
     const titleRow = worksheet.addRow([
-      `M/s. ${financialAnalysis.businessName || loan.applicantName || "XXX"}`,
+      `Business Name: ${financialAnalysis.businessName || loan.applicantName || "XXX"}`,
     ]);
     worksheet.mergeCells("A1:D1");
     titleRow.font = { bold: true, size: 14 };
@@ -1631,7 +1550,7 @@ export class FinancialAnalysisTemplatesService {
 
     // Partners row
     const partnerRow = worksheet.addRow([
-      `Partners : ${financialAnalysis.partnersNames || "XXX"}`,
+      `Proprietor/Partner/Director: ${financialAnalysis.partnersNames || "XXX"}`,
     ]);
     worksheet.mergeCells("A2:D2");
     partnerRow.font = { bold: true, size: 11 };
@@ -1987,121 +1906,6 @@ export class FinancialAnalysisTemplatesService {
     //   "Additional Property",
     //   getBalanceSheetValue("additionalProperty")
     // );
-
-    // // Empty rows before payment calculations
-    // worksheet.addRow([]);
-    // worksheet.addRow([]);
-
-    // Payment Calculations Section
-    const paymentHeaderRow = worksheet.addRow([
-      "Payment Calculations",
-      "",
-      "",
-      "",
-    ]);
-    const paymentHeaderRowNum = paymentHeaderRow.number;
-    worksheet.mergeCells(`A${paymentHeaderRowNum}:D${paymentHeaderRowNum}`);
-    paymentHeaderRow.getCell(1).font = { bold: true, size: 12 };
-    paymentHeaderRow.getCell(1).alignment = { horizontal: "center" };
-    paymentHeaderRow.getCell(1).fill = {
-      type: "pattern",
-      pattern: "solid",
-      fgColor: { argb: "FFD9E1F2" },
-    };
-    this.applyBorder(paymentHeaderRow.getCell(1));
-
-    const totalPaymentsRow = worksheet.addRow([
-      "Total Payments",
-      getValue("totalPayments"),
-      "",
-      "",
-    ]);
-    totalPaymentsRow.getCell(1).font = { bold: true };
-    totalPaymentsRow.eachCell((cell, colNumber) => {
-      this.applyBorder(cell);
-      if (colNumber === 2) {
-        cell.alignment = { horizontal: "right" };
-        if (cell.value && typeof cell.value === "number") {
-          cell.numFmt = "#,##0.00";
-        }
-      }
-    });
-
-    // Empty rows before margins
-    worksheet.addRow([]);
-
-    // Margin Percentages Section
-    const marginHeaderRow = worksheet.addRow([
-      "Margin Percentages",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-    ]);
-    const marginHeaderRowNum = marginHeaderRow.number;
-    worksheet.mergeCells(`A${marginHeaderRowNum}:D${marginHeaderRowNum}`);
-    marginHeaderRow.getCell(1).font = { bold: true, size: 12 };
-    marginHeaderRow.getCell(1).alignment = { horizontal: "center" };
-    marginHeaderRow.getCell(1).fill = {
-      type: "pattern",
-      pattern: "solid",
-      fgColor: { argb: "FFD9E1F2" },
-    };
-    this.applyBorder(marginHeaderRow.getCell(1));
-
-    const gpMarginRow = worksheet.addRow([
-      "GP Margin %",
-      "",
-      "",
-      getValue("gpMargin"),
-    ]);
-    gpMarginRow.getCell(1).font = { bold: true };
-    gpMarginRow.eachCell((cell, colNumber) => {
-      this.applyBorder(cell);
-      if (colNumber === 4) {
-        cell.alignment = { horizontal: "right" };
-        if (cell.value && typeof cell.value === "number") {
-          cell.numFmt = "0.00";
-        }
-      }
-    });
-
-    const npMarginRow = worksheet.addRow([
-      "NP Margin %",
-      "",
-      "",
-      getValue("npMargin"),
-    ]);
-    npMarginRow.getCell(1).font = { bold: true };
-    npMarginRow.eachCell((cell, colNumber) => {
-      this.applyBorder(cell);
-      if (colNumber === 4) {
-        cell.alignment = { horizontal: "right" };
-        if (cell.value && typeof cell.value === "number") {
-          cell.numFmt = "0.00";
-        }
-      }
-    });
-
-    const netProfitMarginRow = worksheet.addRow([
-      "Net Profit Margin",
-      "",
-      "",
-      getValue("netProfitMargin"),
-    ]);
-    netProfitMarginRow.getCell(1).font = { bold: true };
-    netProfitMarginRow.eachCell((cell, colNumber) => {
-      this.applyBorder(cell);
-      if (colNumber === 4) {
-        cell.alignment = { horizontal: "right" };
-        if (cell.value && typeof cell.value === "number") {
-          cell.numFmt = "#,##0.00";
-        }
-      }
-    });
 
     await this.addSignature(workbook, worksheet);
     return await this.finalizeWorkbook(workbook, loan.id);
