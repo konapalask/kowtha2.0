@@ -278,6 +278,34 @@ export const statement2Schema = {
         },
       },
     },
+    // Debit side (expenses/costs) - Left column
+    debit: [
+      "costOfMaterialConsumed",
+      "costToReceiptsPercentage",
+      "salary",
+      "rent",
+      "electricity",
+      "travelling",
+      "otherExpenses",
+      "expenditureSubtotal",
+      "netProfitBeforeInterestTaxDepreciation",
+      "pbditMargin",
+      "financeExpenses",
+      "netProfitBeforeTaxDepreciation",
+      "depreciation",
+      "netProfitBeforeTax",
+      "incomeTax",
+      "netProfitAfterTax",
+      "totalExpensesInclCostOfSales",
+    ],
+    // Credit side (income/receipts) - Right column
+    credit: [
+      "grossReceipts",
+      "otherIncome",
+      "incomeSubtotal",
+      "grossProfitAsPerAssumption",
+      "gpRatio",
+    ],
   },
 } as const;
 
