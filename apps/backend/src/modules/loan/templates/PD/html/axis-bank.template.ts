@@ -441,7 +441,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
         <table style="${tableStyle}">
             <tr>
                 <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>PD Officer Name</strong></p></td>
-                <td colspan="3" style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>${html_data.verifierName || ""}</strong></p></td>
+                <td colspan="3" style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>${html_data.fieldExecutive || ""}</strong></p></td>
             </tr>
             <tr>
                 <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>PD Officer Signature</strong></p></td>

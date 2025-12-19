@@ -214,6 +214,7 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
   const applicantsMainBankingDetails =
     source.applicantsMainBankingDetails ?? {};
   const rawBankingDetails = applicantsMainBankingDetails?.bankingDetails;
+  const endUseOfLoan = source.endUse?.endUse;
   const bankingEntries =
     Array.isArray(rawBankingDetails) && rawBankingDetails.length > 0
       ? rawBankingDetails
@@ -286,13 +287,19 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
     {
       label: "<strong>About Applicant:</strong>",
       value: familyDetails?.aboutApplicant
-        ? familyDetails?.aboutApplicant.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("")
+        ? familyDetails?.aboutApplicant
+            .split("\n")
+            .map((line: string) => `<ul><li>${line}</li></ul>`)
+            .join("")
         : "",
     },
     {
       label: "<strong>About Co-applicant:</strong>",
       value: familyDetails?.aboutCoApplicant
-        ? familyDetails.aboutCoApplicant.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("")
+        ? familyDetails.aboutCoApplicant
+            .split("\n")
+            .map((line: string) => `<ul><li>${line}</li></ul>`)
+            .join("")
         : "",
     },
     {
@@ -357,7 +364,9 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
     <div class="template-content">
       ${renderParagraph(
         `<strong>LOS ID:</strong> ${losId || ""}${
-          dateOfVisit ? `&nbsp;&nbsp;<strong>Dated:</strong> ${formatDate(dateOfVisit)}` : ""
+          dateOfVisit
+            ? `&nbsp;&nbsp;<strong>Dated:</strong> ${formatDate(dateOfVisit)}`
+            : ""
         }`
       )}
       ${renderParagraph(`<strong>Client Name:</strong> ${applicantName || ""}`)}
@@ -448,7 +457,11 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
                   <td style="${labelCellStyle}"><p style="${paragraphStyle}">Qualification</p></td>
                   <td style="${labelCellStyle}"><p style="${paragraphStyle}">Occupation</p></td>
                   </tr>
-                  ${Array.isArray(familySummary[2].value) ? familySummary[2].value.map((item: any) => `
+                  ${
+                    Array.isArray(familySummary[2].value)
+                      ? familySummary[2].value
+                          .map(
+                            (item: any) => `
                     <tr>
                       <td style="${valueCellStyle}"><p style="${paragraphStyle}">${item.name}</p></td>
                       <td style="${valueCellStyle}"><p style="${paragraphStyle}">${item.relationship}</p></td>
@@ -457,7 +470,10 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
                       <td style="${valueCellStyle}"><p style="${paragraphStyle}">${item.occupation}</p></td>
                     </tr>
                   `
-                    ).join("") : `<tr><td style="${valueCellStyle}"><p style="${paragraphStyle}">Not provided</p></td></tr>`}
+                          )
+                          .join("")
+                      : `<tr><td style="${valueCellStyle}"><p style="${paragraphStyle}">Not provided</p></td></tr>`
+                  }
                   </table> 
                 </td>
                 </tr> 
@@ -490,11 +506,20 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
             "Product Details (please also comment on Vintage of the product deals by the firm & Future changes if any)",
           value: businessDetails.productDetails,
         },
-        { label: "Business Process", value: businessDetails.businessProcess.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("") },
+        {
+          label: "Business Process",
+          value: businessDetails.businessProcess
+            .split("\n")
+            .map((line: string) => `<ul><li>${line}</li></ul>`)
+            .join(""),
+        },
         { label: "Margins", value: businessDetails.margins },
         {
           label: "Documents Observed",
-          value: businessDetails.documentsObserved,
+          value: businessDetails.documentsObserved
+            .split("\n")
+            .map((line: string) => `<ul><li>${line}</li></ul>`)
+            .join(""),
         },
         { label: "Activity Observed", value: businessDetails.activityObserved },
       ])}
@@ -590,11 +615,9 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
         renderSingleColumnTable(["Applicant banking details not provided"])
       }
       ${
-        applicantsMainBankingDetails.endUse
+        endUseOfLoan
           ? renderParagraph(
-              `<strong>End Use:</strong> ${formatMultiline(
-                applicantsMainBankingDetails.endUse
-              )}`
+              `<strong>End Use:</strong> ${formatMultiline(endUseOfLoan)}`
             )
           : ""
       }
@@ -658,7 +681,7 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
       <table style="${tableStyle}">
         <tr>
           <td style="${labelCellStyle}">PD Status</td>
-          <td style="${valueCellStyle}">${html_data.approvedStatus|| "Not provided"}</td>
+          <td style="${valueCellStyle}">${html_data.approvedStatus || "Not provided"}</td>
         </tr>
       </table>
       ${renderSubHeading("Disclaimer:")}

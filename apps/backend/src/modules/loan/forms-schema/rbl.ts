@@ -322,14 +322,10 @@ export const rblSchema = {
           documentsObserved: {
             type: "string",
             title: "Documents Observed",
-            enum: [
-              "Business License",
-              "GST Registration Certificate",
-              "PAN Card",
-              "Bank Account Details",
-              "Other",
-            ],
-            multiple: true,
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
           },
           activityObserved: {
             type: "string",
@@ -597,6 +593,16 @@ export const rblSchema = {
             type: "string",
             title: "Remarks",
           },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "endUse",
+      label: "End Use",
+      schema: {
+        type: "object",
+        properties: {
           endUse: {
             type: "string",
             title: "End Use",
