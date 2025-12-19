@@ -704,36 +704,20 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
     "Not Provided";
 
   // Get annual sales/turnover for the textual overview
-  const annualSales =
-    businessData.accountingYear?.annualSales ||
-    estimatedIncome?.annualSales ||
-    "Not Provided";
-
-  // Get PBDIT Margin
-  const pbditMarginValue =
-    businessData.accountingYear?.pbditMargin ||
-    estimatedIncome?.pbditMargin ||
-    "Not Provided";
-
-  // Get PAT
-  const patValue = estimatedIncome?.patOfTheBusinessConcern || "Not Provided";
-
-  // Format annual sales for text
-  const annualSalesFormatted =
-    annualSales !== "Not Provided" && hasValue(annualSales)
-      ? formatCurrency(annualSales)
-      : "Not Provided";
+  const annualSales = verificationData.financialAnalysis.grossReceipts;
+  const pbditMarginValue = verificationData.financialAnalysis.pbditMargin;
+  const patValue = verificationData.financialAnalysis.netProfitAfterTax;
 
   const estimatedIncomeTable = `
     <div> 
       <p style="${sectionTitleStyle};text-align:center;"><strong><u>ESTIMATED INCOME</u></strong></p>
       <p style="${paragraphStyle};text-align:center;"><strong>${businessName}</strong></p>
-      <p style="${paragraphStyle}">As per customer the sales/turnover will be around Rs. ${annualSalesFormatted} per annum.</p>
+      <p style="${paragraphStyle}">As per customer the sales/turnover will be around Rs. ${annualSales ? formatCurrency(annualSales) : "Not Provided"} per annum.</p>
       <p style="${paragraphStyle}">Out of the total Gross Receipts, some are cash and some are credit.</p>
       <p style="${paragraphStyle}">The estimated profit for the period 31.03.${getFinancialYearEndingYear()} is based on previous figures and submissions by the customer.</p>
-      <p style="${paragraphStyle}"><strong>The Gross Sales as per our assumptions:</strong> - ${annualSalesFormatted}</p>
-      <p style="${paragraphStyle}"><strong>PBDIT Margin:</strong> - ${pbditMarginValue !== "Not Provided" && hasValue(pbditMarginValue) ? `${pbditMarginValue}%` : "Not Provided"}</p>
-      <p style="${paragraphStyle}"><strong>The PAT of the Business Concern:</strong> - ${patValue !== "Not Provided" && hasValue(patValue) ? formatCurrency(patValue) : "Not Provided"}</p>
+      <p style="${paragraphStyle}"><strong>The Gross Sales as per our assumptions:</strong> - ${annualSales ? formatCurrency(annualSales) : "Not Provided"}</p>
+      <p style="${paragraphStyle}"><strong>PBDIT Margin:</strong> - ${pbditMarginValue ? `${pbditMarginValue.toFixed(2)}%` : "Not Provided"}</p>
+      <p style="${paragraphStyle}"><strong>The PAT of the Business Concern:</strong> - ${patValue ? formatCurrency(patValue) : "Not Provided"}</p>
     </div>
   `;
   const acceptRejectPDTable = `

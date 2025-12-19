@@ -1503,9 +1503,11 @@ export class FinancialAnalysisTemplatesService {
     // Set up columns for P&L and Balance Sheet side by side
     worksheet.columns = [
       { width: 25 }, // A - Particulars (left)
-      { width: 12 }, // B - Assessed/Estimated
-      { width: 25 }, // C - Particulars (right)
-      { width: 12 }, // D - Estimated
+      { width: 12 }, // B - Audited (left)
+      { width: 12 }, // C - Assessed (left)
+      { width: 25 }, // D - Particulars (right)
+      { width: 12 }, // E - Audited (right)
+      { width: 12 }, // F - Estimated (right)
     ];
 
     // Helper function to get value safely
@@ -1544,7 +1546,7 @@ export class FinancialAnalysisTemplatesService {
     const titleRow = worksheet.addRow([
       `Business Name: ${financialAnalysis.businessName || loan.applicantName || "XXX"}`,
     ]);
-    worksheet.mergeCells("A1:D1");
+    worksheet.mergeCells("A1:F1");
     titleRow.font = { bold: true, size: 14 };
     titleRow.alignment = { horizontal: "center" };
 
@@ -1552,7 +1554,7 @@ export class FinancialAnalysisTemplatesService {
     const partnerRow = worksheet.addRow([
       `Proprietor/Partner/Director: ${financialAnalysis.partnersNames || "XXX"}`,
     ]);
-    worksheet.mergeCells("A2:D2");
+    worksheet.mergeCells("A2:F2");
     partnerRow.font = { bold: true, size: 11 };
     partnerRow.alignment = { horizontal: "center" };
 
@@ -1560,15 +1562,17 @@ export class FinancialAnalysisTemplatesService {
     const subTitleRow = worksheet.addRow([
       `Estimated Profit & Loss Account for the Year Ended 31st March ${this.getFinancialYearEndingYear()}`,
     ]);
-    worksheet.mergeCells("A3:D3");
+    worksheet.mergeCells("A3:F3");
     subTitleRow.font = { bold: true };
     subTitleRow.alignment = { horizontal: "center" };
 
     // Headers for P&L
     const headerRow = worksheet.addRow([
       "PARTICULARS",
+      "Audited",
       "Assessed",
       "PARTICULARS",
+      "Audited",
       "Estimated",
     ]);
     headerRow.font = { bold: true };
@@ -1585,15 +1589,19 @@ export class FinancialAnalysisTemplatesService {
     // Helper function to add a data row
     const addDataRow = (
       leftLabel: string,
+      leftAudited: string | number,
       leftAssessed: string | number,
       rightLabel: string,
+      rightAudited: string | number,
       rightEstimated: string | number,
       isBold = false
     ) => {
       const row = worksheet.addRow([
         leftLabel,
+        leftAudited,
         leftAssessed,
         rightLabel,
+        rightAudited,
         rightEstimated,
       ]);
 
@@ -1613,8 +1621,8 @@ export class FinancialAnalysisTemplatesService {
         cell.alignment = { vertical: "middle" };
       });
 
-      // Format numeric columns (B, D)
-      [2, 4].forEach((colNum) => {
+      // Format numeric columns (B, C, E, F)
+      [2, 3, 5, 6].forEach((colNum) => {
         const cell = row.getCell(colNum);
         const value = cell.value;
         if (value !== null && value !== undefined && value !== "") {
@@ -1641,7 +1649,9 @@ export class FinancialAnalysisTemplatesService {
     addDataRow(
       "Expenditure",
       "",
+      "",
       "INCOME",
+      "",
       "",
       true
     );
@@ -1650,7 +1660,9 @@ export class FinancialAnalysisTemplatesService {
     // Opening Stock (Left)
     addDataRow(
       "To Opening Stock",
+      getValue("openingStockAudited"),
       getValue("openingStockAssessed"),
+      "",
       "",
       ""
     );
@@ -1659,14 +1671,18 @@ export class FinancialAnalysisTemplatesService {
     addDataRow(
       "",
       "",
+      "",
       "By Sales",
+      getValue("salesAudited"),
       getValue("salesEstimated")
     );
 
     // Purchases (Left)
     addDataRow(
       "To Purchases",
+      getValue("purchasesAudited"),
       getValue("purchasesAssessed"),
+      "",
       "",
       ""
     );
@@ -1675,7 +1691,9 @@ export class FinancialAnalysisTemplatesService {
     addDataRow(
       "",
       "",
+      "",
       "By Services",
+      getValue("servicesAudited"),
       getValue("servicesEstimated")
     );
 
@@ -1683,14 +1701,18 @@ export class FinancialAnalysisTemplatesService {
     addDataRow(
       "",
       "",
+      "",
       "By Closing Stock",
+      getValue("closingStockAudited"),
       getValue("closingStockEstimated")
     );
 
     // Gross Profit (Left - Assessed, Right - Estimated)
     addDataRow(
       "To Gross Profit",
+      getValue("grossProfitAudited"),
       getValue("grossProfitAssessed"),
+      "",
       "",
       ""
     );
@@ -1698,56 +1720,89 @@ export class FinancialAnalysisTemplatesService {
     // Grand Total (Left)
     addDataRow(
       "Grand Total",
+      getValue("grandTotalExpenditureAudited"),
       getValue("grandTotalExpenditure"),
       "Grand Total",
+      getValue("grandTotalIncomeAudited"),
       getValue("grandTotalIncome"),
       true
     );
 
     // Empty row
-    addDataRow("To Indirect Expenditures", "", "By Gross Profit", getValue("byGrossProfitEstimated"));
+    addDataRow(
+      "To Indirect Expenditures",
+      "",
+      "",
+      "By Gross Profit",
+      getValue("byGrossProfitAudited"),
+      getValue("byGrossProfitEstimated")
+    );
 
     // Indirect Expenses (Left side)
     addDataRow(
       "To Electricity",
+      getValue("electricityAudited"),
       getValue("electricity"),
+      "",
       "",
       ""
     );
 
-    addDataRow("To Rent", getValue("rent"), "", "");
+    addDataRow(
+      "To Rent",
+      getValue("rentAudited"),
+      getValue("rent"),
+      "",
+      "",
+      ""
+    );
 
-    addDataRow("To Salaries", getValue("salaries"), "", "");
+    addDataRow(
+      "To Salaries",
+      getValue("salariesAudited"),
+      getValue("salaries"),
+      "",
+      "",
+      ""
+    );
 
     addDataRow(
       "To Travelling Charges",
+      getValue("travellingChargesAudited"),
       getValue("travellingCharges"),
+      "",
       "",
       ""
     );
 
     addDataRow(
       "To Other Expenses",
+      getValue("otherExpensesAudited"),
       getValue("otherExpenses"),
+      "",
       "",
       ""
     );
 
     // Empty row
-    addDataRow("", "", "", "");
+    addDataRow("", "", "", "", "", "");
 
     // Net Profit (Right)
     addDataRow(
       "To Net Profit",
+      getValue("netProfitAudited"),
       getValue("netProfit"),
+      "",
       "",
       "",
       true
     );
     addDataRow(
       "Total",
+      getValue("byGrossProfitAudited"),
       getValue("byGrossProfitEstimated"),
-      "",
+      "Total",
+      getValue("byGrossProfitAudited"),
       getValue("byGrossProfitEstimated"),
       true
     );

@@ -18,9 +18,31 @@ export const statement4Schema = {
       },
 
       // Expenditure Section - with Audited Income and Assessed columns
+      openingStockAudited: {
+        type: "number",
+        title: "Opening Stock - Audited",
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
       openingStockAssessed: {
         type: "number",
         title: "Opening Stock - Assessed",
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      purchasesAudited: {
+        type: "number",
+        title: "Purchases - Audited",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -40,10 +62,22 @@ export const statement4Schema = {
           minDecimalPlaces: 0,
         },
       },
-
+      grossProfitAudited: {
+        type: "number",
+        title: "To Gross Profit - Audited",
+        formula: "grandTotalIncomeAudited - (openingStockAudited + purchasesAudited)",
+        readOnly: true,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
       grossProfitAssessed: {
         type: "number",
-        title: "Gross Profit - Assessed",
+        title: "To Gross Profit - Assessed",
         formula:
           "grandTotalIncome - (openingStockAssessed + purchasesAssessed)",
         readOnly: true,
@@ -55,10 +89,23 @@ export const statement4Schema = {
           minDecimalPlaces: 0,
         },
       },
-
+      grandTotalExpenditureAudited: {
+        type: "number",
+        title: "Grand Total Expenditure - Audited",
+        formula:
+          "openingStockAudited + purchasesAudited + grossProfitAudited",
+        readOnly: true,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
       grandTotalExpenditure: {
         type: "number",
-        title: "Grand Total Expenditure",
+        title: "Grand Total Expenditure - Assessed",
         formula:
           "openingStockAssessed + purchasesAssessed + grossProfitAssessed",
         readOnly: true,
@@ -72,9 +119,31 @@ export const statement4Schema = {
       },
 
       // Income Section
+      salesAudited: {
+        type: "number",
+        title: "By Sales - Audited",
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
       salesEstimated: {
         type: "number",
         title: "By Sales - Estimated",
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      servicesAudited: {
+        type: "number",
+        title: "By Services - Audited",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -95,10 +164,34 @@ export const statement4Schema = {
           minDecimalPlaces: 0,
         },
       },
+      closingStockAudited: {
+        type: "number",
+        title: "By Closing Stock - Audited",
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
 
       closingStockEstimated: {
         type: "number",
         title: "By Closing Stock - Estimated",
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      grandTotalIncomeAudited: {
+        type: "number",
+        title: "Grand Total Income - Audited",
+        formula: "salesAudited + servicesAudited + closingStockAudited",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -121,6 +214,19 @@ export const statement4Schema = {
         },
       },
 
+      byGrossProfitAudited: {
+        type: "number",
+        title: "By Gross Profit - Audited",
+        formula: "grossProfitAudited",
+        readOnly: true,
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
       byGrossProfitEstimated: {
         type: "number",
         title: "By Gross Profit - Estimated",
@@ -136,9 +242,31 @@ export const statement4Schema = {
       },
 
       // Indirect Expenses
+      electricityAudited: {
+        type: "number",
+        title: "Electricity - Audited",
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
       electricity: {
         type: "number",
-        title: "Electricity",
+        title: "Electricity - Assessed",
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      rentAudited: {
+        type: "number",
+        title: "Rent - Audited",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -149,7 +277,18 @@ export const statement4Schema = {
       },
       rent: {
         type: "number",
-        title: "Rent",
+        title: "Rent - Assessed",
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      salariesAudited: {
+        type: "number",
+        title: "Salaries - Audited",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -160,7 +299,18 @@ export const statement4Schema = {
       },
       salaries: {
         type: "number",
-        title: "Salaries",
+        title: "Salaries - Assessed",
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      travellingChargesAudited: {
+        type: "number",
+        title: "Travelling Charges - Audited",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -171,7 +321,18 @@ export const statement4Schema = {
       },
       travellingCharges: {
         type: "number",
-        title: "Travelling Charges",
+        title: "Travelling Charges - Assessed",
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      otherExpensesAudited: {
+        type: "number",
+        title: "Other Expenses - Audited",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -182,7 +343,20 @@ export const statement4Schema = {
       },
       otherExpenses: {
         type: "number",
-        title: "Other Expenses",
+        title: "Other Expenses - Assessed",
+        minimum: 0,
+        formatter: {
+          useIndianFormat: true,
+          locale: "en-IN",
+          maxDecimalPlaces: 2,
+          minDecimalPlaces: 0,
+        },
+      },
+      netProfitAudited: {
+        type: "number",
+        title: "Net Profit - Audited",
+        formula: "byGrossProfitAudited - (electricityAudited + rentAudited + salariesAudited + travellingChargesAudited + otherExpensesAudited)",
+        readOnly: true,
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -194,7 +368,7 @@ export const statement4Schema = {
 
       netProfit: {
         type: "number",
-        title: "Net Profit",
+        title: "Net Profit - Assessed",
         formula:
           "byGrossProfitEstimated - (electricity + rent + salaries + travellingCharges + otherExpenses)",
         readOnly: true,
@@ -452,28 +626,39 @@ export const statement4Schema = {
     },
     // Debit side (expenses/costs) - Left column
     debit: [
+      "openingStockAudited",
       "openingStockAssessed",
+      "purchasesAudited",
       "purchasesAssessed",
+      "grossProfitAudited",
+      "grossProfitAssessed",
+      "grandTotalExpenditureAudited",
       "grandTotalExpenditure",
+      "electricityAudited",
       "electricity",
+      "rentAudited",
       "rent",
+      "salariesAudited",
       "salaries",
+      "travellingChargesAudited",
       "travellingCharges",
+      "otherExpensesAudited",
       "otherExpenses",
+      "netProfitAudited",
       "netProfit",
-      "totalPayments",
-      "netProfitMargin",
     ],
     // Credit side (income/receipts) - Right column
     credit: [
+      "salesAudited",
       "salesEstimated",
+      "servicesAudited",
       "servicesEstimated",
+      "closingStockAudited",
       "closingStockEstimated",
+      "grandTotalIncomeAudited",
       "grandTotalIncome",
-      "grossProfitAssessed",
+      "byGrossProfitAudited",
       "byGrossProfitEstimated",
-      "gpMargin",
-      "npMargin",
     ],
   },
 } as const;
