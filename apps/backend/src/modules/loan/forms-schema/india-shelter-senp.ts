@@ -530,7 +530,6 @@ export const indiaShelterSenpSchema = {
           commencementDate: {
             type: "string",
             title: "Date of commencement of Business",
-            format: "date",
           },
           placeOfIncorporation: {
             type: "string",
