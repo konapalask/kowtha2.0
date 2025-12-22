@@ -179,9 +179,10 @@ export const axisFinanceSchema = {
       schema: {
         type: "object",
         properties: {
-          nameOfBusinessEmployment: {
+          businessName: {
             type: "string",
             title: "Name of Business / Employment",
+            readOnly: true,
           },
           natureOfBusinessEntityEmployerDetailsProprietoryPartnershipPvtLtd: {
             type: "string",
@@ -648,33 +649,6 @@ export const axisFinanceSchema = {
             type: "string",
             title: "Accept/Reject",
             enum: ["Accept", "Reject"],
-          },
-        },
-      },
-    },
-    {
-      id: "estimatedIncome",
-      label: "Estimated Income",
-      schema: {
-        type: "object",
-        properties: {
-          estimatedIncomeDetails: {
-            type: "string",
-            title: "Estimated Income Details",
-            ui: {
-              widget: "textarea",
-              rows: 6,
-            },
-          },
-          patOfTheBusinessConcern: {
-            type: "number",
-            title: "The PAT of the Business Concern (Rs.)",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
           },
         },
       },

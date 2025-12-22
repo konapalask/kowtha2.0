@@ -331,7 +331,8 @@ export const iciciSchema = {
           applicantGrossMonthlyIncome: {
             type: "number",
             title: "Applicant - Gross Monthly Income",
-            formula: "applicantMonthlyTO - applicantCostOfRawMaterial + applicantRentIncome + applicantOtherIncome",
+            formula:
+              "applicantMonthlyTO - applicantCostOfRawMaterial + applicantRentIncome + applicantOtherIncome",
             readOnly: true,
           },
           applicantBusinessExpensesRent: {
@@ -357,7 +358,8 @@ export const iciciSchema = {
           applicantIncomeLeftForDomestic: {
             type: "number",
             title: "Applicant - Income Left for Domestic Expenses",
-            formula: "applicantGrossMonthlyIncome - applicantBusinessExpensesRent - applicantBusinessExpensesSalary - applicantBusinessExpensesElectricity - applicantBusinessExpensesTravelling - applicantBusinessExpensesOther",
+            formula:
+              "applicantGrossMonthlyIncome - applicantBusinessExpensesRent - applicantBusinessExpensesSalary - applicantBusinessExpensesElectricity - applicantBusinessExpensesTravelling - applicantBusinessExpensesOther",
             readOnly: true,
           },
           applicantHouseholdExpensesFood: {
@@ -375,7 +377,8 @@ export const iciciSchema = {
           applicantNetMonthlyIncome: {
             type: "number",
             title: "Applicant - Net Monthly Income Post All Expenses",
-            formula: "applicantIncomeLeftForDomestic - applicantHouseholdExpensesFood - applicantHouseholdExpensesSchoolFees - applicantHouseholdExpensesOther",
+            formula:
+              "applicantIncomeLeftForDomestic - applicantHouseholdExpensesFood - applicantHouseholdExpensesSchoolFees - applicantHouseholdExpensesOther",
             readOnly: true,
           },
           applicantSavingsInvestments: {
@@ -389,7 +392,8 @@ export const iciciSchema = {
           applicantNetSurplusForEmi: {
             type: "number",
             title: "Applicant - Net Surplus Available for Proposed EMI",
-            formula: "applicantNetMonthlyIncome - applicantSavingsInvestments - applicantExistingEmi",
+            formula:
+              "applicantNetMonthlyIncome - applicantSavingsInvestments - applicantExistingEmi",
             readOnly: true,
           },
 
@@ -420,7 +424,8 @@ export const iciciSchema = {
                 coApplicantGrossMonthlyIncome: {
                   type: "number",
                   title: "Co-Applicant - Gross Monthly Income",
-                  formula: "coApplicantMonthlyTO - coApplicantCostOfRawMaterial + coApplicantRentIncome + coApplicantOtherIncome",
+                  formula:
+                    "coApplicantMonthlyTO - coApplicantCostOfRawMaterial + coApplicantRentIncome + coApplicantOtherIncome",
                   readOnly: true,
                 },
                 coApplicantBusinessExpensesRent: {
@@ -447,7 +452,8 @@ export const iciciSchema = {
                 coApplicantIncomeLeftForDomestic: {
                   type: "number",
                   title: "Co-Applicant - Income Left for Domestic Expenses",
-                  formula: "coApplicantGrossMonthlyIncome - coApplicantBusinessExpensesRent - coApplicantBusinessExpensesSalary - coApplicantBusinessExpensesElectricity - coApplicantBusinessExpensesTravelling - coApplicantBusinessExpensesOther",
+                  formula:
+                    "coApplicantGrossMonthlyIncome - coApplicantBusinessExpensesRent - coApplicantBusinessExpensesSalary - coApplicantBusinessExpensesElectricity - coApplicantBusinessExpensesTravelling - coApplicantBusinessExpensesOther",
                   readOnly: true,
                 },
                 coApplicantHouseholdExpensesFood: {
@@ -466,7 +472,8 @@ export const iciciSchema = {
                 coApplicantNetMonthlyIncome: {
                   type: "number",
                   title: "Co-Applicant - Net Monthly Income Post All Expenses",
-                  formula: "coApplicantIncomeLeftForDomestic - coApplicantHouseholdExpensesFood - coApplicantHouseholdExpensesSchoolFees - coApplicantHouseholdExpensesOther",
+                  formula:
+                    "coApplicantIncomeLeftForDomestic - coApplicantHouseholdExpensesFood - coApplicantHouseholdExpensesSchoolFees - coApplicantHouseholdExpensesOther",
                   readOnly: true,
                 },
                 coApplicantSavingsInvestments: {
@@ -482,7 +489,8 @@ export const iciciSchema = {
                   type: "number",
                   title:
                     "Co-Applicant - Net Surplus Available for Proposed EMI",
-                  formula: "coApplicantNetMonthlyIncome - coApplicantSavingsInvestments - coApplicantExistingEmi",
+                  formula:
+                    "coApplicantNetMonthlyIncome - coApplicantSavingsInvestments - coApplicantExistingEmi",
                   readOnly: true,
                 },
               },
@@ -520,7 +528,8 @@ export const iciciSchema = {
           totalWeeklySales: {
             type: "number",
             title: "Total Weekly Sales",
-            formula: "weeklySalesMonday + weeklySalesTuesday + weeklySalesWednesday + weeklySalesThursday + weeklySalesFriday + weeklySalesSaturday + weeklySalesSunday",
+            formula:
+              "weeklySalesMonday + weeklySalesTuesday + weeklySalesWednesday + weeklySalesThursday + weeklySalesFriday + weeklySalesSaturday + weeklySalesSunday",
             readOnly: true,
           },
           coApplicantWeeklySalesMonday: {
@@ -560,7 +569,8 @@ export const iciciSchema = {
                 coApplicantTotalWeeklySales: {
                   type: "number",
                   title: "Co-Applicant Total Weekly Sales",
-                  formula: "coApplicantWeeklySalesMonday + coApplicantWeeklySalesTuesday + coApplicantWeeklySalesWednesday + coApplicantWeeklySalesThursday + coApplicantWeeklySalesFriday + coApplicantWeeklySalesSaturday + coApplicantWeeklySalesSunday",
+                  formula:
+                    "coApplicantWeeklySalesMonday + coApplicantWeeklySalesTuesday + coApplicantWeeklySalesWednesday + coApplicantWeeklySalesThursday + coApplicantWeeklySalesFriday + coApplicantWeeklySalesSaturday + coApplicantWeeklySalesSunday",
                   readOnly: true,
                 },
               },
@@ -775,6 +785,9 @@ export const iciciSchema = {
           totalLoanAmount: {
             type: "number",
             title: "Total Loan Amount",
+            formula:
+              "loans.reduce((sum, loan) => sum + (loan.loanAmount || 0), 0)",
+            readOnly: true,
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
@@ -785,6 +798,8 @@ export const iciciSchema = {
           totalEmi: {
             type: "number",
             title: "Total EMI",
+            formula: "loans.reduce((sum, loan) => sum + (loan.emi || 0), 0)",
+            readOnly: true,
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
@@ -816,6 +831,11 @@ export const iciciSchema = {
                   type: "string",
                   title: "Contact No.",
                 },
+                feedback: {
+                  type: "string",
+                  title: "Feedback",
+                  enum: ["Positive", "Negative"],
+                },
               },
             },
           },
@@ -833,12 +853,35 @@ export const iciciSchema = {
                   type: "string",
                   title: "Contact No.",
                 },
+                feedback: {
+                  type: "string",
+                  title: "Feedback",
+                  enum: ["Positive", "Negative"],
+                },
               },
             },
           },
-          neighborFeedback: {
-            type: "string",
+          neighbors: {
+            type: "array",
             title: "Neighbor Feedback",
+            items: {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  title: "Neighbor Name",
+                },
+                contactNo: {
+                  type: "string",
+                  title: "Contact No.",
+                },
+                feedback: {
+                  type: "string",
+                  title: "Feedback",
+                  enum: ["Positive", "Negative"],
+                },
+              },
+            },
           },
         },
       },

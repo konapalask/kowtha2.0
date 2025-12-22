@@ -1,7 +1,6 @@
 import { format, toZonedTime } from "date-fns-tz";
 import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.template";
 
-
 const tableStyle =
   "border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:16px 0";
 const labelCellStyle =
@@ -36,18 +35,25 @@ const formatObservations = (value: any): string => {
   if (!hasValue(value)) return "Not provided";
   const text = String(value);
   // Split by newlines and format as dotted bullets
-  const lines = text.split(/\n+/).filter((line: string) => line.trim().length > 0);
+  const lines = text
+    .split(/\n+/)
+    .filter((line: string) => line.trim().length > 0);
   if (lines.length === 0) return "Not provided";
   return lines.map((line: string) => `• ${line.trim()}`).join("<br>");
 };
 
-const ensureArray = <T,>(value: T | T[] | null | undefined): T[] => {
+const ensureArray = <T>(value: T | T[] | null | undefined): T[] => {
   if (Array.isArray(value)) return value;
   if (value === null || value === undefined) return [];
   return [value];
 };
 
-const renderKeyValue = (label: string, value: any, formatter?: (value: any) => string, options?: { colspan?: number }) => {
+const renderKeyValue = (
+  label: string,
+  value: any,
+  formatter?: (value: any) => string,
+  options?: { colspan?: number }
+) => {
   const rendered = formatter ? formatter(value) : formatMultiline(value);
   return `
     <tr>
@@ -65,15 +71,18 @@ const renderArrayTable = (headers: string[], rows: string[][]): string => {
       <tr>
         ${headers.map((header) => `<th style="${labelCellStyle}">${header}</th>`).join("")}
       </tr>
-      ${rows.map((row) => `
+      ${rows
+        .map(
+          (row) => `
         <tr>
           ${row.map((cell) => `<td style="${valueCellStyle}">${cell}</td>`).join("")}
         </tr>
-      `).join("")}
+      `
+        )
+        .join("")}
     </table>
   `;
 };
-
 
 export const iciciTemplate = (verificationData: any, html_data: any) => {
   const date = new Date();
@@ -81,37 +90,40 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
   const zonedDate = toZonedTime(date, timeZone);
   const istDate = format(zonedDate, "dd-MM-yyyy hh:mm:ss a xxx", { timeZone });
 
-
   const proposal = verificationData.proposal || {};
   const pdDetails = verificationData.pdDetails || {};
   const applicants = verificationData.applicants || {};
   const familyDetails = verificationData.familyBackgroundPersonalDetails || {};
   const residenceDetails = familyDetails?.residenceDetails || {};
-  const natureOfBusinessAndBusinessVintage = verificationData.natureOfBusinessAndVintage || {};
+  const natureOfBusinessAndBusinessVintage =
+    verificationData.natureOfBusinessAndVintage || {};
   const incomeAssessment = verificationData.incomeAssessment || {};
   const assetCreationInLast5Years = verificationData.assetCreation || {};
   const cashFlowAnalysis = verificationData.cashFlowAnalysis || {};
   const coApplicantCases = ensureArray(cashFlowAnalysis.coApplicantCases || []);
-  const coApplicantWeeklySales = ensureArray(cashFlowAnalysis.coApplicantWeeklySalesMonday || []);
+  const coApplicantWeeklySales = ensureArray(
+    cashFlowAnalysis.coApplicantWeeklySalesMonday || []
+  );
   const observationsAtPd = verificationData.observationsAtPd || {};
-  const coApplicantObservations = ensureArray(observationsAtPd.coApplicantCases || []);
-  const triggerPointVerification = verificationData.triggerPointVerification || {};
+  const coApplicantObservations = ensureArray(
+    observationsAtPd.coApplicantCases || []
+  );
+  const triggerPointVerification =
+    verificationData.triggerPointVerification || {};
   const itrAndFinancial = verificationData.itrAndFinancial || {};
   const bankingDetails = verificationData.bankingDetails?.bankDetails || {};
 
-
   // Handle existing loan details - check multiple possible structures
   const existingLoanDetailsSection = verificationData.existingLoanDetails || {};
-    const existingLoanDetails = existingLoanDetailsSection;
-  
+  const existingLoanDetails = existingLoanDetailsSection;
+
   // Extract loans array - handle both direct array and nested structure
   const existingLoansArray = Array.isArray(existingLoanDetailsSection.loans)
     ? existingLoanDetailsSection.loans
     : Array.isArray(existingLoanDetailsSection)
-    ? existingLoanDetailsSection
-    : [];
+      ? existingLoanDetailsSection
+      : [];
   const existingLoans = existingLoansArray;
-
 
   const references = verificationData.references || {};
   const collateralDetails = verificationData.collateralDetails || {};
@@ -120,7 +132,6 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
   const endUseOfLoan = verificationData.endUseOfLoan || {};
   const remarks = verificationData.remarks || {};
   const pdStatus = verificationData.pdStatus || {};
-
 
   return `
     ${pdBaseTemplate(html_data)}
@@ -162,7 +173,7 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
           <td style="${valueCellStyle}">${pdDetails?.pdConductedDate || ""}</td>
           <td style="${valueCellStyle}">${pdDetails?.locationOfPd || ""}</td>
           <td style="${valueCellStyle}">${pdDetails?.locationAddressOfPd || ""}</td>
-          <td style="${valueCellStyle}">${html_data?.verifierName || ""}</td>
+          <td style="${valueCellStyle}">${html_data?.fieldExecutive || ""}</td>
           <td style="${valueCellStyle}">${pdDetails?.personMetAtPd || ""}</td>
           <td style="${valueCellStyle}">${pdDetails?.relationshipWithApplicant || ""}</td>
           <td style="${valueCellStyle}">${pdDetails?.distanceFromHfcBranch || ""}</td>
@@ -184,7 +195,9 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
           <td style="${labelCellStyle}"><strong>Income Source(Business/Rental/Salary/)</strong></td>
           <td style="${labelCellStyle}"><strong>Remarks If any</strong></td>
         </tr>
-        ${ensureArray(applicants.applicants).map((applicant: any) => `
+        ${ensureArray(applicants.applicants)
+          .map(
+            (applicant: any) => `
           <tr>
             <td style="${valueCellStyle}">${applicant.name || ""}</td>
             <td style="${valueCellStyle}">${applicant.relationshipWithApplicant || ""}</td>
@@ -195,7 +208,9 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
             <td style="${valueCellStyle}">${applicant.incomeSource || ""}</td>
             <td style="${valueCellStyle}">${applicant.remarks || ""}</td>
           </tr>
-        `).join("\n")}
+        `
+          )
+          .join("\n")}
 
         </tr>
 
@@ -207,7 +222,7 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
             <table style="${tableStyle} width:100%;margin:0;">
             <tr>
               <td style="${labelCellStyle}">Current Residence- Owned/Rented</td>
-              <td style="${valueCellStyle}">${residenceDetails.currentResidenceOwnedRented || ""} ${residenceDetails.currentResidenceAddress?"<br><strong>Address: </strong>"+residenceDetails.currentResidenceAddress:""}</td>
+              <td style="${valueCellStyle}">${residenceDetails.currentResidenceOwnedRented || ""} ${residenceDetails.currentResidenceAddress ? "<br><strong>Address: </strong>" + residenceDetails.currentResidenceAddress : ""}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">If Current Residence is Owned- Owner Name</td>
@@ -279,7 +294,7 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
         </tr>
         <tr>
             <td style="${labelCellStyle}"><strong>Gross margin and Net Margin:</strong></td>
-            <td style="${valueCellStyle}">${natureOfBusinessAndBusinessVintage.grossMargin?`<strong>Gross Margin:</strong> ${natureOfBusinessAndBusinessVintage.grossMargin}%` : ""} ${natureOfBusinessAndBusinessVintage.netMargin?`<br><strong>Net Margin:</strong> ${natureOfBusinessAndBusinessVintage.netMargin}%` : ""}</td>
+            <td style="${valueCellStyle}">${natureOfBusinessAndBusinessVintage.grossMargin ? `<strong>Gross Margin:</strong> ${natureOfBusinessAndBusinessVintage.grossMargin}%` : ""} ${natureOfBusinessAndBusinessVintage.netMargin ? `<br><strong>Net Margin:</strong> ${natureOfBusinessAndBusinessVintage.netMargin}%` : ""}</td>
         </tr>
         <tr>
             <td style="${labelCellStyle}"><strong>Ideas about to start business:</strong></td>
@@ -291,7 +306,7 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
         </tr>
         <tr>
             <td style="${labelCellStyle}"><strong>Documents Verified:</strong></td>
-            <td style="${valueCellStyle}">${natureOfBusinessAndBusinessVintage.documentsVerified || ""}</td>
+            <td style="${valueCellStyle}">${formatObservations(natureOfBusinessAndBusinessVintage.documentsVerified)}</td>
         </tr>
         <tr>
             <td style="${labelCellStyle}"><strong>Machinery/Assets used in business:</strong></td>
@@ -379,8 +394,8 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
                  </tr>
                  <tr>
                   <td style="${labelCellStyle}">Gross Monthly Income</td>
-                  <td style="${valueCellStyle}">${cashFlowAnalysis.applicantGrossMonthlyIncome || ""}</td>
-                  ${coApplicantCases.map((coApp: any) => `<td style="${valueCellStyle}">${coApp.coApplicantGrossMonthlyIncome || ""}</td>`).join("")}
+                  <td style="${valueCellStyle}"><strong style="color:#0066cc;">${cashFlowAnalysis.applicantGrossMonthlyIncome || ""}</strong></td>
+                  ${coApplicantCases.map((coApp: any) => `<td style="${valueCellStyle}"><strong style="color:#0066cc;">${coApp.coApplicantGrossMonthlyIncome || ""}</strong></td>`).join("")}
                  </tr>
                  <tr>
                   <td style="${labelCellStyle}" colspan="${1 + 1 + coApplicantCases.length}"><strong>Less Monthly Business Expenses</strong></td>
@@ -412,8 +427,8 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
                  </tr>
                  <tr>
                   <td style="${labelCellStyle}">Income Left for Domestic Expenses</td>
-                  <td style="${valueCellStyle}">${cashFlowAnalysis.applicantIncomeLeftForDomestic || ""}</td>
-                  ${coApplicantCases.map((coApp: any) => `<td style="${valueCellStyle}">${coApp.coApplicantIncomeLeftForDomestic || ""}</td>`).join("")}
+                  <td style="${valueCellStyle}"><strong style="color:#0066cc;">${cashFlowAnalysis.applicantIncomeLeftForDomestic || ""}</strong></td>
+                  ${coApplicantCases.map((coApp: any) => `<td style="${valueCellStyle}"><strong style="color:#0066cc;">${coApp.coApplicantIncomeLeftForDomestic || ""}</strong></td>`).join("")}
                  </tr>
                  <tr>
                   <td style="${labelCellStyle}" colspan="${1 + 1 + coApplicantCases.length}"><strong>Less Monthly Household Expenses</strong></td>
@@ -435,8 +450,8 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
                  </tr>
                  <tr>
                   <td style="${labelCellStyle}">Net monthly income post all expenses</td>
-                  <td style="${valueCellStyle}">${cashFlowAnalysis.applicantNetMonthlyIncome || ""}</td>
-                  ${coApplicantCases.map((coApp: any) => `<td style="${valueCellStyle}">${coApp.coApplicantNetMonthlyIncome || ""}</td>`).join("")}
+                  <td style="${valueCellStyle}"><strong style="color:#0066cc;">${cashFlowAnalysis.applicantNetMonthlyIncome || ""}</strong></td>
+                  ${coApplicantCases.map((coApp: any) => `<td style="${valueCellStyle}"><strong style="color:#0066cc;">${coApp.coApplicantNetMonthlyIncome || ""}</strong></td>`).join("")}
                  </tr>
                  <tr>
                   <td style="${labelCellStyle}">Less: Savings/Investments: Insurance Premiums</td>
@@ -453,8 +468,8 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
         </tr>
         <tr>
                   <td style="${labelCellStyle}">Net Surplus Available for Propose EMI</td>
-                  <td style="${valueCellStyle}">${cashFlowAnalysis.applicantNetSurplusForEmi || ""}</td>
-                  ${coApplicantCases.map((coApp: any) => `<td style="${valueCellStyle}">${coApp.coApplicantNetSurplusForEmi || ""}</td>`).join("")}
+                  <td style="${valueCellStyle}"><strong style="color:#0066cc;">${cashFlowAnalysis.applicantNetSurplusForEmi || ""}</strong></td>
+                  ${coApplicantCases.map((coApp: any) => `<td style="${valueCellStyle}"><strong style="color:#0066cc;">${coApp.coApplicantNetSurplusForEmi || ""}</strong></td>`).join("")}
         </tr>
                </table>
              </td>
@@ -572,7 +587,7 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
           <tr>
             <td style="${labelCellStyle}">ITR Details If any</td>
             <td style="${valueCellStyle}"><b>if filling - amount of income declared:</b></td>
-            <td style="${valueCellStyle}">${itrAndFinancial.itrDetailsIfAny || "Not Provided"} ${itrAndFinancial.itrFiling ==="Yes"? `<br><strong>Amount of income declared:</strong> ${itrAndFinancial.itrAmountDeclared || "Not Provided"}` : "Not Provided"}</td>
+            <td style="${valueCellStyle}">${itrAndFinancial.itrDetailsIfAny || "Not Provided"} ${itrAndFinancial.itrFiling === "Yes" ? `<br><strong>Amount of income declared:</strong> ${itrAndFinancial.itrAmountDeclared || "Not Provided"}` : "Not Provided"}</td>
           </tr>
           <tr>
             <td style="${labelCellStyle}"><strong>Banking Details</strong></td>
@@ -583,13 +598,17 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
                 <td style="${labelCellStyle}">A/c Type</td>
                 <td style="${labelCellStyle}">No. of Years</td>
         </tr>
-              ${ensureArray(bankingDetails).map((bank: any) => `
+              ${ensureArray(bankingDetails)
+                .map(
+                  (bank: any) => `
                 <tr>
                   <td style="${valueCellStyle}">${bank.bankName || "Not Provided"}</td>
                   <td style="${valueCellStyle}">${bank.accountType || "Not Provided"}</td>
                   <td style="${valueCellStyle}">${bank.noOfYears || "Not Provided"}</td>
                 </tr>
-              `).join("")}
+              `
+                )
+                .join("")}
             </table>
             </td>
         </tr>
@@ -613,13 +632,17 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
             <td style="${labelCellStyle}">Security Offered</td>
             <td style="${labelCellStyle}">EMI Deducting Bank Account</td>
           </tr>
-          ${existingLoans.length > 0
-            ? existingLoans.map((loan: any) => `
+          ${
+            existingLoans.length > 0
+              ? existingLoans
+                  .map(
+                    (loan: any) => `
             <tr>
               <td style="${valueCellStyle}">${loan?.lender || ""}</td>
               <td style="${valueCellStyle}">${loan?.typeOfLoan || ""}</td>
               <td style="${valueCellStyle}">${
-                loan?.loanAvailedYear !== null && loan?.loanAvailedYear !== undefined
+                loan?.loanAvailedYear !== null &&
+                loan?.loanAvailedYear !== undefined
                   ? String(loan.loanAvailedYear)
                   : ""
               }</td>
@@ -629,8 +652,10 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
               <td style="${valueCellStyle}">${loan?.securityOffered || ""}</td>
               <td style="${valueCellStyle}">${loan?.emiDeductingBankAccount || ""}</td>
             </tr>
-            `).join("")
-            : `<tr><td style="${valueCellStyle}" colspan="8" style="text-align:center;">No existing loan details provided</td></tr>`
+            `
+                  )
+                  .join("")
+              : `<tr><td style="${valueCellStyle}" colspan="8" style="text-align:center;">No existing loan details provided</td></tr>`
           }
           <tr>
             <td style="${labelCellStyle}" colspan="3">Total</td>
@@ -648,15 +673,55 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
         </tr>
         <tr>
           <td style="${labelCellStyle}">Suppliers/Staff</td>
-          <td style="${valueCellStyle}">${ensureArray(references.suppliersOrStaff).map((staff: any) => `${staff.name} - ${staff.contactNo}`).join("<br>") || ""}</td>
+          <td style="${valueCellStyle}">${
+            ensureArray(references.suppliersOrStaff).length > 0
+              ? ensureArray(references.suppliersOrStaff)
+                  .map((staff: any) => {
+                    const name = staff?.name || "";
+                    const contactNo = staff?.contactNo || "";
+                    const feedback = staff?.feedback
+                      ? ` - ${staff.feedback}`
+                      : "";
+                    if (!name && !contactNo) return null;
+                    return `${name || "Not Provided"} - ${contactNo || "Not Provided"}${feedback}`;
+                  })
+                  .filter((item: string | null) => item !== null)
+                  .join("<br>") || "Not Provided"
+              : "Not Provided"
+          }</td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">Customers</td>
-          <td style="${valueCellStyle}">${ensureArray(references.customers).map((customer: any) => `${customer.name} - ${customer.contactNo}`).join("<br>") || ""}</td> 
+          <td style="${valueCellStyle}">${
+            ensureArray(references.customers).length > 0
+              ? ensureArray(references.customers)
+                  .map((customer: any) => {
+                    const name = customer?.name || "";
+                    const contactNo = customer?.contactNo || "";
+                    const feedback = customer?.feedback
+                      ? ` - ${customer.feedback}`
+                      : "";
+                    if (!name && !contactNo) return null;
+                    return `${name || "Not Provided"} - ${contactNo || "Not Provided"}${feedback}`;
+                  })
+                  .filter((item: string | null) => item !== null)
+                  .join("<br>") || "Not Provided"
+              : "Not Provided"
+          }</td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">Neighbor Feedback</td>
-          <td style="${valueCellStyle}">${references.neighborFeedback || ""}</td>
+          <td style="${valueCellStyle}">${
+            ensureArray(references.neighbors).length > 0
+              ? ensureArray(references.neighbors)
+                  .map(
+                    (neighbor: any) =>
+                      `${neighbor.name || ""}${neighbor.contactNo ? ` - ${neighbor.contactNo}` : ""}${neighbor.feedback ? ` - ${neighbor.feedback}` : ""}`
+                  )
+                  .filter((item: string) => item.trim())
+                  .join("<br>")
+              : references.neighborFeedback || ""
+          }</td>
         </tr>
         </table>
 
@@ -683,7 +748,7 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
         </tr>
         <tr>
                 <td style="${labelCellStyle}">Property Value and Registration Value</td>
-                <td style="${valueCellStyle}">${collateralDetails.propertyValue || "Not Provided"} ${collateralDetails.registrationValue?"<br><strong>Registration Value: </strong>"+collateralDetails.registrationValue:"Not Provided"}</td>
+                <td style="${valueCellStyle}">${collateralDetails.propertyValue || "Not Provided"} ${collateralDetails.registrationValue ? "<br><strong>Registration Value: </strong>" + collateralDetails.registrationValue : "Not Provided"}</td>
         </tr>
         <tr>
                 <td style="${labelCellStyle}">Propose Property Current Occupancy</td>
@@ -728,7 +793,7 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
 
         <tr>
           <td style="${labelCellStyle}"><strong>PD Status</strong></td>
-          <td style="${valueCellStyle}">${html_data.approvedStatus|| "Not provided"}</td>
+          <td style="${valueCellStyle}">${html_data.approvedStatus || "Not provided"}</td>
         </tr>
       </table>
 

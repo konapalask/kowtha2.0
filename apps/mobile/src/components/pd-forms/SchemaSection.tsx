@@ -165,9 +165,71 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
     try {
       let evaluatedFormula = formula;
 
+      // Handle array reduce operations (e.g., "loans.reduce((sum, loan) => sum + (loan.loanAmount || 0), 0)")
+      // Pattern matches: arrayField.reduce((acc, item) => acc + (item.property || 0), initialValue)
+      const reducePattern =
+        /(\w+)\.reduce\(\s*\(([^,]+),\s*([^)]+)\)\s*=>\s*[^+]+\+\s*\(([^)]+)\)[^)]*,\s*([\d.]+)\)/g;
+      let match;
+      const processedReduces: string[] = [];
+
+      // Reset regex lastIndex to ensure we process all matches
+      reducePattern.lastIndex = 0;
+
+      while ((match = reducePattern.exec(formula)) !== null) {
+        const fullMatch = match[0];
+        // Avoid processing the same reduce expression twice
+        if (processedReduces.includes(fullMatch)) continue;
+        processedReduces.push(fullMatch);
+
+        const arrayFieldName = match[1]; // e.g., "loans"
+        const accVar = match[2].trim(); // e.g., "sum"
+        const itemVar = match[3].trim(); // e.g., "loan"
+        const itemPath = match[4].trim(); // e.g., "loan.loanAmount || 0"
+        const initialValue = parseFloat(match[5]) || 0;
+
+        const arrayValue = formValues[arrayFieldName];
+        if (Array.isArray(arrayValue) && arrayValue.length > 0) {
+          // Extract the property path (e.g., "loanAmount" from "loan.loanAmount || 0")
+          // Remove the item variable prefix and any fallback values
+          let propertyPath = itemPath
+            .replace(new RegExp(`^${itemVar}\\.`), '')
+            .split('||')[0]
+            .trim();
+
+          // If propertyPath is empty, try to extract from the original itemPath
+          if (!propertyPath && itemPath.includes('.')) {
+            propertyPath = itemPath.split('.')[1]?.split('||')[0]?.trim() || '';
+          }
+
+          // Calculate the sum
+          const sum = arrayValue.reduce((acc: number, item: any) => {
+            if (item && typeof item === 'object') {
+              const propValue = item[propertyPath];
+              const numValue =
+                typeof propValue === 'number'
+                  ? propValue
+                  : parseFloat(String(propValue || 0));
+              return acc + (isNaN(numValue) ? 0 : numValue);
+            }
+            return acc;
+          }, initialValue);
+
+          // Replace the entire reduce expression with the calculated sum
+          evaluatedFormula = evaluatedFormula.replace(fullMatch, String(sum));
+        } else {
+          // If array doesn't exist or is empty, use initial value
+          evaluatedFormula = evaluatedFormula.replace(
+            fullMatch,
+            String(initialValue),
+          );
+        }
+      }
+
       // Extract all field names from the formula (words that match JavaScript identifier pattern)
       // This regex matches valid JavaScript identifiers in the formula
-      const fieldNameMatches = formula.match(/\b[a-zA-Z_][a-zA-Z0-9_]*\b/g);
+      const fieldNameMatches = evaluatedFormula.match(
+        /\b[a-zA-Z_][a-zA-Z0-9_]*\b/g,
+      );
       const fieldNamesInFormula = fieldNameMatches || [];
 
       // Replace all field references in the formula with their numeric values
@@ -181,6 +243,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
           'undefined',
           'NaN',
           'Infinity',
+          'sum', // Skip reduce callback variable
         ];
         if (jsKeywords.includes(fieldName)) continue;
 
@@ -298,6 +361,9 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
             const numVal =
               typeof val === 'number' ? val : parseFloat(String(val));
             numericValues[key] = isNaN(numVal) ? 0 : numVal;
+          } else if (fieldSchema?.type === 'array') {
+            // Include arrays as-is for reduce operations
+            numericValues[key] = Array.isArray(val) ? val : [];
           } else {
             numericValues[key] =
               val === undefined || val === null || val === '' ? 0 : val;
@@ -316,7 +382,13 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
         // Ensure all schema properties are included (in case formula references fields not yet in objectValues)
         Object.keys(properties).forEach(key => {
           if (!(key in numericValues)) {
-            numericValues[key] = 0;
+            const fieldSchema = properties[key];
+            if (fieldSchema?.type === 'array') {
+              // Include arrays as empty array for reduce operations
+              numericValues[key] = [];
+            } else {
+              numericValues[key] = 0;
+            }
           }
         });
 
@@ -344,10 +416,24 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
 
       // Recursively check nested object properties
       if (property.type === 'object' && property.properties) {
+        // Get nested object values - ensure arrays are included for reduce operations
         const nestedObjectValues = objectValues[fieldId] || {};
+        // Ensure all properties from schema are included, especially arrays
+        const completeNestedValues: AnyObject = {...nestedObjectValues};
+        Object.entries(property.properties).forEach(
+          ([nestedKey, nestedProp]) => {
+            if (
+              nestedProp.type === 'array' &&
+              !(nestedKey in completeNestedValues)
+            ) {
+              completeNestedValues[nestedKey] = [];
+            }
+          },
+        );
+
         const nestedCalculated = evaluateNestedFormulas(
           property.properties,
-          nestedObjectValues,
+          completeNestedValues,
           parentKey ? parentKey : fieldId, // Pass the object field key as parent
           {}, // Start fresh for nested object calculations
         );
@@ -497,15 +583,16 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
         }
       });
 
-      // Calculate formula fields for non-array fields
-      const nonArrayProperties = Object.fromEntries(
+      // Calculate formula fields - include arrays for reduce operations in nested objects
+      // We still filter arrays at top level, but nested objects need access to their arrays
+      const propertiesForEvaluation = Object.fromEntries(
         Object.entries(schema.properties).filter(
           ([_, prop]) => prop.type !== 'array',
         ),
       );
 
       const calculatedFields = evaluateNestedFormulas(
-        nonArrayProperties,
+        propertiesForEvaluation,
         formValues,
       );
 

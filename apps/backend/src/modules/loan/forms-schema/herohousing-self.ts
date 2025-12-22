@@ -573,6 +573,8 @@ export const herohousingSelfSchema = {
           totalMonthlyIncome: {
             type: "number",
             title: "Total monthly income",
+            formula: "salesReceiptsMonthlyAverage + otherIncome",
+            readOnly: true,
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
@@ -754,6 +756,9 @@ export const herohousingSelfSchema = {
           netMonthlyAppraisalIncome: {
             type: "number",
             title: "Net monthly appraisal income",
+            formula:
+              "totalMonthlyIncome - (costOfMaterialService + directExpenses + salary + rent + electricityExpenses + travelAndTransportationExpenses + RepairsAndMaintenanceExpenses + otherMiscellaneousExpenses + otherFamilyExpenses)",
+            readOnly: true,
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
@@ -791,6 +796,8 @@ export const herohousingSelfSchema = {
           netResidualIncome: {
             type: "number",
             title: "Net residual income (monthly)",
+            formula: "netMonthlyAppraisalIncome - monthlyObligations",
+            readOnly: true,
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
