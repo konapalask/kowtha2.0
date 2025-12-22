@@ -67,9 +67,9 @@ const renderKeyValueTable = (
 };
 
 const renderInnerTable = (headers: string[], rows: string[][]) => {
-  if (!rows.length) {
-    return wrapParagraph("Not provided");
-  }
+  // if (!rows.length) {
+  //   return wrapParagraph("Not provided");
+  // }
   const headerRow = headers
     .map((header) => `<td style="${labelCellStyle}">${header}</td>`)
     .join("");
@@ -84,6 +84,7 @@ const renderInnerTable = (headers: string[], rows: string[][]) => {
           .join("")}</tr>`
     )
     .join("");
+  console.log("***************************************************************", rowsHtml);
   return `
     <table style="${tableStyle}">
       <tr>${headerRow}</tr>

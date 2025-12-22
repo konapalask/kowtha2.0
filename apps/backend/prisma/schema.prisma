@@ -184,7 +184,7 @@ model EditRequest {
 model Attendance {
   id         Int              @id @default(autoincrement())
   userId     Int
-  date       DateTime
+  date       DateTime?
   status     AttendanceStatus
   createdAt  DateTime         @default(now())
   updatedAt  DateTime         @updatedAt
@@ -309,6 +309,7 @@ enum EditRequestStatus {
 enum EditRequestType {
   Login
   LoanData
+  FinancialAnalysis
   Other
 }
 
