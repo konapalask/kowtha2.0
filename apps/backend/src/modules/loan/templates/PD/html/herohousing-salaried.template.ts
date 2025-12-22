@@ -264,7 +264,7 @@ export const herohousingSalariedTemplate = (
             <ul><li style="margin:8px 0;line-height:1.5"><strong>Job profile</strong></li></ul>
           </td>
           <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
-            <ul><li style="margin:8px 0;line-height:1.5">${currentJobProfile.jobProfile || "Not provided"}</li></ul>
+            <ul><li style="margin:8px 0;line-height:1.5">${formatMultiline(currentJobProfile.jobProfile || "Not provided")}</li></ul>
           </td>
         </tr>
         <tr>
@@ -554,7 +554,7 @@ export const herohousingSalariedTemplate = (
               )
               .join("")}
             `
-                : "<p style=\"margin:8px 0;line-height:1.5\">Not provided</p>"
+                : '<p style="margin:8px 0;line-height:1.5">Not provided</p>'
             }
           </td>
         </tr>
@@ -577,7 +577,7 @@ export const herohousingSalariedTemplate = (
               )
               .join("")}
             `
-                : "<p style=\"margin:8px 0;line-height:1.5\">Not provided</p>"
+                : '<p style="margin:8px 0;line-height:1.5">Not provided</p>'
             }
           </td>
         </tr>
@@ -629,7 +629,7 @@ export const herohousingSalariedTemplate = (
         </tr>
       </table>
 
-      <p style="margin:8px 0;line-height:1.5"><strong>PD Status:</strong> ${html_data.approvedStatus|| "Not provided"}</p>
+      <p style="margin:8px 0;line-height:1.5"><strong>PD Status:</strong> ${html_data.approvedStatus || "Not provided"}</p>
 
       <p style="margin:8px 0;line-height:1.5"><strong>Disclaimer Clause:</strong></p>
       <p style="margin:8px 0;line-height:1.5">This report (including any attachments) has been prepared based on verbal information provided by the person contacted. HERO HOUSING FINANCE LTD will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. <strong>M/s. KOWTHA & CO </strong>will not be held liable in any case.</p>

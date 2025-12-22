@@ -349,7 +349,7 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
   const employmentTable = renderTwoColumnTable([
     {
       label: "Name of Business / Employment",
-      value: employment.nameOfBusinessEmployment || "Not Provided",
+      value: employment.businessName || "Not Provided",
     },
     {
       label: "Nature of Business Entity / Employer Details",
@@ -697,9 +697,15 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
   `;
 
   // Get business name from various sources
+  console.log(
+    "***************************************************************",
+    html_data,
+    employment,
+    company
+  );
   const businessName =
     html_data?.loanDetails?.businessName ||
-    employment.nameOfBusinessEmployment ||
+    employment.businessName ||
     company?.detailedProfileOfTheBusiness?.split("\n")[0] ||
     "Not Provided";
 
