@@ -230,16 +230,16 @@ export class EditRequestService {
           });
 
           // Log array changes if metadata exists
-          if (_arrayChangesMetadata) {
-            await this.loggingService.info(
-              "Array changes applied successfully",
-              {
-                editRequestId: editRequest.id,
-                verificationId: editRequest.verification.id,
-                arrayChanges: _arrayChangesMetadata,
-              }
-            );
-          }
+          // if (_arrayChangesMetadata) {
+          //   await this.loggingService.info(
+          //     "Array changes applied successfully",
+          //     {
+          //       editRequestId: editRequest.id,
+          //       verificationId: editRequest.verification.id,
+          //       arrayChanges: _arrayChangesMetadata,
+          //     }
+          //   );
+          // }
         } else if (editRequest.type === EditRequestType.Login) {
           // Update user data
           const user = await this.prisma.user.findUnique({
@@ -255,7 +255,6 @@ export class EditRequestService {
               changes: true,
             },
           });
-          console.log(requestedData);
 
           const changes = requestedData?.changes as unknown as changeData;
 
@@ -265,6 +264,21 @@ export class EditRequestService {
             data: {
               deviceId: changes.newDeviceId,
             },
+          });
+        }
+        else if (editRequest.type === EditRequestType.FinancialAnalysis) {
+          const financialAnalysis = editRequest.changes;
+          let oldVerification = await this.prisma.verification.findUnique({
+            where: { id: editRequest.verification.id },
+          });
+          if (!oldVerification) {
+            throw new NotFoundException("Verification not found");
+          }
+          let newVerificationData = oldVerification.verificationData as any;
+          newVerificationData.financialAnalysis = financialAnalysis;
+          await this.prisma.verification.update({
+            where: { id: editRequest.verification.id },
+            data: { verificationData: newVerificationData },
           });
         }
       }

@@ -67,24 +67,27 @@ const renderKeyValueTable = (
 };
 
 const renderInnerTable = (headers: string[], rows: string[][]) => {
+  // if (!rows.length) {
+  //   return wrapParagraph("Not provided");
+  // }
   const headerRow = headers
     .map((header) => `<td style="${labelCellStyle}">${header}</td>`)
     .join("");
-  // Always render at least one empty row if no data
-  const rowsHtml =
-    rows.length > 0
-      ? rows
+  const rowsHtml = rows
+    .map(
+      (row) =>
+        `<tr>${row
           .map(
-            (row) =>
-              `<tr>${row
-                .map(
-                  (cell) =>
-                    `<td style="${cellStyle};text-align:center;">${cell || "-"}</td>`
-                )
-                .join("")}</tr>`
+            (cell) =>
+              `<td style="${cellStyle};text-align:center;">${cell || "-"}</td>`
           )
-          .join("")
-      : `<tr>${headers.map(() => `<td style="${cellStyle};text-align:center;">-</td>`).join("")}</tr>`;
+          .join("")}</tr>`
+    )
+    .join("");
+  console.log(
+    "***************************************************************",
+    rowsHtml
+  );
   return `
     <table style="${tableStyle}">
       <tr>${headerRow}</tr>
