@@ -3,10 +3,11 @@ import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.template";
 
 const tableStyle =
   "border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0";
+// Make question (label) column narrower to give more space to answers
 const labelCellStyle =
-  "border:1px solid #ccc;padding:8px;font-weight:bold;vertical-align:top;line-height:1.5";
+  "border:1px solid #ccc;padding:8px;font-weight:bold;vertical-align:top;line-height:1.5;width:32%";
 const valueCellStyle =
-  "border:1px solid #ccc;padding:8px;vertical-align:top;line-height:1.5";
+  "border:1px solid #ccc;padding:8px;vertical-align:top;line-height:1.5;width:68%";
 const paragraphStyle = "margin:8px 0;line-height:1.5;font-size:12px;color:#333";
 
 const hasValue = (value: any): boolean => {
