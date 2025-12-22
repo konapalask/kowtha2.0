@@ -57,7 +57,7 @@ const ensureArray = <T>(value: T | T[] | undefined | null): T[] => {
   return [value];
 };
 
-const  SideHeading = (text: string) =>
+const SideHeading = (text: string) =>
   `<p style="margin:8px 0;line-height:1.5;font-size:15px;color:#333"><strong>${text}</strong></p>`;
 
 const wrapParagraph = (content: string) =>
@@ -229,9 +229,7 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>Phone No. of the applicant</strong></p>`,
-      content: wrapParagraph(
-        personal.applicantPhoneNumber || ""
-      ),
+      content: wrapParagraph(personal.applicantPhoneNumber || ""),
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>PAN No.</strong></p>`,
@@ -304,7 +302,9 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
   const businessRows = [
     {
       instruction: `<p style="${paragraphStyle}"><strong>Name of the Entity/ Employer Name</strong></p>`,
-      content: wrapParagraph(formatMultiline(businessDetails.businessName || "")),
+      content: wrapParagraph(
+        formatMultiline(businessDetails.businessName || "")
+      ),
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>Constitution</strong></p>`,
@@ -325,7 +325,7 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
       ),
     },
     {
-      instruction: `<p style="${paragraphStyle}"><strong>Business actively managed by (Self/Others)</strong></p>`,
+      instruction: `<p style="${paragraphStyle}"><strong>Business actively managed by (Self/Others; if Others, name & relationship)</strong></p>`,
       content: wrapParagraph(
         formatMultiline(businessDetails.businessManagedBy || "")
       ),
@@ -609,9 +609,7 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>PD Conducted by</strong></p>`,
-      content: wrapParagraph(
-        formatMultiline(html_data.verifierName || "")
-      ),
+      content: wrapParagraph(formatMultiline(html_data.fieldExecutive || "")),
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>Signature</strong></p>`,
@@ -623,7 +621,7 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>PD Status</strong></p>`,
-      content: wrapParagraph(html_data.approvedStatus|| "Not provided"),
+      content: wrapParagraph(html_data.approvedStatus || "Not provided"),
     },
   ];
 
@@ -647,45 +645,53 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
 ${pdBaseTemplate(html_data)}
 <div class="template-content">
 <h1 style="margin:8px 0;line-height:1.5;font-size:20px;color:#333">IDFC Bank LTD – Personal Discussion Report</h1>
-${ SideHeading("I] General Details:-")}
+${SideHeading("I] General Details:-")}
 ${generalTable}
 
-${ SideHeading("II] Personal Details:-")}
+${SideHeading("II] Personal Details:-")}
       ${personalTable}
 
-      ${ SideHeading("III] Business/ Work Details:-")}
+      ${SideHeading("III] Business/ Work Details:-")}
       ${businessTable}
 
-      ${ SideHeading("IV] Operational Details:-")}
+      ${SideHeading("IV] Operational Details:-")}
       ${operationalTable}
 
-      ${ SideHeading("V] Financial Details:-")}
+      ${SideHeading("V] Financial Details:-")}
       ${financialTable}
 
-      ${ SideHeading("Loans and Banking Details:")}
+      ${SideHeading("Loans and Banking Details:")}
       <p style="margin:8px 0;line-height:1.5;font-size:15px;font-weight:bold;color:#333;align-items: center;">Term Loans:</p>
       ${termLoansTable}
       <p style="margin:8px 0;line-height:1.5;font-size:15px;font-weight:bold;color:#333;align-items: center;">Banking Details:</p>
       ${bankingTable}
-      ${ SideHeading("Other Assets:")}
+      ${SideHeading("Other Assets:")}
       ${wrapParagraph(
-        termLoansSection?.otherAssets?.split("\n")
-          .map((line: string) => `<ul style="margin-left: 20px;"><li>${line}</li></ul>`)
+        termLoansSection?.otherAssets
+          ?.split("\n")
+          .map(
+            (line: string) =>
+              `<ul style="margin-left: 20px;"><li>${line}</li></ul>`
+          )
           .join("") || "-"
       )}
-      ${ SideHeading("Other Business if any:")}
+      ${SideHeading("Other Business if any:")}
       ${wrapParagraph(
-        termLoansSection?.otherBusiness?.split("\n")
-          .map((line: string) => `<ul style="margin-left: 20px;"><li>${line}</li></ul>`)
+        termLoansSection?.otherBusiness
+          ?.split("\n")
+          .map(
+            (line: string) =>
+              `<ul style="margin-left: 20px;"><li>${line}</li></ul>`
+          )
           .join("") || "-"
       )}
-      ${ SideHeading("Rental Income If any:")}
+      ${SideHeading("Rental Income If any:")}
       ${rentalTable}
 
-      ${ SideHeading("VI] Loan Details:-")}
+      ${SideHeading("VI] Loan Details:-")}
       ${loanDetailsTable}
 
-      ${ SideHeading("VII] Personal Discussion Details:-")}
+      ${SideHeading("VII] Personal Discussion Details:-")}
       ${personalDiscussionTable}
       ${detailsConfirmationRows}
 
