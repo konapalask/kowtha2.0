@@ -148,14 +148,6 @@ export const indiaShelterSenpSchema = {
       schema: {
         type: "object",
         properties: {
-          assetsOwned: {
-            type: "string",
-            title: "Assets Owned (Summary)",
-            ui: {
-              widget: "textarea",
-              rows: 3,
-            },
-          },
           smartphone: {
             type: "string",
             title: "Smartphone",
@@ -731,6 +723,8 @@ export const indiaShelterSenpSchema = {
           totalMonthlyRevenue: {
             type: "number",
             title: "Total Monthly Revenue (A)",
+            formula: "sales + receipts",
+            readOnly: true,
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
@@ -740,6 +734,9 @@ export const indiaShelterSenpSchema = {
           totalMonthlyExpenses: {
             type: "number",
             title: "Total Monthly Expenses (B)",
+            formula:
+              "purchases + rent + electricity + transportation + otherExpenses",
+            readOnly: true,
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
@@ -749,6 +746,8 @@ export const indiaShelterSenpSchema = {
           netMonthlyProfit: {
             type: "number",
             title: "Net Monthly Profit (= A - B)",
+            formula: "totalMonthlyRevenue - totalMonthlyExpenses",
+            readOnly: true,
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
@@ -1267,14 +1266,6 @@ export const indiaShelterSenpSchema = {
       schema: {
         type: "object",
         properties: {
-          majorObservations: {
-            type: "string",
-            title: "Major Observations / Comments / Concerns During PD",
-            ui: {
-              widget: "textarea",
-              rows: 3,
-            },
-          },
           caseStrengths: {
             type: "string",
             title: "Case Strengths",
@@ -1304,7 +1295,7 @@ export const indiaShelterSenpSchema = {
           pdStatus: {
             type: "string",
             title: "PD Status",
-            enum: ["Positive", "Negative","Referred"],
+            enum: ["Positive", "Negative", "Referred"],
           },
         },
       },
