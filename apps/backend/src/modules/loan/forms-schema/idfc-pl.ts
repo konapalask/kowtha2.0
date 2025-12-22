@@ -159,26 +159,16 @@ export const idfcPlSchema = {
             title: "Total No. of Family Members",
           },
           earningFamilyMembersIncomeDetails: {
-            type: "number",
+            type: "string",
             title: "Earning Family Members Income Details",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-            },
           },
           noOfDependents: {
             type: "integer",
             title: "No. of Dependents",
           },
           anyOtherSourceOfIncomeMonthlyAnnual: {
-            type: "number",
+            type: "string",
             title: "Any Other Source of Income (Monthly / Annual)",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-            },
           },
           familyMembers: {
             type: "array",
@@ -286,7 +276,7 @@ export const idfcPlSchema = {
                     maxDecimalPlaces: 2,
                   },
                 },
-                loanAmount: {
+                existingLoanAmount: {
                   type: "number",
                   title: "Loan Amount",
                   formatter: {
@@ -294,7 +284,6 @@ export const idfcPlSchema = {
                     locale: "en-IN",
                     maxDecimalPlaces: 2,
                   },
-                  readOnly: true,
                 },
               },
             },
@@ -348,6 +337,7 @@ export const idfcPlSchema = {
               locale: "en-IN",
               maxDecimalPlaces: 2,
             },
+            readOnly: true,
           },
           endUse: {
             type: "string",
