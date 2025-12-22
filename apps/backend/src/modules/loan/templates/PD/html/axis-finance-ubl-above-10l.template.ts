@@ -67,23 +67,24 @@ const renderKeyValueTable = (
 };
 
 const renderInnerTable = (headers: string[], rows: string[][]) => {
-  if (!rows.length) {
-    return wrapParagraph("Not provided");
-  }
   const headerRow = headers
     .map((header) => `<td style="${labelCellStyle}">${header}</td>`)
     .join("");
-  const rowsHtml = rows
-    .map(
-      (row) =>
-        `<tr>${row
+  // Always render at least one empty row if no data
+  const rowsHtml =
+    rows.length > 0
+      ? rows
           .map(
-            (cell) =>
-              `<td style="${cellStyle};text-align:center;">${cell || "-"}</td>`
+            (row) =>
+              `<tr>${row
+                .map(
+                  (cell) =>
+                    `<td style="${cellStyle};text-align:center;">${cell || "-"}</td>`
+                )
+                .join("")}</tr>`
           )
-          .join("")}</tr>`
-    )
-    .join("");
+          .join("")
+      : `<tr>${headers.map(() => `<td style="${cellStyle};text-align:center;">-</td>`).join("")}</tr>`;
   return `
     <table style="${tableStyle}">
       <tr>${headerRow}</tr>
@@ -308,7 +309,10 @@ export const axisFinanceUBLTemplate = (
         ["Structure of Loan", basic.structureOfLoan],
         ["No. of Visit", basic.numberOfVisits],
         ["Person Met", basic.personMet],
-        ["Visited By", basic.visitedBy],
+        [
+          "Visited By",
+          basic.visitedBy || html_data.fieldExecutive || "Not provided",
+        ],
         ["About Applicant", formatMultiline(basic.aboutApplicant)],
         ["Residential Details", formatMultiline(basic.residentialDetails)],
         ["Co-Applicant Details", formatMultiline(basic.coApplicantDetails)],
@@ -394,12 +398,23 @@ export const axisFinanceUBLTemplate = (
       ])}
       ${renderInnerTable(
         ["Name (top 3 Suppliers)", "Contact Details", "Location", "Ref. Check"],
-        ensureArray(suppliersSection.topSuppliers).map((supplier: any) => [
-          formatMultiline(supplier?.name || ""),
-          formatMultiline(supplier?.contactDetails || ""),
-          formatMultiline(supplier?.location || ""),
-          formatMultiline(supplier?.referenceCheck || ""),
-        ])
+        (() => {
+          const suppliers = ensureArray(suppliersSection.topSuppliers);
+          // Always show 3 rows for "Top 3"
+          const rows = suppliers
+            .slice(0, 3)
+            .map((supplier: any) => [
+              supplier?.name || "",
+              supplier?.contactDetails || "",
+              supplier?.location || "",
+              supplier?.referenceCheck || "",
+            ]);
+          // Pad to 3 rows if less than 3
+          while (rows.length < 3) {
+            rows.push(["", "", "", ""]);
+          }
+          return rows;
+        })()
       )}
 
       <p style="${paragraphStyle};font-size:14px;"><strong>Clients / Debtors</strong></p>
@@ -416,17 +431,32 @@ export const axisFinanceUBLTemplate = (
       ])}
       ${renderInnerTable(
         ["Name (top 3 Customers)", "Contact Details", "Location", "Ref. Check"],
-        ensureArray(customersSection.topCustomers).map((customer: any) => [
-          formatMultiline(customer?.name || ""),
-          formatMultiline(customer?.contactDetails || ""),
-          formatMultiline(customer?.location || ""),
-          formatMultiline(customer?.referenceCheck || ""),
-        ])
+        (() => {
+          const customers = ensureArray(customersSection.topCustomers);
+          // Always show 3 rows for "Top 3"
+          const rows = customers
+            .slice(0, 3)
+            .map((customer: any) => [
+              customer?.name || "",
+              customer?.contactDetails || "",
+              customer?.location || "",
+              customer?.referenceCheck || "",
+            ]);
+          // Pad to 3 rows if less than 3
+          while (rows.length < 3) {
+            rows.push(["", "", "", ""]);
+          }
+          return rows;
+        })()
       )}
       ${renderKeyValueTable([
         [
           "Average stock maintained",
           customersSection.averageStockMaintained || "Not provided",
+        ],
+        [
+          "Machinery/Equipment",
+          customersSection.machineryEquipment || "Not provided",
         ],
         [
           "Turnover & margins",
