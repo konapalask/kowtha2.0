@@ -2783,6 +2783,7 @@ export class LoanService {
                 isPostponed: false,
                 postponedDate: null,
                 postponedReason: null,
+                initialSubmitted: false,
                 businessName: v.businessName,
                 currentOfficeName: null,
                 applicantAddress: v.applicantAddress,

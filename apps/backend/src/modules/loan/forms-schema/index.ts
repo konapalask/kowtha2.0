@@ -108,7 +108,7 @@ export const bankSchemas: BankSchemaConfig[] = [
     schema: cholaSchema,
     templatesAndFooters: {
       "CHOLA-HL" : "CHOLAMANDALAM INVESTMENT AND FINANCE COMPANY LIMITED" ,
-      "CHOLA-ML" : "CHOLAMANDALAM INVESTMENT AND FINANCE COMPANY LIMITED" ,
+      "CHOLA-SME" : "CHOLAMANDALAM INVESTMENT AND FINANCE COMPANY LIMITED" ,
     },
   },
   {

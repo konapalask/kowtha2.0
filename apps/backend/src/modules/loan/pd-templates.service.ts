@@ -481,7 +481,7 @@ export class PDTemplateService {
       return templates.iciciTemplate(verification, html_data);
     }
 
-    if (matchesTemplate("CHOLA-HL") || matchesTemplate("CHOLA-ML")) {
+    if (matchesTemplate("CHOLA-HL") || matchesTemplate("CHOLA-SME")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
