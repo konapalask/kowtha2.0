@@ -69,7 +69,7 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
       "Axis Finance UBL Below 10L": ["AXIS FINANCE-UBL BELOW 10L"],
       "Axis Bank": ["AXIS BANK"],
       "Axis Agri": ["AXIS AGRI", "AXIS BUSINESS AGRI"],
-      "Chola": ["CHOLA-HL", "CHOLA-ML"],
+      "Chola": ["CHOLA-HL", "CHOLA-SME"],
       "DCB": ["DCB BANK"],
       "Arka Fincap": [
         "ARKA FINCAP",
