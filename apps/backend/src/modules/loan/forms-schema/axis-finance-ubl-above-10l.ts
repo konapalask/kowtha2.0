@@ -383,6 +383,10 @@ export const axisFinanceUblAbove10lSchema = {
               minDecimalPlaces: 0,
             },
           },
+          machineryEquipment: {
+            type: "integer",
+            title: "Machinery/Equipment",
+          },
           turnoverAndMargins: {
             type: "number",
             title: "Turnover & margins",

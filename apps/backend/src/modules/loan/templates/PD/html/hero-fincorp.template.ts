@@ -105,7 +105,8 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
   const applicantProfile = verificationData.applicantProfile || {};
   // Handle nested structures for business profile
   const businessProfileData = verificationData.businessProfile || {};
-  const turnoverAndNetProfitDetails = verificationData.turnoverAndNetProfitDetails || {};
+  const turnoverAndNetProfitDetails =
+    verificationData.turnoverAndNetProfitDetails || {};
   const documentsObserved = verificationData.documentsObserved || {};
   const automationLevel = verificationData.automationLevel || {};
   const relationships = verificationData.relationships || {};
@@ -229,7 +230,9 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
         formatMultiline(turnoverAndNetProfitDetails.assessmentYear || ""),
         formatCurrency(turnoverAndNetProfitDetails.turnover),
         formatCurrency(turnoverAndNetProfitDetails.netProfit),
-        formatMultiline(turnoverAndNetProfitDetails.netMarginPercent + "%" || ""),
+        formatMultiline(
+          turnoverAndNetProfitDetails.netMarginPercent + "%" || ""
+        ),
       ],
     ]
   );
@@ -334,7 +337,7 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
           : "Not provided"
       }
 
-      ${sectionTitle("Turnover and net profit details for last one year audited financials.") }
+      ${sectionTitle("Turnover and net profit details for last one year audited financials.")}
       ${financialSummaryTable}
 
       <h3 style="margin:12px 0 6px;font-size:16px;font-weight:600;color:#1f2d3d;">Documents Observed</h3>
@@ -370,13 +373,55 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
       </ul>
 
       ${sectionTitle("Margins")}
-      ${relationships.margins ? `<p style="margin: 0; padding-left: 8px;">${relationships.margins}</p>` : "Not provided"}
+      ${
+        relationships.margins
+          ? `<ul style="margin: 0; padding-left: 20px;">${
+              String(relationships.margins)
+                .split("\n")
+                .map((line: string) => line.trim())
+                .filter((line: string) => line.length > 0)
+                .map(
+                  (line: string) =>
+                    `<li style="margin-left: 8px;">${formatMultiline(line)}</li>`
+                )
+                .join("") || "Not provided"
+            }</ul>`
+          : "Not provided"
+      }
 
       ${sectionTitle("Employees")}
-      ${wrapParagraph(relationships.employeesCount || "Not provided")}
+      ${
+        relationships.employeesCount
+          ? `<ul style="margin: 0; padding-left: 20px;">${
+              String(relationships.employeesCount)
+                .split("\n")
+                .map((line: string) => line.trim())
+                .filter((line: string) => line.length > 0)
+                .map(
+                  (line: string) =>
+                    `<li style="margin-left: 8px;">${formatMultiline(line)}</li>`
+                )
+                .join("") || "Not provided"
+            }</ul>`
+          : "Not provided"
+      }
 
       ${sectionTitle("Assets")}
-      ${relationships.assets ? `<p style="margin: 0; padding-left: 8px;">${relationships.assets}</p>` : "Not provided"}
+      ${
+        relationships.assets
+          ? `<ul style="margin: 0; padding-left: 20px;">${
+              String(relationships.assets)
+                .split("\n")
+                .map((line: string) => line.trim())
+                .filter((line: string) => line.length > 0)
+                .map(
+                  (line: string) =>
+                    `<li style="margin-left: 8px;">${formatMultiline(line)}</li>`
+                )
+                .join("") || "Not provided"
+            }</ul>`
+          : "Not provided"
+      }
 
       ${sectionTitle("Loans")}
       ${renderInnerTable(
@@ -402,6 +447,9 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
       ${sectionTitle("Other Business / Income")}
       ${otherBusinessList}
 
+      ${statusTable}
+      ${dateRow}
+
       ${sectionTitle("Disclaimer Clause")}
       <p style="${paragraphStyle}">
         This report (including any attachments) has been prepared on the basis of verbal
@@ -409,9 +457,6 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
         for any actions taken on this report and any liabilities directly or indirectly accruing
         from such actions. Kowtha &amp; Co. will not be held liable in any case.
       </p>
-
-      ${statusTable}
-      ${dateRow}
     </div>
     ${pdBaseTemplateFooter(html_data)}
   `;
