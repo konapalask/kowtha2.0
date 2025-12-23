@@ -34,34 +34,42 @@ import { UploadOutlined } from "@ant-design/icons";
 
 const { TextArea } = Input;
 import React, {
-  useEffect,useLayoutEffect,useState,useCallback,useMemo,useRef,} from "react";
+  useEffect,
+  useLayoutEffect,
+  useState,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react";
 import "react-quill/dist/quill.snow.css";
 
 const COORDINATE_FIELD_KEYS = [
-  'siteCoordinates',
-  'coordinates',
-  'latitude',
-  'longitude',
-  'latitudeLongitude',
-  'latitudeAndLongitude',
-  'officeGeoTag',
-  'customerGeoTag',
-  'geoTag',
-  'geoCoordinates',
-  'geoLocation',
-  'lat',
-  'lng',
-  'long',
-  'siteLatitude',
-  'siteLongitude',
-  'currentLatitude',
-  'currentLongitude',
+  "siteCoordinates",
+  "coordinates",
+  "latitude",
+  "longitude",
+  "latitudeLongitude",
+  "latitudeAndLongitude",
+  "officeGeoTag",
+  "customerGeoTag",
+  "geoTag",
+  "geoCoordinates",
+  "geoLocation",
+  "lat",
+  "lng",
+  "long",
+  "siteLatitude",
+  "siteLongitude",
+  "currentLatitude",
+  "currentLongitude",
 ];
 
 const isCoordinateField = (fieldId: string): boolean => {
   if (!fieldId) return false;
   const fieldIdLower = fieldId.toLowerCase();
-  return COORDINATE_FIELD_KEYS.some(key => fieldIdLower === key.toLowerCase());
+  return COORDINATE_FIELD_KEYS.some(
+    (key) => fieldIdLower === key.toLowerCase()
+  );
 };
 
 import EditRequestLogs from "./EditRequestLogs";
@@ -355,7 +363,6 @@ export const BusinessVerificationDetails: React.FC<
   const [formLoading, setFormLoading] = useState(true);
   const [dynamicFormData, setDynamicFormData] = useState<WebFormData>({});
 
-
   const [savedSectionData, setSavedSectionData] = useState<Record<string, any>>(
     {}
   );
@@ -560,8 +567,15 @@ export const BusinessVerificationDetails: React.FC<
           return transformed;
         };
 
-        if (schemaForm && useGenericApproach && schemaCacheKeyRef.current === schemaKey) {
-          const transformedData = transformDataForSchema(rawFormData, schemaForm);
+        if (
+          schemaForm &&
+          useGenericApproach &&
+          schemaCacheKeyRef.current === schemaKey
+        ) {
+          const transformedData = transformDataForSchema(
+            rawFormData,
+            schemaForm
+          );
           const formData = cleanEmptyStrings(transformedData, schemaForm);
           setDynamicFormData(formData);
           setFormLoading(false);
@@ -934,7 +948,7 @@ export const BusinessVerificationDetails: React.FC<
         approvedStatus = "Positive";
       } else if (verdict === "negative") {
         approvedStatus = "Negative";
-      } else if (verdict === "credit_refer")        {
+      } else if (verdict === "credit_refer") {
         approvedStatus = "CreditRefer";
       }
 
@@ -980,13 +994,14 @@ export const BusinessVerificationDetails: React.FC<
 
   // Extract the form data directly
   const rawApiData = verificationData?.verificationData || verificationData;
-  
-  const data = role === "VerificationExecutive" && savedSectionData?.uploadedItems
-    ? {
-        ...rawApiData,
-        uploadedItems: savedSectionData.uploadedItems,
-      }
-    : rawApiData;
+
+  const data =
+    role === "VerificationExecutive" && savedSectionData?.uploadedItems
+      ? {
+          ...rawApiData,
+          uploadedItems: savedSectionData.uploadedItems,
+        }
+      : rawApiData;
 
   // Debug logging
   // console.log("🔍 BusinessVerificationDetails Debug:");
@@ -1069,22 +1084,21 @@ export const BusinessVerificationDetails: React.FC<
   };
 
   const handlePhotoRemoval = async (pid: any) => {
-  
     // Store scroll position and section ID for restoration after save (same as section save)
     const scrollPosition = window.scrollY || window.pageYOffset;
     savedSectionRef.current = "photoCapture";
     savedSectionScrollRef.current = scrollPosition;
     savedSectionViewportTopRef.current =
-      document
-        .getElementById("section-photoCapture")
-        ?.getBoundingClientRect().top ?? null;
+      document.getElementById("section-photoCapture")?.getBoundingClientRect()
+        .top ?? null;
 
     if (role === "VerificationExecutive") {
-      const currentItems = savedSectionData?.uploadedItems ||
+      const currentItems =
+        savedSectionData?.uploadedItems ||
         completeVerificationData?.verificationData?.uploadedItems ||
         verificationData?.verificationData?.uploadedItems ||
         [];
-      
+
       const updatedItems = currentItems.filter(
         (photo: any) => photo?.id !== pid
       );
@@ -1152,7 +1166,6 @@ export const BusinessVerificationDetails: React.FC<
     );
   };
 
-
   const getFileExtension = (item: any): string => {
     if (item.fileType) return item.fileType.toLowerCase();
     if (item.fileName) {
@@ -1165,13 +1178,13 @@ export const BusinessVerificationDetails: React.FC<
   const handleViewDocument = async (item: any) => {
     try {
       const presignedUrl = await getS3ImageUrl(item.s3ImageUrl);
-      
+
       if (!presignedUrl) {
         message.error("Failed to load document URL. Please try again.");
         return;
       }
-      
-      window.open(presignedUrl, '_blank', 'noopener,noreferrer');
+
+      window.open(presignedUrl, "_blank", "noopener,noreferrer");
     } catch (error) {
       console.error("Error loading document:", error);
       message.error("Failed to load document. Please try again.");
@@ -1181,28 +1194,29 @@ export const BusinessVerificationDetails: React.FC<
   const handleDownloadDocument = async (item: any) => {
     try {
       const presignedUrl = await getS3ImageUrl(item.s3ImageUrl);
-      const fileName = item.fileName || item.s3ImageUrl.split("/").pop() || "document";
-      
+      const fileName =
+        item.fileName || item.s3ImageUrl.split("/").pop() || "document";
+
       const response = await fetch(presignedUrl);
       if (!response.ok) {
         throw new Error(`Failed to fetch file: ${response.status}`);
       }
-      
+
       const blob = await response.blob();
       const blobUrl = window.URL.createObjectURL(blob);
-      
+
       const link = document.createElement("a");
       link.href = blobUrl;
       link.download = fileName;
       link.style.display = "none";
       document.body.appendChild(link);
       link.click();
-      
+
       setTimeout(() => {
         document.body.removeChild(link);
         window.URL.revokeObjectURL(blobUrl);
       }, 100);
-      
+
       message.success("Document download started");
     } catch (error) {
       console.error("Error downloading document:", error);
@@ -1219,10 +1233,10 @@ export const BusinessVerificationDetails: React.FC<
         return;
       }
 
-      message.loading({ 
-        content: `Preparing ${uploadedItems.length} file(s) for download...`, 
+      message.loading({
+        content: `Preparing ${uploadedItems.length} file(s) for download...`,
         key: "downloadAll",
-        duration: 0 
+        duration: 0,
       });
 
       let successCount = 0;
@@ -1232,47 +1246,55 @@ export const BusinessVerificationDetails: React.FC<
         const item = uploadedItems[i];
         try {
           const fileType = isDocumentItem(item) ? "document" : "photo";
-          message.loading({ 
-            content: `Downloading ${fileType} ${i + 1} of ${uploadedItems.length}...`, 
+          message.loading({
+            content: `Downloading ${fileType} ${i + 1} of ${uploadedItems.length}...`,
             key: "downloadAll",
-            duration: 0 
+            duration: 0,
           });
 
           const presignedUrl = await getS3ImageUrl(item.s3ImageUrl);
-          
+
           const response = await fetch(presignedUrl);
           if (!response.ok) {
             throw new Error(`Failed to fetch file: ${response.status}`);
           }
-          
+
           const blob = await response.blob();
           const blobUrl = window.URL.createObjectURL(blob);
-          
+
           const link = document.createElement("a");
           link.href = blobUrl;
-          const fileName = item.fileName || item.s3ImageUrl.split("/").pop() || `file-${item.id}`;
+          const fileName =
+            item.fileName ||
+            item.s3ImageUrl.split("/").pop() ||
+            `file-${item.id}`;
           link.download = fileName;
           link.style.display = "none";
           document.body.appendChild(link);
           link.click();
-          
+
           setTimeout(() => {
             document.body.removeChild(link);
             window.URL.revokeObjectURL(blobUrl);
           }, 100);
-          
+
           successCount++;
-          
+
           await new Promise((resolve) => setTimeout(resolve, 500));
         } catch (error) {
-          console.error(`Error downloading ${item.fileName || item.id}:`, error);
+          console.error(
+            `Error downloading ${item.fileName || item.id}:`,
+            error
+          );
           failCount++;
         }
       }
 
       message.destroy("downloadAll");
       if (successCount > 0) {
-        message.success(`Successfully downloaded ${successCount} file(s) to your device`);
+        message.success(
+          `Successfully downloaded ${successCount} file(s) to your device`
+        );
       }
       if (failCount > 0) {
         message.error(`Failed to download ${failCount} file(s)`);
@@ -1286,7 +1308,7 @@ export const BusinessVerificationDetails: React.FC<
 
   const handleMultipleFileUpload = async (info: any) => {
     const { fileList } = info;
-    
+
     const newFiles = fileList
       .filter((f: any) => {
         if (!f.originFileObj) return false;
@@ -1310,9 +1332,8 @@ export const BusinessVerificationDetails: React.FC<
     savedSectionRef.current = "photoCapture";
     savedSectionScrollRef.current = scrollPosition;
     savedSectionViewportTopRef.current =
-      document
-        .getElementById("section-photoCapture")
-        ?.getBoundingClientRect().top ?? null;
+      document.getElementById("section-photoCapture")?.getBoundingClientRect()
+        .top ?? null;
 
     const uploadPromises = newFiles.map(async (file: File) => {
       try {
@@ -1353,7 +1374,7 @@ export const BusinessVerificationDetails: React.FC<
 
         const timestamp = new Date().getTime();
         const randomStr = Math.random().toString(36).substring(7);
-        
+
         let fileExtension = "jpg";
         if (isPdf) {
           fileExtension = "pdf";
@@ -1362,7 +1383,7 @@ export const BusinessVerificationDetails: React.FC<
         } else if (isJpeg) {
           fileExtension = "jpg";
         }
-        
+
         const fileName = `verification/${id}/${timestamp}-${randomStr}.${fileExtension}`;
 
         const { url: presignedUrl } = await getPresignedUploadUrl(
@@ -1381,7 +1402,9 @@ export const BusinessVerificationDetails: React.FC<
         });
 
         if (!uploadResponse.ok) {
-          throw new Error(`Upload failed with status: ${uploadResponse.status}`);
+          throw new Error(
+            `Upload failed with status: ${uploadResponse.status}`
+          );
         }
 
         const newItem = {
@@ -1408,15 +1431,16 @@ export const BusinessVerificationDetails: React.FC<
 
     if (allNewItems.length > 0) {
       const updatedItems = [...existingItems, ...allNewItems];
-      
+
       if (role === "VerificationExecutive") {
         setSavedSectionData((prev: any) => ({
           ...prev,
           uploadedItems: updatedItems,
         }));
-        
+
         if (completeVerificationData?.verificationData) {
-          completeVerificationData.verificationData.uploadedItems = updatedItems;
+          completeVerificationData.verificationData.uploadedItems =
+            updatedItems;
         }
       } else {
         const updatedData = {
@@ -1436,7 +1460,7 @@ export const BusinessVerificationDetails: React.FC<
     if (failCount > 0 && successCount === 0) {
       message.error(`${failCount} file(s) failed to upload`);
     }
-    
+
     processedFilesRef.current.clear();
   };
 
@@ -1473,7 +1497,7 @@ export const BusinessVerificationDetails: React.FC<
 
       const timestamp = new Date().getTime();
       const randomStr = Math.random().toString(36).substring(7);
-      
+
       let fileExtension = "jpg";
       if (isPdf) {
         fileExtension = "pdf";
@@ -1482,7 +1506,7 @@ export const BusinessVerificationDetails: React.FC<
       } else if (isJpeg) {
         fileExtension = "jpg";
       }
-      
+
       const fileName = `verification/${id}/${timestamp}-${randomStr}.${fileExtension}`;
 
       const { url: presignedUrl } = await getPresignedUploadUrl(
@@ -1522,9 +1546,8 @@ export const BusinessVerificationDetails: React.FC<
       savedSectionRef.current = "photoCapture";
       savedSectionScrollRef.current = scrollPosition;
       savedSectionViewportTopRef.current =
-        document
-          .getElementById("section-photoCapture")
-          ?.getBoundingClientRect().top ?? null;
+        document.getElementById("section-photoCapture")?.getBoundingClientRect()
+          .top ?? null;
 
       if (role === "VerificationExecutive") {
         const updatedItems = [...existingItems, newItem];
@@ -1532,11 +1555,12 @@ export const BusinessVerificationDetails: React.FC<
           ...prev,
           uploadedItems: updatedItems,
         }));
-        
+
         if (completeVerificationData?.verificationData) {
-          completeVerificationData.verificationData.uploadedItems = updatedItems;
+          completeVerificationData.verificationData.uploadedItems =
+            updatedItems;
         }
-        
+
         return;
       }
 
@@ -1728,9 +1752,8 @@ export const BusinessVerificationDetails: React.FC<
       savedSectionRef.current = sectionId;
       savedSectionScrollRef.current = scrollPosition;
       savedSectionViewportTopRef.current =
-        document
-          .getElementById(`section-${sectionId}`)
-          ?.getBoundingClientRect().top ?? null;
+        document.getElementById(`section-${sectionId}`)?.getBoundingClientRect()
+          .top ?? null;
 
       // Ensure section stays expanded
       if (!activeSections.includes(sectionId)) {
@@ -1758,10 +1781,16 @@ export const BusinessVerificationDetails: React.FC<
           const initialValue = initialSectionData[key];
           if (
             !Array.isArray(initialValue) &&
-            (typeof initialValue === "string" || typeof initialValue === "number" || initialValue === null)
+            (typeof initialValue === "string" ||
+              typeof initialValue === "number" ||
+              initialValue === null)
           ) {
             if (sectionData[key] === undefined || sectionData[key] === null) {
-              if (initialValue !== "" && initialValue !== null && initialValue !== undefined) {
+              if (
+                initialValue !== "" &&
+                initialValue !== null &&
+                initialValue !== undefined
+              ) {
                 sectionData[key] = "";
               }
             }
@@ -1771,12 +1800,12 @@ export const BusinessVerificationDetails: React.FC<
         const sectionSchema = schema?.sections?.find(
           (s: any) => s.id === sectionId
         );
-        
+
         const getNestedValue = (obj: any, path: string): any => {
-          const keys = path.split('.');
+          const keys = path.split(".");
           let value = obj;
           for (const key of keys) {
-            if (value && typeof value === 'object' && key in value) {
+            if (value && typeof value === "object" && key in value) {
               value = value[key];
             } else {
               return undefined;
@@ -1784,53 +1813,64 @@ export const BusinessVerificationDetails: React.FC<
           }
           return value;
         };
-        
+
         const isEmptyValue = (value: any): boolean => {
           return (
-            value === "" || 
-            value === null || 
+            value === "" ||
+            value === null ||
             value === undefined ||
             (typeof value === "string" && value.trim() === "")
           );
         };
-        
+
         if (sectionSchema && sectionSchema.fields) {
           const validationErrors: string[] = [];
-          
+
           sectionSchema.fields.forEach((field: any) => {
             let fieldValue = sectionData[field.id];
-            
-            if (fieldValue === undefined && field.id.includes('.')) {
+
+            if (fieldValue === undefined && field.id.includes(".")) {
               fieldValue = getNestedValue(sectionData, field.id);
             }
-            
+
             if (fieldValue === undefined) {
-              if (sectionData.basicDetails && sectionData.basicDetails[field.id] !== undefined) {
+              if (
+                sectionData.basicDetails &&
+                sectionData.basicDetails[field.id] !== undefined
+              ) {
                 fieldValue = sectionData.basicDetails[field.id];
-              } else if (sectionData.businessDetails && sectionData.businessDetails[field.id] !== undefined) {
+              } else if (
+                sectionData.businessDetails &&
+                sectionData.businessDetails[field.id] !== undefined
+              ) {
                 fieldValue = sectionData.businessDetails[field.id];
               }
             }
-            
+
             const isFieldEmpty = isEmptyValue(fieldValue);
             const isRequired = field.required === true;
-            const isLoanAmount = field.id === "loanAmount" || field.id.endsWith(".loanAmount");
-            
+            const isLoanAmount =
+              field.id === "loanAmount" || field.id.endsWith(".loanAmount");
+
             if (isRequired && !isLoanAmount && isFieldEmpty) {
               const fieldLabel = field.label || field.id || "Field";
-              validationErrors.push(`${fieldLabel} is mandatory and cannot be empty`);
+              validationErrors.push(
+                `${fieldLabel} is mandatory and cannot be empty`
+              );
             }
           });
-          
+
           if (validationErrors.length > 0) {
-            message.error(
-              `Cannot save: ${validationErrors.join(", ")}`
-            );
-            
-            if (formInstance && initialSectionData && Object.keys(initialSectionData).length > 0) {
+            message.error(`Cannot save: ${validationErrors.join(", ")}`);
+
+            if (
+              formInstance &&
+              initialSectionData &&
+              Object.keys(initialSectionData).length > 0
+            ) {
               formInstance.setFieldsValue(initialSectionData);
             }
-            
+
             return;
           }
         }
@@ -1948,7 +1988,6 @@ export const BusinessVerificationDetails: React.FC<
           message.warning("No changes to save");
           return;
         }
-
 
         try {
           // Get all initial data (contains all sections from backend)
@@ -2308,23 +2347,36 @@ export const BusinessVerificationDetails: React.FC<
     try {
       const fieldNameMatches = formula.match(/\b[a-zA-Z_][a-zA-Z0-9_]*\b/g);
       const fieldNamesInFormula = fieldNameMatches || [];
-      
-      const jsKeywords = ['true', 'false', 'null', 'undefined', 'NaN', 'Infinity', 'if', 'else', 'return'];
-      const validFieldNames = fieldNamesInFormula.filter(name => !jsKeywords.includes(name));
+
+      const jsKeywords = [
+        "true",
+        "false",
+        "null",
+        "undefined",
+        "NaN",
+        "Infinity",
+        "if",
+        "else",
+        "return",
+      ];
+      const validFieldNames = fieldNamesInFormula.filter(
+        (name) => !jsKeywords.includes(name)
+      );
 
       let evaluatedFormula = formula;
       for (const fieldName of validFieldNames) {
         const regex = new RegExp(`\\b${fieldName}\\b`, "g");
         const value = formValues[fieldName];
-        
+
         let numValue = 0;
         if (value !== undefined && value !== null && value !== "") {
-          const parsed = typeof value === "number" ? value : parseFloat(String(value));
+          const parsed =
+            typeof value === "number" ? value : parseFloat(String(value));
           if (!isNaN(parsed)) {
             numValue = parsed;
           }
         }
-        
+
         evaluatedFormula = evaluatedFormula.replace(regex, String(numValue));
       }
 
@@ -2333,7 +2385,14 @@ export const BusinessVerificationDetails: React.FC<
       )();
       return typeof result === "number" && !isNaN(result) ? result : null;
     } catch (error) {
-      console.debug("Formula evaluation error:", error, "Formula:", formula, "Values:", formValues);
+      console.debug(
+        "Formula evaluation error:",
+        error,
+        "Formula:",
+        formula,
+        "Values:",
+        formValues
+      );
       return null;
     }
   };
@@ -2409,20 +2468,25 @@ export const BusinessVerificationDetails: React.FC<
     ): Record<string, any> => {
       const calculatedFields: Record<string, any> = {};
       const itemFields = arrayField.arrayItemFields || [];
-      
+
       const itemValues: Record<string, any> = {};
       itemFields.forEach((itemField: any) => {
-        const flatKey = prefix ? `${prefix}[${arrayIndex}].${itemField.id}` : `${arrayField.id}[${arrayIndex}].${itemField.id}`;
+        const flatKey = prefix
+          ? `${prefix}[${arrayIndex}].${itemField.id}`
+          : `${arrayField.id}[${arrayIndex}].${itemField.id}`;
         const value = formValues[flatKey];
         if (value !== undefined && value !== null && value !== "") {
-          itemValues[itemField.id] = typeof value === "number" ? value : parseFloat(String(value)) || 0;
+          itemValues[itemField.id] =
+            typeof value === "number" ? value : parseFloat(String(value)) || 0;
         } else {
           itemValues[itemField.id] = 0;
         }
       });
 
       const workingItemValues = { ...itemValues };
-      const formulaItemFields = itemFields.filter((field: any) => field.formula);
+      const formulaItemFields = itemFields.filter(
+        (field: any) => field.formula
+      );
       const maxPasses = 10;
       let pass = 0;
       let hasNewCalculations = true;
@@ -2432,14 +2496,22 @@ export const BusinessVerificationDetails: React.FC<
         pass++;
 
         formulaItemFields.forEach((itemField: any) => {
-          const calculatedValue = evaluateFormula(itemField.formula, workingItemValues);
+          const calculatedValue = evaluateFormula(
+            itemField.formula,
+            workingItemValues
+          );
           if (calculatedValue !== null) {
             const currentValue = workingItemValues[itemField.id];
-            const currentNum = typeof currentValue === "number" ? currentValue : parseFloat(String(currentValue || 0));
+            const currentNum =
+              typeof currentValue === "number"
+                ? currentValue
+                : parseFloat(String(currentValue || 0));
             const newNum = calculatedValue;
 
             if (isNaN(currentNum) || Math.abs(currentNum - newNum) > 0.0001) {
-              const flatKey = prefix ? `${prefix}[${arrayIndex}].${itemField.id}` : `${arrayField.id}[${arrayIndex}].${itemField.id}`;
+              const flatKey = prefix
+                ? `${prefix}[${arrayIndex}].${itemField.id}`
+                : `${arrayField.id}[${arrayIndex}].${itemField.id}`;
               calculatedFields[flatKey] = calculatedValue;
               workingItemValues[itemField.id] = calculatedValue;
               hasNewCalculations = true;
@@ -2450,11 +2522,23 @@ export const BusinessVerificationDetails: React.FC<
 
       itemFields.forEach((itemField: any) => {
         if (itemField.type === "array" && itemField.arrayItemFields) {
-          const nestedArrayValue = formValues[prefix ? `${prefix}[${arrayIndex}].${itemField.id}` : `${arrayField.id}[${arrayIndex}].${itemField.id}`];
+          const nestedArrayValue =
+            formValues[
+              prefix
+                ? `${prefix}[${arrayIndex}].${itemField.id}`
+                : `${arrayField.id}[${arrayIndex}].${itemField.id}`
+            ];
           if (Array.isArray(nestedArrayValue)) {
             nestedArrayValue.forEach((_, nestedIndex: number) => {
-              const nestedPrefix = prefix ? `${prefix}[${arrayIndex}].${itemField.id}` : `${arrayField.id}[${arrayIndex}].${itemField.id}`;
-              const nestedCalculated = calculateFormulasInArrayItemForEffect(itemField, nestedIndex, formValues, nestedPrefix);
+              const nestedPrefix = prefix
+                ? `${prefix}[${arrayIndex}].${itemField.id}`
+                : `${arrayField.id}[${arrayIndex}].${itemField.id}`;
+              const nestedCalculated = calculateFormulasInArrayItemForEffect(
+                itemField,
+                nestedIndex,
+                formValues,
+                nestedPrefix
+              );
               Object.assign(calculatedFields, nestedCalculated);
             });
           }
@@ -2476,9 +2560,11 @@ export const BusinessVerificationDetails: React.FC<
       ): Record<string, any> => {
         const calculatedFields: Record<string, any> = {};
         const objectFields = objectField.objectFields || [];
-        
+
         const workingValues: Record<string, any> = { ...objectValues };
-        const formulaFields = objectFields.filter((field: any) => field.formula);
+        const formulaFields = objectFields.filter(
+          (field: any) => field.formula
+        );
         const maxPasses = 10;
         let pass = 0;
         let hasNewCalculations = true;
@@ -2488,7 +2574,10 @@ export const BusinessVerificationDetails: React.FC<
           pass++;
 
           formulaFields.forEach((field: any) => {
-            const calculatedValue = evaluateFormula(field.formula, workingValues);
+            const calculatedValue = evaluateFormula(
+              field.formula,
+              workingValues
+            );
             if (calculatedValue !== null) {
               const currentValue = workingValues[field.id];
               const currentNum =
@@ -2520,8 +2609,15 @@ export const BusinessVerificationDetails: React.FC<
 
         if (field.type === "object" && field.objectFields) {
           const objectValue = formValues[field.id];
-          if (objectValue && typeof objectValue === "object" && !Array.isArray(objectValue)) {
-            const objectCalculated = calculateFormulasInObject(field, objectValue);
+          if (
+            objectValue &&
+            typeof objectValue === "object" &&
+            !Array.isArray(objectValue)
+          ) {
+            const objectCalculated = calculateFormulasInObject(
+              field,
+              objectValue
+            );
             if (Object.keys(objectCalculated).length > 0) {
               calculatedFields[field.id] = {
                 ...objectValue,
@@ -2535,7 +2631,11 @@ export const BusinessVerificationDetails: React.FC<
           const arrayValue = formValues[field.id];
           if (Array.isArray(arrayValue)) {
             arrayValue.forEach((_, index: number) => {
-              const arrayCalculated = calculateFormulasInArrayItemForEffect(field, index, formValues);
+              const arrayCalculated = calculateFormulasInArrayItemForEffect(
+                field,
+                index,
+                formValues
+              );
               Object.assign(calculatedFields, arrayCalculated);
             });
           }
@@ -2575,20 +2675,25 @@ export const BusinessVerificationDetails: React.FC<
     ): Record<string, any> => {
       const calculatedFields: Record<string, any> = {};
       const itemFields = arrayField.arrayItemFields || [];
-      
+
       const itemValues: Record<string, any> = {};
       itemFields.forEach((itemField: any) => {
-        const flatKey = prefix ? `${prefix}[${arrayIndex}].${itemField.id}` : `${arrayField.id}[${arrayIndex}].${itemField.id}`;
+        const flatKey = prefix
+          ? `${prefix}[${arrayIndex}].${itemField.id}`
+          : `${arrayField.id}[${arrayIndex}].${itemField.id}`;
         const value = allValues[flatKey];
         if (value !== undefined && value !== null && value !== "") {
-          itemValues[itemField.id] = typeof value === "number" ? value : parseFloat(String(value)) || 0;
+          itemValues[itemField.id] =
+            typeof value === "number" ? value : parseFloat(String(value)) || 0;
         } else {
           itemValues[itemField.id] = 0;
         }
       });
 
       const workingItemValues = { ...itemValues };
-      const formulaItemFields = itemFields.filter((field: any) => field.formula);
+      const formulaItemFields = itemFields.filter(
+        (field: any) => field.formula
+      );
       const maxPasses = 10;
       let pass = 0;
       let hasNewCalculations = true;
@@ -2598,14 +2703,22 @@ export const BusinessVerificationDetails: React.FC<
         pass++;
 
         formulaItemFields.forEach((itemField: any) => {
-          const calculatedValue = evaluateFormula(itemField.formula, workingItemValues);
+          const calculatedValue = evaluateFormula(
+            itemField.formula,
+            workingItemValues
+          );
           if (calculatedValue !== null) {
             const currentValue = workingItemValues[itemField.id];
-            const currentNum = typeof currentValue === "number" ? currentValue : parseFloat(String(currentValue || 0));
+            const currentNum =
+              typeof currentValue === "number"
+                ? currentValue
+                : parseFloat(String(currentValue || 0));
             const newNum = calculatedValue;
 
             if (isNaN(currentNum) || Math.abs(currentNum - newNum) > 0.0001) {
-              const flatKey = prefix ? `${prefix}[${arrayIndex}].${itemField.id}` : `${arrayField.id}[${arrayIndex}].${itemField.id}`;
+              const flatKey = prefix
+                ? `${prefix}[${arrayIndex}].${itemField.id}`
+                : `${arrayField.id}[${arrayIndex}].${itemField.id}`;
               calculatedFields[flatKey] = calculatedValue;
               workingItemValues[itemField.id] = calculatedValue;
               hasNewCalculations = true;
@@ -2616,11 +2729,23 @@ export const BusinessVerificationDetails: React.FC<
 
       itemFields.forEach((itemField: any) => {
         if (itemField.type === "array" && itemField.arrayItemFields) {
-          const nestedArrayValue = allValues[prefix ? `${prefix}[${arrayIndex}].${itemField.id}` : `${arrayField.id}[${arrayIndex}].${itemField.id}`];
+          const nestedArrayValue =
+            allValues[
+              prefix
+                ? `${prefix}[${arrayIndex}].${itemField.id}`
+                : `${arrayField.id}[${arrayIndex}].${itemField.id}`
+            ];
           if (Array.isArray(nestedArrayValue)) {
             nestedArrayValue.forEach((_, nestedIndex: number) => {
-              const nestedPrefix = prefix ? `${prefix}[${arrayIndex}].${itemField.id}` : `${arrayField.id}[${arrayIndex}].${itemField.id}`;
-              const nestedCalculated = calculateFormulasInArrayItem(itemField, nestedIndex, allValues, nestedPrefix);
+              const nestedPrefix = prefix
+                ? `${prefix}[${arrayIndex}].${itemField.id}`
+                : `${arrayField.id}[${arrayIndex}].${itemField.id}`;
+              const nestedCalculated = calculateFormulasInArrayItem(
+                itemField,
+                nestedIndex,
+                allValues,
+                nestedPrefix
+              );
               Object.assign(calculatedFields, nestedCalculated);
             });
           }
@@ -2633,9 +2758,10 @@ export const BusinessVerificationDetails: React.FC<
     const handleFormChange = useCallback(
       (changedValues: any, allValues: any) => {
         const workingValues = { ...allValues };
-        
+
         const calculatedFields: Record<string, any> = {};
-        const formulaFields = section.fields?.filter((field: any) => field.formula) || [];
+        const formulaFields =
+          section.fields?.filter((field: any) => field.formula) || [];
         const maxPasses = 10;
         let pass = 0;
         let hasNewCalculations = true;
@@ -2645,7 +2771,10 @@ export const BusinessVerificationDetails: React.FC<
           pass++;
 
           formulaFields.forEach((field: any) => {
-            const calculatedValue = evaluateFormula(field.formula, workingValues);
+            const calculatedValue = evaluateFormula(
+              field.formula,
+              workingValues
+            );
             if (calculatedValue !== null) {
               const currentValue = workingValues[field.id];
               const currentNum =
@@ -2669,9 +2798,11 @@ export const BusinessVerificationDetails: React.FC<
         ): Record<string, any> => {
           const calculated: Record<string, any> = {};
           const objectFields = objectField.objectFields || [];
-          
+
           const workingObjectValues: Record<string, any> = { ...objectValues };
-          const formulaFields = objectFields.filter((field: any) => field.formula);
+          const formulaFields = objectFields.filter(
+            (field: any) => field.formula
+          );
           const maxPasses = 10;
           let pass = 0;
           let hasNewCalculations = true;
@@ -2681,7 +2812,10 @@ export const BusinessVerificationDetails: React.FC<
             pass++;
 
             formulaFields.forEach((field: any) => {
-              const calculatedValue = evaluateFormula(field.formula, workingObjectValues);
+              const calculatedValue = evaluateFormula(
+                field.formula,
+                workingObjectValues
+              );
               if (calculatedValue !== null) {
                 const currentValue = workingObjectValues[field.id];
                 const currentNum =
@@ -2690,7 +2824,10 @@ export const BusinessVerificationDetails: React.FC<
                     : parseFloat(String(currentValue || 0));
                 const newNum = calculatedValue;
 
-                if (isNaN(currentNum) || Math.abs(currentNum - newNum) > 0.0001) {
+                if (
+                  isNaN(currentNum) ||
+                  Math.abs(currentNum - newNum) > 0.0001
+                ) {
                   calculated[field.id] = calculatedValue;
                   workingObjectValues[field.id] = calculatedValue;
                   hasNewCalculations = true;
@@ -2705,8 +2842,15 @@ export const BusinessVerificationDetails: React.FC<
         section.fields?.forEach((field: any) => {
           if (field.type === "object" && field.objectFields) {
             const objectValue = allValues[field.id];
-            if (objectValue && typeof objectValue === "object" && !Array.isArray(objectValue)) {
-              const objectCalculated = calculateFormulasInObjectForChange(field, objectValue);
+            if (
+              objectValue &&
+              typeof objectValue === "object" &&
+              !Array.isArray(objectValue)
+            ) {
+              const objectCalculated = calculateFormulasInObjectForChange(
+                field,
+                objectValue
+              );
               if (Object.keys(objectCalculated).length > 0) {
                 calculatedFields[field.id] = {
                   ...objectValue,
@@ -2720,7 +2864,11 @@ export const BusinessVerificationDetails: React.FC<
             const arrayValue = allValues[field.id];
             if (Array.isArray(arrayValue)) {
               arrayValue.forEach((_, index: number) => {
-                const arrayCalculated = calculateFormulasInArrayItem(field, index, allValues);
+                const arrayCalculated = calculateFormulasInArrayItem(
+                  field,
+                  index,
+                  allValues
+                );
                 Object.assign(calculatedFields, arrayCalculated);
               });
             }
@@ -2750,7 +2898,7 @@ export const BusinessVerificationDetails: React.FC<
         section.id === "financialAnalysis" ||
         section.id === "financialAnalysisComprehensive" ||
         section.label?.toLowerCase().includes("financial") ||
-        section.label?.toLowerCase().includes("comprehensive actuals") 
+        section.label?.toLowerCase().includes("comprehensive actuals")
       );
     };
 
@@ -2758,9 +2906,9 @@ export const BusinessVerificationDetails: React.FC<
     // Note: formValues is already declared above for formula calculations
     const calculateFinancialTotals = useMemo(() => {
       const sectionLabel = section.label?.toLowerCase() || "";
-      
+
       // Check if this is a financial analysis section (including Type 4 which is excluded from grouping)
-      const isFinancialSection = 
+      const isFinancialSection =
         section.id === "financialAnalysis" ||
         section.id === "financialAnalysisComprehensive" ||
         section.id === "financialAnalysisDetailed" ||
@@ -2796,24 +2944,42 @@ export const BusinessVerificationDetails: React.FC<
             }
           }
 
-          if (fieldLabel.includes("gross profit") || fieldId.toLowerCase().includes("grossprofit")) {
+          if (
+            fieldLabel.includes("gross profit") ||
+            fieldId.toLowerCase().includes("grossprofit")
+          ) {
             const value = parseNum(fieldValue || mergedData[fieldId]);
-            if (value !== 0 && (totalGrossProfit === 0 || Math.abs(value) > Math.abs(totalGrossProfit))) {
+            if (
+              value !== 0 &&
+              (totalGrossProfit === 0 ||
+                Math.abs(value) > Math.abs(totalGrossProfit))
+            ) {
               totalGrossProfit = value;
             }
           }
 
           if (
-            (fieldLabel.includes("net profit") && !fieldLabel.includes("before") && !fieldLabel.includes("after tax")) ||
-            (fieldId.toLowerCase().includes("netprofit") && !fieldId.toLowerCase().includes("before") && !fieldId.toLowerCase().includes("aftertax"))
+            (fieldLabel.includes("net profit") &&
+              !fieldLabel.includes("before") &&
+              !fieldLabel.includes("after tax")) ||
+            (fieldId.toLowerCase().includes("netprofit") &&
+              !fieldId.toLowerCase().includes("before") &&
+              !fieldId.toLowerCase().includes("aftertax"))
           ) {
             const value = parseNum(fieldValue || mergedData[fieldId]);
-            if (value !== 0 && (totalNetProfit === 0 || Math.abs(value) > Math.abs(totalNetProfit))) {
+            if (
+              value !== 0 &&
+              (totalNetProfit === 0 ||
+                Math.abs(value) > Math.abs(totalNetProfit))
+            ) {
               totalNetProfit = value;
             }
           }
 
-          if (fieldLabel.includes("net profit after tax") || fieldId.toLowerCase().includes("netprofitaftertax")) {
+          if (
+            fieldLabel.includes("net profit after tax") ||
+            fieldId.toLowerCase().includes("netprofitaftertax")
+          ) {
             const value = parseNum(fieldValue || mergedData[fieldId]);
             if (value !== 0) {
               totalNetProfit = value;
@@ -2823,7 +2989,15 @@ export const BusinessVerificationDetails: React.FC<
       }
 
       return { totalGrossProfit, totalNetProfit };
-    }, [data, changedData, section.id, section.label, section.fields, form, formValues]);
+    }, [
+      data,
+      changedData,
+      section.id,
+      section.label,
+      section.fields,
+      form,
+      formValues,
+    ]);
 
     // Use side attribute that is set by the schema conversion service
     // This is determined from the credit/debit arrays in the schema
@@ -2835,7 +3009,6 @@ export const BusinessVerificationDetails: React.FC<
       // Use the variant attribute set by schema service
       return field.variant || null;
     };
-
 
     // Render a single field (for use in grouped and standalone rendering)
     const renderSingleField = (
@@ -2861,7 +3034,9 @@ export const BusinessVerificationDetails: React.FC<
       const isCoordField = isCoordinateField(fieldId);
       const fieldReadOnly = readOnly || isFormulaField || isCoordField;
 
-      const readonlyFieldStyle = fieldReadOnly ? { color: '#262626' } : undefined;
+      const readonlyFieldStyle = fieldReadOnly
+        ? { color: "#262626" }
+        : undefined;
       if (field.type === "array" && field.arrayItemFields) {
         return (
           <div key={fieldId} style={{ marginBottom: 16 }}>
@@ -2979,7 +3154,11 @@ export const BusinessVerificationDetails: React.FC<
                 disabled={fieldReadOnly}
                 placeholder={`Select ${field.label}`}
                 format="hh:mm A"
-                style={fieldReadOnly ? { width: "100%", ...readonlyFieldStyle } : { width: "100%" }}
+                style={
+                  fieldReadOnly
+                    ? { width: "100%", ...readonlyFieldStyle }
+                    : { width: "100%" }
+                }
                 suffixIcon={<ClockCircleOutlined />}
               />
             </Form.Item>
@@ -3099,7 +3278,11 @@ export const BusinessVerificationDetails: React.FC<
                   placeholder={`Select ${field.label}`}
                   format="DD/MM/YYYY HH:mm A"
                   showTime={{ format: "HH:mm A" }}
-                  style={fieldReadOnly ? { width: "100%", ...readonlyFieldStyle } : { width: "100%" }}
+                  style={
+                    fieldReadOnly
+                      ? { width: "100%", ...readonlyFieldStyle }
+                      : { width: "100%" }
+                  }
                 />
               </Form.Item>
             );
@@ -3141,7 +3324,11 @@ export const BusinessVerificationDetails: React.FC<
                   disabled={fieldReadOnly}
                   placeholder={`Select ${field.label}`}
                   format="DD/MM/YYYY"
-                  style={fieldReadOnly ? { width: "100%", ...readonlyFieldStyle } : { width: "100%" }}
+                  style={
+                    fieldReadOnly
+                      ? { width: "100%", ...readonlyFieldStyle }
+                      : { width: "100%" }
+                  }
                 />
               </Form.Item>
             );
@@ -3195,7 +3382,11 @@ export const BusinessVerificationDetails: React.FC<
             >
               <InputNumber
                 disabled={fieldReadOnly}
-                style={fieldReadOnly ? { width: "100%", ...readonlyFieldStyle } : { width: "100%" }}
+                style={
+                  fieldReadOnly
+                    ? { width: "100%", ...readonlyFieldStyle }
+                    : { width: "100%" }
+                }
                 placeholder={field.placeholder || field.label}
                 formatter={
                   field.formatter?.useIndianFormat
@@ -3293,11 +3484,19 @@ export const BusinessVerificationDetails: React.FC<
                 <Card size="small" style={{ backgroundColor: "#fafafa" }}>
                   <Row gutter={[16, 16]}>
                     {field.objectFields.map((objectField: any) => {
-                      const isNestedCoordField = isCoordinateField(objectField.id);
-                      const objectFieldReadOnly = readOnly || objectField.readOnly || isNestedCoordField || false;
+                      const isNestedCoordField = isCoordinateField(
+                        objectField.id
+                      );
+                      const objectFieldReadOnly =
+                        readOnly ||
+                        objectField.readOnly ||
+                        isNestedCoordField ||
+                        false;
                       const objectFieldRequired = objectField.required || false;
-               
-                      const readonlyNestedFieldStyle = objectFieldReadOnly ? { color: '#262626' } : undefined;
+
+                      const readonlyNestedFieldStyle = objectFieldReadOnly
+                        ? { color: "#262626" }
+                        : undefined;
                       const renderNestedField = () => {
                         switch (objectField.type) {
                           case "text":
@@ -3305,19 +3504,30 @@ export const BusinessVerificationDetails: React.FC<
                             return (
                               <Input
                                 disabled={objectFieldReadOnly}
-                                placeholder={objectField.placeholder || objectField.label}
+                                placeholder={
+                                  objectField.placeholder || objectField.label
+                                }
                                 maxLength={objectField.maxLength}
                                 style={readonlyNestedFieldStyle}
                               />
                             );
-                          
+
                           case "number":
                           case "integer":
                             return (
                               <InputNumber
                                 disabled={objectFieldReadOnly}
-                                style={objectFieldReadOnly ? { width: "100%", ...readonlyNestedFieldStyle } : { width: "100%" }}
-                                placeholder={objectField.placeholder || objectField.label}
+                                style={
+                                  objectFieldReadOnly
+                                    ? {
+                                        width: "100%",
+                                        ...readonlyNestedFieldStyle,
+                                      }
+                                    : { width: "100%" }
+                                }
+                                placeholder={
+                                  objectField.placeholder || objectField.label
+                                }
                                 formatter={
                                   objectField.formatter?.useIndianFormat
                                     ? (value) => {
@@ -3325,17 +3535,21 @@ export const BusinessVerificationDetails: React.FC<
                                         const num = parseFloat(String(value));
                                         return new Intl.NumberFormat("en-IN", {
                                           minimumFractionDigits:
-                                            objectField.formatter?.minDecimalPlaces || 0,
+                                            objectField.formatter
+                                              ?.minDecimalPlaces || 0,
                                           maximumFractionDigits:
-                                            objectField.formatter?.maxDecimalPlaces || 2,
+                                            objectField.formatter
+                                              ?.maxDecimalPlaces || 2,
                                         }).format(num);
                                       }
                                     : undefined
                                 }
-                                parser={(value) => value?.replace(/\$\s?|(,*)/g, "") || ""}
+                                parser={(value) =>
+                                  value?.replace(/\$\s?|(,*)/g, "") || ""
+                                }
                               />
                             );
-                          
+
                           case "select":
                             return (
                               <Select
@@ -3355,23 +3569,27 @@ export const BusinessVerificationDetails: React.FC<
                                 ))}
                               </Select>
                             );
-                          
+
                           case "textarea":
                             return (
                               <TextArea
                                 disabled={objectFieldReadOnly}
-                                placeholder={objectField.placeholder || objectField.label}
+                                placeholder={
+                                  objectField.placeholder || objectField.label
+                                }
                                 rows={objectField.textAreaRows || 3}
                                 maxLength={objectField.maxLength}
                                 style={readonlyNestedFieldStyle}
                               />
                             );
-                          
+
                           default:
                             return (
                               <Input
                                 disabled={objectFieldReadOnly}
-                                placeholder={objectField.placeholder || objectField.label}
+                                placeholder={
+                                  objectField.placeholder || objectField.label
+                                }
                                 style={readonlyNestedFieldStyle}
                               />
                             );
@@ -3428,7 +3646,6 @@ export const BusinessVerificationDetails: React.FC<
       }
     };
 
-
     // Handle the actual schema structure from the backend
     // The backend now returns sections with fields array
     if (!section.fields || !Array.isArray(section.fields)) {
@@ -3442,7 +3659,6 @@ export const BusinessVerificationDetails: React.FC<
       }
       return true;
     });
-
 
     if (isFinancialAnalysisSection()) {
       const debitFields: any[] = [];
@@ -3505,14 +3721,22 @@ export const BusinessVerificationDetails: React.FC<
                 ))}
               </div>
             </Col>
-            
+
             {/* Object fields - full width */}
             {objectFields.map((field: any) => (
-              <Col key={field.id} xs={24} sm={24} md={24} lg={24} xl={24} xxl={24}>
+              <Col
+                key={field.id}
+                xs={24}
+                sm={24}
+                md={24}
+                lg={24}
+                xl={24}
+                xxl={24}
+              >
                 {renderSingleField(field.id, field, true)}
               </Col>
             ))}
-            
+
             {/* Array fields - always full width */}
             {arrayFields.map((field: any) => (
               <Col
@@ -3559,7 +3783,8 @@ export const BusinessVerificationDetails: React.FC<
                           display: "block",
                         }}
                       >
-                        ₹{totalGrossProfit.toLocaleString("en-IN", {
+                        ₹
+                        {totalGrossProfit.toLocaleString("en-IN", {
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 2,
                         })}
@@ -3595,7 +3820,8 @@ export const BusinessVerificationDetails: React.FC<
                           display: "block",
                         }}
                       >
-                        ₹{totalNetProfit.toLocaleString("en-IN", {
+                        ₹
+                        {totalNetProfit.toLocaleString("en-IN", {
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 2,
                         })}
@@ -3622,7 +3848,9 @@ export const BusinessVerificationDetails: React.FC<
     // Check if this is Type 4 (Detailed Financial Analysis with Balance Sheet) to show totals
     const isType4FinancialAnalysis =
       section.id === "financialAnalysisDetailed" ||
-      section.label?.toLowerCase().includes("detailed financial analysis with balance sheet");
+      section.label
+        ?.toLowerCase()
+        .includes("detailed financial analysis with balance sheet");
     const { totalGrossProfit, totalNetProfit } = calculateFinancialTotals;
 
     return (
@@ -3650,82 +3878,85 @@ export const BusinessVerificationDetails: React.FC<
           ))}
 
           {/* Total Gross Profit and Total Net Profit Display for Type 4 */}
-          {isType4FinancialAnalysis && (totalGrossProfit !== 0 || totalNetProfit !== 0) && (
-            <>
-              <Col xs={24} sm={24} md={12} lg={12} xl={12} xxl={12}>
-                <Card
-                  size="small"
-                  style={{
-                    backgroundColor: "#f0f9ff",
-                    border: "1px solid #0ea5e9",
-                    marginTop: 16,
-                  }}
-                >
-                  <div style={{ textAlign: "center" }}>
-                    <Text
-                      type="secondary"
-                      style={{
-                        fontSize: "12px",
-                        display: "block",
-                        marginBottom: 4,
-                      }}
-                    >
-                      To Gross Profit
-                    </Text>
-                    <Text
-                      strong
-                      style={{
-                        fontSize: "20px",
-                        color: "#0ea5e9",
-                        display: "block",
-                      }}
-                    >
-                      ₹{totalGrossProfit.toLocaleString("en-IN", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                    </Text>
-                  </div>
-                </Card>
-              </Col>
-              <Col xs={24} sm={24} md={12} lg={12} xl={12} xxl={12}>
-                <Card
-                  size="small"
-                  style={{
-                    backgroundColor: "#f0fdf4",
-                    border: "1px solid #22c55e",
-                    marginTop: 16,
-                  }}
-                >
-                  <div style={{ textAlign: "center" }}>
-                    <Text
-                      type="secondary"
-                      style={{
-                        fontSize: "12px",
-                        display: "block",
-                        marginBottom: 4,
-                      }}
-                    >
-                      To Net Profit
-                    </Text>
-                    <Text
-                      strong
-                      style={{
-                        fontSize: "20px",
-                        color: "#22c55e",
-                        display: "block",
-                      }}
-                    >
-                      ₹{totalNetProfit.toLocaleString("en-IN", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                    </Text>
-                  </div>
-                </Card>
-              </Col>
-            </>
-          )}
+          {isType4FinancialAnalysis &&
+            (totalGrossProfit !== 0 || totalNetProfit !== 0) && (
+              <>
+                <Col xs={24} sm={24} md={12} lg={12} xl={12} xxl={12}>
+                  <Card
+                    size="small"
+                    style={{
+                      backgroundColor: "#f0f9ff",
+                      border: "1px solid #0ea5e9",
+                      marginTop: 16,
+                    }}
+                  >
+                    <div style={{ textAlign: "center" }}>
+                      <Text
+                        type="secondary"
+                        style={{
+                          fontSize: "12px",
+                          display: "block",
+                          marginBottom: 4,
+                        }}
+                      >
+                        To Gross Profit
+                      </Text>
+                      <Text
+                        strong
+                        style={{
+                          fontSize: "20px",
+                          color: "#0ea5e9",
+                          display: "block",
+                        }}
+                      >
+                        ₹
+                        {totalGrossProfit.toLocaleString("en-IN", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </Text>
+                    </div>
+                  </Card>
+                </Col>
+                <Col xs={24} sm={24} md={12} lg={12} xl={12} xxl={12}>
+                  <Card
+                    size="small"
+                    style={{
+                      backgroundColor: "#f0fdf4",
+                      border: "1px solid #22c55e",
+                      marginTop: 16,
+                    }}
+                  >
+                    <div style={{ textAlign: "center" }}>
+                      <Text
+                        type="secondary"
+                        style={{
+                          fontSize: "12px",
+                          display: "block",
+                          marginBottom: 4,
+                        }}
+                      >
+                        To Net Profit
+                      </Text>
+                      <Text
+                        strong
+                        style={{
+                          fontSize: "20px",
+                          color: "#22c55e",
+                          display: "block",
+                        }}
+                      >
+                        ₹
+                        {totalNetProfit.toLocaleString("en-IN", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </Text>
+                    </div>
+                  </Card>
+                </Col>
+              </>
+            )}
         </Row>
       </Form>
     );
@@ -3790,20 +4021,25 @@ export const BusinessVerificationDetails: React.FC<
     ): Record<string, any> => {
       const calculatedFields: Record<string, any> = {};
       const itemFields = arrayField.arrayItemFields || [];
-      
+
       const itemValues: Record<string, any> = {};
       itemFields.forEach((itemField: any) => {
-        const flatKey = prefix ? `${prefix}[${arrayIndex}].${itemField.id}` : `${arrayField.id}[${arrayIndex}].${itemField.id}`;
+        const flatKey = prefix
+          ? `${prefix}[${arrayIndex}].${itemField.id}`
+          : `${arrayField.id}[${arrayIndex}].${itemField.id}`;
         const value = allFormValues[flatKey];
         if (value !== undefined && value !== null && value !== "") {
-          itemValues[itemField.id] = typeof value === "number" ? value : parseFloat(String(value)) || 0;
+          itemValues[itemField.id] =
+            typeof value === "number" ? value : parseFloat(String(value)) || 0;
         } else {
           itemValues[itemField.id] = 0;
         }
       });
 
       const workingItemValues = { ...itemValues };
-      const formulaItemFields = itemFields.filter((field: any) => field.formula);
+      const formulaItemFields = itemFields.filter(
+        (field: any) => field.formula
+      );
       const maxPasses = 10;
       let pass = 0;
       let hasNewCalculations = true;
@@ -3813,14 +4049,22 @@ export const BusinessVerificationDetails: React.FC<
         pass++;
 
         formulaItemFields.forEach((itemField: any) => {
-          const calculatedValue = evaluateFormula(itemField.formula, workingItemValues);
+          const calculatedValue = evaluateFormula(
+            itemField.formula,
+            workingItemValues
+          );
           if (calculatedValue !== null) {
             const currentValue = workingItemValues[itemField.id];
-            const currentNum = typeof currentValue === "number" ? currentValue : parseFloat(String(currentValue || 0));
+            const currentNum =
+              typeof currentValue === "number"
+                ? currentValue
+                : parseFloat(String(currentValue || 0));
             const newNum = calculatedValue;
 
             if (isNaN(currentNum) || Math.abs(currentNum - newNum) > 0.0001) {
-              const flatKey = prefix ? `${prefix}[${arrayIndex}].${itemField.id}` : `${arrayField.id}[${arrayIndex}].${itemField.id}`;
+              const flatKey = prefix
+                ? `${prefix}[${arrayIndex}].${itemField.id}`
+                : `${arrayField.id}[${arrayIndex}].${itemField.id}`;
               calculatedFields[flatKey] = calculatedValue;
               workingItemValues[itemField.id] = calculatedValue;
               hasNewCalculations = true;
@@ -3831,11 +4075,23 @@ export const BusinessVerificationDetails: React.FC<
 
       itemFields.forEach((itemField: any) => {
         if (itemField.type === "array" && itemField.arrayItemFields) {
-          const nestedArrayValue = allFormValues[prefix ? `${prefix}[${arrayIndex}].${itemField.id}` : `${arrayField.id}[${arrayIndex}].${itemField.id}`];
+          const nestedArrayValue =
+            allFormValues[
+              prefix
+                ? `${prefix}[${arrayIndex}].${itemField.id}`
+                : `${arrayField.id}[${arrayIndex}].${itemField.id}`
+            ];
           if (Array.isArray(nestedArrayValue)) {
             nestedArrayValue.forEach((_, nestedIndex: number) => {
-              const nestedPrefix = prefix ? `${prefix}[${arrayIndex}].${itemField.id}` : `${arrayField.id}[${arrayIndex}].${itemField.id}`;
-              const nestedCalculated = calculateFormulasInArrayItemLocal(itemField, nestedIndex, allFormValues, nestedPrefix);
+              const nestedPrefix = prefix
+                ? `${prefix}[${arrayIndex}].${itemField.id}`
+                : `${arrayField.id}[${arrayIndex}].${itemField.id}`;
+              const nestedCalculated = calculateFormulasInArrayItemLocal(
+                itemField,
+                nestedIndex,
+                allFormValues,
+                nestedPrefix
+              );
               Object.assign(calculatedFields, nestedCalculated);
             });
           }
@@ -3857,7 +4113,9 @@ export const BusinessVerificationDetails: React.FC<
           const arrayIndices = new Set<number>();
           Object.keys(allFormValues).forEach((key) => {
             if (key.startsWith(`${field.id}[`)) {
-              const match = key.match(new RegExp(`${field.id}\\[(\\d+)\\]\\.(.+)`));
+              const match = key.match(
+                new RegExp(`${field.id}\\[(\\d+)\\]\\.(.+)`)
+              );
               if (match) {
                 arrayIndices.add(parseInt(match[1]));
               }
@@ -3865,7 +4123,11 @@ export const BusinessVerificationDetails: React.FC<
           });
 
           arrayIndices.forEach((index) => {
-            const arrayCalculated = calculateFormulasInArrayItemLocal(field, index, allFormValues);
+            const arrayCalculated = calculateFormulasInArrayItemLocal(
+              field,
+              index,
+              allFormValues
+            );
             Object.assign(calculatedFields, arrayCalculated);
           });
         }
@@ -3904,7 +4166,14 @@ export const BusinessVerificationDetails: React.FC<
           },
         }));
       },
-      [field.id, field.arrayItemFields, sectionId, setSectionUncommittedChanges, form, items.length]
+      [
+        field.id,
+        field.arrayItemFields,
+        sectionId,
+        setSectionUncommittedChanges,
+        form,
+        items.length,
+      ]
     );
 
     // Sync form values and trigger change handler when items are ADDED (not removed)
@@ -3976,7 +4245,7 @@ export const BusinessVerificationDetails: React.FC<
         // Clear all form values for this array field
         const allFormValues = form.getFieldsValue();
         const keysToRemove: string[] = [];
-        
+
         Object.keys(allFormValues).forEach((key) => {
           if (key.startsWith(`${field.id}[`)) {
             keysToRemove.push(key);
@@ -4092,9 +4361,12 @@ export const BusinessVerificationDetails: React.FC<
       const fieldKey = `${field.id}[${itemIndex}].${itemFieldId}`;
       const isItemCoordField = isCoordinateField(itemFieldId);
       const isItemFormulaField = !!itemField.formula;
-      const itemFieldReadOnly = readOnly || isItemCoordField || isItemFormulaField;
-      
-      const readonlyItemFieldStyle = itemFieldReadOnly ? { color: '#262626' } : undefined;
+      const itemFieldReadOnly =
+        readOnly || isItemCoordField || isItemFormulaField;
+
+      const readonlyItemFieldStyle = itemFieldReadOnly
+        ? { color: "#262626" }
+        : undefined;
 
       // Handle enum fields (select dropdown) in arrays
       if (itemField.enum && itemField.enum.length > 0) {
@@ -4124,7 +4396,10 @@ export const BusinessVerificationDetails: React.FC<
               name={fieldKey}
               label={itemField.label}
             >
-              <Radio.Group disabled={itemFieldReadOnly} style={readonlyItemFieldStyle}>
+              <Radio.Group
+                disabled={itemFieldReadOnly}
+                style={readonlyItemFieldStyle}
+              >
                 <Radio value={true}>Yes</Radio>
                 <Radio value={false}>No</Radio>
               </Radio.Group>
@@ -4181,7 +4456,11 @@ export const BusinessVerificationDetails: React.FC<
                 disabled={itemFieldReadOnly}
                 placeholder={`Select ${itemField.label}`}
                 format="hh:mm A"
-                style={itemFieldReadOnly ? { width: "100%", ...readonlyItemFieldStyle } : { width: "100%" }}
+                style={
+                  itemFieldReadOnly
+                    ? { width: "100%", ...readonlyItemFieldStyle }
+                    : { width: "100%" }
+                }
                 suffixIcon={<ClockCircleOutlined />}
               />
             </Form.Item>
@@ -4197,7 +4476,11 @@ export const BusinessVerificationDetails: React.FC<
             >
               <InputNumber
                 disabled={itemFieldReadOnly}
-                style={itemFieldReadOnly ? { width: "100%", ...readonlyItemFieldStyle } : { width: "100%" }}
+                style={
+                  itemFieldReadOnly
+                    ? { width: "100%", ...readonlyItemFieldStyle }
+                    : { width: "100%" }
+                }
                 placeholder={itemField.placeholder || itemField.label}
                 formatter={
                   itemField.formatter?.useIndianFormat
@@ -4253,7 +4536,11 @@ export const BusinessVerificationDetails: React.FC<
                 disabled={itemFieldReadOnly}
                 placeholder={`Select ${itemField.label}`}
                 format="DD/MM/YYYY"
-                style={itemFieldReadOnly ? { width: "100%", ...readonlyItemFieldStyle } : { width: "100%" }}
+                style={
+                  itemFieldReadOnly
+                    ? { width: "100%", ...readonlyItemFieldStyle }
+                    : { width: "100%" }
+                }
               />
             </Form.Item>
           );
@@ -4374,7 +4661,11 @@ export const BusinessVerificationDetails: React.FC<
                   placeholder={`Select ${itemField.label}`}
                   format="DD/MM/YYYY HH:mm A"
                   showTime={{ format: "HH:mm A" }}
-                  style={itemFieldReadOnly ? { width: "100%", ...readonlyItemFieldStyle } : { width: "100%" }}
+                  style={
+                    itemFieldReadOnly
+                      ? { width: "100%", ...readonlyItemFieldStyle }
+                      : { width: "100%" }
+                  }
                 />
               </Form.Item>
             );
@@ -4467,7 +4758,10 @@ export const BusinessVerificationDetails: React.FC<
               name={fieldKey}
               label={itemField.label}
             >
-              <Radio.Group disabled={itemFieldReadOnly} style={readonlyItemFieldStyle}>
+              <Radio.Group
+                disabled={itemFieldReadOnly}
+                style={readonlyItemFieldStyle}
+              >
                 <Radio value={true}>Yes</Radio>
                 <Radio value={false}>No</Radio>
               </Radio.Group>
@@ -4549,43 +4843,44 @@ export const BusinessVerificationDetails: React.FC<
 
   return (
     <div>
-      {currentDepartment === "PD" && (() => {
-        const bankName =
-          (typeof completeVerificationData?.bankName === "string"
-            ? completeVerificationData.bankName
-            : undefined) ||
-          (typeof verificationData?.bankName === "string"
-            ? verificationData.bankName
-            : undefined) ||
-          (typeof verificationData?.loan?.bankName === "string"
-            ? verificationData.loan.bankName
-            : undefined) ||
-          "";
+      {currentDepartment === "PD" &&
+        (() => {
+          const bankName =
+            (typeof completeVerificationData?.bankName === "string"
+              ? completeVerificationData.bankName
+              : undefined) ||
+            (typeof verificationData?.bankName === "string"
+              ? verificationData.bankName
+              : undefined) ||
+            (typeof verificationData?.loan?.bankName === "string"
+              ? verificationData.loan.bankName
+              : undefined) ||
+            "";
 
-        const templateName =
-          loanTemplateName ||
-          (typeof completeVerificationData?.loan?.templateName === "string"
-            ? completeVerificationData.loan.templateName
-            : undefined) ||
-          (typeof verificationData?.loan?.templateName === "string"
-            ? verificationData.loan.templateName
-            : undefined) ||
-          "";
+          const templateName =
+            loanTemplateName ||
+            (typeof completeVerificationData?.loan?.templateName === "string"
+              ? completeVerificationData.loan.templateName
+              : undefined) ||
+            (typeof verificationData?.loan?.templateName === "string"
+              ? verificationData.loan.templateName
+              : undefined) ||
+            "";
 
-        if (!bankName && !templateName) return null;
+          if (!bankName && !templateName) return null;
 
-        const headerText = templateName
-          ? `${bankName}${bankName ? " - " : ""}${templateName}`
-          : bankName;
+          const headerText = templateName
+            ? `${bankName}${bankName ? " - " : ""}${templateName}`
+            : bankName;
 
-        return (
-          <section style={{ margin: "6px 0 12px", textAlign: "center" }}>
-            <Text style={{ color: "#1e40af", fontWeight: 600 }}>
-              {headerText || "Unknown Bank"}
-            </Text>
-          </section>
-        );
-      })()}
+          return (
+            <section style={{ margin: "6px 0 12px", textAlign: "center" }}>
+              <Text style={{ color: "#1e40af", fontWeight: 600 }}>
+                {headerText || "Unknown Bank"}
+              </Text>
+            </section>
+          );
+        })()}
 
       {/* Loading Indicator */}
       {formLoading && (
@@ -4624,7 +4919,7 @@ export const BusinessVerificationDetails: React.FC<
               onEdit={handleDynamicSectionEdit}
               readOnly={
                 role === "VerificationExecutive"
-                  ? hasEditRequest 
+                  ? hasEditRequest
                   : !!verificationData?.approvedStatus || hasEditRequest // Others follow original logic
               }
               activeSections={activeSections}
@@ -4645,19 +4940,21 @@ export const BusinessVerificationDetails: React.FC<
                 title="Photo Capture"
                 extra={
                   <Space>
-                    {(currentDepartment || curDept) === "PD" && 
-                     data?.uploadedItems && 
-                     data.uploadedItems.length > 0 && (
-                      <Button
-                        type="default"
-                        icon={<DownloadOutlined />}
-                        size="small"
-                        onClick={handleDownloadAllFiles}
-                      >
-                        Download All Files
-                      </Button>
-                    )}
-                    {!(!!verificationData?.approvedStatus || hasEditRequest) && (
+                    {(currentDepartment || curDept) === "PD" &&
+                      data?.uploadedItems &&
+                      data.uploadedItems.length > 0 && (
+                        <Button
+                          type="default"
+                          icon={<DownloadOutlined />}
+                          size="small"
+                          onClick={handleDownloadAllFiles}
+                        >
+                          Download All Files
+                        </Button>
+                      )}
+                    {!(
+                      !!verificationData?.approvedStatus || hasEditRequest
+                    ) && (
                       <Upload
                         accept={
                           (currentDepartment || curDept) === "PD"
@@ -4674,7 +4971,9 @@ export const BusinessVerificationDetails: React.FC<
                           icon={<UploadOutlined />}
                           size="small"
                         >
-                          {(currentDepartment || curDept) === "PD" ? "Upload Images and Documents" : "Upload Photo"}
+                          {(currentDepartment || curDept) === "PD"
+                            ? "Upload Images and Documents"
+                            : "Upload Photo"}
                         </Button>
                       </Upload>
                     )}
@@ -4726,9 +5025,12 @@ export const BusinessVerificationDetails: React.FC<
                           {photos.map((item: any, idx: number) => {
                             const isDoc = isDocumentItem(item);
                             const fileExt = getFileExtension(item);
-                            
+
                             return (
-                              <div key={item.id} style={{ position: "relative" }}>
+                              <div
+                                key={item.id}
+                                style={{ position: "relative" }}
+                              >
                                 {isDoc ? (
                                   <div
                                     style={{
@@ -4736,7 +5038,8 @@ export const BusinessVerificationDetails: React.FC<
                                       height: "200px",
                                       borderRadius: "4px",
                                       border: "2px solid #f0f0f0",
-                                      background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                                      background:
+                                        "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
                                       display: "flex",
                                       flexDirection: "column",
                                       alignItems: "center",
@@ -4746,11 +5049,29 @@ export const BusinessVerificationDetails: React.FC<
                                     }}
                                     onClick={() => handleViewDocument(item)}
                                   >
-                                    <FileOutlined style={{ fontSize: "48px", marginBottom: "8px" }} />
-                                    <div style={{ fontSize: "12px", textAlign: "center", padding: "0 8px" }}>
-                                      {item.fileName || `${fileExt.toUpperCase()} Document`}
+                                    <FileOutlined
+                                      style={{
+                                        fontSize: "48px",
+                                        marginBottom: "8px",
+                                      }}
+                                    />
+                                    <div
+                                      style={{
+                                        fontSize: "12px",
+                                        textAlign: "center",
+                                        padding: "0 8px",
+                                      }}
+                                    >
+                                      {item.fileName ||
+                                        `${fileExt.toUpperCase()} Document`}
                                     </div>
-                                    <div style={{ fontSize: "10px", marginTop: "4px", opacity: 0.9 }}>
+                                    <div
+                                      style={{
+                                        fontSize: "10px",
+                                        marginTop: "4px",
+                                        opacity: 0.9,
+                                      }}
+                                    >
                                       Click to view
                                     </div>
                                   </div>
@@ -4767,7 +5088,7 @@ export const BusinessVerificationDetails: React.FC<
                                     }}
                                   />
                                 )}
-                                
+
                                 {isDoc && (
                                   <div
                                     style={{
@@ -4818,7 +5139,7 @@ export const BusinessVerificationDetails: React.FC<
                                     />
                                   </div>
                                 )}
-                                
+
                                 {!(
                                   !!verificationData?.approvedStatus ||
                                   hasEditRequest
@@ -4843,7 +5164,7 @@ export const BusinessVerificationDetails: React.FC<
                                     onClick={() => handleDeleteClick(item.id)}
                                   />
                                 )}
-                                
+
                                 <div
                                   style={{
                                     position: "absolute",
@@ -4857,7 +5178,8 @@ export const BusinessVerificationDetails: React.FC<
                                     borderRadius: "0 0 4px 4px",
                                   }}
                                 >
-                                  {docType} - {isDoc ? "Document" : "Photo"} {idx + 1}{" "}
+                                  {docType} - {isDoc ? "Document" : "Photo"}{" "}
+                                  {idx + 1}{" "}
                                   {!isDoc && (item?.isCamera ? "📷" : "🖼️")}
                                   {isDoc && "📄"}
                                 </div>
@@ -4912,7 +5234,7 @@ export const BusinessVerificationDetails: React.FC<
             {/* Legacy FI Static Components */}
             <BusinessBasicDetailsDescription
               data={mergedLegacyData}
-              extra={getButton("basicDetails")}
+              extra={getButton("businessBasicDetails")}
               logs={false}
             />
             <BusinessDetailsDescription
@@ -5086,15 +5408,18 @@ export const BusinessVerificationDetails: React.FC<
             >
               Download
             </Button>,
-            <Button key="close" onClick={() => {
-              if (currentPdfUrl && currentPdfUrl.startsWith("blob:")) {
-                window.URL.revokeObjectURL(currentPdfUrl);
-              }
-              setPdfViewerVisible(false);
-              setCurrentPdfUrl(null);
-              setCurrentPdfFileName("");
-              setPdfLoading(false);
-            }}>
+            <Button
+              key="close"
+              onClick={() => {
+                if (currentPdfUrl && currentPdfUrl.startsWith("blob:")) {
+                  window.URL.revokeObjectURL(currentPdfUrl);
+                }
+                setPdfViewerVisible(false);
+                setCurrentPdfUrl(null);
+                setCurrentPdfFileName("");
+                setPdfLoading(false);
+              }}
+            >
               Close
             </Button>,
           ]}
@@ -5120,10 +5445,18 @@ export const BusinessVerificationDetails: React.FC<
                   }}
                   title={currentPdfFileName}
                   onError={() => {
-                    message.warning("Unable to display document in browser. Use download or open in new tab.");
+                    message.warning(
+                      "Unable to display document in browser. Use download or open in new tab."
+                    );
                   }}
                 />
-                <div style={{ marginTop: "16px", textAlign: "center", padding: "10px" }}>
+                <div
+                  style={{
+                    marginTop: "16px",
+                    textAlign: "center",
+                    padding: "10px",
+                  }}
+                >
                   <Space>
                     <Button
                       icon={<DownloadOutlined />}
@@ -5142,7 +5475,11 @@ export const BusinessVerificationDetails: React.FC<
                     <Button
                       icon={<EyeOutlined />}
                       onClick={() => {
-                        window.open(currentPdfUrl, "_blank", "noopener,noreferrer");
+                        window.open(
+                          currentPdfUrl,
+                          "_blank",
+                          "noopener,noreferrer"
+                        );
                       }}
                     >
                       Open in New Tab
