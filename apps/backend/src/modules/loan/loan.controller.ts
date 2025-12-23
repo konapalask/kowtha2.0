@@ -622,12 +622,15 @@ export class LoanController {
   async editVerificationData(
     @Param("id") loanId: string,
     @Param("type") verificationType: VerificationType,
-    @Body() editVerificationDto: EditVerificationDto
+    @Body() editVerificationDto: EditVerificationDto,
+    @Request() req: AuthenticatedRequest
   ) {
+    const userId = req.user.id;
     const result = await this.loanService.editVerificationData(
       Number(loanId),
       verificationType,
-      editVerificationDto
+      editVerificationDto,
+      userId
     );
     return {
       status: 200,

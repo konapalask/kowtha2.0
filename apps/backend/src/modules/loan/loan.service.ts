@@ -35,6 +35,8 @@ import {
   UserRole,
   ApprovedStatus,
   Department,
+  EditRequestType,
+  EditRequestStatus,
 } from "@prisma/client";
 import {
   Injectable,
@@ -2058,7 +2060,8 @@ export class LoanService {
   async editVerificationData(
     loanId: number,
     verificationType: VerificationType,
-    editVerificationDto: EditVerificationDto
+    editVerificationDto: EditVerificationDto,
+    userId: number
   ) {
     try {
       const verification = await this.prisma.verification.findFirst({
@@ -2069,16 +2072,41 @@ export class LoanService {
       });
 
       if (!verification) {
-        await this.loggingService.warn(
-          "Verification edit failed - Verification not found",
-          {
-            loanId,
-            verificationType,
-          }
-        );
         throw new NotFoundException("Verification not found");
       }
 
+      try {
+        let financialAnalysis = editVerificationDto.verificationData?.financialAnalysis;
+
+        if (financialAnalysis?.netProfit && financialAnalysis?.netProfit > 1000000) {
+          delete editVerificationDto.verificationData?.financialAnalysis;
+        }
+        const createEditRequest = await this.prisma.editRequest.create({
+          data: {
+            loan: {
+              connect: { id: loanId },
+            },
+            verification: {
+              connect: { id: verification.id },
+            },
+            requester: {
+              connect: { id: userId },
+            },
+            status: EditRequestStatus.Pending,
+            type: EditRequestType.FinancialAnalysis,
+            changes: editVerificationDto.verificationData?.financialAnalysis,
+          }
+        });
+      } catch (error) {
+        await this.loggingService.error("Failed to edit verification data", {
+          loanId,
+          verificationType,
+          error: error.message,
+          stack: error.stack,
+        });
+        throw error;
+      }
+      
       const updatedVerification = await this.prisma.verification.update({
         where: {
           id: verification.id,
@@ -2087,12 +2115,6 @@ export class LoanService {
           ...editVerificationDto,
           updatedAt: new Date(),
         },
-      });
-
-      await this.loggingService.info("Verification data updated successfully", {
-        loanId,
-        verificationType,
-        updatedFields: Object.keys(editVerificationDto),
       });
 
       return updatedVerification;
