@@ -221,11 +221,13 @@ export class LoanController {
   })
   async assignLoan(
     @Param("id") loanId: string,
+    @Query("department") department: Department,
     @Body() createAssignmentDto: createAssignmentDto
   ) {
     const result = await this.loanService.assignVerification(
       Number(loanId),
-      createAssignmentDto
+      createAssignmentDto,
+      department
     );
     return {
       status: 200,
