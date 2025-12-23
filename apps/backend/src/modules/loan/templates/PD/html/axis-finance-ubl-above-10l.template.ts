@@ -26,6 +26,21 @@ const formatMultiline = (value: any): string => {
   return String(value).replace(/\n+/g, "<br>");
 };
 
+const formatList = (value: any): string => {
+  if (!hasValue(value)) {
+    return `<ul style="margin:0;padding-left:18px;"><li>Not provided</li></ul>`;
+  }
+  const items = String(value)
+    .split(/<br\s*\/?>|\n+/i)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  if (!items.length) {
+    return `<ul style="margin:0;padding-left:18px;"><li>Not provided</li></ul>`;
+  }
+  const listItems = items.map((item) => `<li>${item}</li>`).join("");
+  return `<ul style="margin:0;padding-left:18px;">${listItems}</ul>`;
+};
+
 const formatCurrency = (value: any): string => {
   if (!hasValue(value)) return "Not provided";
   const numeric = Number(value);
@@ -55,10 +70,14 @@ const renderKeyValueTable = (
           const rendered = formatter
             ? formatter(value)
             : formatMultiline(value);
+          const valueHtml =
+            typeof rendered === "string" && rendered.trim().startsWith("<ul")
+              ? rendered
+              : wrapParagraph(rendered);
           return `
           <tr>
             <td style="${labelCellStyle}">${wrapParagraph(label)}</td>
-            <td style="${cellStyle}">${wrapParagraph(rendered)}</td>
+            <td style="${cellStyle}">${valueHtml}</td>
           </tr>`;
         })
         .join("")}
@@ -272,8 +291,6 @@ export const axisFinanceUBLTemplate = (
       formatMultiline(ref?.feedbackOnBusiness || ""),
     ]
   );
-
-  const observations = formatMultiline(thirdPartySection.observations || "");
 
   const recommendations = ensureArray(
     verificationData.recommendations?.recommendations
@@ -562,7 +579,9 @@ export const axisFinanceUBLTemplate = (
         ],
         thirdPartyReferences
       )}
-      ${renderKeyValueTable([["Observations:", observations || "Not provided"]])}
+      ${renderKeyValueTable([
+        ["Observations:", thirdPartySection.observations || "", formatList],
+      ])}
       ${renderKeyValueTable([
         [
           "Other Income: (Income from other than initiated business)",
@@ -571,7 +590,7 @@ export const axisFinanceUBLTemplate = (
         ["Site Coordinates:", thirdPartySection.siteCoordinates || ""],
       ])}
       ${renderKeyValueTable([
-        ["Remarks:", thirdPartySection.remarks || ""],
+        ["Remarks:", thirdPartySection.remarks || "", formatList],
         ["Status:", html_data.approvedStatus || "Not provided"],
         [
           "AFL Verifier's Name & Emp Code:",
