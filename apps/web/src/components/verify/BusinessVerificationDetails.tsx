@@ -2930,12 +2930,17 @@ export const BusinessVerificationDetails: React.FC<
 
       let totalGrossProfit = 0;
       let totalNetProfit = 0;
+      let grossProfitAssessedValue: number | null = null;
+      let netProfitAssessedValue: number | null = null;
+      let grossProfitFallbackValue: number | null = null;
+      let netProfitFallbackValue: number | null = null;
 
       if (section.fields && Array.isArray(section.fields)) {
         section.fields.forEach((field: any) => {
           const fieldId = field.id;
           const fieldValue = mergedData[fieldId];
           const fieldLabel = (field.label || field.title || "").toLowerCase();
+          const fieldIdLower = fieldId.toLowerCase();
 
           if (field.formula) {
             const calculatedValue = evaluateFormula(field.formula, mergedData);
@@ -2943,18 +2948,41 @@ export const BusinessVerificationDetails: React.FC<
               mergedData[fieldId] = calculatedValue;
             }
           }
+        });
+
+        section.fields.forEach((field: any) => {
+          const fieldId = field.id;
+          const fieldValue = mergedData[fieldId];
+          const fieldLabel = (field.label || field.title || "").toLowerCase();
+          const fieldIdLower = fieldId.toLowerCase();
 
           if (
             fieldLabel.includes("gross profit") ||
             fieldId.toLowerCase().includes("grossprofit")
           ) {
             const value = parseNum(fieldValue || mergedData[fieldId]);
-            if (
-              value !== 0 &&
-              (totalGrossProfit === 0 ||
-                Math.abs(value) > Math.abs(totalGrossProfit))
-            ) {
-              totalGrossProfit = value;
+            const isAssessed =
+              fieldIdLower.includes("assessed") ||
+              fieldLabel.includes("assessed");
+            const isAudited =
+              fieldIdLower.includes("audited") ||
+              fieldLabel.includes("audited");
+            const isEstimated =
+              fieldIdLower.includes("estimated") ||
+              fieldLabel.includes("estimated");
+
+            if (value !== 0) {
+              if (isAssessed && !isAudited && !isEstimated) {
+                grossProfitAssessedValue = value;
+              } else if (
+                !isAudited &&
+                !isEstimated &&
+                grossProfitAssessedValue === null
+              ) {
+                if (grossProfitFallbackValue === null) {
+                  grossProfitFallbackValue = value;
+                }
+              }
             }
           }
 
@@ -2967,12 +2995,28 @@ export const BusinessVerificationDetails: React.FC<
               !fieldId.toLowerCase().includes("aftertax"))
           ) {
             const value = parseNum(fieldValue || mergedData[fieldId]);
-            if (
-              value !== 0 &&
-              (totalNetProfit === 0 ||
-                Math.abs(value) > Math.abs(totalNetProfit))
-            ) {
-              totalNetProfit = value;
+            const isAssessed =
+              fieldIdLower.includes("assessed") ||
+              fieldLabel.includes("assessed");
+            const isAudited =
+              fieldIdLower.includes("audited") ||
+              fieldLabel.includes("audited");
+            const isEstimated =
+              fieldIdLower.includes("estimated") ||
+              fieldLabel.includes("estimated");
+
+            if (value !== 0) {
+              if (isAssessed && !isAudited && !isEstimated) {
+                netProfitAssessedValue = value;
+              } else if (
+                !isAudited &&
+                !isEstimated &&
+                netProfitAssessedValue === null
+              ) {
+                if (netProfitFallbackValue === null) {
+                  netProfitFallbackValue = value;
+                }
+              }
             }
           }
 
@@ -2981,11 +3025,24 @@ export const BusinessVerificationDetails: React.FC<
             fieldId.toLowerCase().includes("netprofitaftertax")
           ) {
             const value = parseNum(fieldValue || mergedData[fieldId]);
-            if (value !== 0) {
-              totalNetProfit = value;
+            if (
+              value !== 0 &&
+              netProfitAssessedValue === null &&
+              netProfitFallbackValue === null
+            ) {
+              netProfitFallbackValue = value;
             }
           }
         });
+
+        totalGrossProfit =
+          grossProfitAssessedValue !== null
+            ? grossProfitAssessedValue
+            : grossProfitFallbackValue || 0;
+        totalNetProfit =
+          netProfitAssessedValue !== null
+            ? netProfitAssessedValue
+            : netProfitFallbackValue || 0;
       }
 
       return { totalGrossProfit, totalNetProfit };
@@ -4907,6 +4964,21 @@ export const BusinessVerificationDetails: React.FC<
 
       {/* Main Single Column Layout */}
       <div style={{ padding: "0 12px" }}>
+        {hasEditRequest && (
+          <Card
+            style={{
+              marginBottom: 12,
+              background: "#fffbe6",
+              border: "1px solid #ffe58f",
+            }}
+          >
+            <Text style={{ color: "#d48806", fontWeight: 600 }}>
+              Awaiting for Admin approval. Edits are locked because a change
+              request is pending.
+            </Text>
+          </Card>
+        )}
+
         {/* PD Department - Use Dynamic Forms Only */}
         {currentDepartment === "PD" &&
         useGenericApproach &&

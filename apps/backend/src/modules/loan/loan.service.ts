@@ -489,7 +489,7 @@ export class LoanService {
   }
 
   // Assign a field executive to a verification for a loan
-  async assignVerification(loanId: number, createData: createAssignmentDto) {
+  async assignVerification(loanId: number, createData: createAssignmentDto, department: Department) {
     try {
       const loan = await this.prisma.loan.findUnique({ where: { id: loanId } });
 
@@ -501,7 +501,7 @@ export class LoanService {
         throw new NotFoundException("Loan not found");
       }
 
-      if (!loan.templateName) {
+      if (department === Department.PD && !loan.templateName) {
         throw new BadRequestException("Please assign a template to the loan first");
       }
 
@@ -2080,23 +2080,26 @@ export class LoanService {
 
         if (financialAnalysis?.netProfit && financialAnalysis?.netProfit > 1000000) {
           delete editVerificationDto.verificationData?.financialAnalysis;
-        }
-        const createEditRequest = await this.prisma.editRequest.create({
-          data: {
-            loan: {
-              connect: { id: loanId },
+          
+          const createEditRequest = await this.prisma.editRequest.create({
+            data: {
+              loan: {
+                connect: { id: loanId },
+              },
+              verification: {
+                connect: { id: verification.id },
+              },
+              requester: {
+                connect: { id: userId },
+              },
+              status: EditRequestStatus.Pending,
+              type: EditRequestType.LoanData,
+              changes: financialAnalysis,
             },
-            verification: {
-              connect: { id: verification.id },
-            },
-            requester: {
-              connect: { id: userId },
-            },
-            status: EditRequestStatus.Pending,
-            type: EditRequestType.FinancialAnalysis,
-            changes: editVerificationDto.verificationData?.financialAnalysis,
-          }
         });
+        
+        return verification;
+        }
       } catch (error) {
         await this.loggingService.error("Failed to edit verification data", {
           loanId,
