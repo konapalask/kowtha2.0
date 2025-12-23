@@ -235,10 +235,18 @@ export default function Verify() {
       align: "center",
       render: (_, record) => {
         const enabledStatuses = ["FVCompleted", "Approved", "Rejected"];
+        const verifications = record?.verifications || [];
+        const hasFeSubmission = verifications.some(
+          (v: any) =>
+            v?.initialSubmitted === true ||
+            v?.status === "Completed" ||
+            v?.status === "FVCompleted"
+        );
+
         const isEnabled =
           record?.department === "FI"
-            ? (record?.status ?? "") !== "Unassigned" || !!record?.fieldExecutiveId
-            : enabledStatuses.includes(record?.status ?? "");
+            ? hasFeSubmission
+            : hasFeSubmission || enabledStatuses.includes(record?.status ?? "");
         
         return (
           <Button
