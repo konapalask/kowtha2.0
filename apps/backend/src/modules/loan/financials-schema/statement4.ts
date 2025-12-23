@@ -17,7 +17,7 @@ export const statement4Schema = {
         ui: { widget: "textarea", rows: 3 },
       },
 
-      // Expenditure Section - with Audited Income and Assessed columns
+      // Expenditure Section - with Audited Income and Estimated columns
       openingStockAudited: {
         type: "number",
         title: "Opening Stock - Audited",
@@ -31,7 +31,7 @@ export const statement4Schema = {
       },
       openingStockAssessed: {
         type: "number",
-        title: "Opening Stock - Assessed",
+        title: "Opening Stock - Estimated",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -53,7 +53,7 @@ export const statement4Schema = {
       },
       purchasesAssessed: {
         type: "number",
-        title: "Purchases - Assessed",
+        title: "Purchases - Estimated",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -65,7 +65,8 @@ export const statement4Schema = {
       grossProfitAudited: {
         type: "number",
         title: "To Gross Profit - Audited",
-        formula: "grandTotalIncomeAudited - (openingStockAudited + purchasesAudited)",
+        formula:
+          "grandTotalIncomeAudited - (openingStockAudited + purchasesAudited)",
         readOnly: true,
         minimum: 0,
         formatter: {
@@ -77,7 +78,7 @@ export const statement4Schema = {
       },
       grossProfitAssessed: {
         type: "number",
-        title: "To Gross Profit - Assessed",
+        title: "To Gross Profit - Estimated",
         formula:
           "grandTotalIncome - (openingStockAssessed + purchasesAssessed)",
         readOnly: true,
@@ -92,8 +93,7 @@ export const statement4Schema = {
       grandTotalExpenditureAudited: {
         type: "number",
         title: "Grand Total Expenditure - Audited",
-        formula:
-          "openingStockAudited + purchasesAudited + grossProfitAudited",
+        formula: "openingStockAudited + purchasesAudited + grossProfitAudited",
         readOnly: true,
         minimum: 0,
         formatter: {
@@ -105,7 +105,7 @@ export const statement4Schema = {
       },
       grandTotalExpenditure: {
         type: "number",
-        title: "Grand Total Expenditure - Assessed",
+        title: "Grand Total Expenditure - Estimated",
         formula:
           "openingStockAssessed + purchasesAssessed + grossProfitAssessed",
         readOnly: true,
@@ -255,7 +255,7 @@ export const statement4Schema = {
       },
       electricity: {
         type: "number",
-        title: "Electricity - Assessed",
+        title: "Electricity - Estimated",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -277,7 +277,7 @@ export const statement4Schema = {
       },
       rent: {
         type: "number",
-        title: "Rent - Assessed",
+        title: "Rent - Estimated",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -299,7 +299,7 @@ export const statement4Schema = {
       },
       salaries: {
         type: "number",
-        title: "Salaries - Assessed",
+        title: "Salaries - Estimated",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -321,7 +321,7 @@ export const statement4Schema = {
       },
       travellingCharges: {
         type: "number",
-        title: "Travelling Charges - Assessed",
+        title: "Travelling Charges - Estimated",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -343,7 +343,7 @@ export const statement4Schema = {
       },
       otherExpenses: {
         type: "number",
-        title: "Other Expenses - Assessed",
+        title: "Other Expenses - Estimated",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -355,7 +355,8 @@ export const statement4Schema = {
       netProfitAudited: {
         type: "number",
         title: "Net Profit - Audited",
-        formula: "byGrossProfitAudited - (electricityAudited + rentAudited + salariesAudited + travellingChargesAudited + otherExpensesAudited)",
+        formula:
+          "byGrossProfitAudited - (electricityAudited + rentAudited + salariesAudited + travellingChargesAudited + otherExpensesAudited)",
         readOnly: true,
         minimum: 0,
         formatter: {
@@ -368,7 +369,7 @@ export const statement4Schema = {
 
       netProfit: {
         type: "number",
-        title: "Net Profit - Assessed",
+        title: "Net Profit - Estimated",
         formula:
           "byGrossProfitEstimated - (electricity + rent + salaries + travellingCharges + otherExpenses)",
         readOnly: true,

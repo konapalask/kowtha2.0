@@ -305,6 +305,10 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
     <div class="template-content hero-fincorp-section">
       ${generalTable}
 
+      ${wrapParagraph(
+        "The following data and explanation are based on the verbal information provided to us during the course of the visit."
+      )}
+
       ${sectionTitle("About the Applicant")}
       ${
         applicantProfile.applicantSummary
