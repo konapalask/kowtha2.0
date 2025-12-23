@@ -4649,6 +4649,20 @@ export const BusinessVerificationDetails: React.FC<
 
       {/* Main Single Column Layout */}
       <div style={{ padding: "0 12px" }}>
+        {hasEditRequest && (
+          <Card
+            style={{
+              marginBottom: 12,
+              background: "#fffbe6",
+              border: "1px solid #ffe58f",
+            }}
+          >
+            <Text style={{ color: "#d48806", fontWeight: 600 }}>
+              Awaiting  for Admin approval. Edits are locked because a change request is pending.
+            </Text>
+          </Card>
+        )}
+
         {/* PD Department - Use Dynamic Forms Only */}
         {currentDepartment === "PD" &&
         useGenericApproach &&

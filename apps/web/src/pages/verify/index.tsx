@@ -234,10 +234,11 @@ export default function Verify() {
       key: "actions",
       align: "center",
       render: (_, record) => {
-        // View button enabled for: FVCompleted, Approved, Rejected
-        // View button disabled for: Unassigned, Assigned, UnderFV
         const enabledStatuses = ["FVCompleted", "Approved", "Rejected"];
-        const isEnabled = enabledStatuses.includes(record?.status ?? "");
+        const isEnabled =
+          record?.department === "FI"
+            ? (record?.status ?? "") !== "Unassigned" || !!record?.fieldExecutiveId
+            : enabledStatuses.includes(record?.status ?? "");
         
         return (
           <Button
