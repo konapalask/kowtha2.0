@@ -7,9 +7,9 @@ const headerStyle =
 const subHeaderStyle =
   "background:#f7d8c7;color:#4a3426;font-weight:600;font-size:12px;padding:8px;border:1px solid #ccc;text-transform:uppercase";
 const labelCellStyle =
-  "background:#f4f6fb;font-weight:600;color:#1f2d3d;padding:8px;border:1px solid #d0d7de;vertical-align:top;";
+  "background:#f4f6fb;font-weight:600;color:#1f2d3d;padding:8px;border:1px solid #d0d7de;vertical-align:top;width:30%;";
 const valueCellStyle =
-  "padding:8px;border:1px solid #d0d7de;color:#2f3b52;vertical-align:top";
+  "padding:8px;border:1px solid #d0d7de;color:#2f3b52;vertical-align:top;width:70%;";
 
 const hasValue = (value: any): boolean => {
   if (value === null || value === undefined) return false;
@@ -484,7 +484,9 @@ export const indiaShelterSenpTemplate = (
      <tr>
       <td style="${labelCellStyle}">Name of the Partners</td>
       <td style="${valueCellStyle}">
-        ${ensureArray(business.partners).map((item: any) => item?.partnerName).join("<br>")}
+        ${ensureArray(business.partners)
+          .map((item: any) => item?.partnerName)
+          .join("<br>")}
         </td>
      </tr>
       <tr>
@@ -522,7 +524,10 @@ export const indiaShelterSenpTemplate = (
       </tr>
       ${renderKeyValueRow(
         "Business Profile",
-        business.businessProfile.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join(""),
+        business.businessProfile
+          .split("\n")
+          .map((line: string) => `<ul><li>${line}</li></ul>`)
+          .join(""),
         undefined,
         { colSpan: 3 }
       )}
@@ -577,7 +582,7 @@ export const indiaShelterSenpTemplate = (
         )}</td>
       </tr>
       <tr>
-        <td style="${labelCellStyle}">Source of initial funds</td>
+        <td style="${labelCellStyle}">If Self Started, source of initial funds</td>
         <td style="${valueCellStyle}">${formatMultiline(
           business.initialFundingSource
         )}</td>
@@ -706,12 +711,9 @@ export const indiaShelterSenpTemplate = (
   const loanPurposeTable = `
     <table style="${tableStyle}">
       <tr><th style="${subHeaderStyle}" colspan="4">Loan Details & Purpose</th></tr>
-      ${renderKeyValueRow(
-        "Purpose of Loan",
-        loanPurpose.purposes,
-        undefined,
-        { colSpan: 3 }
-      )}
+      ${renderKeyValueRow("Purpose of Loan", loanPurpose.purposes, undefined, {
+        colSpan: 3,
+      })}
 
       ${renderKeyValueRow(
         "Minimum Loan Amount Required",
@@ -944,7 +946,9 @@ export const indiaShelterSenpTemplate = (
         <td style="${labelCellStyle}">Email</td>
         <td style="${labelCellStyle}">Years Known</td>
       </tr>
-      ${ensureArray(references?.references).map((reference: any) => `
+      ${ensureArray(references?.references)
+        .map(
+          (reference: any) => `
         <tr>
           <td style="${valueCellStyle}">${formatMultiline(reference.referenceName)}</td>
           <td style="${valueCellStyle}">${formatMultiline(reference.address)}</td>
@@ -953,7 +957,9 @@ export const indiaShelterSenpTemplate = (
           <td style="${valueCellStyle}">${formatMultiline(reference.email)}</td>
           <td style="${valueCellStyle}">${formatMultiline(reference.yearsKnown)}</td>
         </tr>
-      `).join("")}
+      `
+        )
+        .join("")}
     </table>
   `;
 
@@ -968,7 +974,9 @@ export const indiaShelterSenpTemplate = (
         <td style="${labelCellStyle}">Knowing Since (Months / Years)</td>
         <td style="${labelCellStyle}">Feedback</td>
       </tr>
-      ${ensureArray(tpcRefs?.businessReferences).map((reference: any) => `
+      ${ensureArray(tpcRefs?.businessReferences)
+        .map(
+          (reference: any) => `
         <tr>
           <td style="${valueCellStyle}">${formatMultiline(reference.name)}</td>
           <td style="${valueCellStyle}">${formatMultiline(reference.address)}</td>
@@ -976,7 +984,9 @@ export const indiaShelterSenpTemplate = (
           <td style="${valueCellStyle}">${formatMultiline(reference.knowingSince)}</td>
           <td style="${valueCellStyle}">${formatMultiline(reference.feedback)}</td>
         </tr>
-      `).join("")}
+      `
+        )
+        .join("")}
     </table>
   `;
 
@@ -992,7 +1002,7 @@ export const indiaShelterSenpTemplate = (
       </tr>
       ${renderKeyValueRow(
         "Name of PD Officer",
-        html_data.verifierName,
+        html_data.fieldExecutive || "Not provided",
         undefined,
         { colSpan: 5 }
       )}
