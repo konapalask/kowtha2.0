@@ -448,18 +448,6 @@ const BusinessBasicDetailsDescription: React.FC<{
             {data?.basicDetails?.aadhar}
           </Descriptions.Item>
           <Descriptions.Item
-            label="Purpose of Loan"
-            contentStyle={getItemStyle("purposeOfLoan")}
-          >
-            {data?.basicDetails?.purposeOfLoan}
-          </Descriptions.Item>
-          <Descriptions.Item
-            label="Loan Amount"
-            contentStyle={getItemStyle("loanAmount")}
-          >
-            {data?.basicDetails?.loanAmount}
-          </Descriptions.Item>
-          <Descriptions.Item
             label="Business Name"
             contentStyle={getItemStyle("businessName")}
           >
