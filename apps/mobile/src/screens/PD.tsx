@@ -78,7 +78,7 @@ const FIELD_KEY_MAPPINGS = {
   ],
   purposeOfLoan: ['loanType', 'purposeOfLoan'],
   bankName: [],
-  fieldExecutive: ['visitedBy'],
+  fieldExecutive: ['visitedBy', 'nameOfInterviewer', 'interviewedBy'],
   address: [
     'applicantAddress',
     'initiatedAddress',
