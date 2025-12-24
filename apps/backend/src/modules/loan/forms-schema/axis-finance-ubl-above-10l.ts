@@ -387,9 +387,19 @@ export const axisFinanceUblAbove10lSchema = {
             type: "integer",
             title: "Machinery/Equipment",
           },
-          turnoverAndMargins: {
+          turnover: {
             type: "number",
-            title: "Turnover & margins",
+            title: "Turnover",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          margins: {
+            type: "number",
+            title: "Margins",
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
