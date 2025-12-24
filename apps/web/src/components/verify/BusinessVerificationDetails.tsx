@@ -2165,7 +2165,28 @@ export const BusinessVerificationDetails: React.FC<
             `Section "${schema?.sections?.find((s: any) => s.id === sectionId)?.label}" saved successfully`
           );
 
-          // Refresh verification data - scroll restoration will happen in useEffect
+          const mergedData = mergedVerificationData as any;
+          const completeData = completeVerificationData?.verificationData as any;
+          const verifyData = verificationData?.verificationData as any;
+          const netProfit =
+            mergedData?.financialAnalysis?.netProfit ||
+            completeData?.financialAnalysis?.netProfit ||
+            verifyData?.financialAnalysis?.netProfit ||
+            null;
+
+          const netProfitNum =
+            netProfit !== null && netProfit !== undefined
+              ? typeof netProfit === "string"
+                ? parseFloat(String(netProfit).replace(/,/g, ""))
+                : Number(netProfit)
+              : null;
+
+          if (netProfitNum !== null && netProfitNum > 1000000) {
+            await fetchVerificationData?.();
+            window.location.reload();
+            return;
+          }
+
           await fetchVerificationData?.();
         } catch (error: any) {
           console.error("Error saving section to backend:", error);
@@ -4985,26 +5006,48 @@ export const BusinessVerificationDetails: React.FC<
         schemaForm &&
         !formLoading ? (
           <>
-            <CollapsibleFormSections
-              schema={schemaForm}
-              formData={dynamicFormData}
-              onEdit={handleDynamicSectionEdit}
-              readOnly={
-                role === "VerificationExecutive"
-                  ? hasEditRequest
-                  : !!verificationData?.approvedStatus || hasEditRequest // Others follow original logic
-              }
-              activeSections={activeSections}
-              setActiveSections={setActiveSections}
-              role={role}
-              verificationData={verificationData}
-              changedData={changedData}
-              setChangedData={setChangedData}
-              setLocalEditLogsUpdated={setLocalEditLogsUpdated}
-              parentFormInstancesRef={formInstancesRef}
-              savedSectionData={savedSectionData}
-              setSavedSectionData={setSavedSectionData}
-            />
+            {(() => {
+              const netProfit =
+                dynamicFormData?.financialAnalysis?.netProfit ||
+                completeVerificationData?.verificationData?.financialAnalysis?.netProfit ||
+                verificationData?.verificationData?.financialAnalysis?.netProfit ||
+                verificationData?.financialAnalysis?.netProfit ||
+                null;
+
+              const netProfitNum =
+                netProfit !== null && netProfit !== undefined
+                  ? typeof netProfit === "string"
+                    ? parseFloat(String(netProfit).replace(/,/g, ""))
+                    : Number(netProfit)
+                  : null;
+
+              const isNetProfitAbove10Lakh =
+                netProfitNum !== null && netProfitNum > 1000000;
+
+              return (
+                <CollapsibleFormSections
+                  schema={schemaForm}
+                  formData={dynamicFormData}
+                  onEdit={handleDynamicSectionEdit}
+                  readOnly={
+                    isNetProfitAbove10Lakh ||
+                    (role === "VerificationExecutive"
+                      ? hasEditRequest
+                      : !!verificationData?.approvedStatus || hasEditRequest) // Others follow original logic
+                  }
+                  activeSections={activeSections}
+                  setActiveSections={setActiveSections}
+                  role={role}
+                  verificationData={verificationData}
+                  changedData={changedData}
+                  setChangedData={setChangedData}
+                  setLocalEditLogsUpdated={setLocalEditLogsUpdated}
+                  parentFormInstancesRef={formInstancesRef}
+                  savedSectionData={savedSectionData}
+                  setSavedSectionData={setSavedSectionData}
+                />
+              );
+            })()}
 
             {/* Photo Capture Section - Grouped by Document Type */}
             <section id="section-photoCapture" style={{ marginBottom: 24 }}>
