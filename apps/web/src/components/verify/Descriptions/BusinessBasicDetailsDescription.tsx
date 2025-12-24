@@ -200,30 +200,12 @@ const BusinessBasicDetailsDescription: React.FC<{
                 {formatDisplayValue(data?.basicDetails?.personMet, "personMet")}
               </Descriptions.Item>
               <Descriptions.Item
-                label="Loan Amount"
-                contentStyle={getItemStyle("loanAmount")}
-              >
-                {formatDisplayValue(
-                  data?.basicDetails?.loanAmount,
-                  "loanAmount"
-                )}
-              </Descriptions.Item>
-              <Descriptions.Item
                 label="Date of Visit"
                 contentStyle={getItemStyle("dateOfVisit")}
               >
                 {formatDisplayValue(
                   data?.basicDetails?.dateOfVisit,
                   "dateOfVisit"
-                )}
-              </Descriptions.Item>
-              <Descriptions.Item
-                label="Purpose of Loan"
-                contentStyle={getItemStyle("purposeOfLoan")}
-              >
-                {formatDisplayValue(
-                  data?.basicDetails?.purposeOfLoan,
-                  "purposeOfLoan"
                 )}
               </Descriptions.Item>
               <Descriptions.Item

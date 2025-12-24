@@ -7,9 +7,9 @@ const headerStyle =
 const subHeaderStyle =
   "background:#f7d8c7;color:#4a3426;font-weight:600;font-size:12px;padding:8px;border:1px solid #ccc;text-transform:uppercase";
 const labelCellStyle =
-  "background:#f4f6fb;font-weight:600;color:#1f2d3d;padding:8px;border:1px solid #d0d7de;vertical-align:top;width:30%;";
+  "background:#f4f6fb;font-weight:600;color:#1f2d3d;padding:8px;border:1px solid #d0d7de;vertical-align:top;";
 const valueCellStyle =
-  "padding:8px;border:1px solid #d0d7de;color:#2f3b52;vertical-align:top;width:70%;";
+  "padding:8px;border:1px solid #d0d7de;color:#2f3b52;vertical-align:top;";
 
 const hasValue = (value: any): boolean => {
   if (value === null || value === undefined) return false;
@@ -201,25 +201,14 @@ export const indiaShelterSenpTemplate = (
         undefined,
         { colSpan: 3 }
       )}
-      <tr colspan="3">
-      <td style="${labelCellStyle}">Number of Dependents</td>
-        <td style="${valueCellStyle}">Children: ${formatMultiline(
-          basic.dependentsChildren
-        )}</td>
-        <td style="${valueCellStyle}">Adults: ${formatMultiline(
-          basic.dependentsAdults
-        )}</td>
-        <td style="${valueCellStyle}">Others: ${formatMultiline(
-          basic.dependentsOthers
-        )}</td>
-      </tr>
-    </table>
-  `;
-
-  const residenceTable = `
-    <table style="${tableStyle}">
       <tr>
-      <td style="${subHeaderStyle}" colspan="3">Residence Address & Details</td>
+        <td style="${labelCellStyle}">Number of Dependents</td>
+        <td style="${valueCellStyle}">Children: ${
+            basic.dependentsChildren || "Not provided"
+          }</td>
+        <td style="${valueCellStyle}">Adults: ${basic.dependentsAdults || "Not provided"}</td>
+        <td style="${valueCellStyle}">Others: ${basic.dependentsOthers || "Not provided"}</td>
+      </tr>
       ${renderKeyValueRow(
         "Residence Address",
         residence.residenceAddress,
@@ -281,6 +270,51 @@ export const indiaShelterSenpTemplate = (
     { label: "Fridge", value: checklist.fridge },
     { label: "Induction", value: checklist.induction },
   ]);
+
+  const landRows = land.map((plot: any) => [
+    plot.totalArea,
+    plot.location,
+    plot.landType,
+    formatCurrency(plot.marketValue),
+  ]);
+
+  const houseRows = houses.map((house: any) => [
+    house.builtUpArea,
+    house.location,
+    house.occupancyStatus,
+    formatCurrency(house.monthlyIncomeIfRented),
+    formatCurrency(house.marketValue),
+  ]);
+
+  const shopRows = shops.map((shop: any) => [
+    shop.area,
+    shop.location,
+    shop.occupancyStatus,
+    formatCurrency(shop.monthlyIncomeIfRented),
+    formatCurrency(shop.marketValue),
+  ]);
+
+  const vehicleRows = vehicles.map((vehicle: any) => [
+    vehicle.makeModel,
+    vehicle.purpose,
+    formatCurrency(vehicle.marketValue),
+  ]);
+
+  const preciousRows = precious.map((item: any) => [
+    item.totalQuantity,
+    item.form,
+    formatCurrency(item.marketValue),
+  ]);
+
+  const livestockRows = ensureArray(livestock).map((item: any) => [
+    item.typeOfAnimals,
+    item.quantity,
+    item.purpose,
+    formatCurrency(item.totalValue),
+    formatCurrency(item.monthlyIncome),
+    formatCurrency(item.maintenanceCosts),
+  ]);
+
 
   const assetsTable = `
     <table style="${tableStyle}">
@@ -355,110 +389,164 @@ export const indiaShelterSenpTemplate = (
       </tr>
       <tr>
           <td style="${labelCellStyle}">Is Post Office savings monthly?</td>
-          <td style="${valueCellStyle}" colspan="3">${formatMultiline(financialAssets.postOfficeSavings)}</td>
+          <td style="${valueCellStyle}" colspan="2">${formatMultiline(financialAssets.postOfficeSavings)}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">Any Recurring Deposit?</td>
-          <td style="${valueCellStyle}" colspan="3">${formatMultiline(financialAssets.recurringDeposit)}</td>
+          <td style="${valueCellStyle}" colspan="2">${formatMultiline(financialAssets.recurringDeposit)}</td>
       </tr>
-    </table>
-  `;
 
-  const landRows = land.map((plot: any) => [
-    plot.totalArea,
-    plot.location,
-    plot.landType,
-    formatCurrency(plot.marketValue),
-  ]);
+      <tr>
+        <td style="${labelCellStyle}">Land</td>
+        <td style="border:1px solid #ccc;padding:8px" colspan="10">
+          <table style="${tableStyle}">
+            <tr>
+              <td style="${labelCellStyle}">Total area of plot</td>
+              <td style="${valueCellStyle}">${landRows[0][0] || "Not provided"}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">Location</td>
+              <td style="${valueCellStyle}">${landRows[0][1] || "Not provided"}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">Type</td>
+              <td style="${valueCellStyle}">${landRows[0][2] || "Not provided"}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">Market value</td>
+              <td style="${valueCellStyle}">${landRows[0][3] || "Not provided"}</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
 
-  const houseRows = houses.map((house: any) => [
-    house.builtUpArea,
-    house.location,
-    house.occupancyStatus,
-    formatCurrency(house.monthlyIncomeIfRented),
-    formatCurrency(house.marketValue),
-  ]);
+      <tr>
+        <td style="${labelCellStyle}">House</td>
+        <td style="border:1px solid #ccc;padding:8px" colspan="10">
+          <table style="${tableStyle}">
+            <tr>
+              <td style="${labelCellStyle}">Built-up area</td>
+              <td style="${valueCellStyle}">${houseRows[0][0] || "Not provided"}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">Location</td>
+              <td style="${valueCellStyle}">${houseRows[0][1] || "Not provided"}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">Self-occupied or rented:</td>
+              <td style="${valueCellStyle}">${houseRows[0][2] || "Not provided"}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">Monthly income (if rented)</td>
+              <td style="${valueCellStyle}">${houseRows[0][3] || "Not provided"}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">Market value</td>
+              <td style="${valueCellStyle}">${houseRows[0][4] || "Not provided"}</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
 
-  const shopRows = shops.map((shop: any) => [
-    shop.area,
-    shop.location,
-    shop.occupancyStatus,
-    formatCurrency(shop.monthlyIncomeIfRented),
-    formatCurrency(shop.marketValue),
-  ]);
+      <tr>
+        <td style="${labelCellStyle}">Shop / Commercial Space</td>
+        <td style="border:1px solid #ccc;padding:8px" colspan="10">
+          <table style="${tableStyle}">
+            <tr>
+              <td style="${labelCellStyle}">Area</td>
+              <td style="${valueCellStyle}">${shopRows[0][0] || "Not provided"}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">Location</td>
+              <td style="${valueCellStyle}">${shopRows[0][1] || "Not provided"}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">Self-occupied or rented:</td>
+              <td style="${valueCellStyle}">${shopRows[0][2] || "Not provided"}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">Monthly income (if rented)</td>
+              <td style="${valueCellStyle}">${shopRows[0][3] || "Not provided"}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">Market value</td>
+              <td style="${valueCellStyle}">${shopRows[0][4] || "Not provided"}</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
 
-  const vehicleRows = vehicles.map((vehicle: any) => [
-    vehicle.makeModel,
-    vehicle.purpose,
-    formatCurrency(vehicle.marketValue),
-  ]);
+      <tr>
+        <td style="${labelCellStyle}">Vehicle</td>
+        <td style="${labelCellStyle}">4-Wheelers</td>
+        <td style="border:1px solid #ccc;padding:8px" colspan="10">
+          <table style="${tableStyle}">
+            <tr>
+              <td style="${labelCellStyle}">Make and model</td>
+              <td style="${valueCellStyle}">${vehicleRows[0][0] || "Not provided"}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">Purpose</td>
+              <td style="${valueCellStyle}">${vehicleRows[0][1] || "Not provided"}</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
 
-  const preciousRows = precious.map((item: any) => [
-    item.totalQuantity,
-    item.form,
-    formatCurrency(item.marketValue),
-  ]);
+      <tr>
+        <td style="${labelCellStyle}">Precious Metals</td>
+        <td style="${labelCellStyle}">Gold & Jewellery</td>
+        <td style="border:1px solid #ccc;padding:8px" colspan="10">
+          <table style="${tableStyle}">
+            <tr>
+              <td style="${labelCellStyle}">Total quantity (grams)</td>
+              <td style="${valueCellStyle}">${preciousRows[0][0] || "Not provided"}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">Form (jewellery/coins/bars)</td>
+              <td style="${valueCellStyle}">${preciousRows[0][1] || "Not provided"}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">Current market value</td>
+              <td style="${valueCellStyle}">${preciousRows[0][2] || "Not provided"}</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
 
-  const livestockRows = ensureArray(livestock).map((item: any) => [
-    item.typeOfAnimals,
-    item.quantity,
-    item.purpose,
-    formatCurrency(item.totalValue),
-    formatCurrency(item.monthlyIncome),
-    formatCurrency(item.maintenanceCosts),
-  ]);
+      <tr>
+        <td style="${labelCellStyle}">Livestock</td>
+        <td style="${labelCellStyle}">Animals</td>
+        <td style="border:1px solid #ccc;padding:8px" colspan="10">
+          <table style="${tableStyle}">
+            <tr>
+              <td style="${labelCellStyle}">Types of animals</td>
+              <td style="${valueCellStyle}">${livestockRows[0][0] || "Not provided"}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">Quantity of each type</td>
+              <td style="${valueCellStyle}">${livestockRows[0][1] || "Not provided"}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">Purpose</td>
+              <td style="${valueCellStyle}">${livestockRows[0][2] || "Not provided"}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">Total value</td>
+              <td style="${valueCellStyle}">${livestockRows[0][3] || "Not provided"}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">Monthly income</td>
+              <td style="${valueCellStyle}">${livestockRows[0][4] || "Not provided"}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">Maintenance costs</td>
+              <td style="${valueCellStyle}">${livestockRows[0][5] || "Not provided"}</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
 
-  const tangibleAssetsTable = `
-    <table style="${tableStyle}">
-      <tr><th style="${subHeaderStyle}" colspan="4">Land</th></tr>
-      ${renderArrayTable(
-        ["Total area of plot", "Location", "Type", "Market value"],
-        landRows
-      )}
-      <tr><th style="${subHeaderStyle}" colspan="5">House</th></tr>
-      ${renderArrayTable(
-        [
-          "Built-up area",
-          "Location",
-          "Occupancy Status",
-          "Monthly income (if rented)",
-          "Market value",
-        ],
-        houseRows
-      )}
-      <tr><th style="${subHeaderStyle}" colspan="5">Shop / Commercial Space</th></tr>
-      ${renderArrayTable(
-        [
-          "Area",
-          "Location",
-          "Occupancy Status",
-          "Monthly income (if rented)",
-          "Market value",
-        ],
-        shopRows
-      )}
-      <tr><th style="${subHeaderStyle}" colspan="3">Vehicles (4-Wheelers)</th></tr>
-      ${renderArrayTable(
-        ["Make and model", "Purpose", "Market value"],
-        vehicleRows
-      )}
-      <tr><th style="${subHeaderStyle}" colspan="3">Precious Metals - Gold & Jewellery</th></tr>
-      ${renderArrayTable(
-        ["Total quantity (grams)", "Form", "Market value"],
-        preciousRows
-      )}
-      <tr><th style="${subHeaderStyle}" colspan="6">Livestock - Animals</th></tr>
-      ${renderArrayTable(
-        [
-          "Types of animals",
-          "Quantity of each type",
-          "Purpose",
-          "Total value",
-          "Monthly income",
-          "Maintenance costs",
-        ],
-        livestockRows
-      )}
     </table>
   `;
 
@@ -470,6 +558,8 @@ export const indiaShelterSenpTemplate = (
         <td style="${valueCellStyle}">${formatMultiline(
           business.businessName
         )}</td>
+      </tr>
+      <tr>
         <td style="${labelCellStyle}">Type of Business Firm</td>
         <td style="${valueCellStyle}">${formatMultiline(
           business.businessFirmType
@@ -494,6 +584,8 @@ export const indiaShelterSenpTemplate = (
         <td style="${valueCellStyle}">${formatMultiline(
           business.commencementDate
         )}</td>
+        </tr>
+        <tr>
         <td style="${labelCellStyle}">Place of Incorporation (Address)</td>
         <td style="${valueCellStyle}">${formatMultiline(
           business.placeOfIncorporation
@@ -507,6 +599,8 @@ export const indiaShelterSenpTemplate = (
         <td style="${valueCellStyle}">${formatMultiline(
           business.totalWorkExperienceYears
         )}</td>
+        </tr>
+        <tr>
         <td style="${labelCellStyle}">Mobile No.</td>
         <td style="${valueCellStyle}">${formatMultiline(
           business.mobileNumber
@@ -517,6 +611,8 @@ export const indiaShelterSenpTemplate = (
         <td style="${valueCellStyle}">${formatMultiline(
           business.natureOfBusiness
         )}</td>
+        </tr>
+        <tr>
         <td style="${labelCellStyle}">Type of Industry</td>
         <td style="${valueCellStyle}">${formatMultiline(
           business.industryType
@@ -536,6 +632,8 @@ export const indiaShelterSenpTemplate = (
         <td style="${valueCellStyle}">${formatMultiline(
           business.premisesOwnership
         )}</td>
+        </tr>
+        <tr>
         <td style="${labelCellStyle}">Stocks/Assets Seen in Business Premises</td>
         <td style="${valueCellStyle}">${formatMultiline(
           business.stocksAssetsSeen
@@ -546,6 +644,8 @@ export const indiaShelterSenpTemplate = (
         <td style="${valueCellStyle}">${formatMultiline(
           business.businessLocality
         )}</td>
+        </tr>
+        <tr>
         <td style="${labelCellStyle}">Annual Turnover</td>
         <td style="${valueCellStyle}">${formatCurrency(
           business.annualTurnover
@@ -556,6 +656,8 @@ export const indiaShelterSenpTemplate = (
         <td style="${valueCellStyle}">${formatMultiline(
           business.netProfitMargin
         )}</td>
+        </tr>
+        <tr>
         <td style="${labelCellStyle}">Is Business seasonal?</td>
         <td style="${valueCellStyle}">${formatMultiline(
           business.businessSeasonal
@@ -566,6 +668,8 @@ export const indiaShelterSenpTemplate = (
         <td style="${valueCellStyle}">${formatMultiline(
           business.numberOfEmployees
         )}</td>
+        </tr>
+        <tr>
         <td style="${labelCellStyle}">No. of Years Business Running in this Premises</td>
         <td style="${valueCellStyle}">${formatMultiline(
           business.yearsAtCurrentPremises
@@ -576,6 +680,8 @@ export const indiaShelterSenpTemplate = (
         <td style="${valueCellStyle}">${formatMultiline(
           business.competitorsNearby
         )}</td>
+        </tr>
+        <tr>
         <td style="${labelCellStyle}">Business started by</td>
         <td style="${valueCellStyle}">${formatMultiline(
           business.businessStartedBy
@@ -586,6 +692,8 @@ export const indiaShelterSenpTemplate = (
         <td style="${valueCellStyle}">${formatMultiline(
           business.initialFundingSource
         )}</td>
+        </tr>
+        <tr>
         <td style="${labelCellStyle}">Customer Location (Office / Business GEO Tag)</td>
         <td style="${valueCellStyle}">${formatMultiline(
           business.customerGeoTag
@@ -751,6 +859,8 @@ export const indiaShelterSenpTemplate = (
         <td style="${valueCellStyle}">${formatMultiline(
           collateral.propertyStatus
         )}</td>
+        </tr>
+        <tr>
         <td style="${labelCellStyle}">Usage of Property after Purchase</td>
         <td style="${valueCellStyle}">${collateral.usageAfterPurchase === "Others" ? formatMultiline(collateral.usageOtherNotes) : collateral.usageAfterPurchase}</td>
       </tr>
@@ -765,6 +875,8 @@ export const indiaShelterSenpTemplate = (
         <td style="${valueCellStyle}">${formatMultiline(
           collateral.propertyArea
         )}</td>
+        </tr>
+        <tr>
         <td style="${labelCellStyle}">Ownership of the property from how many years?</td>
         <td style="${valueCellStyle}">${formatMultiline(
           collateral.ownershipDuration
@@ -775,6 +887,8 @@ export const indiaShelterSenpTemplate = (
         <td style="${valueCellStyle}">${formatCurrency(
           collateral.agreementValue
         )}</td>
+        </tr>
+        <tr>
         <td style="${labelCellStyle}">Own Contribution</td>
         <td style="${valueCellStyle}">${formatCurrency(
           collateral.ownContribution
@@ -966,7 +1080,7 @@ export const indiaShelterSenpTemplate = (
   const tpcTable = `
     <table style="${tableStyle}">
       <tr><th style="${subHeaderStyle}" colspan="6">TPC (Third Party Check) Details</th></tr>
-      <tr><td style="${labelCellStyle}" colspan="6">Business Reference</td></tr>
+      <tr><td style="text-align:center;${labelCellStyle}" colspan="6">Business Reference</td></tr>
       <tr>
         <td style="${labelCellStyle}">Name</td>
         <td style="${labelCellStyle}">Address</td>
@@ -995,10 +1109,18 @@ export const indiaShelterSenpTemplate = (
       <tr><th style="${subHeaderStyle}" colspan="5">To be filled by PD Officer</th></tr>
       <tr>
         <td style="${labelCellStyle}">Major Observations / Comments / Concerns During PD</td>
-        <td style="${labelCellStyle}">Case Strengths</td>
-        <td style="${valueCellStyle}">${formatMultiline(pdReview.caseStrengths)}</td>
-        <td style="${labelCellStyle}">Case Weakness</td>
-        <td style="${valueCellStyle}">${formatMultiline(pdReview.caseWeakness)}</td>
+         <td style="border:1px solid #ccc;padding:8px" colspan="10">
+          <table style="${tableStyle}">
+            <tr>
+              <td style="${labelCellStyle}">Case Strengths</td>
+              <td style="${valueCellStyle}">${(pdReview.caseStrengths.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join(""))}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">Case Weakness</td>
+              <td style="${valueCellStyle}">${(pdReview.caseWeakness.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join(""))}</td>
+            </tr>
+          </table>
+        </td>
       </tr>
       ${renderKeyValueRow(
         "Name of PD Officer",
@@ -1038,9 +1160,7 @@ export const indiaShelterSenpTemplate = (
     <div class="template-content india-shelter-senp">
       ${generalTable}
       ${basicTable}
-      ${residenceTable}
       ${assetsTable}
-      ${tangibleAssetsTable}
       ${businessTable}
       ${businessIncomeTable}
       ${loanPurposeTable}

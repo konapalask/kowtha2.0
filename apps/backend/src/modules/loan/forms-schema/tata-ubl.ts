@@ -726,7 +726,7 @@ export const tataUblSchema = {
           },
           pdStatus: {
             type: "string",
-            title: "Financial Status",
+            title: "Final Status",
             enum: ["Positive", "Negative", "Credit Refer"],
           },
           dateOfPD: {

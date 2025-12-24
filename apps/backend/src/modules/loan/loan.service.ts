@@ -489,7 +489,7 @@ export class LoanService {
   }
 
   // Assign a field executive to a verification for a loan
-  async assignVerification(loanId: number, createData: createAssignmentDto) {
+  async assignVerification(loanId: number, createData: createAssignmentDto, department: Department) {
     try {
       const loan = await this.prisma.loan.findUnique({ where: { id: loanId } });
 
@@ -501,7 +501,7 @@ export class LoanService {
         throw new NotFoundException("Loan not found");
       }
 
-      if (!loan.templateName) {
+      if (department === Department.PD && !loan.templateName) {
         throw new BadRequestException("Please assign a template to the loan first");
       }
 
