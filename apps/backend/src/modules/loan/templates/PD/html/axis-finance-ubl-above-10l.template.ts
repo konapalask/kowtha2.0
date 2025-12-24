@@ -478,10 +478,8 @@ export const axisFinanceUBLTemplate = (
           "Machinery/Equipment",
           customersSection.machineryEquipment || "Not provided",
         ],
-        [
-          "Turnover & margins",
-          customersSection.turnoverAndMargins || "Not provided",
-        ],
+        ["Turnover", customersSection.turnover || "Not provided"],
+        ["Margins", customersSection.margins || "Not provided"],
       ])}
 
       <p style="${paragraphStyle};font-size:14px;"><strong>Expenditure - Salaries & Wages</strong></p>
