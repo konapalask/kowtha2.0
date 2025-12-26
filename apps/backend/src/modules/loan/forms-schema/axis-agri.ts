@@ -66,6 +66,10 @@ export const axisAgriSchema = {
             type: "string",
             title: "Name of Person Met",
           },
+          designation: {
+            type: "string",
+            title: "Designation",
+          },
         },
       },
       required: true,
@@ -270,11 +274,6 @@ export const axisAgriSchema = {
             type: "string",
             title: "PD Final Status",
             enum: ["Positive", "Negative", "Credit Refer"],
-          },
-          pdVendorDetails: {
-            type: "string",
-            title: "PD Vendor Name & Address",
-            ui: { widget: "textarea", rows: 2 },
           },
         },
       },
