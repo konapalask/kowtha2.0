@@ -680,14 +680,6 @@ export const indiaShelterSalariedSchema = {
       schema: {
         type: "object",
         properties: {
-          majorObservations: {
-            type: "string",
-            title: "Major Observations / Comments / Concerns",
-            ui: {
-              widget: "textarea",
-              rows: 3,
-            },
-          },
           caseStrengths: {
             type: "string",
             title: "Case Strengths",
