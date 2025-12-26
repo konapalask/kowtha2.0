@@ -571,7 +571,7 @@ export const indiaShelterSalariedTemplate = (
       <tr>
         <td style="${labelCellStyle}">Document Type</td>
         <td style="${labelCellStyle}">Original / Copy / Not Provided</td>
-        <td style="${labelCellStyle}">Details Cross Checked</td>
+        <td style="${labelCellStyle}">Details Cross-Checked (Yes / No)</td>
         <td style="${labelCellStyle}">Comments</td>
       </tr>
       ${

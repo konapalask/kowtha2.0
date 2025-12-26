@@ -181,6 +181,10 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
 
       <table style="${tableStyle}">
             <h3 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;">BASIC DETAILS OF APPLICANT</h3>
+            <tr>
+              <td style="${labelCellStyle}"><p style="text-align:center;">Particulars</p></td>
+              <td style="${labelCellStyle}"><p style="text-align:center;">Remarks</p></td>
+            </tr>
         <tr>
           <td style="${labelCellStyle}">Applicant <br> &middot; Business <br> &middot; Educational background <br> &middot; Past experience</td>
           <td style="${valueCellStyle}">${formatMultiline(
