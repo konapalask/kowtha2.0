@@ -214,7 +214,7 @@ export const janaSalariedSchema = {
         properties: {
           netWorth: {
             type: "array",
-            title: "Net Worth",
+            title: "Net Worth (Car / Property / Investments etc.)",
             items: {
               type: "object",
               properties: {
@@ -553,9 +553,18 @@ export const janaSalariedSchema = {
                 documentCategory: {
                   type: "string",
                   title: "Document Category",
+                  enum: [
+                    "KYC Documents",
+                    "Income & Expense Records",
+                    "Other Documents",
+                  ],
                 },
                 documentName: { type: "string", title: "Document Name" },
-                documentType: { type: "string", title: "Document Type" },
+                documentType: {
+                  type: "string",
+                  title: "Document Type",
+                  enum: ["Original", "Scan Image"],
+                },
                 remarks: {
                   type: "string",
                   title: "Remarks",
@@ -598,7 +607,11 @@ export const janaSalariedSchema = {
             title: "Date of Visit",
             format: "date",
           },
-          timeOfVisit: { type: "string", title: "Time of Visit" },
+          timeOfVisit: {
+            type: "string",
+            title: "Time of Visit",
+            format: "time",
+          },
           checkedBy: { type: "string", title: "Checked By" },
         },
       },

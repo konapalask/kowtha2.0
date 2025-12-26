@@ -136,11 +136,13 @@ export const yesBankSchema = {
           },
           gstRegistration: {
             type: "string",
-            title: "GST Registration details",
+            title:
+              "Whether GST registered (if Yes, since when GST registration exist)",
           },
           proofOfBusinessStability: {
             type: "string",
-            title: "Proof of business existence / stability verified",
+            title:
+              "Details of any other proof of business existence /stability available/verified during visit",
           },
           averageMonthlySales: {
             type: "number",
@@ -166,7 +168,7 @@ export const yesBankSchema = {
           },
           indirectExpenses: {
             type: "string",
-            title: "Overheads / Indirect expenses",
+            title: "Overheads to run the business (Indirect expenses)",
           },
           netMonthlyProfit: {
             type: "string",
@@ -193,7 +195,8 @@ export const yesBankSchema = {
           },
           infrastructureManpower: {
             type: "string",
-            title: "Infrastructure and manpower details",
+            title:
+              "Infrastructure and manpower details (to include Business / factory details, plant capacity utilization and staff strength etc) ",
             ui: { widget: "textarea", rows: 3 },
           },
           otherAssetsInvestments: {
@@ -329,10 +332,15 @@ export const yesBankSchema = {
             items: {
               type: "object",
               properties: {
-                referenceType: { type: "string", title: "Reference type" },
+                referenceType: {
+                  type: "string",
+                  title:
+                    "Reference type (Nearby business premises, Buyer, Suppliers)",
+                },
                 businessName: {
                   type: "string",
-                  title: "Shop / Business name",
+                  title:
+                    "Name of Shop/Business premises with whom ref check done",
                 },
                 contactPerson: {
                   type: "string",

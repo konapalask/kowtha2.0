@@ -28,7 +28,21 @@ const formatMultiline = (value: any): string => {
   return String(value).replace(/\n+/g, "<br>");
 };
 
-const ensureArray = <T,>(value: T | T[] | null | undefined): T[] => {
+const formatBulletPoints = (value: any): string => {
+  if (!hasValue(value)) return "Not provided";
+  const text = String(value);
+  const lines = text
+    .split(/\n+/)
+    .filter((line: string) => line.trim().length > 0);
+  if (lines.length === 0) return "Not provided";
+  return `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;">${lines
+    .map(
+      (line: string) => `<li style="margin-bottom: 4px;">${line.trim()}</li>`
+    )
+    .join("")}</ul>`;
+};
+
+const ensureArray = <T>(value: T | T[] | null | undefined): T[] => {
   if (Array.isArray(value)) return value;
   if (value === null || value === undefined) return [];
   return [value];
@@ -60,10 +74,7 @@ const renderKeyValueRow = (
   `;
 };
 
-const renderArrayTable = (
-  headers: string[],
-  rows: string[][]
-): string => {
+const renderArrayTable = (headers: string[], rows: string[][]): string => {
   if (!rows.length) {
     return `<tr><td style="${valueCellStyle}" colspan="${headers.length}">Not provided</td></tr>`;
   }
@@ -114,7 +125,9 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
   const pdDetails = verificationData.pdVisitDetails || {};
   const profile = verificationData.businessProfile || {};
   const banking = verificationData.bankingAndWorkingCapital || {};
-  const suppliersClients = ensureArray(verificationData.suppliersClients?.suppliersClients || []);
+  const suppliersClients = ensureArray(
+    verificationData.suppliersClients?.suppliersClients || []
+  );
   const observations = verificationData.observations || {};
 
   const facilityRows = ensureArray(banking.facilities).map((facility: any) => [
@@ -131,8 +144,8 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
   const generalTable = `
     <table style="${tableStyle}">
       <tr><th style="${headerStyle}" colspan="4"><u>Personal Discussion Sheet (PD) with Rural Enterprise</u></th></tr>
-      ${renderKeyValueRow("Reference Number", general.referenceNumber,undefined, {colSpan: 3})}
-      ${renderKeyValueRow("Name of Firm", general.nameOfFirm,undefined, {colSpan: 3})}
+      ${renderKeyValueRow("Reference Number", general.referenceNumber, undefined, { colSpan: 3 })}
+      ${renderKeyValueRow("Name of Firm", general.nameOfFirm, undefined, { colSpan: 3 })}
       <tr>
         <td style="${labelCellStyle}">Constitution</td>
         <td style="${valueCellStyle}">${formatMultiline(general.constitution)}</td>
@@ -141,16 +154,21 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
           general.incorporationDate
         )}</td>
       </tr>
-      ${renderKeyValueRow("Address of the Firm", pdDetails.addressOfFirm, undefined, {
-        colSpan: 3,
-      })}
+      ${renderKeyValueRow(
+        "Address of the Firm",
+        pdDetails.addressOfFirm,
+        formatBulletPoints,
+        {
+          colSpan: 3,
+        }
+      )}
       <tr>
         <td style="${labelCellStyle}">Date & Time of PD</td>
         <td style="${valueCellStyle}">${formatMultiline(
           pdDetails.dateAndTimeOfPd
         )}</td>
         <td style="${labelCellStyle}">Place of PD</td>
-        <td style="${valueCellStyle}">${formatMultiline(pdDetails.placeOfPd)}</td>
+        <td style="${valueCellStyle}">${formatBulletPoints(pdDetails.placeOfPd)}</td>
       </tr>
       <tr>
         <td style="${labelCellStyle}">Name of Person Met</td>
@@ -158,25 +176,31 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
           pdDetails.nameOfPersonMet
         )}</td>
         <td style="${labelCellStyle}">Designation</td>
-        <td style="${valueCellStyle}">${pdDetails.designation || "PD EXECUTIVE"}</td>
+        <td style="${valueCellStyle}">${formatMultiline(pdDetails.designation)}</td>
       </tr>
       ${renderKeyValueRow(
         "Name of PD Official",
-        html_data.verifierName,
+        html_data.fieldExecutive,
         undefined,
         { colSpan: 3 }
       )}
     </table>
   `;
 
-
-
   const profileTable = `
     <table style="${tableStyle}">
       <tr><th style="${subHeaderStyle}" colspan="4">Business Profile</th></tr>
-      ${renderKeyValueRow("Type of Industry", profile.typeOfIndustry,undefined, {colSpan: 3})}
-      ${renderKeyValueRow("Nature of Business", profile.natureOfBusiness.split("\n").map((item: string) => `<ul><li>${item}</li></ul>`).join(""),undefined, {colSpan: 3})}
-      ${renderKeyValueRow("Details on management of business", formatMultiline(profile.managementDetails), undefined, {colSpan: 3})}
+      ${renderKeyValueRow("Type of Industry", profile.typeOfIndustry, undefined, { colSpan: 3 })}
+      ${renderKeyValueRow(
+        "Nature of Business",
+        profile.natureOfBusiness
+          .split("\n")
+          .map((item: string) => `<ul><li>${item}</li></ul>`)
+          .join(""),
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow("Details on management of business", formatMultiline(profile.managementDetails), undefined, { colSpan: 3 })}
       ${renderKeyValueRow(
         "Total Experience in Same line Business",
         profile.totalExperience,
@@ -197,18 +221,18 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
       )}
       ${renderKeyValueRow(
         "Business Premise setup / Ownership / Nameplate / Staff",
-        formatMultiline(profile.premiseSetup),
-        undefined,
+        profile.premiseSetup,
+        formatBulletPoints,
         { colSpan: 3 }
       )}
       ${renderKeyValueRow(
         "Financial Brief",
-        formatMultiline(profile.financialBrief),
-        undefined,
+        profile.financialBrief,
+        formatBulletPoints,
         { colSpan: 3 }
       )}
       ${renderKeyValueRow(
-        "End use of the Loan & Loan amount Required", 
+        "End use of the Loan & Loan amount Required",
         formatMultiline(profile.endUseOfTheLoanAndLoanAmountRequired),
         undefined,
         { colSpan: 3 }
@@ -227,8 +251,8 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
       )}
       ${renderKeyValueRow(
         "Documnets Provided during Visit",
-        formatMultiline(profile.documentsProvidedDuringVisit),
-        undefined,
+        profile.documentsProvidedDuringVisit,
+        formatBulletPoints,
         { colSpan: 3 }
       )}
       <tr>
@@ -240,21 +264,26 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
           <td style="${labelCellStyle}">Limit Type</td>
           <td style="${labelCellStyle}">Limit Amount</td>
         </tr>
-        ${ensureArray(banking.facilities).map((facility: any) => `
+        ${ensureArray(banking.facilities)
+          .map(
+            (facility: any) => `
           <tr>
             <td style="${valueCellStyle}">${facility.bankName || "Not provided"}</td>
             <td style="${valueCellStyle}">${facility.limitType || "Not provided"}</td>
             <td style="${valueCellStyle}">${formatCurrency(facility.limitAmount || "Not provided")}</td>
           </tr>
-        `).join("")}
+        `
+          )
+          .join("")}
         </table>
         </td>
       </tr>
 
       ${renderKeyValueRow(
-        "Is it a Takeover?", 
-        banking.isItATakeover, 
-        undefined, { colSpan: 3 }
+        "Is it a Takeover?",
+        banking.isItATakeover,
+        undefined,
+        { colSpan: 3 }
       )}
 
       ${renderKeyValueRow(
@@ -268,10 +297,10 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
         banking.currentAccountIfAny,
         undefined,
         { colSpan: 3 }
-      )}${renderKeyValueRow(
+      )}      ${renderKeyValueRow(
         "Collateral Security Details",
         banking.collateralSecurityDetails,
-        undefined,
+        formatBulletPoints,
         { colSpan: 3 }
       )}
       ${renderKeyValueRow(
@@ -349,24 +378,18 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
       ${renderKeyValueRow(
         "Lease land Verification",
         observations.leaseLandVerification,
-        undefined,
+        formatBulletPoints,
         { colSpan: 3 }
       )}
       ${renderKeyValueRow(
         "Remarks & Observations",
         observations.remarksObservations,
-        undefined,
+        formatBulletPoints,
         { colSpan: 3 }
       )}
       ${renderKeyValueRow(
         "PD Final Status",
-        html_data.approvedStatus|| "Not provided",
-        undefined,
-        { colSpan: 3 }
-      )}
-      ${renderKeyValueRow(
-        "PD Vendor Name & Address",
-        observations.pdVendorDetails,
+        html_data.approvedStatus || "Not provided",
         undefined,
         { colSpan: 3 }
       )}

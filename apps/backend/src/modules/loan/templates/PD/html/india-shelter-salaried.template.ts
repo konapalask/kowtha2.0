@@ -294,7 +294,9 @@ export const indiaShelterSalariedTemplate = (
     )}
     ${renderKeyValueRow(
       "Usage of Property after Purchase",
-      collateral.usageAfterPurchase === "Others" ? formatMultiline(collateral.usageOtherNotes) : collateral.usageAfterPurchase,
+      collateral.usageAfterPurchase === "Others"
+        ? formatMultiline(collateral.usageOtherNotes)
+        : collateral.usageAfterPurchase,
       undefined,
       { colSpan: 3 }
     )}
@@ -405,13 +407,19 @@ export const indiaShelterSalariedTemplate = (
       )}
       ${renderKeyValueRow(
         "Applicant's Job Profile",
-        employer.jobProfile.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join(""),
+        employer.jobProfile
+          .split("\n")
+          .map((line: string) => `<ul><li>${line}</li></ul>`)
+          .join(""),
         undefined,
         { colSpan: 3 }
       )}
       ${renderKeyValueRow(
         "About the company",
-        employer.companyOverview.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join(""),
+        employer.companyOverview
+          .split("\n")
+          .map((line: string) => `<ul><li>${line}</li></ul>`)
+          .join(""),
         undefined,
         { colSpan: 3 }
       )}
@@ -613,22 +621,41 @@ export const indiaShelterSalariedTemplate = (
       <tr><th style="${subHeaderStyle}" colspan="4">To be filled by PD officer</th></tr>
       ${renderKeyValueRow(
         "Major Observations / Comments / Concerns",
-        pdReview.majorObservations.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join(""),
+        pdReview.majorObservations
+          .split("\n")
+          .map((line: string) => `<ul><li>${line}</li></ul>`)
+          .join(""),
         undefined,
         { colSpan: 3 }
       )}
-      ${renderKeyValueRow("Case Strengths", pdReview.caseStrengths.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join(""), undefined, {
-        colSpan: 3,
-      })}
-      ${renderKeyValueRow("Case Weakness", pdReview.caseWeakness.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join(""), undefined, {
-        colSpan: 3,
-      })}
+      ${renderKeyValueRow(
+        "Case Strengths",
+        pdReview.caseStrengths
+          .split("\n")
+          .map((line: string) => `<ul><li>${line}</li></ul>`)
+          .join(""),
+        undefined,
+        {
+          colSpan: 3,
+        }
+      )}
+      ${renderKeyValueRow(
+        "Case Weakness",
+        pdReview.caseWeakness
+          .split("\n")
+          .map((line: string) => `<ul><li>${line}</li></ul>`)
+          .join(""),
+        undefined,
+        {
+          colSpan: 3,
+        }
+      )}
       <tr>
         <td style="${labelCellStyle}">PD Status</td>
-        <td style="${valueCellStyle}">${html_data.approvedStatus|| "Not provided"}</td>
+        <td style="${valueCellStyle}">${html_data.approvedStatus || "Not provided"}</td>
         <td style="${labelCellStyle}">Name of PD Officer</td>
         <td style="${valueCellStyle}">${formatMultiline(
-          html_data.verifierName
+          html_data.fieldExecutive
         )}</td>
       </tr>
       <tr>

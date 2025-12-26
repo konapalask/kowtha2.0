@@ -34,13 +34,18 @@ const formatObservations = (value: any): string => {
   if (!hasValue(value)) return "Not provided";
   return String(value).replace(/\n+/g, "<br>");
 };
-const ensureArray = <T,>(value: T | T[] | null | undefined): T[] => {
+const ensureArray = <T>(value: T | T[] | null | undefined): T[] => {
   if (Array.isArray(value)) return value;
   if (value === null || value === undefined) return [];
   return [value];
 };
 
-const renderKeyValue = (label: string, value: any, formatter?: (value: any) => string, options?: { colspan?: number }) => {
+const renderKeyValue = (
+  label: string,
+  value: any,
+  formatter?: (value: any) => string,
+  options?: { colspan?: number }
+) => {
   const rendered = formatter ? formatter(value) : formatMultiline(value);
   return `
     <tr>
@@ -58,55 +63,67 @@ const renderArrayTable = (headers: string[], rows: string[][]): string => {
       <tr>
         ${headers.map((header) => `<th style="${labelCellStyle}">${header}</th>`).join("")}
       </tr>
-      ${rows.map((row) => `
+      ${rows
+        .map(
+          (row) => `
         <tr>
           ${row.map((cell) => `<td style="${valueCellStyle}">${cell}</td>`).join("")}
         </tr>
-      `).join("")}
+      `
+        )
+        .join("")}
     </table>
   `;
 };
 
-
-export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) => {
+export const janaSenpBelow50lTemplate = (
+  verificationData: any,
+  html_data: any
+) => {
   const applicationDetails = verificationData.applicationDetails || {};
   const borrowerFamilyDetails = verificationData.borrowerFamilyDetails || {};
   const addressDetails = verificationData.addressDetails || {};
   const borrowerprofile = verificationData.borrowerprofile || {};
   const residenceDetails = verificationData.residenceDetails || {};
-  const residenceOwnershipDetails = verificationData.residenceOwnershipDetails || {};
+  const residenceOwnershipDetails =
+    verificationData.residenceOwnershipDetails || {};
   const nameOfFirm = verificationData.nameOfFirm || {};
   const designation = verificationData.designation || {};
   const shareholdingDetails = verificationData.shareholdingDetails || {};
-  const employmentOrBusinessDetails = verificationData.employmentOrBusinessDetails || {};
+  const employmentOrBusinessDetails =
+    verificationData.employmentOrBusinessDetails || {};
   const jobProfile = verificationData.jobProfile || {};
   const averageStockMaintained = verificationData.averageStockMaintained || {};
   const workingHours = verificationData.workingHours || {};
-  const employmentDetails = verificationData.employmentDetails || {};  
+  const employmentDetails = verificationData.employmentDetails || {};
   const currentMonthlySalary = verificationData.currentMonthlySalary || {};
   const otherIncome = verificationData.otherIncome || {};
-  const specificForCashSalariedProfile = verificationData.specificForCashSalariedProfile || {};
-  const businessAndProuctsAndEndUseOfTheSame = verificationData.businessAndProuctsAndEndUseOfTheSame || {};
+  const specificForCashSalariedProfile =
+    verificationData.specificForCashSalariedProfile || {};
+  const businessAndProuctsAndEndUseOfTheSame =
+    verificationData.businessAndProuctsAndEndUseOfTheSame || {};
   const clientDetails = verificationData.clientDetails || {};
   const vendorDetails = verificationData.vendorDetails || {};
   const thirdPartyChecks = verificationData.thirdPartyChecks || [];
   const incomeAssessment = verificationData.incomeAssessment || {};
-  const specificForContractorProfile = verificationData.specificForContractorProfile || {};
+  const specificForContractorProfile =
+    verificationData.specificForContractorProfile || {};
   const levelOfActivity = verificationData?.levelOfActivity || {};
   const mortgageDetails = verificationData.mortgageDetails || {};
   const endUseOfLoan = verificationData.endUseOfLoan || {};
   const assetDetails = verificationData.assetDetails || {};
   const loanDetails = verificationData.loanDetails || {};
   const bankingDetails = verificationData.bankingDetails || {};
-  const loanAmountAndEndUseOfLoan = verificationData.loanAmountAndEndUseOfLoan || {};
-  const existingRelationWithLender = verificationData.existingRelationWithLender || {};
+  const loanAmountAndEndUseOfLoan =
+    verificationData.loanAmountAndEndUseOfLoan || {};
+  const existingRelationWithLender =
+    verificationData.existingRelationWithLender || {};
   const documentsSeen = verificationData.documentsSeen || {};
   const interviewerComments = verificationData.interviewerComments || {};
   const observations = verificationData.observations || {};
   const pdStatus = verificationData.pdStatus || {};
   const interviewerDetails = verificationData.interviewerDetails || {};
   const geoTagDetails = verificationData?.geoTagDetails || {};
-
 
   return `
     ${pdBaseTemplate(html_data)}
@@ -131,7 +148,9 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
               <td style="${labelCellStyle}">Earning (Yes/No)</td>
               <td style="${labelCellStyle}">Approx. Income</td>
             </tr>
-            ${ensureArray(borrowerFamilyDetails?.borrowerFamilyDetails).map((borrower: any) => `
+            ${ensureArray(borrowerFamilyDetails?.borrowerFamilyDetails)
+              .map(
+                (borrower: any) => `
               <tr>  
                 <td style="${valueCellStyle}">${borrower.name}</td>
                 <td style="${valueCellStyle}">${borrower.relationWithApplicant}</td>
@@ -140,7 +159,9 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
                 <td style="${valueCellStyle}">${borrower.earningMember}</td>
                 <td style="${valueCellStyle}">${formatCurrency(borrower.approxIncome)}</td>
               </tr>
-            `).join("")}
+            `
+              )
+              .join("")}
           </table>
         </td>
       </tr>
@@ -202,7 +223,9 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
               <td style="${labelCellStyle}">Coming into Loan Structure</td>
               <td style="${labelCellStyle}">Function Handled</td>
             </tr>
-            ${ensureArray(shareholdingDetails?.shareholdingDetails).map((shareholder: any) => `
+            ${ensureArray(shareholdingDetails?.shareholdingDetails)
+              .map(
+                (shareholder: any) => `
               <tr>
                 <td style="${valueCellStyle}">${shareholder.shareholderName}</td>
                 <td style="${valueCellStyle}">${shareholder.relationWithApplicant}</td>
@@ -211,7 +234,9 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
                 <td style="${valueCellStyle}">${shareholder.comingIntoLoanStructure}</td>
                 <td style="${valueCellStyle}">${shareholder.functionHandled}</td>
               </tr>
-            `).join("")}
+            `
+              )
+              .join("")}
           </table>
         </td>
       </tr>
@@ -224,17 +249,20 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
 
       <tr>
         <td style="${labelCellStyle}">Business Profile /Employment job profile along with previous business/employment details</td>
-        <td style="${valueCellStyle}">${
-          (() => {
-            const profileText = jobProfile?.businessOrEmploymentProfile || "";
-            const previousText = jobProfile?.previousBusinessOrEmploymentDetails || "";
-            const combined = [profileText, previousText].filter(Boolean).join("\n");
-            if (!combined.trim()) return "Not provided";
-            const lines = combined.split(/\n+/).filter((line: string) => line.trim().length > 0);
-            if (lines.length === 0) return "Not provided";
-            return `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;">${lines.map((line: string) => `<li style="margin-left: 8px;">${line.trim()}</li>`).join("")}</ul>`;
-          })()
-        }</td>
+        <td style="${valueCellStyle}">${(() => {
+          const profileText = jobProfile?.businessOrEmploymentProfile || "";
+          const previousText =
+            jobProfile?.previousBusinessOrEmploymentDetails || "";
+          const combined = [profileText, previousText]
+            .filter(Boolean)
+            .join("\n");
+          if (!combined.trim()) return "Not provided";
+          const lines = combined
+            .split(/\n+/)
+            .filter((line: string) => line.trim().length > 0);
+          if (lines.length === 0) return "Not provided";
+          return `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;">${lines.map((line: string) => `<li style="margin-left: 8px;">${line.trim()}</li>`).join("")}</ul>`;
+        })()}</td>
       </tr>
 
       <tr>
@@ -305,13 +333,17 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
               <td style="${labelCellStyle}">Amount</td>
               <td style="${labelCellStyle}">Remarks (pls. Specify)</td>
             </tr>
-            ${ensureArray(otherIncome?.otherIncome).map((income: any) => `
+            ${ensureArray(otherIncome?.otherIncome)
+              .map(
+                (income: any) => `
               <tr>
                 <td style="${valueCellStyle}">${income.typeOfIncome}</td>
                 <td style="${valueCellStyle}">${formatCurrency(income.incomeAmount)}</td>
                 <td style="${valueCellStyle}">${income.remarks}</td>
               </tr>
-            `).join("")}
+            `
+              )
+              .join("")}
           </table>
         </td>
       </tr>
@@ -337,11 +369,25 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
             </tr>
             <tr>
               <td style="border-bottom: 0px !important;${labelCellStyle}">If no, then do reference checks for employment confirmation with other employees working in the same firm. Minimum 2 references to be obtain. (Name & mobile number of the reference people to be documented)</td>
-              <td style="border-bottom: 0px !important;${valueCellStyle}">${ensureArray(specificForCashSalariedProfile?.attendanceReferenceChecksinSameFirm).map((reference: any) => `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;"><li style="margin-left: 8px;">${reference.nameOfReferencePeople} , ${reference.mobileNumberReferencePeople}</li></ul>`).join("<br> ")}</td>
+              <td style="border-bottom: 0px !important;${valueCellStyle}">${ensureArray(
+                specificForCashSalariedProfile?.attendanceReferenceChecksinSameFirm
+              )
+                .map(
+                  (reference: any) =>
+                    `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;"><li style="margin-left: 8px;">${reference.nameOfReferencePeople} , ${reference.mobileNumberReferencePeople}</li></ul>`
+                )
+                .join("<br> ")}</td>
             </tr>
             <tr>
-              <td style="border-top: 0px !important;${labelCellStyle}">Neighbour two reference checks to confirm applicant's employer information is correct. (name & contact number along with feedback to be documented)</td>
-              <td style="border-top: 0px !important;${valueCellStyle}">${ensureArray(specificForCashSalariedProfile?.attendanceNeighboursReferenceChecks).map((reference: any) => `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;"><li style="margin-left: 8px;">${reference.nameOfNeighbour} , ${reference.mobileNumberNeighbour} , ${reference.feedbackOnApplicant}</li></ul>`).join("<br> ")}</td>
+              <td style="border-top: 0px !important;${labelCellStyle}">Neighbour reference checks(minimum 2 people) deatails with name & contact details to be captured in the PD report</td>
+              <td style="border-top: 0px !important;${valueCellStyle}">${ensureArray(
+                specificForCashSalariedProfile?.attendanceNeighboursReferenceChecks
+              )
+                .map(
+                  (reference: any) =>
+                    `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;"><li style="margin-left: 8px;">${reference.nameOfNeighbour} , ${reference.mobileNumberNeighbour} , ${reference.feedbackOnApplicant}</li></ul>`
+                )
+                .join("<br> ")}</td>
             </tr>
             <tr>
               <td style="border-bottom: 0px !important;${labelCellStyle}">Does the employer maintain any salary register or any salary paid receipt/voucher or any other documentary proof for salary being paid to the borrower (Y/N)</td>
@@ -353,7 +399,14 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
             </tr>
             <tr>
               <td style="${labelCellStyle}">If no, then do reference checks with other employees working in the same firm for salary confirmation. Minimum 2 references to be obtained. (Name & mobile number of the reference people to be documented).</td>
-              <td style="${valueCellStyle}">${ensureArray(specificForCashSalariedProfile?.salaryReferenceCheckInSameFirm).map((reference: any) => `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;"><li style="margin-left: 8px;">${reference.nameOfReferencePeople} , ${reference.mobileNumberReferencePeople}</li></ul>`).join("<br> ")}</td>
+              <td style="${valueCellStyle}">${ensureArray(
+                specificForCashSalariedProfile?.salaryReferenceCheckInSameFirm
+              )
+                .map(
+                  (reference: any) =>
+                    `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;"><li style="margin-left: 8px;">${reference.nameOfReferencePeople} , ${reference.mobileNumberReferencePeople}</li></ul>`
+                )
+                .join("<br> ")}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Any variation in the salary paid amount as per salary certificate & as per salary register verified during the visit.</td>
@@ -395,14 +448,18 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
               <td style="${labelCellStyle}">Location</td>
               <td style="${labelCellStyle}">Ref. Check</td>
             </tr>
-            ${ensureArray(clientDetails?.top3customers).map((customer: any) => `
+            ${ensureArray(clientDetails?.top3customers)
+              .map(
+                (customer: any) => `
               <tr>
                 <td style="${valueCellStyle}">${customer.nameOfClient}</td>
                 <td style="${valueCellStyle}">${customer.contactDetails}</td>
                 <td style="${valueCellStyle}">${customer.location}</td>
                 <td style="${valueCellStyle}">${customer.referenceCheck}</td>
               </tr>
-            `).join("")}
+            `
+              )
+              .join("")}
           </table>
         </td>
       </tr>
@@ -430,14 +487,18 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
               <td style="${labelCellStyle}">Location</td>
               <td style="${labelCellStyle}">Ref. Check</td>
             </tr>
-            ${ensureArray(vendorDetails?.top3vendors).map((vendor: any) => `
+            ${ensureArray(vendorDetails?.top3vendors)
+              .map(
+                (vendor: any) => `
               <tr>
                 <td style="${valueCellStyle}">${vendor?.nameOfVendor}</td>
                 <td style="${valueCellStyle}">${vendor?.contactDetails}</td>
                 <td style="${valueCellStyle}">${vendor?.location}</td>
                 <td style="${valueCellStyle}">${vendor?.referenceCheck}</td>
               </tr>
-            `).join("")}
+            `
+              )
+              .join("")}
           </table>
         </td>
       </tr>
@@ -454,7 +515,9 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
               <td style="${labelCellStyle}">Feedback on Borrower</td>
               <td style="${labelCellStyle}">Feedback on Business</td>
             </tr>
-            ${ensureArray(thirdPartyChecks?.thirdPartyChecks).map((check: any) => `
+            ${ensureArray(thirdPartyChecks?.thirdPartyChecks)
+              .map(
+                (check: any) => `
               <tr>
                 <td style="${valueCellStyle}">${check?.individualOrBusinessName || ""}</td>
                 <td style="${valueCellStyle}">${check?.address || ""}</td>
@@ -463,7 +526,9 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
                 <td style="${valueCellStyle}">${check?.feedbackOnBorrower || ""}</td>
                 <td style="${valueCellStyle}">${check?.feedbackOnBusiness || ""}</td>
               </tr>
-            `).join("")}
+            `
+              )
+              .join("")}
           </table>
         </td>
       </tr>
@@ -475,19 +540,23 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
         <td style="border:1px solid #ccc;padding:8px">
           <table style="${tableStyle}">
             <tr>
-              <td style="${labelCellStyle}">Last 3 Month Salary</td>
+              <td style="${labelCellStyle}">Last 3 Months</td>
               <td style="${labelCellStyle}">Sales</td>
               <td style="${labelCellStyle}">Net Profit Margin</td>
               <td style="${labelCellStyle}">GST Paid (in Rupees)</td>
             </tr>
-            ${ensureArray(incomeAssessment?.incomedetails).map((income: any) => `
+            ${ensureArray(incomeAssessment?.incomedetails)
+              .map(
+                (income: any) => `
               <tr>
                 <td style="${valueCellStyle}">${formatCurrency(income.last3MonthSalary)}</td>
                 <td style="${valueCellStyle}">${formatCurrency(income.sales)}</td>
                 <td style="${valueCellStyle}">${formatCurrency(income.netProfitMargin)}</td>
                 <td style="${valueCellStyle}">${formatCurrency(income.gstPaid)}</td>
               </tr>
-            `).join("")}
+            `
+              )
+              .join("")}
 
             <tr>
               <td style="${labelCellStyle}" colspan="2"><u>Particulars:</u></td>
@@ -561,11 +630,25 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
               </tr>
               <tr>
                 <td style="${labelCellStyle}">Randomly call 2 to 3 clients to verify the contract details and document the feedback in the PD report along with details of the client called for confirmation.</td>
-                <td style="${valueCellStyle}">${ensureArray(specificForContractorProfile?.clientReferenceCheck).map((client: any) => `${client.nameOfClient} - ${client.mobileNumberOfClient} - ${formatCurrency(client.feedbackOnClient)}`).join("<br> ")}</td>
+                <td style="${valueCellStyle}">${ensureArray(
+                  specificForContractorProfile?.clientReferenceCheck
+                )
+                  .map(
+                    (client: any) =>
+                      `${client.nameOfClient} - ${client.mobileNumberOfClient} - ${formatCurrency(client.feedbackOnClient)}`
+                  )
+                  .join("<br> ")}</td>
               </tr>
               <tr>
                 <td style="${labelCellStyle}">Neighbour two reference checks to confirm applicant's employer information is correct. (name & contact number along with feedback to be documented)</td>
-                <td style="${valueCellStyle}">${ensureArray(specificForContractorProfile?.neighbourReferenceCheck).map((neighbour: any) => `${neighbour.nameOfNeighbour} - ${neighbour.mobileNumberOfNeighbour} - ${neighbour.feedbackDetails}`).join("<br> ")}</td>
+                <td style="${valueCellStyle}">${ensureArray(
+                  specificForContractorProfile?.neighbourReferenceCheck
+                )
+                  .map(
+                    (neighbour: any) =>
+                      `${neighbour.nameOfNeighbour} - ${neighbour.mobileNumberOfNeighbour} - ${neighbour.feedbackDetails}`
+                  )
+                  .join("<br> ")}</td>
               </tr>
               <tr>
                 <td style="${labelCellStyle}">Stability or vintage in the same line of business</td>
@@ -585,7 +668,10 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
 
       <tr>
         <td style="${labelCellStyle}">Level of Activity & Stocks along with Observation</td>
-        <td style="${valueCellStyle}"><ul style="margin: 0; padding-left: 20px;">${levelOfActivity?.observations?.split("\n").map((line: string) => `<li style="margin-left: 20px;">${line}</li>`).join("")}</ul></td>
+        <td style="${valueCellStyle}"><ul style="margin: 0; padding-left: 20px;">${levelOfActivity?.observations
+          ?.split("\n")
+          .map((line: string) => `<li style="margin-left: 20px;">${line}</li>`)
+          .join("")}</ul></td>
       </tr>
 
       <tr>
@@ -731,7 +817,9 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
               <td style="${labelCellStyle}">MOB</td>
               <td style="${labelCellStyle}">EMI Paid Bank</td>
             </tr>
-            ${ensureArray(loanDetails?.loanDetails)?.map((loan: any) => `
+            ${ensureArray(loanDetails?.loanDetails)
+              ?.map(
+                (loan: any) => `
               <tr>
                 <td style="${valueCellStyle}">${loan?.nameOfBank}</td>
                 <td style="${valueCellStyle}">${loan?.typeOfLoan}</td>
@@ -742,7 +830,9 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
                 <td style="${valueCellStyle}">${loan?.monthOnBooks}</td>
                 <td style="${valueCellStyle}">${loan?.emiPaidBank}</td>
               </tr>
-            `).join("")}
+            `
+              )
+              .join("")}
           </table>
         </td>
       </tr>
@@ -757,14 +847,18 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
           <td style="${labelCellStyle}">Account Type</td>
           <td style="${labelCellStyle}">Open Since (Year)</td>
         </tr>
-        ${ensureArray(bankingDetails?.details)?.map((bank: any) => `
+        ${ensureArray(bankingDetails?.details)
+          ?.map(
+            (bank: any) => `
           <tr>
           <td style="${valueCellStyle}">${bank?.bankName}</td>
           <td style="${valueCellStyle}">${bank?.branchName}</td>
           <td style="${valueCellStyle}">${bank?.accountType}</td>
           <td style="${valueCellStyle}">${bank?.openSinceYear}</td>
         </tr>
-        `).join("")}
+        `
+          )
+          .join("")}
           </table>
         </td>
       </tr>
@@ -799,14 +893,18 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
               <td style="${labelCellStyle}">Document Name</td>
               <td style="${labelCellStyle}">Document Type</td>
               <td style="${labelCellStyle}">Remarks</td>
-              ${ensureArray(documentsSeen?.documentsSeen)?.map((document: any) => `
+              ${ensureArray(documentsSeen?.documentsSeen)
+                ?.map(
+                  (document: any) => `
                 <tr>
                   <td style="${valueCellStyle}">${document?.documentCategory}</td>
                   <td style="${valueCellStyle}">${document?.documentName}</td>
                   <td style="${valueCellStyle}">${document?.documentType}</td>
                   <td style="${valueCellStyle}">${formatMultiline(document?.documentRemarks)}</td>
                 </tr>
-              `).join("")}
+              `
+                )
+                .join("")}
           </table>
         </td>
       </tr>
@@ -823,17 +921,15 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
               <td style="${labelCellStyle}">Discomforts</td>
               <td style="${valueCellStyle}">${formatMultiline(interviewerComments?.discomforts)}</td>
             </tr>
-            <tr>
-              <td style="${labelCellStyle}" colspan="2"><i>Note: As per business calculations we estimated his monthly cash flow</i></td>
-            </tr>
           </table>
+          <p style="margin-top: 8px; margin-bottom: 0; font-style: italic; color: #666;"><i>Note: As per business calculations we estimated his monthly cash flow</i></p>
          </td>
       </tr>
 
 
       <tr>
         <td style="${labelCellStyle}">Pd Status (Positive/Negative/Refer)</td>
-        <td style="${valueCellStyle}">${html_data.approvedStatus|| "Not provided"}</td>
+        <td style="${valueCellStyle}">${html_data.approvedStatus || "Not provided"}</td>
       </tr>
       <tr>
         <td style="${labelCellStyle}">Interviewer Details</td>
@@ -854,11 +950,13 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
         <td style="${labelCellStyle}">Geo Tag Details</td>
         <td style="border:1px solid #ccc;padding:8px">
           <p><strong><u>Enclosed:</u></strong></p>
-          <p>${geoTagDetails?.coordinates 
-            || geoTagDetails?.Coordinates 
-            || verificationData?.geoTagDetails?.coordinates
-            || verificationData?.GeoTagDetails?.coordinates
-            || "Not provided"}</p>
+          <p>${
+            geoTagDetails?.coordinates ||
+            geoTagDetails?.Coordinates ||
+            verificationData?.geoTagDetails?.coordinates ||
+            verificationData?.GeoTagDetails?.coordinates ||
+            "Not provided"
+          }</p>
         </td>
       </tr>
     </table>
