@@ -330,6 +330,10 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
           descriptions[sectionKey as keyof typeof descriptions];
         const currentSection = currentData?.[sectionKey];
         const editSection = changedData?.[sectionKey];
+        const mergedEditSection =
+          editSection && currentSection
+            ? { ...currentSection, ...editSection }
+            : editSection || currentSection || {};
 
         const changedKeys = getChangedKeys(currentSection, editSection);
         if (changedKeys.length === 0) return null; // Don't show sections with no changes
@@ -360,7 +364,8 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
               <div key={sectionKey} style={{ marginBottom: 32 }}>
                 {arrayFields.map((arrayField: any) => {
                   const currentArray = currentSection?.[arrayField.id] || [];
-                  const changedArray = editSection?.[arrayField.id] || [];
+                  const changedArray =
+                    mergedEditSection?.[arrayField.id] || editSection?.[arrayField.id] || [];
 
                   // Only show if there are actual changes in this array
                   if (
@@ -425,8 +430,8 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
                         }
                       >
                         <DynamicSectionDescription
-                          data={editSection}
-                          changedData={editSection}
+                          data={mergedEditSection}
+                          changedData={mergedEditSection}
                           sectionLabel={sectionLabel}
                           sectionSchema={{
                             ...dynamicSectionSchema,
@@ -476,8 +481,8 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
                   }
                 >
                   <DynamicSectionDescription
-                    data={editSection}
-                    changedData={editSection}
+                    data={mergedEditSection}
+                    changedData={mergedEditSection}
                     sectionLabel={sectionLabel}
                     sectionSchema={dynamicSectionSchema}
                     logs={true}

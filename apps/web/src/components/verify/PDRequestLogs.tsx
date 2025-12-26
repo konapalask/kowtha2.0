@@ -255,6 +255,10 @@ const PDRequestLogs: React.FC<PDRequestLogsProps> = (_props) => {
       {Object.keys(changedData).map((sectionKey) => {
         const currentSection = currentData?.[sectionKey];
         const editSection = changedData?.[sectionKey];
+        const mergedEditSection =
+          editSection && currentSection
+            ? { ...currentSection, ...editSection }
+            : editSection || currentSection || {};
 
         const changedKeys = getChangedKeys(currentSection, editSection);
         if (changedKeys.length === 0) return null; // Don't show sections with no changes
@@ -264,7 +268,45 @@ const PDRequestLogs: React.FC<PDRequestLogsProps> = (_props) => {
           (s: any) => s.id === sectionKey
         );
 
-        if (!dynamicSectionSchema) return null;
+        if (!dynamicSectionSchema && dynamicSchema !== null) {
+          const isFinancialAnalysis = 
+            sectionKey === "financialAnalysis" ||
+            sectionKey === "financialAnalysisComprehensive" ||
+            sectionKey === "financialAnalysisDetailed" ||
+            sectionKey.toLowerCase().includes("financial");
+          
+          if (isFinancialAnalysis) {
+            return (
+              <Card key={sectionKey} style={{ marginBottom: 32 }}>
+                <Text type="warning">
+                  Financial Analysis section found but schema not loaded. 
+                  Please ensure the bank schema is properly configured.
+                </Text>
+                <Row gutter={24} style={{ marginTop: 16 }}>
+                  <Col span={12}>
+                    <Card size="small" title="Current Values">
+                      <pre style={{ fontSize: 12, maxHeight: 400, overflow: "auto" }}>
+                        {JSON.stringify(currentSection || {}, null, 2)}
+                      </pre>
+                    </Card>
+                  </Col>
+                  <Col span={12}>
+                    <Card size="small" title="New Values">
+                      <pre style={{ fontSize: 12, maxHeight: 400, overflow: "auto" }}>
+                        {JSON.stringify(editSection || {}, null, 2)}
+                      </pre>
+                    </Card>
+                  </Col>
+                </Row>
+              </Card>
+            );
+          }
+          
+          return null;
+        }
+        if (!dynamicSectionSchema && dynamicSchema === null) {
+          return null;
+        }
 
         const sectionLabel =
           dynamicSectionSchema?.title ||
@@ -292,7 +334,8 @@ const PDRequestLogs: React.FC<PDRequestLogsProps> = (_props) => {
               <div style={{ marginBottom: 24 }}>
                 {arrayFields.map((arrayField: any) => {
                   const currentArray = currentSection?.[arrayField.id] || [];
-                  const changedArray = editSection?.[arrayField.id] || [];
+                  const changedArray =
+                    mergedEditSection?.[arrayField.id] || editSection?.[arrayField.id] || [];
 
                   // Only show if there are actual changes in this array
                   if (
@@ -377,8 +420,8 @@ const PDRequestLogs: React.FC<PDRequestLogsProps> = (_props) => {
                     }}
                   >
                     <DynamicSectionDescription
-                      data={editSection}
-                      changedData={editSection}
+                      data={mergedEditSection}
+                      changedData={mergedEditSection}
                       sectionLabel={sectionLabel}
                       sectionSchema={{
                         ...dynamicSectionSchema,
@@ -395,7 +438,7 @@ const PDRequestLogs: React.FC<PDRequestLogsProps> = (_props) => {
               </Row>
             )}
 
-            {/* Summary of changes */}
+            {/* Summary of changes
             <div
               style={{
                 padding: "12px 16px",
@@ -428,7 +471,7 @@ const PDRequestLogs: React.FC<PDRequestLogsProps> = (_props) => {
                   );
                 })}
               </div>
-            </div>
+            </div> */}
 
             <Divider />
           </div>
