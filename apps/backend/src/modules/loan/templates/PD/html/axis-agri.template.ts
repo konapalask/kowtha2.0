@@ -286,12 +286,33 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
         { colSpan: 3 }
       )}
 
-      ${renderKeyValueRow(
-        "Any other loan obligations of the firm",
-        banking.otherLoanObligations,
-        undefined,
-        { colSpan: 3 }
-      )}
+      <tr>
+        <td style="${labelCellStyle}">Any other loan obligations of the firm</td>
+        <td style="${valueCellStyle}">
+          <table style="${tableStyle}">
+            <tr>
+              <td style="${labelCellStyle}">Bank</td>
+              <td style="${labelCellStyle}">Loan Type</td>
+              <td style="${labelCellStyle}">Loan</td>
+              <td style="${labelCellStyle}">EMI</td>
+              <td style="${labelCellStyle}">Open/Close</td>
+            </tr>
+            ${ensureArray(banking.otherLoanObligations)
+              .map(
+                (obligation: any) => `
+                <tr>
+                  <td style="${valueCellStyle}">${obligation.bankName || "Not provided"}</td>
+                  <td style="${valueCellStyle}">${obligation.loanType || "Not provided"}</td>
+                  <td style="${valueCellStyle}">${formatCurrency(obligation.loan || "Not provided")}</td>
+                  <td style="${valueCellStyle}">${formatCurrency(obligation.emi || "Not provided")}</td>
+                  <td style="${valueCellStyle}">${obligation.openClose || "Not provided"}</td>
+                </tr>
+              `
+              )
+              .join("")}
+          </table>
+        </td>
+      </tr>
       ${renderKeyValueRow(
         "Current Account if any",
         banking.currentAccountIfAny,
@@ -351,12 +372,33 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
         undefined,
         { colSpan: 3 }
       )}
-      ${renderKeyValueRow(
-        "Family Background & Net-worth",
-        observations.familyBackgroundNetWorth,
-        undefined,
-        { colSpan: 3 }
-      )}
+      <tr>
+        <td style="${labelCellStyle}">Family Background & Net-worth</td>
+        <td style="${valueCellStyle}">
+          <table style="${tableStyle}">
+            <tr>
+              <td style="${labelCellStyle}">Name</td>
+              <td style="${labelCellStyle}">Relation to applicant</td>
+              <td style="${labelCellStyle}">Age</td>
+              <td style="${labelCellStyle}">Education</td>
+              <td style="${labelCellStyle}">Occupation</td>
+            </tr>
+            ${ensureArray(observations.familyBackgroundNetWorth)
+              .map(
+                (entry: any) => `
+                <tr>
+                  <td style="${valueCellStyle}">${entry.name || "Not provided"}</td>
+                  <td style="${valueCellStyle}">${entry.relationToApplicant || "Not provided"}</td>
+                  <td style="${valueCellStyle}">${entry.age || "Not provided"}</td>
+                  <td style="${valueCellStyle}">${entry.education || "Not provided"}</td>
+                  <td style="${valueCellStyle}">${entry.occupation || "Not provided"}</td>
+                </tr>
+              `
+              )
+              .join("")}
+          </table>
+        </td>
+      </tr>
       ${renderKeyValueRow(
         "Business Succession Plan",
         observations.businessSuccessionPlan,
