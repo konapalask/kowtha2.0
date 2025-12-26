@@ -250,7 +250,7 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
         { colSpan: 3 }
       )}
       ${renderKeyValueRow(
-        "Documnets Provided during Visit",
+        "Documents Provided during Visit",
         profile.documentsProvidedDuringVisit,
         formatBulletPoints,
         { colSpan: 3 }

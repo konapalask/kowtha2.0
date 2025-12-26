@@ -154,8 +154,8 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
           </td>
           <td style="${labelCellStyle}">Contact number</td>
           <td style="${valueCellStyle}">${formatMultiline(
-    general.applicantContactNumber
-  )}</td>
+            general.applicantContactNumber
+          )}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">Loan applied amount</td>
@@ -530,6 +530,5 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
 
 
     </div>
-    ${pdBaseTemplateFooter(html_data)}
   `;
 };
