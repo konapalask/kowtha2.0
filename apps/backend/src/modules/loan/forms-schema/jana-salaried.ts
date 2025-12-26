@@ -208,13 +208,13 @@ export const janaSalariedSchema = {
     },
     {
       id: "networthDetails",
-      label: "Networth Details",
+      label: "Net Worth (Car / Property / Investments etc.)",
       schema: {
         type: "object",
         properties: {
           netWorth: {
             type: "array",
-            title: "Net Worth (Car / Property / Investments etc.)",
+            title: "Net Worth",
             items: {
               type: "object",
               properties: {
