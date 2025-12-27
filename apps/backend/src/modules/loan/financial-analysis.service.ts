@@ -1504,7 +1504,7 @@ export class FinancialAnalysisTemplatesService {
     worksheet.columns = [
       { width: 25 }, // A - Particulars (left)
       { width: 12 }, // B - Audited (left)
-      { width: 12 }, // C - Assessed (left)
+      { width: 12 }, // C - Estimated (left)
       { width: 25 }, // D - Particulars (right)
       { width: 12 }, // E - Audited (right)
       { width: 12 }, // F - Estimated (right)
@@ -1570,7 +1570,7 @@ export class FinancialAnalysisTemplatesService {
     const headerRow = worksheet.addRow([
       "PARTICULARS",
       "Audited",
-      "Assessed",
+      "Estimated",
       "PARTICULARS",
       "Audited",
       "Estimated",
@@ -1707,7 +1707,7 @@ export class FinancialAnalysisTemplatesService {
       getValue("closingStockEstimated")
     );
 
-    // Gross Profit (Left - Assessed, Right - Estimated)
+    // Gross Profit (Left - Estimated, Right - Estimated)
     addDataRow(
       "To Gross Profit",
       getValue("grossProfitAudited"),

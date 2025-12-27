@@ -78,6 +78,7 @@ const FIELD_KEY_MAPPINGS = {
   ],
   purposeOfLoan: ['loanType', 'purposeOfLoan'],
   bankName: [],
+  fieldExecutive: ['visitedBy', 'nameOfInterviewer', 'interviewedBy'],
   address: [
     'applicantAddress',
     'initiatedAddress',
@@ -134,6 +135,11 @@ const getInitialDataByBank = (
     loanAmount: userData?.loan?.loanAmount || '',
     purposeOfLoan: userData?.loan?.loanType || '',
     bankName: userData?.loan?.bankName || '',
+    fieldExecutive:
+      loggedInUserName ||
+      userData?.fieldExecutiveName ||
+      userData?.loan?.fieldExecutiveName ||
+      '',
     address:
       userData?.applicantAddress || userData?.loan?.applicantAddress || '',
     latitude: '',

@@ -94,8 +94,8 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
     ${pdBaseTemplate()}
 
     <div class="template-content">
-      <h2 style="margin:8px 0;line-height:1.5 text-align:center"><strong>Jana Small Finance Bank Ltd.</strong></h2>
-      <h3 style="margin:8px 0;line-height:1.5 text-align:center"><strong><u>PD Sheet – Salaried</u></strong></h3>
+      <h2 style="margin:8px 0;line-height:1.5;text-align:center;"><strong>Jana Small Finance Bank Ltd.</strong></h2>
+      <h3 style="margin:8px 0;line-height:1.5;text-align:center;"><strong><u>PD Sheet – Salaried</u></strong></h3>
 
       <table style="${tableStyle}">
         <tr>
@@ -147,21 +147,27 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
                 <td style="${labelCellStyle}">Income per month (approx.)</td>
                 <td style="${labelCellStyle}">Dependent</td>
               </tr>
-              ${familyDetails?.familyMembers
-                ?.map(
-                  (member: any) => `
+              ${
+                familyDetails?.familyMembers &&
+                Array.isArray(familyDetails.familyMembers) &&
+                familyDetails.familyMembers.length > 0
+                  ? familyDetails.familyMembers
+                      .map(
+                        (member: any) => `
                 <tr>
-                  <td style="${valueCellStyle}">${member.name}</td>
-                  <td style="${valueCellStyle}">${member.relationship}</td>
-                  <td style="${valueCellStyle}">${member.age}</td>
-                  <td style="${valueCellStyle}">${member.qualification}</td>
-                  <td style="${valueCellStyle}">${member.occupation}</td>
-                  <td style="${valueCellStyle}">${member.incomePerMonth}</td>
-                  <td style="${valueCellStyle}">${member.dependent}</td>
+                  <td style="${valueCellStyle}">${formatMultiline(member?.name || "")}</td>
+                  <td style="${valueCellStyle}">${formatMultiline(member?.relationship || "")}</td>
+                  <td style="${valueCellStyle}">${formatMultiline(member?.age || "")}</td>
+                  <td style="${valueCellStyle}">${formatMultiline(member?.qualification || "")}</td>
+                  <td style="${valueCellStyle}">${formatMultiline(member?.occupation || "")}</td>
+                  <td style="${valueCellStyle}">${formatMultiline(member?.incomePerMonth || "")}</td>
+                  <td style="${valueCellStyle}">${formatMultiline(member?.dependent || "")}</td>
                 </tr>
               `
-                )
-                .join("")}
+                      )
+                      .join("")
+                  : `<tr><td style="${valueCellStyle}" colspan="7">Not provided</td></tr>`
+              }
             </table>
           </td>
         </tr>
@@ -198,11 +204,27 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
         </tr>
         <tr>
           <td style="${labelCellStyle}">Applicant's Job Profile</td>
-          <td style="${valueCellStyle}">${formatMultiline(applicantDetails?.applicantJobProfile)}</td>
+          <td style="${valueCellStyle}">${(() => {
+            const text = applicantDetails?.applicantJobProfile;
+            if (!text) return "Not provided";
+            const lines = String(text)
+              .split(/\n+/)
+              .filter((line: string) => line.trim().length > 0);
+            if (lines.length === 0) return "Not provided";
+            return `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;">${lines.map((line: string) => `<li style="margin-bottom: 4px;">${line.trim()}</li>`).join("")}</ul>`;
+          })()}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">About the company</td>
-          <td style="${valueCellStyle}">${formatMultiline(applicantDetails?.aboutTheCompany)}</td>
+          <td style="${valueCellStyle}">${(() => {
+            const text = applicantDetails?.aboutTheCompany;
+            if (!text) return "Not provided";
+            const lines = String(text)
+              .split(/\n+/)
+              .filter((line: string) => line.trim().length > 0);
+            if (lines.length === 0) return "Not provided";
+            return `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;">${lines.map((line: string) => `<li style="margin-bottom: 4px;">${line.trim()}</li>`).join("")}</ul>`;
+          })()}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">Previous Employment</td>
@@ -214,7 +236,7 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
         </tr>
 
         <tr>
-          <td style="${labelCellStyle}">Networth Details</td>
+          <td style="${labelCellStyle}">Net Worth (Car / Property / Investments etc.)</td>
           <td style="border:1px solid #ccc;padding:8px">
             <table style="${tableStyle}">
               <tr>
@@ -226,21 +248,27 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
                 <td style="${labelCellStyle}">Owner Name</td>
                 <td style="${labelCellStyle}">Mortgaged</td>
               </tr>
-              ${networthDetails?.netWorth
-                ?.map(
-                  (item: any) => `
+              ${
+                networthDetails?.netWorth &&
+                Array.isArray(networthDetails.netWorth) &&
+                networthDetails.netWorth.length > 0
+                  ? networthDetails.netWorth
+                      .map(
+                        (item: any) => `
                 <tr>
-                  <td style="${valueCellStyle}">${item.address}</td>
-                  <td style="${valueCellStyle}">${item.areaInSqFt}</td>
-                  <td style="${valueCellStyle}">${item.purchaseCostLakhs}</td>
-                  <td style="${valueCellStyle}">${item.purchaseYear}</td>
-                  <td style="${valueCellStyle}">${item.marketValueLakhs}</td>
-                  <td style="${valueCellStyle}">${item.ownerName}</td>
-                  <td style="${valueCellStyle}">${item.mortgaged}</td>
+                  <td style="${valueCellStyle}">${formatMultiline(item?.address || "")}</td>
+                  <td style="${valueCellStyle}">${formatMultiline(item?.areaInSqFt || "")}</td>
+                  <td style="${valueCellStyle}">${formatMultiline(item?.purchaseCostLakhs || "")}</td>
+                  <td style="${valueCellStyle}">${formatMultiline(item?.purchaseYear || "")}</td>
+                  <td style="${valueCellStyle}">${formatMultiline(item?.marketValueLakhs || "")}</td>
+                  <td style="${valueCellStyle}">${formatMultiline(item?.ownerName || "")}</td>
+                  <td style="${valueCellStyle}">${formatMultiline(item?.mortgaged || "")}</td>
                 </tr>
               `
-                )
-                .join("")}
+                      )
+                      .join("")
+                  : `<tr><td style="${valueCellStyle}" colspan="7">Not provided</td></tr>`
+              }
 
               <tr>
                 <td style="${labelCellStyle}" colspan="3">Any Liquid, Moveable & Monetary items such as Cash, Gold, FD, RD, Mutual Fund Holdings, Shares, Bonds, Securities -</td>
@@ -465,36 +493,36 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
                 <td style="${labelCellStyle}">Case Strengths</td>
                 </tr>
                 <tr>
-                <td style="${valueCellStyle}">${
-                  (() => {
-                    const text = otherObservations?.caseStrengths;
-                    if (!text) return "Not provided";
-                    const lines = String(text).split(/\n+/).filter((line: string) => line.trim().length > 0);
-                    if (lines.length === 0) return "Not provided";
-                    return `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;">${lines.map((line: string) => `<li style="margin-left: 8px;">${line.trim()}</li>`).join("")}</ul>`;
-                  })()
-                }</td>
+                <td style="${valueCellStyle}">${(() => {
+                  const text = otherObservations?.caseStrengths;
+                  if (!text) return "Not provided";
+                  const lines = String(text)
+                    .split(/\n+/)
+                    .filter((line: string) => line.trim().length > 0);
+                  if (lines.length === 0) return "Not provided";
+                  return `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;">${lines.map((line: string) => `<li style="margin-left: 8px;">${line.trim()}</li>`).join("")}</ul>`;
+                })()}</td>
               </tr>
               <tr>
                 <td style="${labelCellStyle}">Case Weakness</td>
                 </tr>
                 <tr>
-                <td style="${valueCellStyle}">${
-                  (() => {
-                    const text = otherObservations?.caseWeakness;
-                    if (!text) return "Not provided";
-                    const lines = String(text).split(/\n+/).filter((line: string) => line.trim().length > 0);
-                    if (lines.length === 0) return "Not provided";
-                    return `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;">${lines.map((line: string) => `<li style="margin-left: 8px;">${line.trim()}</li>`).join("")}</ul>`;
-                  })()
-                }</td>
+                <td style="${valueCellStyle}">${(() => {
+                  const text = otherObservations?.caseWeakness;
+                  if (!text) return "Not provided";
+                  const lines = String(text)
+                    .split(/\n+/)
+                    .filter((line: string) => line.trim().length > 0);
+                  if (lines.length === 0) return "Not provided";
+                  return `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;">${lines.map((line: string) => `<li style="margin-left: 8px;">${line.trim()}</li>`).join("")}</ul>`;
+                })()}</td>
               </tr>
             </table> 
           </td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">PD Status</td>
-          <td style="${valueCellStyle}">${html_data.approvedStatus|| "Not provided"}</td>
+          <td style="${valueCellStyle}">${html_data.approvedStatus || "Not provided"}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">Name of Agency Executive</td>
@@ -511,11 +539,13 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
         <tr>
         <td style="${labelCellStyle}">Site Coordinates</td>
         <td style="border:1px solid #ccc;padding:8px">
-          <p>${geoTagDetails?.coordinates 
-            || geoTagDetails?.Coordinates 
-            || verificationData?.geoTagDetails?.coordinates
-            || verificationData?.GeoTagDetails?.coordinates
-            || "Not provided"}</p>
+          <p>${
+            geoTagDetails?.coordinates ||
+            geoTagDetails?.Coordinates ||
+            verificationData?.geoTagDetails?.coordinates ||
+            verificationData?.GeoTagDetails?.coordinates ||
+            "Not provided"
+          }</p>
         </td>
       </tr>
       </table>

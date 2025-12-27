@@ -136,11 +136,13 @@ export const yesBankSchema = {
           },
           gstRegistration: {
             type: "string",
-            title: "GST Registration details",
+            title:
+              "Whether GST registered (if Yes, since when GST registration exist)",
           },
           proofOfBusinessStability: {
             type: "string",
-            title: "Proof of business existence / stability verified",
+            title:
+              "Details of any other proof of business existence /stability available/verified during visit",
           },
           averageMonthlySales: {
             type: "number",
@@ -166,7 +168,7 @@ export const yesBankSchema = {
           },
           indirectExpenses: {
             type: "string",
-            title: "Overheads / Indirect expenses",
+            title: "Overheads to run the business (Indirect expenses)",
           },
           netMonthlyProfit: {
             type: "string",
@@ -193,7 +195,8 @@ export const yesBankSchema = {
           },
           infrastructureManpower: {
             type: "string",
-            title: "Infrastructure and manpower details",
+            title:
+              "Infrastructure and manpower details (to include Business / factory details, plant capacity utilization and staff strength etc) ",
             ui: { widget: "textarea", rows: 3 },
           },
           otherAssetsInvestments: {
@@ -329,10 +332,15 @@ export const yesBankSchema = {
             items: {
               type: "object",
               properties: {
-                referenceType: { type: "string", title: "Reference type" },
+                referenceType: {
+                  type: "string",
+                  title:
+                    "Reference type (Nearby business premises, Buyer, Suppliers)",
+                },
                 businessName: {
                   type: "string",
-                  title: "Shop / Business name",
+                  title:
+                    "Name of Shop/Business premises with whom ref check done",
                 },
                 contactPerson: {
                   type: "string",
@@ -456,11 +464,11 @@ export const yesBankSchema = {
           },
           builderDetails: {
             type: "string",
-            title: "Builder / Project / Representative details",
+            title: "Name of the Builder/ Project/ Builder Representative",
           },
           transactionType: {
             type: "string",
-            title: "Type of transaction",
+            title: "Type of Transaction (Purchase, BT/BT+Topup, Construction etc)",
           },
           propertyType: {
             type: "string",
@@ -468,12 +476,12 @@ export const yesBankSchema = {
           },
           propertyDetails: {
             type: "string",
-            title: "Property details (Address, flat no., size, stage etc.)",
+            title: "Details of Property (Address/Flat No./Floor/2 BHK, 3 BHK etc./ Stage of completion, Landmark etc.)",
             ui: { widget: "textarea", rows: 3 },
           },
           totalPropertyCost: {
             type: "number",
-            title: "Total cost of the property",
+            title: "Total Cost of the Property",
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
@@ -482,16 +490,15 @@ export const yesBankSchema = {
           },
           ocrSource: {
             type: "string",
-            title: "Source details of OCR",
+            title: "Source of OCR-(Individual Savings, Sale of another property, Other family members help, etc )",
           },
           downPaymentDone: {
             type: "string",
-            title:
-              "Source details of OCR-(Individual Savings, Sale of another property, Other family members help, etc )",
+            title: "Down payment details (if already done)",
           },
           downPaymentAmount: {
             type: "number",
-            title: "Amount of down payment",
+            title: "Amount of Down Payment",
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
@@ -537,29 +544,29 @@ export const yesBankSchema = {
           },
           employerContact: {
             type: "string",
-            title: "Employer representative (name, designation, contact)",
+            title: "Name and designation of person met from Employer side alongwith contact no",
           },
           employerDetails: {
             type: "string",
-            title: "Employer details (years in business, employees, industry)",
+            title: "Employer Details (i.e., Years in business, Number of employees, Industry etc.)",
             ui: { widget: "textarea", rows: 3 },
           },
           employmentStatus: {
             type: "string",
-            title: "Employment status (Regular / Contract)",
+            title: "Employment Status (Regular / Contract)",
           },
           currentDesignation: {
             type: "string",
-            title: "Current designation & department",
+            title: "Current Designation & Department",
           },
           employeeId: { type: "string", title: "Employee ID" },
           salaryMode: {
             type: "string",
-            title: "Salary mode & salary account details",
+            title: "Salary Mode & Salary Account Details",
           },
           grossMonthlySalary: {
             type: "number",
-            title: "Gross monthly salary",
+            title: "Gross Monthly Salary",
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
@@ -568,7 +575,7 @@ export const yesBankSchema = {
           },
           netMonthlySalary: {
             type: "number",
-            title: "Net monthly salary",
+            title: "Net Monthly Salary",
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
@@ -577,36 +584,36 @@ export const yesBankSchema = {
           },
           employerLoanDetails: {
             type: "string",
-            title: "Loans from employer (if any)",
+            title: "Whether any loan from employer, If Yes please provide details",
           },
           employmentTerms: {
             type: "string",
-            title: "Terms of employment",
+            title: "Terms of Employment",
           },
           currentEmployerVintage: {
             type: "string",
-            title: "Vintage with current employer",
+            title: "Vintage with Current Employer",
           },
           previousExperienceDetails: {
             type: "string",
-            title: "Previous work experience details",
+            title: "Details of previous work experience with number of years of experience (If Applicable)",
             ui: { widget: "textarea", rows: 2 },
           },
           previousExperienceYears: {
             type: "string",
-            title: "Years worked in previous job",
+            title: "How many Years worked in previous job",
           },
           otherIncome: {
             type: "string",
-            title: "Any other source of income",
+            title: "Any other source of Income",
           },
           residenceStatus: {
             type: "string",
-            title: "Existing residence status",
+            title: "Existing Residence status (Rented, Self-owned, Parental, Kachaa house/Chawl etc)",
           },
           rentExpenses: {
             type: "string",
-            title: "Rental expenses per month",
+            title: "Rental expenses per month (if existing Residence is rented)",
           },
           familyExpenses: {
             type: "string",
@@ -617,7 +624,7 @@ export const yesBankSchema = {
             title: "Third party check for employment",
           },
           employmentDocuments: {
-            title: "Documentary evidence seen for employment",
+            title: "Documentary evidence seen for employment, with Period/Validity Date",
             type: "array",
             items: {
               type: "object",
