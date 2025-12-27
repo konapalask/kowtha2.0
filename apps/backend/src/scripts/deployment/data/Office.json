@@ -1,0 +1,26 @@
+{
+  "schema": "public",
+  "table": "Office",
+  "rows": [
+    {
+      "id": 1,
+      "name": "AP",
+      "location": "Vijayawada",
+      "address": "26-22-21, Mudunurivari Street, Gandhinagar, Vijayawada, AP - 520003",
+      "createdAt": "2025-07-02T09:14:11.642000",
+      "updatedAt": "2025-07-02T09:14:11.642000",
+      "archived": false,
+      "organizationId": 1
+    },
+    {
+      "id": 2,
+      "name": "TG",
+      "location": "Hyderabad",
+      "address": "Flat No: 502, AB Heights Apartment, Premnagar Colony, Khairtabad, Hyderabad, TG - 500004",
+      "createdAt": "2025-07-02T09:17:40.427000",
+      "updatedAt": "2025-07-02T09:17:40.427000",
+      "archived": false,
+      "organizationId": 1
+    }
+  ]
+}
