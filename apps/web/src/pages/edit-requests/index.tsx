@@ -13,6 +13,7 @@ import {
   getAllEditRequestsApi,
   updateEditRequestApi,
 } from "@/services/verifier.services";
+import { useDepartmentChange } from "@/utils/utility";
 
 const { Title } = Typography;
 
@@ -40,27 +41,7 @@ const EditRequests: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [editRequests, setEditRequests] = useState<EditRequest[]>([]);
   const [loginRequests, setLoginRequests] = useState<any>([]);
-  // Add dummy login requests data
-  // const [loginRequests] = useState<LoginRequest[]>([
-  //   {
-  //     id: "1",
-  //     employeeCode: "EMP001",
-  //     name: "John Doe",
-  //     phoneNumber: "+91 9876543210",
-  //   },
-  //   {
-  //     id: "2",
-  //     employeeCode: "EMP002",
-  //     name: "Jane Smith",
-  //     phoneNumber: "+91 9876543211",
-  //   },
-  //   {
-  //     id: "3",
-  //     employeeCode: "EMP003",
-  //     name: "Mike Johnson",
-  //     phoneNumber: "+91 9876543212",
-  //   },
-  // ]);
+  const currentDepartment = useDepartmentChange();
 
   const fetchEditRequests = async () => {
     setLoading(true);
@@ -84,7 +65,7 @@ const EditRequests: React.FC = () => {
 
   useEffect(() => {
     fetchEditRequests();
-  }, []);
+  }, [currentDepartment]); // Add currentDepartment as dependency
 
   console.log(editRequests);
 

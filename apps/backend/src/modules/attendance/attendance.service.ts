@@ -9,7 +9,7 @@ import { PaginatedResponse } from '../common/dto/pagination.dto';
 export class AttendanceService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createAttendance(userId: number, createAttendanceDto: CreateAttendanceDto) {
+  async createAttendance(userId: number, department: Department, createAttendanceDto: CreateAttendanceDto) {
     const { status = AttendanceStatus.Available, date } = createAttendanceDto;
     
     const attendanceDate = new Date(date);
@@ -21,21 +21,30 @@ export class AttendanceService {
     const user = await this.prisma.user.findUnique({
       where: {
         id: userId
+      },
+      include: {
+        departmentRoles: true
       }
     });
 
     if (!user) {
       throw new NotFoundException('User not found');
     }
-
-    // if (user.role !== UserRole.FieldExecutive) {
-    //   throw new BadRequestException('Only field executives can record attendance');
-    // }
+    if (department === Department.FI) {
+      if (!user.departmentRoles.find(role => role.role === UserRole.FieldExecutive && role.department === Department.FI)) {
+        throw new BadRequestException('Only field executives can record attendance');
+      }
+    } else if (department === Department.PD) {
+      if (!user.departmentRoles.find(role => role.role === UserRole.FieldExecutive && role.department === Department.PD)) {
+        throw new BadRequestException('Only PD field executives can record attendance');
+      }
+    }
 
     // Check if attendance record already exists for this user and date
     const existingAttendance = await this.prisma.attendance.findFirst({
       where: {
         userId,
+        department,
         date: {
           gte: new Date(attendanceDate.getFullYear(), attendanceDate.getMonth(), attendanceDate.getDate()),
           lt: new Date(attendanceDate.getFullYear(), attendanceDate.getMonth(), attendanceDate.getDate() + 1)
@@ -50,6 +59,7 @@ export class AttendanceService {
     const attendance = await this.prisma.attendance.create({
       data: {
         userId,
+        department,
         date: attendanceDate,
         status
       },
@@ -102,7 +112,7 @@ export class AttendanceService {
         departmentRoles: {
           some: {
             department: department,
-            role: department === Department.FI ? UserRole.FieldExecutive : UserRole.PDFieldExecutive
+            role: UserRole.FieldExecutive
           }
         }
       },

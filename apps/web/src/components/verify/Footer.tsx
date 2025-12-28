@@ -2,11 +2,16 @@ import { useTabContext } from "@/pages/verify/[id]";
 import {
   generateFinalReport,
   generatePreviewReport,
+  exportFinancialAnalysis,
+  getVerificationData,
 } from "@/services/verifier.services";
-import { EyeOutlined } from "@ant-design/icons";
-import { Button, message, Modal, Popconfirm } from "antd";
+import { sendPdEmailReplyApi, updateLoanApi, getLoansByIdApi } from "@/services/loans.services";
+import { EyeOutlined, DownloadOutlined, MailOutlined } from "@ant-design/icons";
+import { Button, message, Modal, Popconfirm, Spin } from "antd";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
+import { getCurrentDepartment } from "@/utils/utility";
+import DownloadAnimation from "./DownloadAnimation";
 
 const Footer: React.FC<{
   editorContent: any;
@@ -16,6 +21,9 @@ const Footer: React.FC<{
   open: boolean;
   setOpen: any;
   verificationType: string;
+  currentDepartment?: string;
+  loanId?: number;
+  hasPdEmail?: boolean;
 }> = ({
   editorContent,
   disabled,
@@ -24,6 +32,9 @@ const Footer: React.FC<{
   open,
   setOpen,
   verificationType,
+  currentDepartment,
+  loanId,
+  hasPdEmail,
 }) => {
   const { activeTab } = useTabContext();
   const router = useRouter();
@@ -33,6 +44,11 @@ const Footer: React.FC<{
   //   null
   // );
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
+  const [sendingEmail, setSendingEmail] = useState(false);
+  const [downloadingReport, setDownloadingReport] = useState(false);
+  const [exportingExcel, setExportingExcel] = useState(false);
+  const [showDownloadAnimation, setShowDownloadAnimation] = useState(false);
+  const [downloadFileType, setDownloadFileType] = useState<"pdf" | "excel">("pdf");
 
   // const handleApprove = async () => {
   //   try {
@@ -69,6 +85,114 @@ const Footer: React.FC<{
       message.error(
         error?.response?.data?.message ?? "Failed to generate final report"
       );
+    }
+  };
+
+  const handleDownloadReport = async () => {
+    try {
+      setDownloadingReport(true);
+      setDownloadFileType("pdf");
+      setShowDownloadAnimation(true);
+    
+      const verificationResponse = await getVerificationData(id as string);
+      const loanIdFromVerification = verificationResponse?.data?.loanId || loanId;
+      
+      if (!loanIdFromVerification) {
+        throw new Error("Loan ID not found");
+      }
+      const loanResponse = await getLoansByIdApi(loanIdFromVerification.toString());
+      const loanData = loanResponse?.data?.data?.items?.[0] || loanResponse?.data?.data?.items || loanResponse?.data?.data || loanResponse?.data;
+
+      if (loanData && loanData.closedAt === null) {
+        try {
+          await updateLoanApi(loanIdFromVerification, {
+            closedAt: new Date().toISOString(),
+          });
+        } catch (updateError: any) {
+          console.error("Error updating closedAt:", updateError);
+        }
+      }
+      
+      const reportResponse = await generatePreviewReport(
+        id as string,
+        activeTab,
+        null
+      );
+      if (!reportResponse) {
+        throw new Error("No PDF data received");
+      }
+
+      const blob = new Blob([reportResponse], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+      
+   
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `verification-report-${id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+  
+      window.URL.revokeObjectURL(url);
+
+      setTimeout(() => {
+        setShowDownloadAnimation(false);
+        message.success("Final report downloaded successfully");
+      }, 1500);
+    } catch (error: any) {
+      console.error("Error downloading report:", error);
+      setShowDownloadAnimation(false);
+      message.error(
+        error?.response?.data?.message ?? "Failed to download final report"
+      );
+    } finally {
+      setDownloadingReport(false);
+    }
+  };
+
+  const handleExportExcel = async () => {
+    try {
+      setExportingExcel(true);
+      setDownloadFileType("excel");
+      setShowDownloadAnimation(true);
+      
+      const excelResponse = await exportFinancialAnalysis(id as string);
+
+      // Check if we have valid data
+      if (!excelResponse) {
+        throw new Error("No Excel data received");
+      }
+
+      // Create a blob URL for Excel file
+      const blob = new Blob([excelResponse], { 
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" 
+      });
+      const url = window.URL.createObjectURL(blob);
+      
+      // Create a temporary link element to trigger download
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `financial-analysis-${id}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up the blob URL
+      window.URL.revokeObjectURL(url);
+      
+
+      setTimeout(() => {
+        setShowDownloadAnimation(false);
+        message.success("Excel file downloaded successfully");
+      }, 1500);
+    } catch (error: any) {
+      console.error("Error exporting Excel:", error);
+      setShowDownloadAnimation(false);
+      message.error(
+        error?.response?.data?.message ?? "Failed to export Excel file"
+      );
+    } finally {
+      setExportingExcel(false);
     }
   };
 
@@ -127,8 +251,36 @@ const Footer: React.FC<{
     }
   };
 
+  const handleReplyToPdEmail = async () => {
+    if (!loanId) {
+      message.error("Loan ID not available");
+      return;
+    }
+
+    try {
+      setSendingEmail(true);
+      const dept = currentDepartment || getCurrentDepartment();
+      const response = await sendPdEmailReplyApi(loanId, dept);
+      message.success(
+        response?.data?.message || "Email reply sent successfully"
+      );
+    } catch (error: any) {
+      console.error("Error sending PD email reply:", error);
+      message.error(
+        error?.response?.data?.message ||
+          "Failed to send email reply. Please try again."
+      );
+    } finally {
+      setSendingEmail(false);
+    }
+  };
+
   return (
     <>
+      <DownloadAnimation
+        fileType={downloadFileType}
+        isVisible={showDownloadAnimation}
+      />
       <div
         style={{
           position: "sticky",
@@ -136,27 +288,75 @@ const Footer: React.FC<{
           left: 120,
           right: 40,
           background: "#fff",
-          padding: "16px 24px",
+          padding: "8px 16px",
           borderTop: "1px solid #f0f0f0",
           display: "flex",
           justifyContent: "center",
-          gap: "16px",
+          gap: "12px",
           zIndex: 1000,
           boxShadow: "0 -2px 8px rgba(0, 0, 0, 0.06)",
-          // paddingBottom: 0,
-          // marginBottom: 24,
         }}
       >
         <Button
+          size="small"
           icon={<EyeOutlined />}
           onClick={() => {
             // submitFinalVerdict();
             setOpen(true);
             fetchPdf();
           }}
+          style={{
+            height: "32px",
+            fontSize: "14px",
+          }}
         >
           Generate Preview
         </Button>
+        {currentDepartment === "PD" && (
+          <>
+            <Button
+              size="small"
+              icon={<DownloadOutlined />}
+              onClick={handleDownloadReport}
+              loading={downloadingReport}
+              disabled={downloadingReport || disabled}
+              style={{
+                height: "32px",
+                fontSize: "14px",
+              }}
+            >
+              Download Final Report
+            </Button>
+            <Button
+              size="small"
+              icon={<DownloadOutlined />}
+              onClick={handleExportExcel}
+              loading={exportingExcel}
+              disabled={exportingExcel || disabled}
+              style={{
+                height: "32px",
+                fontSize: "14px",
+              }}
+            >
+              Export Excel
+            </Button>
+            {hasPdEmail && loanId && (
+              <Button
+                size="small"
+                icon={<MailOutlined />}
+                onClick={handleReplyToPdEmail}
+                loading={sendingEmail}
+                disabled={sendingEmail || disabled}
+                style={{
+                  height: "32px",
+                  fontSize: "14px",
+                }}
+              >
+                Reply to PD Mail
+              </Button>
+            )}
+          </>
+        )}
       </div>
       <Modal
         open={open}
@@ -217,12 +417,21 @@ const Footer: React.FC<{
             {/* <Button type={"primary"} onClick={handleSave}>
               Submit
             </Button> */}
-            <Popconfirm
+            {/* <Popconfirm
               title="Are you sure you want to submit this final verdict?"
               onConfirm={handleFinalReport}
             >
-              <Button type="primary">Generate Final Report</Button>
-            </Popconfirm>
+              <Button
+                type="primary"
+                size="small"
+                style={{
+                  height: "32px",
+                  fontSize: "14px",
+                }}
+              >
+                Generate Final Report
+              </Button>
+            </Popconfirm> */}
             {/* </Space> */}
           </div>
         )}

@@ -11,14 +11,13 @@ import {
 } from 'react-native';
 import {colors} from '../../constants/colors';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import RNAndroidLocationEnabler from 'react-native-android-location-enabler';
-import GetLocation from 'react-native-get-location';
 import {getItem} from '../../helpers/utility';
 import dayjs from 'dayjs';
 import {verificationRetryApi} from '../../services/field.services';
 import {useForm, Controller} from 'react-hook-form';
 import Toast from 'react-native-toast-message';
 import {useNavigation} from '@react-navigation/native';
+import {useUser} from '../../contexts/UserContext';
 
 interface InvestigableProps {
   isInvestigable: boolean | null;
@@ -46,20 +45,18 @@ const Investigable: React.FC<InvestigableProps> = ({
   } = useForm<{
     reason: string;
     date: Date | null;
-    geoTag: string;
   }>({
     defaultValues: {
       reason: '',
       date: dayjs().toDate(),
-      geoTag: '',
     },
   });
   const navigation = useNavigation<any>();
   const [isDatePickerVisible, setDatePickerVisible] = useState(false);
-  // const geoTag = watch('geoTag');
   const selectedDate = watch('date');
   const [userDetails, setUserDetails] = useState<any>({});
   // console.log(userDetails);
+  const {currentDept} = useUser();
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -72,21 +69,6 @@ const Investigable: React.FC<InvestigableProps> = ({
     };
     fetchUserDetails();
   }, []);
-
-  useEffect(() => {
-    GetLocation.getCurrentPosition({
-      enableHighAccuracy: true,
-      timeout: 15000,
-    })
-      .then(location => {
-        const {latitude, longitude} = location;
-        setValue('geoTag', `${latitude},${longitude}`);
-      })
-      .catch(error => {
-        console.error('Error getting location:', error);
-        setValue('geoTag', 'Location not available');
-      });
-  }, [setValue]);
 
   // useEffect(() => {
   //   if (Platform.OS === 'android') {
@@ -122,20 +104,15 @@ const Investigable: React.FC<InvestigableProps> = ({
     : '';
 
   const onSubmit = async (data: any) => {
-    // if (!data.geoTag || !data.date || !data.reason) {
-    //   Alert.alert('Error', 'Geo Tag, Date, and Reason are mandatory.');
-    //   return;
-    // }
     try {
       const payload = {
         verificationId: item?.id,
         date: dayjs(data.date).toISOString(),
-        geotag: data.geoTag,
         address: item?.address,
         reason: data.reason,
-        fieldExecutiveId: Number(userDetails?.sub),
+        fieldExecutiveId: Number(userDetails?.id),
       };
-      await verificationRetryApi(payload);
+      await verificationRetryApi(payload, currentDept);
       Toast.show({
         type: 'success',
         text1: 'Submitted Successfully',
@@ -159,8 +136,21 @@ const Investigable: React.FC<InvestigableProps> = ({
         <TouchableOpacity
           style={styles.radioOption}
           onPress={() => {
-            setIsInvestigable(true);
-            onYes();
+            try {
+              setIsInvestigable(true);
+              // Only call onYes if it's provided and is a function
+              if (onYes && typeof onYes === 'function') {
+                onYes();
+              }
+            } catch (error) {
+              console.error('Error handling "No" selection:', error);
+              Toast.show({
+                type: 'error',
+                text1: 'Something went wrong',
+                text2: 'Please try again',
+                position: 'top',
+              });
+            }
           }}>
           <View
             style={[
@@ -172,7 +162,19 @@ const Investigable: React.FC<InvestigableProps> = ({
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.radioOption}
-          onPress={() => setIsInvestigable(false)}>
+          onPress={() => {
+            try {
+              setIsInvestigable(false);
+            } catch (error) {
+              console.error('Error handling "Yes" selection:', error);
+              Toast.show({
+                type: 'error',
+                text1: 'Something went wrong',
+                text2: 'Please try again',
+                position: 'top',
+              });
+            }
+          }}>
           <View
             style={[
               styles.radioCircle,
@@ -184,24 +186,6 @@ const Investigable: React.FC<InvestigableProps> = ({
       </View>
       {isInvestigable === false && (
         <View style={styles.inputContainer}>
-          {/* Geo Tag Field */}
-          <Text style={styles.label}>Geo Tag</Text>
-          <Controller
-            control={control}
-            name="geoTag"
-            rules={{required: true}}
-            render={({field: {value}}) => (
-              <TextInput
-                style={[styles.input, styles.disabledInput]}
-                value={value}
-                editable={false}
-                placeholder="Geo Tag"
-              />
-            )}
-          />
-          {errors.geoTag && (
-            <Text style={{color: 'red'}}>Geo Tag is required</Text>
-          )}
           {/* Date Picker Field */}
           <Text style={styles.label}>Date</Text>
           <TouchableOpacity

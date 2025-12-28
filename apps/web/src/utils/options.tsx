@@ -127,6 +127,56 @@ export const bankOptions = [
   { value: "MUTHOOT FINANCE LIMITED", label: "MUTHOOT FINANCE LIMITED" },
 ];
 
+export const pdBankOptions = [
+  { value: "ADITYA BIRLA", label: "ADITYA BIRLA" },
+  { value: "AMBIT", label: "AMBIT" },
+  { value: "AMBIT-MSME", label: "AMBIT-MSME" },
+  { value: "AXIS FINANCE", label: "AXIS FINANCE" },
+  {
+    value: "AXIS FINANCE UBL ABOVE 10 LAKHS",
+    label: "AXIS FINANCE UBL ABOVE 10 LAKHS",
+  },
+  {
+    value: "AXIS FINANCE UBL BELOW 10 LAKHS",
+    label: "AXIS FINANCE UBL BELOW 10 LAKHS",
+  },
+  { value: "AXIS BANK", label: "AXIS BANK" },
+  { value: "AXIS AGRI", label: "AXIS AGRI" },
+  { value: "ARKA FINCAP", label: "ARKA FINCAP" },
+  { value: "CHOLA", label: "CHOLA" },
+  { value: "DCB BANK", label: "DCB BANK" },
+  { value: "HERO FINCORP", label: "HERO FINCORP" },
+  { value: "HERO HOUSING-SELF EMPLOYED", label: "HERO HOUSING-SELF EMPLOYED" },
+  { value: "HERO HOUSING-SALARIED", label: "HERO HOUSING-SALARIED" },
+  { value: "ICICI", label: "ICICI" },
+  { value: "IDFC HL & ML", label: "IDFC HL & ML" },
+  { value: "IDFC PL", label: "IDFC PL" },
+  { value: "IIFL", label: "IIFL" },
+  { value: "INCRED", label: "INCRED" },
+  { value: "INDIA SHELTER SENP", label: "INDIA SHELTER SENP" },
+  { value: "INDIA SHELTER SALARIED", label: "INDIA SHELTER SALARIED" },
+  {
+    value: "JANA BANK SELF EMPLOYED ABOVE 50 LAKHS",
+    label: "JANA BANK SELF EMPLOYED ABOVE 50 LAKHS",
+  },
+  {
+    value: "JANA BANK SELF EMPLOYED BELOW 50 LAKHS",
+    label: "JANA BANK SELF EMPLOYED BELOW 50 LAKHS",
+  },
+  { value: "JANA BANK SALARIED", label: "JANA BANK SALARIED" },
+  { value: "NIWAS SENP", label: "NIWAS SENP" },
+  { value: "NIWAS SALARIED", label: "NIWAS SALARIED" },
+  { value: "RBL", label: "RBL" },
+  { value: "SMFG SME", label: "SMFG SME" },
+  { value: "TATA UBL", label: "TATA UBL" },
+  { value: "YES BANK", label: "YES BANK" },
+];
+
+// Template options are now fetched from backend via getTemplateOptionsApi()
+// This is kept as a fallback for backward compatibility
+// Components should use getTemplateOptionsApi() from @/services/schema.service
+export const templateNameOptions: Array<{ value: string; label: string }> = [];
+
 export const applicantTypeOptions = [
   { label: "Primary Applicant", value: "Primary Applicant" },
   { label: "Co-applicant 1 ", value: "Co-applicant 1" },

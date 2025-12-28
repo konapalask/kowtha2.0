@@ -22,7 +22,6 @@ import {
   FamilyMember,
 } from '../types/verification';
 import BasicDetails from '../components/forms/BasicDetails';
-import PhotoCapture from '../components/forms/PhotoCapture';
 import AddressVerification from '../components/forms/AddressVerification';
 import ResidenceDetails from '../components/forms/ResidenceDetails';
 import FamilyEmploymentDetails from '../components/forms/FamilyEmploymentDetails';
@@ -34,6 +33,7 @@ import {submitVerification} from '../services/field.services';
 import {getItem, setItem, clearItem} from '../helpers/utility';
 import FamilyMemberDetails from '../components/forms/FamilyMemberDetails';
 import Investigable from '../components/forms/Investigable';
+import PhotoCaptureFi from '../components/forms/PhotoCaptureFi';
 
 type VerificationItemScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -356,7 +356,7 @@ const VerificationItemScreen = () => {
       };
 
       console.log('Submitting form data:', finalData);
-      await submitVerification(finalData, item?.verificationId);
+      await submitVerification(finalData, item?.verificationId, 'FI');
 
       // Clear the saved data after successful submission
       await clearItem(`${item?.verificationId}_${verificationType}`);
@@ -487,7 +487,7 @@ const VerificationItemScreen = () => {
               isExpanded={expandedSections.photoCapture}
               onToggle={() => toggleSection('photoCapture')}
               isValid={validSections.photoCapture}>
-              <PhotoCapture
+              <PhotoCaptureFi
                 onUploadedItemsChange={handleUploadedItemsChange}
                 initialItems={uploadedItems}
                 loanId={item?.verificationId}

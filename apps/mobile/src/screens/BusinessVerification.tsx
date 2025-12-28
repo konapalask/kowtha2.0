@@ -12,7 +12,6 @@ import CollapsibleSection from '../components/CollapsibleSection';
 import BusinessBasicDetails from '../components/forms/BusinessBasicDetails';
 import BusinessDetails from '../components/forms/BusinessDetails';
 import BusinessMiscellaneous from '../components/forms/BusinessMiscellaneous';
-import PhotoCapture from '../components/forms/PhotoCapture';
 import ThirdPartyCheck, {
   ThirdPartyCheckFormData,
 } from '../components/forms/ThirdPartyCheck';
@@ -24,6 +23,7 @@ import {getItem, setItem, clearItem} from '../helpers/utility';
 import {BusinessDetailsFormData} from '../components/forms/BusinessDetails';
 import Investigable from '../components/forms/Investigable';
 import ExistingLoans from '../components/forms/ExistingLoans';
+import PhotoCaptureFi from '../components/forms/PhotoCaptureFi';
 
 interface BusinessVerificationFormData {
   basicDetails: {
@@ -358,7 +358,7 @@ const BusinessVerification = () => {
 
       console.log(finalData);
 
-      await submitVerification(finalData, item.verificationId);
+      await submitVerification(finalData, item.verificationId, 'FI');
       await clearItem(`${item.verificationId}_${verificationType}`);
       Alert.alert('Success', 'Verification submitted successfully');
       navigation.goBack();
@@ -447,7 +447,7 @@ const BusinessVerification = () => {
               isExpanded={expandedSections.photoCapture}
               onToggle={() => toggleSection('photoCapture')}
               isValid={validSections.photoCapture}>
-              <PhotoCapture
+              <PhotoCaptureFi
                 onUploadedItemsChange={handleUploadedItemsChange}
                 initialItems={formData.uploadedItems}
                 loanId={item.verificationId}

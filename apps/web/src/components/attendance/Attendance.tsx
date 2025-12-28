@@ -1,4 +1,5 @@
 import { getAttendanceRecodsApi } from "@/services/attendance.services";
+import { useDepartmentChange, getCurrentDepartment } from "@/utils/utility";
 import {
   Table,
   Input,
@@ -9,7 +10,7 @@ import {
   message,
   Typography,
 } from "antd";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import dayjs from "dayjs";
 import { SearchOutlined } from "@ant-design/icons";
 
@@ -50,8 +51,15 @@ export default function Attendance({ dateRange }: AttendanceProps) {
     employeeCode: "",
     status: undefined as boolean | undefined,
   });
+  const currentDepartment = useDepartmentChange();
+
+  // Refs for filter inputs to focus them when dropdown opens
+  const nameInputRef = useRef<any>(null);
+  const employeeCodeInputRef = useRef<any>(null);
 
   const fetchAttendanceRecords = async () => {
+    const department = getCurrentDepartment();
+    if (!department) return;
     setLoading(true);
     try {
       const [start, end] = dateRange || [];
@@ -72,9 +80,11 @@ export default function Attendance({ dateRange }: AttendanceProps) {
   };
 
   useEffect(() => {
+    const department = getCurrentDepartment();
+    if (!department) return; // Guard: only fetch if department is set
     fetchAttendanceRecords();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dateRange, filters.status, filters.employeeCode]);
+  }, [dateRange, filters.status, filters.employeeCode, currentDepartment]);
 
   // Client-side filter for name
   const filteredData = useMemo(() => {
@@ -110,6 +120,15 @@ export default function Attendance({ dateRange }: AttendanceProps) {
       }: any) => (
         <div style={{ padding: 8 }}>
           <Input
+            ref={(input) => {
+              nameInputRef.current = input;
+              // Focus immediately when ref is set (dropdown is visible when ref callback runs)
+              if (input) {
+                requestAnimationFrame(() => {
+                  input.focus();
+                });
+              }
+            }}
             placeholder="Search name"
             value={selectedKeys[0]}
             onChange={(e) => {
@@ -118,6 +137,7 @@ export default function Attendance({ dateRange }: AttendanceProps) {
               confirm({ closeDropdown: false });
             }}
             style={{ width: 188, marginBottom: 8, display: "block" }}
+            autoFocus
           />
           <Space>
             <a
@@ -178,6 +198,15 @@ export default function Attendance({ dateRange }: AttendanceProps) {
       }: any) => (
         <div style={{ padding: 8 }}>
           <Input
+            ref={(input) => {
+              employeeCodeInputRef.current = input;
+              // Focus immediately when ref is set (dropdown is visible when ref callback runs)
+              if (input) {
+                requestAnimationFrame(() => {
+                  input.focus();
+                });
+              }
+            }}
             placeholder="Search code"
             value={selectedKeys[0]}
             onChange={(e) => {
@@ -186,11 +215,15 @@ export default function Attendance({ dateRange }: AttendanceProps) {
               confirm({ closeDropdown: false });
             }}
             style={{ width: 188, marginBottom: 8, display: "block" }}
+            autoFocus
           />
           <Space>
             <a
               onClick={() => {
-                setFilters((f) => ({ ...f, employeeCode: selectedKeys[0] || "" }));
+                setFilters((f) => ({
+                  ...f,
+                  employeeCode: selectedKeys[0] || "",
+                }));
                 confirm();
               }}
               style={{ color: "#1890ff" }}

@@ -1,7 +1,7 @@
 "use client";
-import { Drawer } from "antd";
+import { Drawer, Modal } from "antd";
 import { useRouter } from "next/router";
-import { useEffect, useState, createContext, useContext } from "react";
+import { useEffect, useState, createContext, useContext, useRef } from "react";
 import { Typography, message, Tabs } from "antd";
 // import DashboardLayout from "@/components/layout/DashboardLayout";
 import {
@@ -15,6 +15,9 @@ import { TabContextType } from "@/utils/verifierInterface";
 import { BusinessVerificationDetails } from "@/components/verify/BusinessVerificationDetails";
 import { LeftOutlined } from "@ant-design/icons";
 import PdfPreview from "@/components/verify/PdfPreview";
+import { useDepartmentChange } from "@/utils/utility";
+import dayjs from "dayjs";
+import { Loan, getLoansByIdApi } from "@/services/loans.services";
 
 const { Title } = Typography;
 const { TabPane } = Tabs;
@@ -42,13 +45,17 @@ export default function LoanVerifyDetails() {
   const [editLogsUpdated, setEditLogsUpdated] = useState(0);
   const [editRequests, setEditRequests] = useState<any>([]);
   const [loading, setLoading] = useState(false);
+  const currentDepartment = useDepartmentChange();
+  const [loanDetails, setLoanDetails] = useState<Loan | null>(null);
 
   const fetchVerificationData = async () => {
     getVerificationData(id as string)
       .then((res) => {
-        setVerificationData(res?.data);
+        const newData = res?.data;
+        setVerificationData(newData);
+        
         // Set the first available tab as active
-        if (res?.data?.verifications?.length > 0) {
+        if (newData?.verifications?.length > 0) {
           const verificationOrder = [
             "PermanentAddress",
             "CurrentAddress",
@@ -56,7 +63,7 @@ export default function LoanVerifyDetails() {
             "Business",
           ];
           const firstAvailableTab = verificationOrder.find((type) =>
-            res.data.verifications.some((v: any) => v.addressType === type)
+            newData.verifications.some((v: any) => v.addressType === type)
           );
           if (firstAvailableTab && activeTab === "") {
             setActiveTab(firstAvailableTab);
@@ -69,15 +76,45 @@ export default function LoanVerifyDetails() {
       });
   };
 
+  const fetchLoanDetails = async () => {
+    if (!id) return;
+    try {
+      const res = await getLoansByIdApi(id as string);
+      const loanData =
+        res?.data?.data?.items?.[0] ||
+        res?.data?.data?.items ||
+        res?.data?.data ||
+        res?.data;
+      if (loanData) {
+        setLoanDetails(loanData);
+      }
+    } catch (error) {
+      console.error("Failed to fetch loan details:", error);
+    }
+  };
+
   const fetchEditRequests = async () => {
-    getEditRequestsApi("Pending", id as string)
-      .then((res) => {
-        // console.log(res.data);
-        setEditRequests(res.data);
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+    if (currentDepartment === "PD") {
+      // For PD department, call the API with department parameter
+      getEditRequestsApi("Pending", id as string)
+        .then((res) => {
+          // console.log(res.data);
+          setEditRequests(res.data);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    } else {
+      // For other departments (like FI), use the existing logic
+      getEditRequestsApi("Pending", id as string)
+        .then((res) => {
+          // console.log(res.data);
+          setEditRequests(res.data);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    }
   };
 
   useEffect(() => {
@@ -85,8 +122,9 @@ export default function LoanVerifyDetails() {
       fetchEditRequests();
 
       fetchVerificationData();
+      fetchLoanDetails();
     }
-  }, [id]);
+  }, [id, currentDepartment]);
 
   // Add this useEffect for IndexedDB initialization
   useEffect(() => {
@@ -261,6 +299,11 @@ export default function LoanVerifyDetails() {
             completeVerificationData={getCompleteVerificationData("Business")}
             fetchVerificationData={fetchVerificationData}
             editRequests={editRequests}
+            currentDepartment={currentDepartment}
+            applicationNumber={verificationData?.applicationNumber}
+            loanId={verificationData?.loanId}
+            pdEmailLogs={verificationData?.pdEmailLogs}
+            loanTemplateName={loanDetails?.templateName}
           />
         );
     }
@@ -306,7 +349,7 @@ export default function LoanVerifyDetails() {
               onClick={() => {
                 const page = router.query.page;
                 if (page) {
-                  router.push({ pathname: "/verify", query: { page } });
+                  router.push({ pathname: "/verify", query: { page: page.toString() } });
                 } else {
                   router.push("/verify");
                 }
@@ -339,7 +382,8 @@ export default function LoanVerifyDetails() {
           </Tabs>
         </div>
 
-        {editModalVisible && (
+        {/* EditFormModal is only for FI department - PD uses DynamicEditModal in BusinessVerificationDetails */}
+        {editModalVisible && currentDepartment === "FI" && (
           <EditFormModal
             visible={editModalVisible}
             onCancel={() => setEditModalVisible(false)}
@@ -350,6 +394,7 @@ export default function LoanVerifyDetails() {
             onEditSuccess={() => setEditLogsUpdated((prev) => prev + 1)}
           />
         )}
+
       </Drawer>
     </TabContext.Provider>
   );

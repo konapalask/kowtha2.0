@@ -13,17 +13,23 @@ import {
   Row,
   Col,
 } from "antd";
-import { CloseOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import {
+  CloseOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
 import React, { useEffect, useState } from "react";
-import { bankOptions, loanTypeOptions } from "@/utils/options";
+import { bankOptions, loanTypeOptions, pdBankOptions } from "@/utils/options";
 import FieldAssignmentForm from "./FieldAssignmentForm";
 import LoanInformationEditForm from "./LoanInformationEditForm";
 import {
   assignExecutivesApi,
   deleteFieldAssignmentApi,
   getLoansByIdApi,
+  reassignLoanApi,
 } from "@/services/loans.services";
-import { getUserDetails } from "@/utils/utility";
+import { getUserDetails, getCurrentDepartment } from "@/utils/utility";
 import dayjs from "dayjs";
 
 interface LoanDetails {
@@ -38,6 +44,16 @@ interface LoanDetails {
   status: string;
   verifierId?: string;
   verifications?: any[];
+  pdEmailLogs?: Array<{
+    id: number;
+    subject: string;
+    body: string;
+    fromEmail: string[];
+    toEmail: string[];
+    ccEmail: string[];
+    receivedAt: string | null;
+    createdAt: string;
+  }>;
   [key: string]: any;
 }
 
@@ -58,6 +74,8 @@ interface LoanEditProps {
   fetchLoans: () => void;
   setRefresh: (refresh: boolean) => void;
   fetchExecutives: any;
+  pdBankOptions: any;
+  templateOptions: any[];
 }
 
 const LoanEditDrawer: React.FC<LoanEditProps> = ({
@@ -77,9 +95,33 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
   fetchLoans,
   setRefresh,
   fetchExecutives,
+  pdBankOptions,
+  templateOptions,
 }) => {
   const [form] = Form.useForm();
   const userDetails = getUserDetails();
+  const [currentDepartment, setCurrentDepartment] = useState(
+    getCurrentDepartment()
+  );
+  console.log("LoanEditDrawer - Current department:", currentDepartment);
+
+  // Watch for department changes
+  useEffect(() => {
+    const checkDepartment = () => {
+      const dept = getCurrentDepartment();
+      if (dept !== currentDepartment) {
+        setCurrentDepartment(dept);
+      }
+    };
+
+    // Check immediately
+    checkDepartment();
+
+    // Set up interval to check for changes
+    const interval = setInterval(checkDepartment, 1000);
+
+    return () => clearInterval(interval);
+  }, [currentDepartment]);
   const [selectedLoan, setSelectedLoan] = useState<string | null>(loanId);
   // const [address1Disabled, setAddress1Disabled] = useState<boolean>(false);
   // const [address2Disabled, setAddress2Disabled] = useState<boolean>(false);
@@ -88,12 +130,16 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
   const [loanDetails, setLoanDetails] = useState<LoanDetails | null>(null);
   const [fieldExecutiveEdit, setFieldExecutiveEdit] = useState<
     Record<string, boolean>
-  >({
-    Address1: false,
-    Address2: false,
-    Work: false,
-    Business: false,
-  });
+  >(
+    currentDepartment === "PD"
+      ? { Business: false }
+      : {
+          Address1: false,
+          Address2: false,
+          Work: false,
+          Business: false,
+        }
+  );
 
   useEffect(() => {
     if (loanId) {
@@ -148,6 +194,23 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
     }
   };
 
+  const handleReassign = async () => {
+    if (!loanDetails?.id) return;
+
+    try {
+      setLoading(true);
+      console.log("Reassigning loan:", loanDetails.id);
+      await reassignLoanApi(loanDetails.id);
+      message.success("Loan reassigned successfully");
+      setRefresh(true);
+    } catch (error) {
+      console.error("Error reassigning loan:", error);
+      message.error("Failed to reassign loan");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleClose = () => {
     setIsDrawerVisible(false);
     form.resetFields();
@@ -155,13 +218,17 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
     setSelectedLoan(null);
     setEditLoanInfo(false);
     setLoanDetails(null);
-    setFieldExecutiveEdit({
-      Address1: false,
-      Address2: false,
-      Work: false,
-      Business: false,
-    });
-    fetchLoans(); 
+    setFieldExecutiveEdit(
+      currentDepartment === "PD"
+        ? { Business: false }
+        : {
+            Address1: false,
+            Address2: false,
+            Work: false,
+            Business: false,
+          }
+    );
+    fetchLoans();
   };
 
   const handleDelete = async (
@@ -188,48 +255,68 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
     <div>
       <Drawer
         title={
-          <span>
-            {loanDetails?.id
-              ? `Loan Details - ${loanDetails.applicationNumber}`
-              : "New Loan"}{" "}
-            {loanDetails?.status && (
-              <Tag
-                color={
-                  loanDetails.status === "Pending"
-                    ? "orange"
-                    : loanDetails.status === "Approved"
-                      ? "green"
-                      : loanDetails.status === "Rejected"
-                        ? "red"
-                        : loanDetails.status === "FieldVerificationComplete"
-                          ? "green"
-                          : loanDetails.status === "FieldVerificationStarted"
-                            ? "blue"
-                            : "default"
-                }
-                style={{ marginLeft: 8 }}
-              >
-                {(() => {
-                  switch (loanDetails.status) {
-                    case "Pending":
-                      return "Unassigned";
-                    case "Assigned":
-                      return "Assigned";
-                    case "FieldVerificationStarted":
-                      return "Under FV";
-                    case "FieldVerificationComplete":
-                      return "FV Completed";
-                    case "Approved":
-                      return "Approved";
-                    case "Rejected":
-                      return "Rejected";
-                    default:
-                      return loanDetails.status;
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              width: "100%",
+            }}
+          >
+            <span>
+              {loanDetails?.id
+                ? `Loan Details - ${loanDetails.applicationNumber}`
+                : "New Loan"}{" "}
+              {loanDetails?.status && (
+                <Tag
+                  color={
+                    loanDetails.status === "Pending"
+                      ? "orange"
+                      : loanDetails.status === "Approved"
+                        ? "green"
+                        : loanDetails.status === "Rejected"
+                          ? "red"
+                          : loanDetails.status === "FieldVerificationComplete"
+                            ? "green"
+                            : loanDetails.status === "FieldVerificationStarted"
+                              ? "blue"
+                              : "default"
                   }
-                })()}
-              </Tag>
+                  style={{ marginLeft: 8 }}
+                >
+                  {(() => {
+                    switch (loanDetails.status) {
+                      case "Pending":
+                        return "Unassigned";
+                      case "Assigned":
+                        return "Assigned";
+                      case "FieldVerificationStarted":
+                        return "Under FV";
+                      case "FieldVerificationComplete":
+                        return "FV Completed";
+                      case "Approved":
+                        return "Approved";
+                      case "Rejected":
+                        return "Rejected";
+                      default:
+                        return loanDetails.status;
+                    }
+                  })()}
+                </Tag>
+              )}
+            </span>
+            {loanDetails?.id && currentDepartment === "PD" && (
+              <Button
+                type="primary"
+                icon={<ReloadOutlined />}
+                onClick={handleReassign}
+                loading={loading}
+                style={{ marginLeft: 16 }}
+              >
+                Reassign
+              </Button>
             )}
-          </span>
+          </div>
         }
         placement="right"
         width="99%"
@@ -301,6 +388,8 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                   loading={loading}
                   setLoading={setLoading}
                   fetchLoanDetails={fetchLoanDetails}
+                  pdBankOptions={pdBankOptions}
+                  templateOptions={templateOptions}
                 />
               ) : (
                 <Descriptions
@@ -332,6 +421,11 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                   <Descriptions.Item label="Applicant Type">
                     {loanDetails?.applicantType}
                   </Descriptions.Item>
+                  {currentDepartment === "PD" && (
+                    <Descriptions.Item label="Template Name">
+                      {loanDetails?.templateName}
+                    </Descriptions.Item>
+                  )}
                 </Descriptions>
               )}
             </div>
@@ -339,15 +433,29 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
             {loanDetails?.id && (
               <>
                 <Row style={{ display: "flex" }} gutter={[8, 8]}>
-                  {[
-                    { type: "AddressOne", label: "Address 1" },
-                    { type: "AddressTwo", label: "Address 2" },
-                    { type: "Work", label: "Work" },
-                    { type: "Business", label: "Business" },
-                  ].map(({ type, label }) => {
+                  {(currentDepartment === "PD"
+                    ? [{ type: "Business", label: "Business" }]
+                    : [
+                        { type: "AddressOne", label: "Address 1" },
+                        { type: "AddressTwo", label: "Address 2" },
+                        { type: "Work", label: "Work" },
+                        { type: "Business", label: "Business" },
+                      ]
+                  ).map(({ type, label }) => {
                     const verification = loanDetails?.verifications?.find(
                       (v: any) => v.type === type
                     );
+                      const isPostponed =
+                        verification?.isPostponed === true &&
+                        verification?.status === "Pending";
+                      const statusLabel = isPostponed
+                        ? "Postponed"
+                        : verification?.status;
+                      const statusColor = isPostponed
+                        ? "volcano"
+                        : verification?.status === "Completed"
+                          ? "green"
+                          : "orange";
                     return (
                       <Col md={12} lg={12} xl={12} xxl={12} key={type}>
                         <Card
@@ -375,17 +483,9 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                             <>
                               {verification && (
                                 <Tag
-                                  color={
-                                    verification?.isPostponed
-                                      ? "volcano"
-                                      : verification.status === "Completed"
-                                        ? "green"
-                                        : "orange"
-                                  }
+                                  color={statusColor}
                                 >
-                                  {verification?.isPostponed
-                                    ? "Postponed"
-                                    : verification.status}
+                                  {statusLabel}
                                 </Tag>
                               )}
                             </>
@@ -558,6 +658,65 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                   })}
                 </Row>
               </>
+            )}
+
+            {/* PD Email Section */}
+            {currentDepartment === "PD" &&
+              loanDetails?.pdEmailLogs &&
+              loanDetails.pdEmailLogs.length > 0 && (
+                <Card
+                  title="PD Email"
+                  style={{ marginTop: 16 }}
+                  size="small"
+                >
+                  {loanDetails.pdEmailLogs.map((emailLog, index) => (
+                    <div key={emailLog.id} style={{ marginBottom: index < loanDetails.pdEmailLogs!.length - 1 ? 16 : 0 }}>
+                      <Descriptions column={1} size="small" bordered>
+                        <Descriptions.Item label="Subject">
+                          {emailLog.subject}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="From">
+                          {emailLog.fromEmail.join(", ")}
+                        </Descriptions.Item>
+                        {emailLog.toEmail.length > 0 && (
+                          <Descriptions.Item label="To">
+                            {emailLog.toEmail.join(", ")}
+                          </Descriptions.Item>
+                        )}
+                        {emailLog.ccEmail.length > 0 && (
+                          <Descriptions.Item label="CC">
+                            {emailLog.ccEmail.join(", ")}
+                          </Descriptions.Item>
+                        )}
+                        {emailLog.receivedAt && (
+                          <Descriptions.Item label="Received">
+                            {dayjs(emailLog.receivedAt).format(
+                              "MMM DD, YYYY HH:mm"
+                            )}
+                          </Descriptions.Item>
+                        )}
+                      </Descriptions>
+                      <div
+                        style={{
+                          marginTop: 12,
+                          padding: 12,
+                          backgroundColor: "#ffffff",
+                          border: "1px solid #e8e8e8",
+                          borderRadius: 4,
+                          maxHeight: 400,
+                          overflowY: "auto",
+                          wordBreak: "break-word",
+                          fontSize: 14,
+                          lineHeight: 1.6,
+                          whiteSpace: "pre-wrap",
+                          color: "#333",
+                        }}
+                      >
+                        {emailLog.body || <span style={{ color: "#999" }}>No email body content</span>}
+                      </div>
+                    </div>
+                  ))}
+                </Card>
             )}
           </>
         )}

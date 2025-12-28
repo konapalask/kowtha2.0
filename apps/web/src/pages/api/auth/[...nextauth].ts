@@ -24,7 +24,7 @@ declare module "next-auth/jwt" {
 }
 
 // Ensure API URL is properly configured
-const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
+const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 axiosInstance.defaults.baseURL = API_URL;
 
 export const authOptions: NextAuthOptions = {

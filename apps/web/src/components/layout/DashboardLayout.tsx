@@ -5,11 +5,12 @@ import {
   Space,
   Typography,
   Avatar,
-  Dropdown,
   Grid,
   Badge,
   notification,
   Popover,
+  message,
+  Tooltip,
 } from "antd";
 import { useRouter } from "next/router";
 import {
@@ -22,6 +23,8 @@ import {
   CheckCircleOutlined,
   AuditOutlined,
   NotificationOutlined,
+  UserOutlined,
+  SwapOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
 import { useState, useEffect } from "react";
@@ -30,8 +33,23 @@ import logo from "../../../public/images/appLogos/KowthaDarkIcon.png";
 import smallLogo from "../../../public/images/appLogos/kowthaSmallLogo.png";
 // import attendanceIcon from "../../../public/images/svgIcons/attendance.svg";
 import { getOfficesApi } from "@/services/settings.services";
-import { getUserDetails } from "@/utils/utility";
+import {
+  getUserDetails,
+  setUserDetails,
+  getCurrentDepartment,
+  setCurrentDepartment,
+  initializeCurrentDepartment,
+  subscribeToUserDetailsChanges,
+  notifyUserDetailsChange,
+  getUserDetailsUpdateCounter,
+  getCurrentDepartmentRole,
+  getFirstAvailableNavigationOption,
+} from "@/utils/utility";
 import { getAllEditRequestsApi } from "@/services/verifier.services";
+import { updateUserDepartmentApi } from "@/services/auth.services";
+import { updateUserApi } from "@/services/users.services";
+import UserSettingsModal from "../UserSettingsModal";
+import SelectDepartmentModal from "../SelectDepartmentModal";
 
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
@@ -69,27 +87,76 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
   const [currentTime] = useState(new Date());
-  const [office, setOffice] = useState<string>("");
-  const userDetails = getUserDetails();
+  const [userDetails, setUserDetailsState] = useState(getUserDetails());
   const [loading, setLoading] = useState<boolean>(false);
   const [requestData, setRequestData] = useState<any>([]);
-  // Add dummy login requests data
+  const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
+  const [showDepartmentModal, setShowDepartmentModal] = useState(false);
+  const [userDepartmentRoles, setUserDepartmentRoles] = useState<
+    { department: string; role: string }[]
+  >([]);
+  const [modalUserData, setModalUserData] = useState(userDetails);
+  const [isLoadingUserData, setIsLoadingUserData] = useState(false);
+  const [currentDept, setCurrentDept] = useState<string>("");
+  const [offices, setOffices] = useState<any[]>([]);
+  const [currentBranchName, setCurrentBranchName] = useState<string>("");
 
   useEffect(() => {
-    if (userDetails?.officeId) {
-      getOfficesApi()
-        .then((res) => {
-          setOffice(
-            res?.data?.data?.find(
-              (office: any) => office?.id === userDetails?.officeId
-            )?.name
-          );
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+    const handleUserDetailsChange = () => {
+      const currentUserDetails = getUserDetails();
+      setUserDetailsState(currentUserDetails);
+    };
+
+    // Subscribe to user details changes
+    const unsubscribe = subscribeToUserDetailsChanges(handleUserDetailsChange);
+
+    return () => unsubscribe();
+  }, []);
+
+  // Force re-render when user details update counter changes
+  useEffect(() => {
+    const checkForUpdates = () => {
+      const currentUserDetails = getUserDetails();
+      setUserDetailsState(currentUserDetails);
+    };
+
+    checkForUpdates();
+
+    const interval = setInterval(checkForUpdates, 100);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const initialCurrentDept = initializeCurrentDepartment();
+    setCurrentDept(initialCurrentDept);
+  }, [userDetails?.defaultDepartment]);
+
+  useEffect(() => {
+    getOfficesApi()
+      .then((res) => {
+        setOffices(res?.data?.data || []);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (currentDept && userDetails?.departmentRoles && offices.length > 0) {
+      const currentDeptRole = userDetails.departmentRoles.find(
+        (role: any) => role.department === currentDept
+      );
+
+      if (currentDeptRole?.officeId) {
+        const office = offices.find(
+          (office: any) => office.id === currentDeptRole.officeId
+        );
+        setCurrentBranchName(office?.name || "");
+      } else {
+        setCurrentBranchName("");
+      }
     }
-  }, [userDetails?.officeId]);
+  }, [currentDept, userDetails?.departmentRoles, offices]);
 
   const fetchEditRequests = async () => {
     setLoading(true);
@@ -116,14 +183,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     fetchEditRequests();
     const interval = setInterval(fetchEditRequests, 120000); // poll every 2 min
     return () => clearInterval(interval);
-  }, []);
+  }, [currentDept]); // Add currentDept as dependency to re-fetch when department changes
 
   // useEffect(() => {
   //   setCollapsed(!!(screens.xs || screens.sm || screens.md));
   // }, [screens]);
 
   const menuItems = [
-    ...(!(userDetails?.role === "Verifier")
+    ...(!(
+      getCurrentDepartmentRole() === "VerificationExecutive"
+    )
       ? [
           {
             key: "dashboard",
@@ -143,14 +212,20 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       ),
       label: <Link href="/loans">Loans</Link>,
     },
-    {
-      key: "users",
-      icon: (
-        <TeamOutlined style={{ fontSize: 20, color: "var(--primary-800)" }} />
-      ),
-      label: <Link href="/users">Users</Link>,
-    },
-    ...(userDetails?.role === "Admin" || userDetails?.role === "Verifier"
+    ...(getCurrentDepartmentRole() !== "VerificationExecutive"
+      ? [
+          {
+            key: "users",
+            icon: (
+              <TeamOutlined style={{ fontSize: 20, color: "var(--primary-800)" }} />
+            ),
+            label: <Link href="/users">Users</Link>,
+          },
+        ]
+      : []),
+    ...(getCurrentDepartmentRole() === "Admin" ||
+    getCurrentDepartmentRole() === "Verifier" ||
+    getCurrentDepartmentRole() === "VerificationExecutive"
       ? [
           {
             key: "verify",
@@ -163,7 +238,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           },
         ]
       : []),
-    ...(userDetails?.role === "Admin"
+    ...(getCurrentDepartmentRole() === "Admin"
       ? [
           {
             key: "edit-requests",
@@ -199,16 +274,142 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const avatarColor = getAvatarColor(userDetails?.id);
   const initials = getInitials(userDetails);
 
-  const menu = (
-    <Menu>
-      {/* <Menu.Item key="profile">
-        <Link href="/profile">My Profile</Link>
-      </Menu.Item> */}
-      <Menu.Item key="logout">
-        <Link href="/logout">Logout</Link>
-      </Menu.Item>
-    </Menu>
-  );
+  const handleSettingsClick = async () => {
+    setIsSettingsModalVisible(true);
+    // Use current user details instead of fetching from API
+    setModalUserData(userDetails);
+  };
+
+  const handleSettingsModalClose = () => {
+    setIsSettingsModalVisible(false);
+  };
+
+  const handleChangeDepartment = () => {
+    // Set user's department roles for the modal (for changing current department)
+    setUserDepartmentRoles(userDetails?.departmentRoles || []);
+    setShowDepartmentModal(true);
+  };
+
+  const handleCurrentDepartmentChange = (newCurrentDepartment: string) => {
+    console.log("Changing current department to:", newCurrentDepartment);
+    setCurrentDept(newCurrentDepartment);
+    setCurrentDepartment(newCurrentDepartment);
+    message.success(`Current department changed to ${newCurrentDepartment}`);
+
+    const userDetails = getUserDetails();
+    const newDepartmentRole = userDetails?.departmentRoles?.find(
+      (role: any) => role.department === newCurrentDepartment
+    )?.role;
+
+    if (newDepartmentRole) {
+      const firstOption = getFirstAvailableNavigationOption(newDepartmentRole);
+      router.push(firstOption);
+    } else {
+      // Fallback to reload if role not found
+      router.reload();
+    }
+  };
+
+  const handleDepartmentSelect = async (department: string) => {
+    try {
+      // This now changes the current department, not the default department
+      handleCurrentDepartmentChange(department);
+      setShowDepartmentModal(false);
+    } catch (error) {
+      console.error("Error changing current department:", error);
+      message.error("Failed to change current department");
+      setShowDepartmentModal(false);
+    }
+  };
+
+  const handleUserUpdate = async (updatedData: {
+    name: string;
+    email: string;
+  }) => {
+    try {
+      console.log("Attempting to update user:", userDetails.id, updatedData);
+
+      // Update user with name and email using PATCH API
+      const response = await updateUserApi(userDetails.id, updatedData);
+      console.log("User update response:", response);
+
+      // Create updated user details with new name and email
+      const updatedUserDetails = {
+        ...userDetails,
+        name: updatedData.name,
+        email: updatedData.email,
+      };
+
+      // Update localStorage with the new user details
+      setUserDetails(updatedUserDetails);
+      // Update component state to trigger re-render
+      setUserDetailsState(updatedUserDetails);
+      // Notify other components about the user details change
+      notifyUserDetailsChange();
+      message.success("User information updated successfully");
+    } catch (error: any) {
+      console.error("Error updating user information:", error);
+      console.error("Error response:", error?.response?.data);
+      console.error("Error status:", error?.response?.status);
+
+      const errorMessage =
+        error?.response?.data?.message || "Failed to update user information";
+      message.error(errorMessage);
+      throw error; // Re-throw to let the modal handle the error
+    }
+  };
+
+  const handleUserDepartmentChange = async (newDefaultDepartment: string) => {
+    try {
+      // Validate department parameter
+      if (!newDefaultDepartment || newDefaultDepartment.trim() === "") {
+        message.error("Please select a valid department");
+        return;
+      }
+
+      console.log(
+        "Attempting to update department:",
+        userDetails.id,
+        newDefaultDepartment
+      );
+      console.log("User details:", userDetails);
+
+      // Update user with selected default department using PATCH API
+      const response = await updateUserDepartmentApi(
+        userDetails.id,
+        newDefaultDepartment
+      );
+      console.log("Department update response:", response);
+
+      // Create updated user details with new default department
+      const updatedUserDetails = {
+        ...userDetails,
+        defaultDepartment: newDefaultDepartment,
+      };
+
+      // Update localStorage with the new user details
+      setUserDetails(updatedUserDetails);
+      // Update component state to trigger re-render
+      setUserDetailsState(updatedUserDetails);
+      // Notify other components about the user details change
+      notifyUserDetailsChange();
+      message.success("Default department updated successfully");
+    } catch (error: any) {
+      console.error("Error updating default department:", error);
+      console.error("Error response:", error?.response?.data);
+      console.error("Error status:", error?.response?.status);
+      console.error("Error message:", error?.message);
+
+      const errorMessage =
+        error?.message ||
+        error?.response?.data?.message ||
+        "Failed to update default department";
+      message.error(errorMessage);
+      throw error; // Re-throw to let the modal handle the error
+    }
+  };
+
+  // Removed dropdown menu - profile avatar will directly open modal
 
   return (
     <Layout style={{ minHeight: "100vh", fontFamily: "Noto Sans, sans-serif" }}>
@@ -278,7 +479,40 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             style={{ fontSize: "16px", color: "var(--primary-800)" }}
           /> */}
           <Space>
-            {userDetails?.role === "Admin" && (
+            {/* Current Department and Branch Display */}
+            {currentDept && (
+              <Space>
+                <Text style={{ fontWeight: 600, color: "var(--primary-800)" }}>
+                  {currentDept}
+                </Text>
+                {currentBranchName && (
+                  <Text
+                    style={{ fontWeight: 500, color: "var(--neutral-600)" }}
+                  >
+                    - {currentBranchName}
+                  </Text>
+                )}
+                {userDetails?.departmentRoles &&
+                  userDetails.departmentRoles.length > 1 && (
+                    <Tooltip title="Change Current Department">
+                      <Button
+                        type="text"
+                        icon={<SwapOutlined />}
+                        onClick={handleChangeDepartment}
+                        style={{
+                          color: "var(--primary-800)",
+                          fontSize: "16px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      />
+                    </Tooltip>
+                  )}
+              </Space>
+            )}
+
+            {getCurrentDepartmentRole() === "Admin" && (
               <Popover
                 placement="bottomRight"
                 trigger="hover"
@@ -367,36 +601,32 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 </Badge>
               </Popover>
             )}
-            <Text type="secondary" style={{ fontWeight: 500 }}>
-              {office}
-            </Text>
+            {/* Removed default office display - now showing department-specific branch name */}
             <Text style={{ fontWeight: 500 }}>
               {currentTime.toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
-                hour12: true,
               })}
             </Text>
-            <Dropdown
-              overlay={menu}
-              placement="bottomRight"
-              trigger={["click"]}
+
+            {/* <Text style={{ fontWeight: 500 }}>
+              {currentBranchName || "Loading..."}
+            </Text> */}
+            <Avatar
+              onClick={handleSettingsClick}
+              style={{
+                backgroundColor: avatarColor,
+                color: "#fff",
+                fontWeight: 700,
+                boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
+                fontSize: 18,
+                borderRadius: "50%",
+                cursor: "pointer",
+              }}
+              size={40}
             >
-              <Avatar
-                style={{
-                  backgroundColor: avatarColor,
-                  color: "var(--primary-800)",
-                  fontWeight: 700,
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
-                  fontSize: 18,
-                  borderRadius: "50%",
-                  cursor: "pointer",
-                }}
-                size={40}
-              >
-                {initials}
-              </Avatar>
-            </Dropdown>
+              {initials}
+            </Avatar>
           </Space>
         </Header>
         <Content
@@ -440,20 +670,39 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           color: var(--primary-800) !important;
         }
         .ant-layout-sider-trigger {
-            background: var(--primary-50) !important;
-            color: var(--primary-800) !important;
-            font-size: 20px !important;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: background 0.3s;
+          background: var(--primary-50) !important;
+          color: var(--primary-800) !important;
+          font-size: 20px !important;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          transition: background 0.3s;
         }
 
-          .ant-layout-sider-trigger:hover {
-            background: var(--primary-100) !important;
-            color: var(--primary-700) !important;
-          }
+        .ant-layout-sider-trigger:hover {
+          background: var(--primary-100) !important;
+          color: var(--primary-700) !important;
+        }
       `}</style>
+
+      <UserSettingsModal
+        visible={isSettingsModalVisible}
+        onCancel={handleSettingsModalClose}
+        userData={modalUserData}
+        onUpdateUser={handleUserUpdate}
+        onChangeDepartment={handleUserDepartmentChange}
+        onChangeCurrentDepartment={handleCurrentDepartmentChange}
+        loading={isLoadingUserData}
+      />
+
+      <SelectDepartmentModal
+        visible={showDepartmentModal}
+        departmentRoles={userDepartmentRoles}
+        onSelect={handleDepartmentSelect}
+        onCancel={() => setShowDepartmentModal(false)}
+        isCurrentDepartment={true}
+        currentDepartment={currentDept}
+      />
     </Layout>
   );
 }

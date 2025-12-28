@@ -24,5 +24,6 @@ export class EditVerificationDto {
 
   @ApiProperty({ description: 'Approved status', enum: ApprovedStatus })
   @IsEnum(ApprovedStatus)
-  approvedStatus: ApprovedStatus;
+  @IsOptional()
+  approvedStatus?: ApprovedStatus;
 } 

@@ -1,22 +1,21 @@
-import { Injectable, UnauthorizedException, BadRequestException, NotFoundException, ConflictException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { PrismaService } from '../../prisma.service';
-import * as crypto from 'crypto';
-import { LoggingService } from '../common/logging/logging.service';
-import { EditRequestStatus, EditRequestType, UserRole, Department } from '@prisma/client';
-import { ListUsersDto } from './dto/list-users.dto';
 import axios from 'axios';
+import * as crypto from 'crypto';
+import { JwtService } from '@nestjs/jwt';
+import { ListUsersDto } from './dto/list-users.dto';
+import { PrismaService } from '../../prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateOfficeDto } from './dto/create-office.dto';
 import { UpdateOfficeDto } from './dto/update-office.dto';
-import { PaginatedResponse } from '../common/dto/pagination.dto';
 import { ListAllUsersDto } from './dto/list-all-users.dto';
+import { PaginatedResponse } from '../common/dto/pagination.dto';
+import { LoggingService } from '../common/logging/logging.service';
 import { CreateDepartmentRoleDto } from './dto/create-department-role.dto';
 import { UpdateDepartmentRoleDto } from './dto/update-department-role.dto';
-import { UpdateUserDepartmentRolesDto } from './dto/update-user-department-roles.dto';
 import { getUserWithDepartmentRoles } from '../common/types/request.types';
-// import { ConfigService } from '@nestjs/config';
+import { UpdateUserDepartmentRolesDto } from './dto/update-user-department-roles.dto';
+import { EditRequestStatus, EditRequestType, UserRole, Department, UserStatus } from '@prisma/client';
+import { Injectable, UnauthorizedException, BadRequestException, NotFoundException, ConflictException } from '@nestjs/common';
 
 @Injectable()
 export class AccountsService {
@@ -98,7 +97,7 @@ export class AccountsService {
     try {
 
       const user = await this.prisma.user.findUnique({
-        where: { mobile },
+        where: { mobile, status: 'Active' },
       });
 
       if (!user) {
@@ -107,10 +106,15 @@ export class AccountsService {
 
       const userRoles = await getUserWithDepartmentRoles(this.prisma, user.id);
 
-      const hasRole = userRoles.departmentRoles.some(r => r.role === UserRole.FieldExecutive || r.role === UserRole.PDFieldExecutive);
+      // Check if user has FieldExecutive role in PD or FI departments
+      const hasFieldExecutiveRole = userRoles.departmentRoles.some(
+        r => r.role === UserRole.FieldExecutive && 
+        (r.department === Department.PD || r.department === Department.FI)
+      );
 
-      if (isMobile && !hasRole) {
-        throw new BadRequestException('Access denied: You are not authorized to login');
+      // If mobile login is requested, user must be FieldExecutive in PD or FI
+      if (isMobile && !hasFieldExecutiveRole) {
+        throw new BadRequestException('Access denied: You are not authorized to login via mobile app');
       }
 
       const otp = this.generateRandomOTP();
@@ -151,8 +155,12 @@ export class AccountsService {
     try {
 
       const user = await this.prisma.user.findUnique({
-        where: { mobile },
+        where: { mobile, status: 'Active' },
       });
+
+      if (!user) {
+        throw new NotFoundException('Access denied: User not found with this mobile number');
+      }
 
       const userRoles = await getUserWithDepartmentRoles(this.prisma, user.id);
 
@@ -163,20 +171,17 @@ export class AccountsService {
         deviceId: deviceId
       });
 
-      if (!user) {
-        throw new NotFoundException('Access denied: User not found with this mobile number');
-      }
+      // Check if user has FieldExecutive role in PD or FI departments
+      const fieldExecutiveRoles = userRoles.departmentRoles.filter(
+        r => r.role === UserRole.FieldExecutive && 
+        (r.department === Department.PD || r.department === Department.FI)
+      );
+      const hasFieldExecutiveRole = fieldExecutiveRoles.length > 0;
 
-      const hasRole = userRoles.departmentRoles.some(r => r.role === UserRole.FieldExecutive || r.role === UserRole.PDFieldExecutive);
-
-      if(hasRole && !deviceId){
-        throw new UnauthorizedException('Access denied: Please contact administrator');
-      }
-      
-      if(deviceId){
-
-        if(!hasRole){
-          throw new UnauthorizedException('Access denied: You are not Authorized to login');
+      // If deviceId is provided (mobile login), user must be FieldExecutive in PD or FI
+      if (deviceId) {
+        if (!hasFieldExecutiveRole) {
+          throw new UnauthorizedException('Access denied: You are not authorized to login via mobile app');
         }
 
         let updateUser = null;
@@ -217,7 +222,7 @@ export class AccountsService {
                   newDeviceId: deviceId,
                   mobile: userRoles.mobile,
                   userName: userRoles.name,
-                  officeId: userRoles.officeId,
+                  officeId: userRoles.departmentRoles?.find(dr => dr.officeId)?.officeId || null,
                   oldDeviceId: userRoles.deviceId,
                   employeeCode: userRoles.employeeCode,
                 },
@@ -228,11 +233,54 @@ export class AccountsService {
             await this.loggingService.info('Device change request created', {
               userId: userRoles.id,
               deviceId,
-              oldDeviceId: userRoles.deviceId,
+              oldDeviceId: user.deviceId,
               status: 'Pending',
             });
             throw new BadRequestException('Device has been changed. Please contact administrator');
           }          
+        }
+      }
+
+      // If FieldExecutive user logs in via web (no deviceId), automatically set defaultDepartment to opposite department
+      if (!deviceId && hasFieldExecutiveRole && fieldExecutiveRoles.length > 0) {
+        const fieldExecutiveInFI = fieldExecutiveRoles.some(r => r.department === Department.FI);
+        const fieldExecutiveInPD = fieldExecutiveRoles.some(r => r.department === Department.PD);
+        
+        // Check if user has any department role in PD and FI
+        const hasRoleInPD = userRoles.departmentRoles.some(r => r.department === Department.PD);
+        const hasRoleInFI = userRoles.departmentRoles.some(r => r.department === Department.FI);
+        
+        let targetDepartment: Department | null = null;
+        
+        if (fieldExecutiveInFI && !fieldExecutiveInPD && hasRoleInPD) {
+          // User is FieldExecutive only in FI and has role in PD → set defaultDepartment to PD
+          targetDepartment = Department.PD;
+        } else if (fieldExecutiveInPD && !fieldExecutiveInFI && hasRoleInFI) {
+          // User is FieldExecutive only in PD and has role in FI → set defaultDepartment to FI
+          targetDepartment = Department.FI;
+        } else if (fieldExecutiveInFI && fieldExecutiveInPD) {
+          // User is FieldExecutive in both departments → set to opposite of current defaultDepartment
+          if (userRoles.defaultDepartment === Department.FI && hasRoleInPD) {
+            targetDepartment = Department.PD;
+          } else if (userRoles.defaultDepartment === Department.PD && hasRoleInFI) {
+            targetDepartment = Department.FI;
+          } else if (!userRoles.defaultDepartment) {
+            // If no defaultDepartment is set, default to PD if they have role in PD, otherwise FI
+            targetDepartment = hasRoleInPD ? Department.PD : Department.FI;
+          }
+        }
+
+        // Update defaultDepartment if needed and user has role in target department
+        if (targetDepartment && userRoles.defaultDepartment !== targetDepartment) {
+          await this.prisma.user.update({
+            where: { id: user.id },
+            data: { defaultDepartment: targetDepartment }
+          });
+          await this.loggingService.info('Default department auto-set for FieldExecutive web login', {
+            userId: user.id,
+            previousDepartment: userRoles.defaultDepartment,
+            newDepartment: targetDepartment
+          });
         }
       }
 
@@ -303,11 +351,12 @@ export class AccountsService {
       }
 
       await this.loggingService.debug('User validated successfully', { userId: id });
+      
+      // Get officeId from the first department role that has an office
+      
       return {
         id: user.id,
         mobile: user.mobile,
-        role: user.departmentRoles[0].role,
-        officeId: user.officeId,
         employeeCode: user.employeeCode,
         name: user.name,
         email: user.email,
@@ -335,7 +384,14 @@ export class AccountsService {
         status: filters?.status || 'Active'
       };
 
-      if (filters.department) {
+      if (filters?.role) {
+        where.departmentRoles = {
+          some: {
+            ...(filters.department && { department: filters.department }),
+            ...(filters.role && { role: filters.role })
+          }
+        };
+      } else {
         where.departmentRoles = {
           some: {
             department: filters.department
@@ -343,16 +399,14 @@ export class AccountsService {
         };
       }
       
-      if (filters?.role) {
+      if (filters?.officeId) {
         where.departmentRoles = {
+          ...where.departmentRoles,
           some: {
-            role: filters.role
+            ...where.departmentRoles?.some,
+            officeId: Number(filters.officeId)
           }
         };
-      }
-      
-      if (filters?.officeId) {
-        where.officeId = Number(filters.officeId);
       }
 
       if (filters?.locality) {
@@ -362,6 +416,9 @@ export class AccountsService {
         };
       }
 
+      console.log(where);
+      
+
       const users = await this.prisma.user.findMany({
         where,
         select: {
@@ -370,12 +427,6 @@ export class AccountsService {
           mobile: true,
           employeeCode: true,
           status: true,
-          office: {
-            select: {
-              id: true,
-              name: true
-            }
-          },
           createdAt: true,
           _count: {
             select: {
@@ -390,7 +441,8 @@ export class AccountsService {
           departmentRoles: {
             select: {
               department: true,
-              role: true
+              role: true,
+              officeId: true
             }
           }
         },
@@ -462,19 +514,23 @@ export class AccountsService {
     try {
       const where: any = {};
 
-      where.departmentRoles = {
-        some: {
-          department: filters.department
-        }
-      };
-
       if (filters?.role) {
+        if (filters?.role) {
+          where.departmentRoles = {
+            some: {
+              role: filters.role,
+              department: filters.department
+            }
+          };
+        }
+      }
+      else {
         where.departmentRoles = {
           some: {
-            role: filters.role
+            department: filters.department
           }
         };
-      }
+      }      
       
       if (filters?.employeeCode) {
         where.employeeCode = {
@@ -515,13 +571,8 @@ export class AccountsService {
           departmentRoles: {
             select: {
               department: true,
-              role: true
-            }
-          },
-          office: {
-            select: {
-              id: true,
-              name: true
+              role: true,
+              officeId: true
             }
           },
           createdAt: true,
@@ -600,15 +651,40 @@ export class AccountsService {
     }
   }
 
-  async createUser(createUserDto: CreateUserDto) {
+  async createUser(createUserDto: CreateUserDto, department: Department) {
     try {
+
       // Check if user with same mobile already exists
       const existingUser = await this.prisma.user.findUnique({
         where: { mobile: createUserDto.mobile }
       });
 
       if (existingUser) {
-        throw new ConflictException('User with this mobile number already exists');
+        const existingDepartmentRole = await this.prisma.departmentRole.findUnique({
+          where: {
+            userId_department: {
+              userId: existingUser.id,
+              department: department
+            }
+          }
+        });
+  
+        if (existingDepartmentRole) {
+          throw new ConflictException('User with this mobile number already exists');
+        } else {
+          const createDepartmentRole = await this.prisma.departmentRole.create({
+            data: {
+              userId: existingUser.id,
+              department: department,
+              role: createUserDto.departmentRoles.find(dr => dr.department === department)?.role as UserRole,
+              officeId: createUserDto.departmentRoles.find(dr => dr.department === department)?.officeId as number
+            }
+          });
+          return {
+            message: 'User created successfully',
+            data: createDepartmentRole
+          }
+        }
       }
 
       // Check if email is provided and already exists
@@ -633,15 +709,6 @@ export class AccountsService {
         }
       }
 
-      // Check if office exists
-      const office = await this.prisma.office.findUnique({
-        where: { id: createUserDto.officeId },
-      });
-
-      if (!office) {
-        throw new NotFoundException('Office not found');
-      }
-
       // Validate department roles
       if (!createUserDto.departmentRoles || createUserDto.departmentRoles.length === 0) {
         throw new BadRequestException('At least one department role is required');
@@ -659,19 +726,19 @@ export class AccountsService {
         // Extract department roles from DTO
         const { departmentRoles, ...userData } = createUserDto;
 
+        
         // Create user
-        const user = await prisma.user.create({
-          data: userData,
-        });
-
+        const user = await prisma.user.create({data: userData});
+ 
         // Create department roles
         const createdDepartmentRoles = await Promise.all(
           departmentRoles.map(async (deptRole) => {
             return await prisma.departmentRole.create({
               data: {
                 userId: user.id,
-                department: deptRole.department,
                 role: deptRole.role,
+                officeId: deptRole.officeId,
+                department: deptRole.department,
               },
             });
           })
@@ -686,7 +753,6 @@ export class AccountsService {
 
       await this.loggingService.info('User created successfully with department roles', {
         userId: result.id,
-        officeId: result.officeId,
         departmentRolesCount: result.departmentRoles.length,
       });
 
@@ -723,7 +789,10 @@ export class AccountsService {
       }
 
       // Check if email is being updated and already exists
-      if (updateUserDto.email && updateUserDto.email !== user.email) {
+      if (updateUserDto.email==="") {
+        updateUserDto.email = null;
+      }
+      else if (updateUserDto.email && updateUserDto.email !== user.email) {
         const existingEmail = await this.prisma.user.findUnique({
           where: { email: updateUserDto.email },
         });
@@ -733,10 +802,13 @@ export class AccountsService {
         }
       }
 
-      // Check if employee code is being updated and already exists
-      if (updateUserDto.employeeCode && updateUserDto.employeeCode !== user.employeeCode) {
+      // Check if employee code is provided and already exists
+      if (updateUserDto.employeeCode) {
         const existingEmployeeCode = await this.prisma.user.findFirst({
-          where: { employeeCode: updateUserDto.employeeCode },
+          where: { 
+            employeeCode: updateUserDto.employeeCode,
+            id: { not: userId }
+          },
         });
 
         if (existingEmployeeCode) {
@@ -744,16 +816,48 @@ export class AccountsService {
         }
       }
 
-      // Check if office exists if being updated
-      if (updateUserDto.officeId) {
-        const office = await this.prisma.office.findUnique({
-          where: { id: updateUserDto.officeId },
+      // Check if defaultDepartment is being updated and if the role in that department is FieldExecutive
+      if (updateUserDto.defaultDepartment) {
+        const departmentRole = await this.prisma.departmentRole.findUnique({
+          where: {
+            userId_department: {
+              userId: userId,
+              department: updateUserDto.defaultDepartment,
+            },
+          },
         });
 
-        if (!office) {
-          throw new NotFoundException('Office not found');
+        if (departmentRole && departmentRole.role === UserRole.FieldExecutive) {
+          throw new BadRequestException('Cannot set default department to a department where user has FieldExecutive role');
         }
       }
+
+      // Prevent deactivating the last active admin
+      if (updateUserDto.status === UserStatus.Inactive) {
+        const isAdmin = await this.prisma.departmentRole.findFirst({
+          where: {
+            userId,
+            role: UserRole.Admin,
+          },
+        });
+
+        if (isAdmin) {
+          const otherActiveAdmins = await this.prisma.user.count({
+            where: {
+              id: { not: userId },
+              status: UserStatus.Active,
+              departmentRoles: {
+                some: { role: UserRole.Admin },
+              },
+            },
+          });
+
+          if (otherActiveAdmins === 0) {
+            throw new BadRequestException('At least one active admin is required');
+          }
+        }
+      }
+      
 
       // Update user
       const updatedUser = await this.prisma.user.update({
@@ -882,22 +986,22 @@ export class AccountsService {
         where: {
           department: department,
         },
-        orderBy: {
-          name: 'asc',
-        },
         include: {
           _count: {
             select: {
-              users: true
+              departmentRoles: true
             }
           }
+        },
+        orderBy: {
+          name: 'asc',
         }
       });
 
-      // Transform the data to include employees count
-      const officesWithEmployeeCount = offices.map(office => ({
+      // Transform the data to include number of employees
+      const result = offices.map(office => ({
         ...office,
-        employees: office._count.users,
+        numberofEmployees: office._count.departmentRoles,
         _count: undefined // Remove the _count field
       }));
 
@@ -905,7 +1009,7 @@ export class AccountsService {
         count: offices.length,
       });
 
-      return officesWithEmployeeCount;
+      return result;
     } catch (error) {
       await this.loggingService.error('Failed to list offices', {
         error: error.message,
@@ -943,23 +1047,25 @@ export class AccountsService {
     try {
       const user = await this.prisma.user.findUnique({
         where: { id: userId },
-        include: { office: true },
+        include: { departmentRoles: { include: { office: true } } },
       });
 
-      if (!user || !user.office) {
-        await this.loggingService.warn('Organization not found for user', { userId });
-        return null;
-      }
+      // if (!user || !user.office) {
+      //   await this.loggingService.warn('Organization not found for user', { userId });
+      //   return null;
+      // }
 
-      const org = await this.prisma.organization.findUnique({
-        where: { id: user.office.organizationId },
-      });
+      // const org = await this.prisma.organization.findUnique({
+      //   where: { id: user.office.organizationId },
+      // });
+
+      const orgId = user?.departmentRoles[0]?.office?.organizationId;
 
       await this.loggingService.debug('Retrieved organization for user', { 
         userId,
-        organizationId: org?.id 
+        organizationId: orgId
       });
-      return org;
+      return orgId;
     } catch (error) {
       await this.loggingService.error('Failed to get organization by user', { 
         userId,
@@ -1172,6 +1278,7 @@ export class AccountsService {
                 userId: userId,
                 department: deptRole.department,
                 role: deptRole.role,
+                officeId: deptRole.officeId,
               },
               include: {
                 user: {

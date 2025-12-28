@@ -8,3 +8,13 @@
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
 # Add any project specific keep options here:
+
+# Keep document picker classes
+-keep class io.github.react_native_documents_picker.** { *; }
+-keep class com.reactnativedocumentpicker.** { *; }
+-dontwarn io.github.react_native_documents_picker.**
+-dontwarn com.reactnativedocumentpicker.**
+
+# Keep React Native classes
+-keep class com.facebook.react.** { *; }
+-dontwarn com.facebook.react.**

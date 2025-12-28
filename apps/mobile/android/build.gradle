@@ -1,4 +1,9 @@
 buildscript {
+    project.ext.react = [
+    // Use Node from PATH so the build works across machines
+    nodeExecutableAndArgs: ["node"]
+]
+
     ext {
         buildToolsVersion = "35.0.0"
         minSdkVersion = 24

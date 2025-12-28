@@ -1,11 +1,21 @@
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
-import { Table, Card, Button, Space, Tag, Typography, Badge } from "antd";
+import { useEffect, useState, useRef } from "react";
+import {
+  Table,
+  Card,
+  Button,
+  Space,
+  Tag,
+  Typography,
+  Badge,
+  Input,
+} from "antd";
 import {
   CheckCircleOutlined,
   CheckOutlined,
   CloseCircleOutlined,
   EyeOutlined,
+  SearchOutlined,
 } from "@ant-design/icons";
 // import DashboardLayout from "@/components/layout/DashboardLayout";
 import dayjs from "dayjs";
@@ -16,6 +26,7 @@ import {
   getFieldExecutivesApi,
   getVerifierLoansApi,
 } from "@/services/loans.services";
+import { useDepartmentChange, getCurrentDepartmentRole } from "@/utils/utility";
 
 dayjs.extend(relativeTime);
 
@@ -44,40 +55,98 @@ export default function Verify() {
   // const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
   const [loans, setLoans] = useState<LoanData[]>([]);
   const router = useRouter();
+  const currentDepartment = useDepartmentChange();
 
-  // Pagination state
+  // Search state
+  const [searchApplicationNumber, setSearchApplicationNumber] =
+    useState<string>("");
+  const [searchApplicantName, setSearchApplicantName] = useState<string>("");
+
+  // Pagination state - similar to loans page approach
   const pageSize = 10;
   const [currentPage, setCurrentPage] = useState(1);
+  const [paginationMeta, setPaginationMeta] = useState({
+    total: 0,
+    page: 1,
+    limit: 10,
+    totalPages: 0,
+  });
 
-  // Restore page from query string on mount
   useEffect(() => {
-    if (router.query.page) {
-      const page = parseInt(router.query.page as string, 10);
-      if (!isNaN(page)) setCurrentPage(page);
+    if (router.isReady) {
+      if (router.query.page) {
+        const page = parseInt(router.query.page as string, 10);
+        if (!isNaN(page) && page > 0) {
+          setCurrentPage((prevPage) => {
+            return prevPage !== page ? page : prevPage;
+          });
+        }
+      } else {
+        // If no page in query, reset to page 1
+        setCurrentPage((prevPage) => {
+          return prevPage !== 1 ? 1 : prevPage;
+        });
+      }
     }
-  }, [router.query.page]);
+  }, [router.isReady, router.query.page]);
 
   useEffect(() => {
-    getVerifierLoansApi()
-      ?.then((res: any) => {
-        setLoans(res?.data?.data ?? []);
-      })
-      ?.catch((err) => {
-        console.log(err);
-      });
-  }, []);
+    if (!router.isReady) return;
 
-  const filteredLoans =
-    loans?.filter((loan) =>
-      [
-        "Unassigned",
-        "Assigned",
-        "FVCompleted",
-        "Approved",
-        "Rejected",
-        "Pending",
-      ].includes(loan?.status ?? "")
-    ) ?? [];
+    const fetchLoans = async () => {
+      const pageFromQuery = router.query.page
+        ? parseInt(router.query.page as string, 10)
+        : currentPage;
+      const pageToUse =
+        !isNaN(pageFromQuery) && pageFromQuery > 0
+          ? pageFromQuery
+          : currentPage;
+
+      setLoading(true);
+      try {
+        const res = await getVerifierLoansApi(pageToUse, pageSize, {
+          applicationNumber: searchApplicationNumber,
+          applicantName: searchApplicantName,
+        });
+        // Handle new API response structure: {items: [...], meta: {...}}
+        const responseData = res?.data?.data || res?.data || res;
+        const items = responseData?.items || responseData?.data || [];
+        const meta = responseData?.meta || {
+          total: items.length,
+          page: pageToUse,
+          limit: pageSize,
+          totalPages: Math.ceil(items.length / pageSize),
+        };
+
+        setLoans(Array.isArray(items) ? items : []);
+        setPaginationMeta(meta);
+        // Ensure currentPage state matches the page we actually fetched
+        if (pageToUse !== currentPage) {
+          setCurrentPage(pageToUse);
+        }
+      } catch (err) {
+        console.log(err);
+        setLoans([]);
+        setPaginationMeta({
+          total: 0,
+          page: 1,
+          limit: pageSize,
+          totalPages: 0,
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLoans();
+  }, [
+    router.isReady,
+    router.query.page,
+    currentDepartment,
+    pageSize,
+    searchApplicationNumber,
+    searchApplicantName,
+  ]);
 
   const getStatusTags = (record: any) => {
     const types = [
@@ -119,6 +188,10 @@ export default function Verify() {
     );
   };
 
+  // Refs for filter inputs to focus them when dropdown opens
+  const applicationNumberInputRef = useRef<any>(null);
+  const applicantNameInputRef = useRef<any>(null);
+
   const columns: ColumnsType<LoanData> = [
     {
       title: "Application Number",
@@ -126,6 +199,34 @@ export default function Verify() {
       key: "applicationNumber",
       width: 150,
       render: (text) => text ?? "-",
+      filterDropdown: () => {
+        return (
+          <div style={{ padding: 8 }}>
+            <Input
+              ref={(input) => {
+                applicationNumberInputRef.current = input;
+                // Focus immediately when ref is set (dropdown is visible when ref callback runs)
+                if (input) {
+                  // Use requestAnimationFrame to ensure DOM is ready
+                  requestAnimationFrame(() => {
+                    input.focus();
+                  });
+                }
+              }}
+              placeholder="Search Application Number"
+              prefix={<SearchOutlined />}
+              value={searchApplicationNumber}
+              onChange={(e) => setSearchApplicationNumber(e.target.value)}
+              allowClear
+              style={{ width: 200 }}
+              autoFocus
+            />
+          </div>
+        );
+      },
+      filterIcon: (filtered: boolean) => (
+        <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
+      ),
     },
     {
       title: "Applicant Name",
@@ -133,6 +234,34 @@ export default function Verify() {
       key: "applicantName",
       width: 150,
       render: (text) => text ?? "-",
+      filterDropdown: () => {
+        return (
+          <div style={{ padding: 8 }}>
+            <Input
+              ref={(input) => {
+                applicantNameInputRef.current = input;
+                // Focus immediately when ref is set (dropdown is visible when ref callback runs)
+                if (input) {
+                  // Use requestAnimationFrame to ensure DOM is ready
+                  requestAnimationFrame(() => {
+                    input.focus();
+                  });
+                }
+              }}
+              placeholder="Search Applicant Name"
+              prefix={<SearchOutlined />}
+              value={searchApplicantName}
+              onChange={(e) => setSearchApplicantName(e.target.value)}
+              allowClear
+              style={{ width: 200 }}
+              autoFocus
+            />
+          </div>
+        );
+      },
+      filterIcon: (filtered: boolean) => (
+        <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
+      ),
     },
     {
       title: "Investigations",
@@ -153,18 +282,31 @@ export default function Verify() {
       key: "actions",
       align: "center",
       render: (_, record) => {
-        const statusTags = getStatusTags(record);
-        const hasInvestigations = statusTags && statusTags.props && statusTags.props.children && statusTags.props.children.some((child: any) => child !== null);
+        const enabledStatuses = ["FVCompleted", "Approved", "Rejected"];
+        const verifications = record?.verifications || [];
+        const hasFeSubmission = verifications.some(
+          (v: any) =>
+            v?.initialSubmitted === true ||
+            v?.status === "Completed" ||
+            v?.status === "FVCompleted"
+        );
+
+        const isEnabled =
+          record?.department === "FI"
+            ? hasFeSubmission
+            : hasFeSubmission || enabledStatuses.includes(record?.status ?? "");
+
         return (
           <Button
             type="link"
             icon={<EyeOutlined />}
             onClick={() => {
-              if (hasInvestigations) {
-                record?.id && router?.push?.(`/verify/${record.id}?page=${currentPage}`);
+              if (isEnabled) {
+                record?.id &&
+                  router?.push?.(`/verify/${record.id}?page=${currentPage}`);
               }
             }}
-            disabled={!hasInvestigations}
+            disabled={!isEnabled}
           >
             View
           </Button>
@@ -177,23 +319,42 @@ export default function Verify() {
 
   // Table pagination config
   const paginationConfig =
-    filteredLoans.length >= pageSize
+    paginationMeta.totalPages > 0
       ? {
           current: currentPage,
-          pageSize,
+          pageSize: paginationMeta.limit,
+          total: paginationMeta.total,
           showSizeChanger: false,
-          showTotal: (total: number) => `Total ${total ?? 0} items`,
+          showTotal: (total: number, range: [number, number]) =>
+            `${range[0]}-${range[1]} of ${total} items`,
           position: ["bottomCenter" as "bottomCenter"],
           onChange: (page: number) => {
             setCurrentPage(page);
             // Update query string
-            router.replace({
-              pathname: router.pathname,
-              query: { ...router.query, page },
-            }, undefined, { shallow: true });
+            router.replace(
+              {
+                pathname: router.pathname,
+                query: { ...router.query, page },
+              },
+              undefined,
+              { shallow: true }
+            );
           },
         }
       : false;
+
+  // Reset to first page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+    router.replace(
+      {
+        pathname: router.pathname,
+        query: { ...router.query, page: 1 },
+      },
+      undefined,
+      { shallow: true }
+    );
+  }, [searchApplicationNumber, searchApplicantName]);
 
   return (
     <DashboardLayout>
@@ -201,30 +362,35 @@ export default function Verify() {
         <div
           style={{
             marginTop: 16,
+            marginBottom: 16,
             display: "flex",
             gap: 16,
             alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
           }}
         >
-          {/* <Badge color="green" text="Completed - Positive" /> */}
-          <div style={{ gap: 2 }}>
-            <CheckOutlined style={{ color: "green" }} /> Completed - Positive
-          </div>
-          {/* <Badge color="red" text="Completed - Negative" /> */}
-          <div style={{ gap: 2 }}>
-            <CheckOutlined style={{ color: "red" }} /> Completed - Negative
-          </div>
+          <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+            {/* <Badge color="green" text="Completed - Positive" /> */}
+            <div style={{ gap: 2 }}>
+              <CheckOutlined style={{ color: "green" }} /> Completed - Positive
+            </div>
+            {/* <Badge color="red" text="Completed - Negative" /> */}
+            <div style={{ gap: 2 }}>
+              <CheckOutlined style={{ color: "red" }} /> Completed - Negative
+            </div>
 
-          {/* <Badge color="green" text="Investigations completed" /> */}
-          {/* <Tag color="green">Investigations Completed</Tag> */}
-          {/* <Badge color="orange" text="In Progress" />
-          <Badge color="default" text="Pending" /> */}
+            {/* <Badge color="green" text="Investigations completed" /> */}
+            {/* <Tag color="green">Investigations Completed</Tag> */}
+            {/* <Badge color="orange" text="In Progress" />
+            <Badge color="default" text="Pending" /> */}
+          </div>
         </div>
         <Table
           className="striped-table"
           // rowClassName={(_,index)=>index%2===0?"":"striped-row"}
           columns={columns}
-          dataSource={filteredLoans}
+          dataSource={loans}
           rowKey={(record) =>
             record?.id?.toString() ?? Math.random().toString()
           }

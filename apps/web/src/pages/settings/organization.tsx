@@ -12,18 +12,24 @@ import {
   Tabs,
   Popconfirm,
 } from "antd";
-import { PlusOutlined, EditOutlined } from "@ant-design/icons";
+import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import dayjs from "dayjs";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import axiosInstance from "@/config/axios.config";
 import { ColumnsType } from "antd/es/table";
 import {
   createOfficeApi,
   getOfficesApi,
   getOrganizationApi,
+  getBanksApi,
+  createBankApi,
+  updateBankApi,
+  deleteBankApi,
   Office,
+  Bank,
   updateOfficeApi,
 } from "@/services/settings.services";
-import { getUserDetails } from "@/utils/utility";
+import {  putWithDepartment } from "@/services/api.services";
+import { getUserDetails, getCurrentDepartmentRole, getCurrentDepartment } from "@/utils/utility";
 
 const { TabPane } = Tabs;
 
@@ -43,25 +49,50 @@ interface Organization {
 
 export default function OrganizationSettings() {
   const userDetails = getUserDetails();
-  const isAdmin = userDetails?.role === "Admin";
+  const isAdmin = getCurrentDepartmentRole() === "Admin" ;
+  const currentDepartment = getCurrentDepartment();
+  const isFI = currentDepartment === "FI";
   const [form] = Form.useForm();
   const [officeForm] = Form.useForm();
+  const [bankForm] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [offices, setOffices] = useState<Office[]>([]);
+  const [banks, setBanks] = useState<Bank[]>([]);
   const [organization, setOrganization] = useState<Organization>({
     id: 1,
     name: "Loan Verification System",
     description: "Organization description",
   });
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isBankModalVisible, setIsBankModalVisible] = useState(false);
   const [editingOffice, setEditingOffice] = useState<Office | null>(null);
+  const [editingBank, setEditingBank] = useState<Bank | null>(null);
+
+  useEffect(() => {
+    if (isModalVisible) {
+      if (editingOffice) {
+        officeForm.setFieldsValue({
+          name: editingOffice.name,
+          location: editingOffice.location,
+          address: editingOffice.address,
+        });
+      } else {
+        officeForm.resetFields();
+      }
+    }
+  }, [isModalVisible, editingOffice, officeForm]);
 
   useEffect(() => {
     const fetchOrganization = async () => {
       try {
         const result = await getOrganizationApi();
-        setOrganization(result.data);
-        form.setFieldsValue(result.data);
+        const apiData = result?.data?.data ?? result?.data
+        if (typeof apiData === "number") {
+          setOrganization((prev) => ({ ...prev, id: apiData }));
+        } else if (apiData) {
+          setOrganization(apiData);
+          form.setFieldsValue(apiData);
+        }
       } catch (error) {
         console.error("Fetch organization error:", error);
         // message.error("Failed to load organization details");
@@ -84,14 +115,38 @@ export default function OrganizationSettings() {
     fetchOffices();
   }, []);
 
+
+  const fetchBanks = async () => {
+    try {
+      const result = await getBanksApi();
+      setBanks(result?.data?.data ?? []);
+    } catch (error) {
+      console.error("Fetch banks error:", error);
+    }
+  };
+  useEffect(() => {
+    if (isFI) {
+      fetchBanks();
+    }
+  }, [isFI]);
+
   const handleOrganizationUpdate = async (values: any) => {
     try {
       setLoading(true);
-      await axiosInstance.put(
-        `/accounts/organization/${organization.id}`,
-        values
-      );
-      setOrganization({ ...organization, ...values });
+      let orgId = organization?.id;
+      if (!orgId) {
+        const res = await getOrganizationApi();
+        const apiData = res?.data?.data ?? res?.data;
+        orgId = typeof apiData === "number" ? apiData : apiData?.id;
+        console.log(orgId);
+      }
+
+      if (!orgId) {
+        throw new Error("Organization id not found");
+      }
+
+      await putWithDepartment(`/accounts/organization/${orgId}`, values);
+      setOrganization({ ...organization, ...values, id: orgId });
       message.success("Organization details updated successfully");
     } catch (error) {
       message.error("Failed to update organization details");
@@ -122,6 +177,64 @@ export default function OrganizationSettings() {
     } catch (error) {
       console.error("Failed to save Branch:", error);
       message.error("Failed to save Branch");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateBank = async (values: any) => {
+    try {
+      setLoading(true);
+      await createBankApi(values);
+      message.success("Bank created successfully");
+      setIsBankModalVisible(false);
+      bankForm.resetFields();
+      fetchBanks();
+    } catch (error) {
+      message.error("Failed to create bank");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBankSubmit = async (values: any) => {
+    try {
+      setLoading(true);
+
+      if (editingBank) {
+        await updateBankApi(editingBank.id, values);
+        fetchBanks();
+        message.success("Bank updated successfully");
+      } else {
+        await createBankApi(values);
+        fetchBanks();
+        message.success("Bank created successfully");
+      }
+
+      setIsBankModalVisible(false);
+      bankForm.resetFields();
+      setEditingBank(null);
+    } catch (error) {
+      message.error(`Failed to ${editingBank ? 'update' : 'create'} bank`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditBank = (bank: Bank) => {
+    setEditingBank(bank);
+    bankForm.setFieldsValue(bank);
+    setIsBankModalVisible(true);
+  };
+
+  const handleDeleteBank = async (id: number) => {
+    try {
+      setLoading(true);
+      await deleteBankApi(id);
+      fetchBanks();
+      message.success("Bank deleted successfully");
+    } catch (error) {
+      message.error("Failed to delete bank");
     } finally {
       setLoading(false);
     }
@@ -171,8 +284,13 @@ export default function OrganizationSettings() {
     },
     {
       title: "No. of Employees",
-      dataIndex: "employees",
-      key: "employees",
+      dataIndex: "numberofEmployees",
+      key: "numberofEmployees",
+      sorter: (a: any, b: any) => {
+        const aValue = a.numberofEmployees ?? 0;
+        const bValue = b.numberofEmployees ?? 0;
+        return aValue - bValue;
+      },
       render: (value: number | undefined) => value ?? 0,
       width: 150,
     },
@@ -191,6 +309,81 @@ export default function OrganizationSettings() {
                 >
                   Edit
                 </Button>
+              </Space>
+            ),
+            width: 100,
+            fixed: "right",
+          },
+        ]
+      : []),
+  ];
+
+  const bankColumns: any[] = [
+    {
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
+      width: 170,
+    },
+    {
+      title: "Parent Company",
+      dataIndex: "parent",
+      key: "parent",
+      width: 170,
+    },
+    // {
+    //   title: "Logo",
+    //   dataIndex: "logo",
+    //   key: "logo",
+    //   width: 170,
+    //   render: (logo: string | null) => 
+    //     logo ? (
+    //       <img 
+    //         src={logo} 
+    //         alt="Bank Logo" 
+    //         style={{ width: 50, height: 50, objectFit: "contain" }} 
+    //       />
+    //     ) : (
+    //       <span style={{ color: "#999" }}>No Logo</span>
+    //     ),
+    // },
+        {
+      title: "Created At",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      width: 200,
+      render: (value: string) => dayjs(value).format("DD/MM/YYYY HH:mm:ss"),
+      sorter: (a: Bank, b: Bank) => dayjs(b.createdAt).valueOf() - dayjs(a.createdAt).valueOf(),
+    },
+    ...(isAdmin
+      ? [
+          {
+            title: "Actions",
+            key: "actions",
+            align: "center",
+            render: (_: any, record: Bank) => (
+              <Space>
+                <Button
+                  type="link"
+                  icon={<EditOutlined />}
+                  onClick={() => handleEditBank(record)}
+                >
+                  Edit
+                </Button>
+                <Popconfirm
+                  title="Are you sure you want to delete this bank?"
+                  onConfirm={() => handleDeleteBank(record.id)}
+                  okText="Yes"
+                  cancelText="No"
+                >
+                  <Button
+                    type="link"
+                    danger
+                    icon={<DeleteOutlined />}
+                  >
+                    Delete
+                  </Button>
+                </Popconfirm>
               </Space>
             ),
             width: 100,
@@ -223,11 +416,6 @@ export default function OrganizationSettings() {
                         : Promise.resolve(),
                   },
                 ]}
-                // normalize={(value) =>
-                //   typeof value === "string"
-                //     ? value.trim().replace(/\s{2,}/g, " ")
-                //     : value
-                // }
               >
                 <Input
                   onBlur={(e) => {
@@ -289,6 +477,39 @@ export default function OrganizationSettings() {
             />
           </Card>
         </TabPane>
+
+                 {isFI && (
+          <TabPane tab="Banks" key="3">
+            <Card>
+              {isAdmin && (
+                <div style={{ marginBottom: 16 }} className="flex-end">
+                                <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => {
+                  setEditingBank(null);
+                  bankForm.resetFields();
+                  setIsBankModalVisible(true);
+                }}
+              >
+                Add Bank
+              </Button>
+                </div>
+              )}
+
+              <Table
+                className="striped-table"
+                columns={bankColumns}
+                dataSource={banks}
+                rowKey="id"
+                loading={loading}
+                scroll={{ y: 400 }}
+                bordered
+                pagination={banks.length < 10 ? false : undefined}
+              />
+            </Card>
+          </TabPane>
+        )}
       </Tabs>
 
       <Modal
@@ -304,11 +525,6 @@ export default function OrganizationSettings() {
         <Form
           form={officeForm}
           layout="vertical"
-          initialValues={{
-            name: editingOffice?.name,
-            location: editingOffice?.location,
-            address: editingOffice?.address,
-          }}
           onFinish={handleOfficeSubmit}
         >
           <Form.Item
@@ -346,7 +562,7 @@ export default function OrganizationSettings() {
           >
             <Input
               onBlur={(e) => {
-                e.target.value = e.target.value.trim(); // or just .trim() to remove both ends
+                e.target.value = e.target.value.trim();
               }}
             />
           </Form.Item>
@@ -376,7 +592,7 @@ export default function OrganizationSettings() {
             </Space>
           </Form.Item>
 
-          {!editingOffice?.archived && (
+          {editingOffice && !editingOffice?.archived && (
             <div style={{ marginTop: 8 }}>
               <Popconfirm
                 title="Are you sure you want to archive this office?"
@@ -387,7 +603,6 @@ export default function OrganizationSettings() {
                   setEditingOffice(null);
                   officeForm.resetFields();
                   setLoading(false);
-                  // message.success("Branch deleted");
                 }}
                 onCancel={() => {}}
                 okText="Yes"
@@ -397,10 +612,10 @@ export default function OrganizationSettings() {
               </Popconfirm>
             </div>
           )}
-          {editingOffice?.archived && (
+          {editingOffice && editingOffice?.archived && (
             <div style={{ marginTop: 8 }}>
               <Popconfirm
-                title="Are you sure you want to archive this office?"
+                title="Are you sure you want to unarchive this office?"
                 onConfirm={async () => {
                   setLoading(true);
                   handleArchive(editingOffice?.id, false);
@@ -408,7 +623,6 @@ export default function OrganizationSettings() {
                   setEditingOffice(null);
                   officeForm.resetFields();
                   setLoading(false);
-                  // message.success("Branch deleted");
                 }}
                 onCancel={() => {}}
                 okText="Yes"
@@ -418,6 +632,86 @@ export default function OrganizationSettings() {
               </Popconfirm>
             </div>
           )}
+        </Form>
+      </Modal>
+
+      <Modal
+        title={editingBank ? "Edit Bank" : "Add Bank"}
+        open={isBankModalVisible}
+        centered
+        onCancel={() => {
+          setIsBankModalVisible(false);
+          setEditingBank(null);
+          bankForm.resetFields();
+        }}
+        footer={null}
+      >
+        <Form
+          form={bankForm}
+          layout="vertical"
+          onFinish={handleBankSubmit}
+          initialValues={{ logo: undefined, parent: undefined }}
+        >
+          <Form.Item
+            name="name"
+            label="Bank Name"
+            rules={[
+              { required: true, message: "Please enter bank name" },
+              {
+                validator: (_, value) =>
+                  value && /^\s/.test(value)
+                    ? Promise.reject(new Error("Can't start with a space"))
+                    : Promise.resolve(),
+              },
+            ]}
+          >
+            <Input
+              onBlur={(e) => {
+                e.target.value = e.target.value.trim();
+              }}
+            />
+          </Form.Item>
+
+          {/* <Form.Item name="logo" label="Logo URL">
+            <Input />
+          </Form.Item> */}
+
+          <Form.Item 
+            name="parent" 
+            label="Parent Company"
+            rules={[
+              {
+                validator: (_, value) =>
+                  value && /^\s/.test(value)
+                    ? Promise.reject(new Error("Can't start with a space"))
+                    : Promise.resolve(),
+              },
+    
+            ]}
+          >
+            <Input
+              onBlur={(e) => {
+                e.target.value = e.target.value.trim();
+              }}
+            />
+          </Form.Item>
+
+          <Form.Item>
+            <Space>
+              <Button type="primary" htmlType="submit" loading={loading}>
+                {editingBank ? "Update" : "Add"} Bank
+              </Button>
+              <Button
+                onClick={() => {
+                  setIsBankModalVisible(false);
+                  setEditingBank(null);
+                  bankForm.resetFields();
+                }}
+              >
+                Cancel
+              </Button>
+            </Space>
+          </Form.Item>
         </Form>
       </Modal>
     </DashboardLayout>

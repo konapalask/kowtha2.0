@@ -25,6 +25,8 @@ import Toast from 'react-native-toast-message';
 import loginBackground from '../assets/Images/loginBackground.jpg';
 import DeviceInfo from 'react-native-device-info';
 import {getUserDetailsApi} from '../services/user.services';
+import {useUser} from '../contexts/UserContext';
+import {OtpInput} from 'react-native-otp-entry';
 // import {get} from 'http';
 // import {REACT_APP_BASE_URL} from '@env';
 
@@ -41,8 +43,10 @@ const getDeviceId = async () => {
 
 const LoginScreen = () => {
   const navigation = useNavigation<LoginScreenNavigationProp>();
+  const {refreshUserDetails} = useUser();
+  // DEV MODE: Pre-fill credentials for faster testing
   const [mobileNumber, setMobileNumber] = useState('');
-  const [otp, setOtp] = useState('');
+  const [otp, setOtp] = useState(__DEV__ ? '122446' : '');
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [loading, setLoading] = useState(false);
   // console.log('REACT_APP_BASE_URL', REACT_APP_BASE_URL);
@@ -83,8 +87,9 @@ const LoginScreen = () => {
     }
   };
 
-  const handleVerifyOtp = async () => {
-    if (otp.length !== 6) {
+  const handleVerifyOtp = async (otpValue?: string) => {
+    const otpToVerify = otpValue || otp;
+    if (otpToVerify.length !== 6) {
       Alert.alert('Error', 'Please enter a valid 6-digit OTP');
       return;
     }
@@ -92,26 +97,42 @@ const LoginScreen = () => {
     try {
       const deviceId = await getDeviceId();
       setLoading(true);
-      const response = await verifyOTP(mobileNumber, otp, deviceId);
+      const response = await verifyOTP(mobileNumber, otpToVerify, deviceId);
       // Store the tokens
       await setItem('accessToken', response?.accessToken);
       await setItem('refreshToken', response?.refreshToken);
 
-      // Request all permissions after successful login
-      await requestAllPermissions();
+      // Fetch user details BEFORE navigation
+      try {
+        const userDetails = await getUserDetailsApi();
+        // console.log(userDetails);
+        await setItem('userDetails', userDetails?.data);
+
+        // Refresh user context with new details
+        await refreshUserDetails();
+      } catch (error) {
+        console.log('Error fetching user details:', error);
+        Alert.alert(
+          'Error',
+          'Failed to load user details. Please try logging in again.',
+        );
+        setLoading(false);
+        return;
+      }
+
+      // Navigate first so UI never hangs on permission prompts
+      setLoading(false);
       navigation.dispatch(
         CommonActions.reset({
           index: 0,
           routes: [{name: 'VerificationList'}],
         }),
       );
-      try {
-        const userDetails = await getUserDetailsApi();
-        // console.log(userDetails);
-        await setItem('userDetails', userDetails?.data);
-      } catch (error) {
-        console.log(error);
-      }
+
+      // Fire-and-forget permissions to avoid blocking UX
+      requestAllPermissions().catch(err => {
+        console.warn('Permissions request failed:', err);
+      });
     } catch (error: any) {
       if (mobileNumber === '1234567890' && otp === '123456') {
         await setItem('testUser', true);
@@ -190,25 +211,49 @@ const LoginScreen = () => {
             </TouchableOpacity>
           ) : (
             <>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter OTP"
-                value={otp}
-                onChangeText={(value: string) => {
-                  // Only accept numeric input
-                  if (/^\d*$/.test(value)) {
-                    setOtp(value);
+              <View style={styles.otpContainer}>
+                <OtpInput
+                  numberOfDigits={6}
+                  onTextChange={(text: string) => {
+                    setOtp(text);
+                  }}
+                  onFilled={(text: string) => {
+                    setOtp(text);
+                    // Auto-verify when OTP is filled - pass text directly to avoid race condition
+                    if (text.length === 6) {
+                      handleVerifyOtp(text);
                   }
                 }}
-                keyboardType="numeric"
-                maxLength={6}
-                placeholderTextColor={'#c8c8c8'}
-                editable={!loading}
-              />
+                  theme={{
+                    containerStyle: {
+                      gap: 8,
+                    },
+                    pinCodeContainerStyle: {
+                      backgroundColor: colors.input.background,
+                      borderColor: colors.input.border,
+                      borderWidth: 1,
+                      borderRadius: 8,
+                      width: 45,
+                      height: 50,
+                    },
+                    focusedPinCodeContainerStyle: {
+                      borderColor: colors.button.primary.background,
+                      borderWidth: 2,
+                    },
+                    pinCodeTextStyle: {
+                      color: colors.input.text,
+                      fontSize: 18,
+                      fontWeight: 'bold',
+                    },
+                  }}
+                  disabled={loading}
+                  autoFocus
+                />
+              </View>
               <TouchableOpacity
                 style={[styles.button, loading && styles.disabledButton]}
-                onPress={handleVerifyOtp}
-                disabled={loading}>
+                onPress={() => handleVerifyOtp()}
+                disabled={loading || otp.length !== 6}>
                 {loading ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
@@ -271,6 +316,9 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     color: colors.input.text,
     backgroundColor: colors.input.background,
+  },
+  otpContainer: {
+    marginBottom: 20,
   },
   button: {
     backgroundColor: colors.button.primary.background,

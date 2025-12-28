@@ -27,8 +27,9 @@ export class CreateLambdaLoanDto {
   @IsString()
   bankName: string;
 
-  @ApiProperty({ description: 'Loan amount' })
+  @ApiProperty({ description: 'Loan amount', required: false })
   @IsNumber()
-  loanAmount: number;
+  @IsOptional()
+  loanAmount?: number;
 
 }

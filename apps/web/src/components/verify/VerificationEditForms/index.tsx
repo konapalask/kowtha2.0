@@ -74,5 +74,5 @@ export { default as ResidenceDetailsForm } from "./ResidenceDetailsForm";
 export { default as FamilyEmploymentDetailsForm } from "./FamilyEmploymentDetailsForm";
 export { default as AddressVerificationForm } from "./AddressVerificationForm";
 export { default as ThirdPartyCheckForm } from "./ThirdPartyCheckForm";
-export { default as FinalObservationsForm } from "./FinalObservationsForm";
+// export { default as FinalObservationsForm } from "./FinalObservationsForm";
 export { default as OfficeVerificationForm } from "./OfficeVerificationForm";

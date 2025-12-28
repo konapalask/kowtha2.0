@@ -1,7 +1,12 @@
 import axiosInstance from "@/config/axios.config";
+import {
+  getWithDepartment,
+  postWithDepartment,
+  patchWithDepartment,
+} from "./api.services";
 
 export const getVerificationData = async (id: string) => {
-  const response = await axiosInstance.get(`/loans/${id}/verification-data`);
+  const response = await getWithDepartment(`/loans/${id}/verification-data`);
   return response.data;
 };
 
@@ -10,9 +15,10 @@ export const generatePreviewReport = async (
   type: string,
   status: string | null
 ) => {
-  const response = await axiosInstance.get(
-    `/loans/${id}/preview-final-report?type=${type}&status=${status}`,
+  const response = await getWithDepartment(
+    `/loans/${id}/preview-final-report`,
     {
+      params: { type, status },
       responseType: "blob",
       headers: {
         Accept: "application/pdf",
@@ -23,7 +29,9 @@ export const generatePreviewReport = async (
 };
 
 export const generateFinalReport = (id: string, type: string) => {
-  return axiosInstance.get(`/loans/${id}/generate-final-report?type=${type}`);
+  return getWithDepartment(`/loans/${id}/generate-final-report`, {
+    params: { type },
+  });
 };
 
 export const verifierEditApi = async (
@@ -31,7 +39,7 @@ export const verifierEditApi = async (
   verificationType: string,
   payload: any
 ) => {
-  return await axiosInstance.patch(
+  return await patchWithDepartment(
     `/loans/${id}/verification/${verificationType}`,
     payload
   );
@@ -39,29 +47,39 @@ export const verifierEditApi = async (
 
 export const getPresignedDownloadUrl = async (path: string) => {
   console.log(path);
-  return await axiosInstance.get(`/s3/presigned-download-url`);
+  return await getWithDepartment(`/s3/presigned-download-url`);
+};
+
+export const getPresignedUploadUrl = async (path: string, contentType: string) => {
+  const response = await postWithDepartment(`/s3/presigned-upload-url`, {
+    path,
+    contentType,
+  });
+  return response.data;
 };
 
 export const getEditRequestsApi = async (status: string, loanId: string) => {
-  return await axiosInstance.get(
-    `/edit-requests?status=${status}&loanId=${loanId}`
-  );
+  return await getWithDepartment(`/edit-requests`, {
+    params: { status, loanId },
+  });
 };
 
 export const getEditRequestsById = async (id: string) => {
-  return await axiosInstance.get(`/edit-requests/${id}`);
+  return await getWithDepartment(`/edit-requests/${id}`);
 };
 
 export const postEditRequestApi = async (payload: any) => {
-  return await axiosInstance.post(`/edit-requests`, payload);
+  return await postWithDepartment(`/edit-requests`, payload);
 };
 
 export const updateEditRequestApi = async (id: string, payload: any) => {
-  return await axiosInstance.patch(`/edit-requests/${id}/update`, payload);
+  return await patchWithDepartment(`/edit-requests/${id}/update`, payload);
 };
 
 export const getAllEditRequestsApi = async () => {
-  return await axiosInstance.get(`/edit-requests?status=Pending`);
+  return await getWithDepartment(`/edit-requests`, {
+    params: { status: "Pending" },
+  });
 };
 
 // export const editRequestApproveApi = async (id: string, payload: any) => {
@@ -69,7 +87,7 @@ export const getAllEditRequestsApi = async () => {
 // };
 
 export const loanApproveRejectApi = async (id: string, payload: any) => {
-  return await axiosInstance.post(`/loans/${id}/verify`, payload);
+  return await postWithDepartment(`/loans/${id}/verify`, payload);
 };
 
 export const patchFinalVerdict = async (
@@ -77,8 +95,52 @@ export const patchFinalVerdict = async (
   type: string,
   payload: any
 ) => {
-  return await axiosInstance.patch(
+  return await patchWithDepartment(
     `/loans/${id}/verification/${type}/approve`,
     payload
   );
+};
+
+export const submitFinancialAnalysis = async (id: string, payload: any) => {
+  return await postWithDepartment(
+    `/loans/verification/${id}/financial-analysis`,
+    payload,
+    { params: { department: "PD" } }
+  );
+};
+
+export const updateFinancialAnalysis = async (id: string, payload: any) => {
+  return await patchWithDepartment(
+    `/loans/verification/${id}/financial-analysis`,
+    payload,
+    { params: { department: "PD" } }
+  );
+};
+
+export const updateSynopsis = async (id: string, synopsis: string) => {
+  return await patchWithDepartment(
+    `/loans/verification/${id}/financial-analysis`,
+    { synopsis },
+    { params: { department: "PD" } }
+  );
+};
+
+export const asstVerifierSubmitApi = async (id: string, payload: any) => {
+  return await postWithDepartment(
+    `/loans/${id}/submit-verification-executive`,
+    payload
+  );
+};
+
+export const exportFinancialAnalysis = async (id: string) => {
+  const response = await getWithDepartment(
+    `/loans/${id}/export-financial-analysis`,
+    {
+      responseType: "blob",
+      headers: {
+        Accept: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      },
+    }
+  );
+  return response.data;
 };

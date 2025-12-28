@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsOptional, IsBoolean } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsBoolean, IsDateString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class EditLoanDto {
@@ -51,4 +51,14 @@ export class EditLoanDto {
   @IsNumber()
   @IsOptional()
   loanAmount?: number;
+
+  @ApiProperty({ description: 'Template name', required: false })
+  @IsString()
+  @IsOptional()
+  templateName?: string;
+
+  @ApiProperty({ description: 'Date and time when the loan was closed', required: false, type: 'string', format: 'date-time' })
+  @IsDateString()
+  @IsOptional()
+  closedAt?: string;
 } 

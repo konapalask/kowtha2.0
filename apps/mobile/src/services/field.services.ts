@@ -4,8 +4,9 @@ export const getFieldData = async (
   page: number,
   status: string,
   applicationNumber?: string,
+  dept?: string,
 ) => {
-  let url = `/loans/field-executive/assigned?page=${page}&status=${status}`;
+  let url = `/loans/field-executive/assigned?page=${page}&status=${status}&department=${dept}`;
   if (applicationNumber) {
     url += `&applicationNumber=${encodeURIComponent(applicationNumber)}`;
   }
@@ -13,11 +14,18 @@ export const getFieldData = async (
 };
 
 export const getUserDetails = async () => {
-  return axiosInstance.get('/accounts/profile');
+  return axiosInstance.get(`/accounts/profile`);
 };
 
-export const submitVerification = async (data: any, id: string) => {
-  return axiosInstance.patch(`/loans/${id}/submit-verification-report`, data);
+export const submitVerification = async (
+  data: any,
+  id: string,
+  department?: string,
+) => {
+  return axiosInstance.patch(
+    `/loans/${id}/submit-verification-report?department=${department}`,
+    data,
+  );
 };
 
 export const getPresignedUrl = async (id: string) => {
@@ -50,6 +58,20 @@ export const uploadImageToS3 = async (
   });
 };
 
-export const verificationRetryApi = async (payload: any) => {
-  return axiosInstance.post(`/loans/verification-retry`, payload);
+export const verificationRetryApi = async (
+  payload: any,
+  department?: string,
+) => {
+  return axiosInstance.post(
+    `/loans/verification-retry?department=${department}`,
+    payload,
+  );
+};
+
+export const getPDSchema = async (templateName: string) => {
+  return axiosInstance.get(
+    `/loans/get-bank-forms?bankName=${encodeURIComponent(
+      templateName,
+    )}&department=PD`,
+  );
 };

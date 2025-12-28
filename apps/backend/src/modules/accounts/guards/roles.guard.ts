@@ -1,7 +1,7 @@
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { UserRole, Department } from '@prisma/client';
-import { ROLES_KEY } from '../decorators/roles.decorator';
+import { ROLES_KEY, All, PD } from '../decorators/roles.decorator';
 
 export interface RoleRequirement {
   role: UserRole;
@@ -14,7 +14,7 @@ export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const requiredRoles = this.reflector.getAllAndOverride<(UserRole | RoleRequirement)[]>(ROLES_KEY, [
+    const requiredRoles = this.reflector.getAllAndOverride<(UserRole | RoleRequirement | typeof All | typeof PD)[]>(ROLES_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
@@ -30,21 +30,24 @@ export class RolesGuard implements CanActivate {
     }
 
     // Admins can access everything
-    if (user.departmentRoles?.some((dr: any) => dr.role === UserRole.Admin)) {
+    if (user.departmentRoles?.find((dr: any) => dr.department === departmentFromQuery && dr.role === UserRole.Admin)) {
       return true;
     }
 
-    const normalizedRequirements: RoleRequirement[] = requiredRoles.map(role => {
-      if (typeof role === 'string') {
-        return { role: role as UserRole };
+    // Check for special role requirements
+    return requiredRoles.some(role => {
+      // Handle 'All' - allows any role
+      if (role === All) {
+        return user.departmentRoles && user.departmentRoles.length > 0;
       }
-      return role as RoleRequirement;
-    });
 
-    // Only allow if user has required role for department in query
-    return normalizedRequirements.some(requirement => {
+      // Handle regular role requirements
+      const normalizedRequirement: RoleRequirement = typeof role === 'string' 
+        ? { role: role as UserRole } 
+        : role as RoleRequirement;
+
       return user.departmentRoles?.some((dr: any) => {
-        return dr.role === requirement.role && dr.department === departmentFromQuery;
+        return dr.role === normalizedRequirement.role && dr.department === departmentFromQuery;
       });
     });
   }

@@ -27,7 +27,10 @@ const BusinessBasicDetails: React.FC<{ form: any }> = ({ form }) => {
   const isAddressSame = Form.useWatch("isAddressSame", form);
   const isBusinessNameSame = Form.useWatch("isBusinessNameSame", form);
   const isApplicantAvailable = Form.useWatch("isApplicantAvailable", form);
-  const availablePersonRelation = Form.useWatch("availablePersonRelation", form);
+  const availablePersonRelation = Form.useWatch(
+    "availablePersonRelation",
+    form
+  );
 
   return (
     <>
@@ -149,7 +152,12 @@ const BusinessBasicDetails: React.FC<{ form: any }> = ({ form }) => {
         <Form.Item
           name="isApplicantAvailable"
           label="Is Applicant Available"
-          rules={[{ required: true, message: "Please select if applicant is available" }]}
+          rules={[
+            {
+              required: true,
+              message: "Please select if applicant is available",
+            },
+          ]}
         >
           <Select placeholder="Select">
             <Select.Option value="Yes">Yes</Select.Option>
@@ -163,7 +171,12 @@ const BusinessBasicDetails: React.FC<{ form: any }> = ({ form }) => {
             <Form.Item
               name="availablePersonName"
               label="Name of the person met"
-              rules={[{ required: true, message: "Please enter the name of the person met" }]}
+              rules={[
+                {
+                  required: true,
+                  message: "Please enter the name of the person met",
+                },
+              ]}
             >
               <Input placeholder="Enter name of the person met" />
             </Form.Item>
@@ -174,7 +187,10 @@ const BusinessBasicDetails: React.FC<{ form: any }> = ({ form }) => {
               label="Contact Number"
               rules={[
                 { required: true, message: "Please enter contact number" },
-                { pattern: /^\d{10}$/, message: "Please enter a valid 10-digit mobile number" },
+                {
+                  pattern: /^\d{10}$/,
+                  message: "Please enter a valid 10-digit mobile number",
+                },
               ]}
             >
               <Input maxLength={10} placeholder="Enter contact number" />
@@ -201,7 +217,9 @@ const BusinessBasicDetails: React.FC<{ form: any }> = ({ form }) => {
               <Form.Item
                 name="availablePersonRelationOther"
                 label="Specify Relation"
-                rules={[{ required: true, message: "Please specify the relation" }]}
+                rules={[
+                  { required: true, message: "Please specify the relation" },
+                ]}
               >
                 <Input placeholder="Specify relation to applicant" />
               </Form.Item>

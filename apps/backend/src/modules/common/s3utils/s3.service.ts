@@ -253,17 +253,47 @@ export class S3Service {
       ctx.drawImage(img, 0, 0, preferredWidth, preferredHeight);
 
       // Prepare text
-      let address = ''; // or fetch via getAddressFromLatLon() 
-      if(latitude && longitude) {
+      // Validate latitude and longitude are valid numbers
+      const isValidLat = latitude !== null && latitude !== undefined && !Number.isNaN(latitude) && Number.isFinite(latitude);
+      const isValidLng = longitude !== null && longitude !== undefined && !Number.isNaN(longitude) && Number.isFinite(longitude);
+      
+      let address = '';
+      if (isValidLat && isValidLng) {
         address = await this.getAddressFromLatLon(latitude, longitude);
         address = await this.cleanAddress(address);
       }
-      const latlonText = `Lat: ${latitude.toFixed(6)}   Lon: ${longitude.toFixed(6)}`;
+      
+      const latlonText = isValidLat && isValidLng 
+        ? `Lat: ${latitude.toFixed(6)}   Lon: ${longitude.toFixed(6)}`
+        : 'Lat: Not Available   Lon: Not Available';
       ctx.font = '20px Arial';
       const maxTextWidth = preferredWidth - 80;
       const addressLines = await this.wrapText(ctx, address, maxTextWidth);
-      // const now = new Date();
-      // const timestamp = now.toLocaleString('en-GB', { hour12: true, timeZone: 'Asia/Kolkata' }) + ' IST';
+      
+      // Format timestamp in IST if it's an ISO string or Date object
+      let formattedTimestamp = timestamp;
+      if (timestamp) {
+        try {
+          // Try to parse as ISO string or Date
+          const dateObj = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
+          if (!Number.isNaN(dateObj.getTime())) {
+            // Format in IST timezone
+            formattedTimestamp = dateObj.toLocaleString('en-GB', {
+              timeZone: 'Asia/Kolkata',
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+              hour12: true
+            }) + ' IST';
+          }
+        } catch (e) {
+          // If parsing fails, use timestamp as-is
+          formattedTimestamp = timestamp;
+        }
+      }
     
       // Position text
       const lineSpacing = 15;
@@ -290,7 +320,7 @@ export class S3Service {
         ctx.fillText(line, x, currentY + 20);
         currentY += 20 + lineSpacing;
       }
-      ctx.fillText(timestamp, x, currentY + 20);
+      ctx.fillText(formattedTimestamp, x, currentY + 20);
     
       // Convert canvas to buffer
       const jpegBuffer = canvas.toBuffer('image/jpeg');
@@ -317,4 +347,10 @@ export class S3Service {
       throw error;
     }
   }
+}
+
+// Export standalone function for worker threads
+export async function processAndUploadImage(s3ImageUrl: string, latitude: number, longitude: number, timestamp: string): Promise<string> {
+  const s3Service = new S3Service(new LoggingService());
+  return s3Service.processAndUploadImage(s3ImageUrl, latitude, longitude, timestamp);
 } 

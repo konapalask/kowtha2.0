@@ -18,7 +18,7 @@ const { RangePicker } = DatePicker;
 interface FilterOption {
   key: string;
   label: string;
-  type: "status" | "applicationNumber" | "assignee" | "dateRange";
+  type: "status" | "applicationNumber" | "assignee" | "dateRange" | "text" | "select";
 }
 
 const filterOptions: FilterOption[] = [
@@ -32,11 +32,27 @@ const filterOptions: FilterOption[] = [
   { key: "dateRange", label: "Date Range", type: "dateRange" },
 ];
 
+// PD-specific filter options
+const pdFilterOptions: FilterOption[] = [
+  { key: "status", label: "Status", type: "status" },
+  {
+    key: "applicationNumber",
+    label: "Application Number",
+    type: "applicationNumber",
+  },
+  { key: "applicantName", label: "Applicant Name", type: "text" },
+  { key: "applicantMobile", label: "Mobile", type: "text" },
+  { key: "bankName", label: "Bank Name", type: "select" },
+  { key: "assignee", label: "Assignee", type: "assignee" },
+  { key: "dateRange", label: "Date Range", type: "dateRange" },
+];
+
 const statusOptions = [
   { label: "Unassigned", value: "Unassigned" },
   { label: "Assigned", value: "Assigned" },
   // { label: 'UnderFV', value: 'UnderFV' },
   { label: "FVCompleted", value: "FVCompleted" },
+  { label: "Appointment Postponed", value: "Appointment Postponed" },
   // { label: 'Approved', value: 'Approved' },
   // { label: 'Rejected', value: 'Rejected' },
 ];
@@ -48,21 +64,39 @@ export interface FilterValue {
   fieldExecutiveName?: string;
   startDate?: string;
   endDate?: string;
+  // PD-specific filters
+  applicantName?: string;
+  applicantMobile?: string;
+  bankName?: string;
+  templateName?: string;
+  businessStatus?: string;
+  postponed?: boolean;
 }
 
 interface FilterOverlayProps {
   filters: FilterValue;
   onFilterChange: (newFilters: FilterValue) => void;
+  currentDepartment?: string;
+  pdBankOptions?: Array<{ label: string; value: string }>;
+  templateOptions?: Array<{ label: string; value: string }>;
 }
 
 const FilterOverlay: React.FC<FilterOverlayProps> = ({
   filters,
   onFilterChange,
+  currentDepartment,
+  pdBankOptions = [],
+  templateOptions = [],
 }) => {
+  // Use PD-specific filters if department is PD
+  const availableFilterOptions = currentDepartment === "PD" ? pdFilterOptions : filterOptions;
   const [selectedFilters, setSelectedFilters] = useState<string[]>(
     Object.keys(filters).filter(
-      (key) => filters[key as keyof FilterValue] !== undefined
-    )
+      (key) => {
+        const value = filters[key as keyof FilterValue];
+        return value !== undefined && value !== "";
+      }
+    ).map(key => key === "postponed" ? "status" : key)
   );
   const [isOpen, setIsOpen] = useState(false);
 
@@ -77,6 +111,7 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({
           onFilterChange({
             ...filters,
             status: undefined,
+            postponed: undefined,
           });
           break;
         case "applicationNumber":
@@ -91,6 +126,30 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({
             fieldExecutiveEmployeeCode: undefined,
             fieldExecutiveName: undefined,
           });
+          break;
+        case "applicantName":
+          onFilterChange({
+            ...filters,
+            applicantName: undefined,
+          });
+          break;
+        case "applicantMobile":
+          onFilterChange({
+            ...filters,
+            applicantMobile: undefined,
+          });
+          break;
+        case "bankName":
+          onFilterChange({
+            ...filters,
+            bankName: undefined,
+          });
+          break;
+        case "dateRange":
+          const newFilters = { ...filters };
+          delete newFilters.startDate;
+          delete newFilters.endDate;
+          onFilterChange(newFilters);
           break;
       }
     }
@@ -109,6 +168,10 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({
   const handleClearFilter = (key: keyof FilterValue) => {
     const newFilters = { ...filters };
     delete newFilters[key];
+    // If clearing status, also clear postponed
+    if (key === "status") {
+      delete newFilters.postponed;
+    }
     onFilterChange(newFilters);
     setSelectedFilters((prev) => prev.filter((k) => k !== key));
   };
@@ -151,23 +214,29 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({
       case "status":
         return (
           <Space direction="vertical">
-            {/* {statusOptions.map(status => (
-              <Radio
-                key={status.value}
-                checked={filters.status === status.value}
-                onChange={(e) => handleFilterValueChange('status', e.target.checked ? status.value : undefined)}
-              >
-                {status.label}
-              </Radio>
-            ))} */}
             <Select
               style={{ minWidth: 200 }}
               options={statusOptions}
-              value={filters.status}
-              onSelect={(value: string) =>
-                handleFilterValueChange("status", value)
-              }
+              value={filters.status || (filters.postponed ? "Appointment Postponed" : undefined)}
+              onChange={(value: string | null) => {
+                if (value === "Appointment Postponed") {
+                  // When Appointment Postponed is selected, set postponed=true and clear status
+                  onFilterChange({
+                    ...filters,
+                    postponed: true,
+                    status: undefined,
+                  });
+                } else {
+                  // When any other status is selected or cleared, clear postponed and set status
+                  onFilterChange({
+                    ...filters,
+                    postponed: undefined,
+                    status: value || undefined,
+                  });
+                }
+              }}
               placeholder="Select Status"
+              allowClear
             />
           </Space>
         );
@@ -182,6 +251,52 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({
             style={{ width: 200 }}
           />
         );
+      case "text":
+        if (option.key === "applicantName") {
+          return (
+            <Input
+              placeholder="Search applicant name"
+              value={filters.applicantName}
+              onChange={(e) =>
+                handleFilterValueChange("applicantName", e.target.value)
+              }
+              style={{ width: 200 }}
+            />
+          );
+        }
+        if (option.key === "applicantMobile") {
+          return (
+            <Input
+              placeholder="Search mobile number"
+              value={filters.applicantMobile}
+              onChange={(e) =>
+                handleFilterValueChange("applicantMobile", e.target.value)
+              }
+              style={{ width: 200 }}
+            />
+          );
+        }
+        return null;
+      case "select":
+        if (option.key === "bankName") {
+          return (
+            <Select
+              style={{ minWidth: 200 }}
+              options={pdBankOptions}
+              value={filters.bankName}
+              onChange={(value: string) =>
+                handleFilterValueChange("bankName", value || undefined)
+              }
+              placeholder="Select Bank Name"
+              showSearch
+              filterOption={(input, option) =>
+                (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+              }
+              allowClear
+            />
+          );
+        }
+        return null;
       case "assignee":
         return (
           <Space direction="vertical">
@@ -216,7 +331,7 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({
   const content = (
     <div style={{ width: 300 }}>
       <Space direction="vertical" style={{ width: "100%" }}>
-        {filterOptions.map((option) => (
+        {availableFilterOptions.map((option) => (
           <div
             key={option.key}
             style={{ display: "flex", flexDirection: "column", gap: 8 }}
@@ -258,7 +373,19 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({
       );
     }
 
-    if (filters.status) {
+    if (filters.postponed) {
+      activeFilters.push(
+        <Tag key="postponed" closable onClose={() => {
+          onFilterChange({
+            ...filters,
+            postponed: undefined,
+          });
+          setSelectedFilters((prev) => prev.filter((k) => k !== "status"));
+        }}>
+          Status: Appointment Postponed
+        </Tag>
+      );
+    } else if (filters.status) {
       activeFilters.push(
         <Tag key="status" closable onClose={() => handleClearFilter("status")}>
           Status: {filters.status}
@@ -298,6 +425,42 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({
           onClose={() => handleClearFilter("fieldExecutiveName")}
         >
           Employee Name: {filters.fieldExecutiveName}
+        </Tag>
+      );
+    }
+
+    if (filters.applicantName) {
+      activeFilters.push(
+        <Tag
+          key="applicantName"
+          closable
+          onClose={() => handleClearFilter("applicantName")}
+        >
+          Applicant Name: {filters.applicantName}
+        </Tag>
+      );
+    }
+
+    if (filters.applicantMobile) {
+      activeFilters.push(
+        <Tag
+          key="applicantMobile"
+          closable
+          onClose={() => handleClearFilter("applicantMobile")}
+        >
+          Mobile: {filters.applicantMobile}
+        </Tag>
+      );
+    }
+
+    if (filters.bankName) {
+      activeFilters.push(
+        <Tag
+          key="bankName"
+          closable
+          onClose={() => handleClearFilter("bankName")}
+        >
+          Bank: {filters.bankName}
         </Tag>
       );
     }

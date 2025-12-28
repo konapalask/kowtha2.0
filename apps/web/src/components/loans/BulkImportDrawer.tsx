@@ -15,10 +15,10 @@ import {
 import React, { useContext, useEffect, useState } from "react";
 import { UserContext } from "../layout/UserContextProvider";
 import { createLoanApi } from "@/services/loans.services";
-import { bankOptions, loanTypeOptions, applicantTypeOptions } from "@/utils/options";
+import { bankOptions, loanTypeOptions, applicantTypeOptions, pdBankOptions } from "@/utils/options";
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import { getAllFieldExecutivesApi } from "@/services/users.services";
-import { getUserDetails } from "@/utils/utility";
+import { getUserDetails, getCurrentDepartmentOfficeId, getCurrentDepartment } from "@/utils/utility";
 
 interface BulkImportProps {
   isBulkImportDrawerVisible: boolean;
@@ -28,6 +28,7 @@ interface BulkImportProps {
   setLoading: (loading: boolean) => void;
   setRefresh: React.Dispatch<React.SetStateAction<boolean>>;
   verifiers?: any[];
+  templateOptions: any[];
 }
 
 const BulkImportDrawer: React.FC<BulkImportProps> = ({
@@ -38,9 +39,11 @@ const BulkImportDrawer: React.FC<BulkImportProps> = ({
   setLoading,
   setRefresh,
   verifiers = [],
+  templateOptions,
 }) => {
   const userDetails = getUserDetails();
   const [fieldExecutives, setFieldExecutives] = useState<any[]>([]);
+  const currentDepartment = getCurrentDepartment();
 
   useEffect(() => {
     const fetchFieldExecutives = async () => {
@@ -76,7 +79,7 @@ const BulkImportDrawer: React.FC<BulkImportProps> = ({
       // Transform the form values into the required format
       const loansData = values.loans.map((loan: any) => ({
         ...loan,
-        officeId: userDetails?.officeId,
+        officeId: getCurrentDepartmentOfficeId() || userDetails?.officeId,
         operationsExecutiveId: userDetails?.sub,
       }));
       console.log(loansData);
@@ -158,7 +161,6 @@ const BulkImportDrawer: React.FC<BulkImportProps> = ({
                           rules={[
                             { required: true, message: "Required" },
                             { whitespace: true, message: "Cannot be empty" },
-                            { max: 20, message: "Cannot be more than 20 characters" },
                           ]}
                         >
                           <Input style={{ height: "32px" }} />
@@ -193,6 +195,29 @@ const BulkImportDrawer: React.FC<BulkImportProps> = ({
                           />
                         </Form.Item>
                       </Col>
+                      {currentDepartment === "PD" && (
+                        <Col xs={24} md={4} lg={3} xl={3} style={{ padding: 4 }}>
+                          <Form.Item
+                            {...restField}
+                            labelCol={{ span: 24, style: { marginBottom: 0 } }}
+                            name={[name, "templateName"]}
+                            label="Template Name"
+                            rules={[{ required: true, message: "Required" }]}
+                          >
+                            <Select
+                              showSearch
+                              placeholder="Select Template Name"
+                              options={templateOptions}
+                              filterOption={(input, option) =>
+                                (option?.label ?? "")
+                                  .toLowerCase()
+                                  .includes(input.toLowerCase())
+                              }
+                              style={{ height: "32px" }}
+                            />
+                          </Form.Item>
+                        </Col>
+                      )}
                       <Col xs={24} md={4} lg={4} xl={3} style={{ padding: 4 }}>
                         <Form.Item
                           {...restField}
@@ -261,7 +286,7 @@ const BulkImportDrawer: React.FC<BulkImportProps> = ({
                           <Select
                             showSearch
                             placeholder="Select bank"
-                            options={bankOptions}
+                            options={currentDepartment === 'PD' ? pdBankOptions : bankOptions}
                             filterOption={(input, option) =>
                               (option?.label ?? "")
                                 .toLowerCase()

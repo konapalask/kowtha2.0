@@ -5,7 +5,7 @@ export interface AuthenticatedRequest extends Request {
   user: {
     id: number;
     mobile: string;
-    officeId: number;
+    officeId?: number;
     department: Department;
     role: UserRole;
   };
@@ -20,13 +20,13 @@ export interface UserWithDepartmentRoles {
   locality: string | null;
   defaultDepartment: Department | null;
   deviceId: string | null;
-  officeId: number;
   status: string;
   createdAt: Date;
   updatedAt: Date;
   departmentRoles: Array<{
     department: Department;
     role: UserRole;
+    officeId?: number;
   }>;
 }
 
@@ -43,7 +43,8 @@ export async function getUserWithDepartmentRoles(
         departmentRoles: {
           select: {
             department: true,
-            role: true
+            role: true,
+            officeId: true
           }
         }
       }

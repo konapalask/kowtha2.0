@@ -16,7 +16,8 @@ import {
   bankOptions,
   loanTypeOptions,
 } from "@/utils/options";
-import { getUserDetails, isEmpty } from "@/utils/utility";
+import { getUserDetails, isEmpty, getCurrentDepartment } from "@/utils/utility";
+import { isMobileVerificationCompleted } from "@/utils/loanCompletionChecker";
 // import { useWatch } from "antd/es/form/Form";
 interface LoanInfoFormProps {
   form: any;
@@ -26,6 +27,8 @@ interface LoanInfoFormProps {
   loading: boolean;
   setLoading: (loading: boolean) => void;
   fetchLoanDetails: () => void;
+  pdBankOptions: any;
+  templateOptions: any[];
 }
 
 const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
@@ -36,12 +39,93 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
   loading,
   setLoading,
   fetchLoanDetails,
+  pdBankOptions,
+  templateOptions,
 }) => {
   const userDetails = getUserDetails();
+  const currentDepartment = getCurrentDepartment();
   // console.log(selectedLoan);
   // console.log(form.getFieldsValue());
 
   const loanType = Form.useWatch("loanType", form);
+  const bankName = Form.useWatch("bankName", form);
+
+  // Check if mobile verification is completed to disable bank name field
+  const isVerificationCompleted = isMobileVerificationCompleted(selectedLoan);
+
+  // Filter template options based on selected bank name
+  const filteredTemplateOptions = React.useMemo(() => {
+    if (!bankName || !templateOptions || templateOptions.length === 0) {
+      return templateOptions || [];
+    }
+
+    // Map bank names to their template names (matching backend index.ts structure)
+    const bankToTemplatesMap: Record<string, string[]> = {
+      "Aditya Birla": ["ADITYA BIRLA-HL", "ADITYA BIRLA-ML", "ADITYA BIRLA-STSL"],
+      "Ambit": ["AMBIT-HL"],
+      "Ambit-MSME": ["AMBIT-MSME"],
+      "Axis Finance": ["AXIS FINANCE-HL","SAMMAAN","SMFG-ML (MICRO & MASS)","SMFG-HL","TATA CAPITAL-FSL","TATA CAPITAL-HFL"],
+      "Axis Finance UBL Above 10L": ["AXIS FINANCE-UBL ABOVE 10L"],
+      "Axis Finance UBL Below 10L": ["AXIS FINANCE-UBL BELOW 10L"],
+      "Axis Bank": ["AXIS BANK"],
+      "Axis Agri": ["AXIS AGRI", "AXIS BUSINESS AGRI"],
+      "Chola": ["CHOLA-HL", "CHOLA-SME"],
+      "DCB": ["DCB BANK"],
+      "Arka Fincap": [
+        "ARKA FINCAP",
+        "CENTRUM",
+        "CENT BANK",
+        "CLIX CAPITAL-HL",
+        "CLIX CAPITAL-UBL",
+        "EASY HL",
+        "FED BANK (PD&LIP)",
+        "GODREJ-HL",
+        "GODREJ-UBL",
+        "INDUSIND",
+        "KOTAK",
+        "MUTHOOT-HL",
+        "MUTHOOT FINCORP (PD & LIP)",
+        "NIDO HOME FINANCE",
+        "NORTHERN ARC",
+        "NIPUN",
+        "PIRAMAL (PD, AIP, LIP)",
+        "PNB",
+        "TRUHOME (PD & LIP)",
+        "VERITAS",
+      ],
+      "Hero Fincorp": ["HERO FINCORP"],
+      "HeroHousing-Salaried": ["HERO HOUSING SALARIED"],
+      "HeroHousing-Self": ["HERO HOUSING SELF"],
+      "ICICI": ["ICICI"],
+      "IDFC HL & ML": ["IDFC FIRST-HL", "IDFC FIRST-ML"],
+      "IDFC PL": ["IDFC FIRST-PL"],
+      "IIFL": ["IIFL"],
+      "India Shelter SENP": ["INDIA SHELTER SENP"],
+      "India Shelter Salaried": ["INDIA SHELTER SALARIED"],
+      "INCRED": ["INCRED/KKR India Financial Services Limited"],
+      "Jana Salaried": ["JANA SMALL FINANCE BANK LIMITED SALARIED"],
+      "Jana Senp Above 50l": ["JANA SMALL FINANCE BANK LIMITED SENP ABOVE 50L"],
+      "Jana Senp Below 50l": ["JANA SMALL FINANCE BANK LIMITED SENP BELOW 50L"],
+      "Niwas Salaried": ["NIWAS SALARIED"],
+      "Niwas Senp": ["NIWAS SENP"],
+      "RBL": ["RBL BANK (PD & LIP)"],
+      "SMFG SME": ["SMFG-SME"],
+      "Tata Ubl": ["TATA CAPITAL-UBL"],
+      "Yes Bank": ["YES BANK-HL"],
+    };
+
+    const templatesForBank = bankToTemplatesMap[bankName] || [];
+    
+    if (templatesForBank.length === 0) {
+      // If bank not found in map, return all templates
+      return templateOptions;
+    }
+
+    // Filter template options to only include templates for selected bank
+    return templateOptions.filter((option) =>
+      templatesForBank.includes(option.value)
+    );
+  }, [bankName, templateOptions]);
 
   return (
     <div>
@@ -68,6 +152,9 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
                 specifyLoanType: selectedLoan?.loanType,
                 bankName: selectedLoan?.bankName,
                 applicantType: selectedLoan?.applicantType,
+                ...(currentDepartment === "PD" && {
+                  templateName: selectedLoan?.templateName,
+                }),
               }
         }
         onFinish={async (values) => {
@@ -87,6 +174,9 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
               applicantAddress: values.applicantAddress?.trim(),
               loanType: loanTypeFinal,
               bankName: values.bankName,
+              ...(currentDepartment === "PD" && {
+                templateName: values.templateName,
+              }),
               loanAmount: Number(values.loanAmount),
             };
 
@@ -138,18 +228,6 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
               rules={[
                 { required: true, message: "Required" },
                 { whitespace: true, message: "Cannot be empty" },
-                { max: 20, message: "Cannot be more than 20 characters" },
-                {
-                  validator: (_, value) => {
-                    if (value && value.startsWith(' ')) {
-                      return Promise.reject('Cannot start with a space.');
-                    }
-                    if (value && /[^A-Za-z0-9 ]/.test(value)) {
-                      return Promise.reject('Special characters are not allowed.');
-                    }
-                    return Promise.resolve();
-                  },
-                },
               ]}
             >
               <Input readOnly={selectedLoan?.applicationNumber} />
@@ -165,11 +243,13 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
                 { whitespace: true, message: "Cannot be empty" },
                 {
                   validator: (_, value) => {
-                    if (value && value.startsWith(' ')) {
-                      return Promise.reject('Cannot start with a space.');
+                    if (value && value.startsWith(" ")) {
+                      return Promise.reject("Cannot start with a space.");
                     }
                     if (value && /[^A-Za-z0-9 ]/.test(value)) {
-                      return Promise.reject('Special characters are not allowed.');
+                      return Promise.reject(
+                        "Special characters are not allowed."
+                      );
                     }
                     return Promise.resolve();
                   },
@@ -203,19 +283,27 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
               rules={[
                 {
                   validator: (_, value) => {
-                    if (value === undefined || value === null || value === "") {
+                    // Allow empty values - field is not required
+                    if (
+                      value === undefined ||
+                      value === null ||
+                      value === "" ||
+                      value === 0
+                    ) {
                       return Promise.resolve();
                     }
-                    
+
                     const numValue = Number(value);
                     if (isNaN(numValue)) {
                       return Promise.reject("Please enter a valid amount");
                     }
-                    
+
                     if (numValue < 100 || numValue > 9999999999) {
-                      return Promise.reject("Please enter min of 3 digits and max of 10 digits");
+                      return Promise.reject(
+                        "Please enter min of 3 digits and max of 10 digits"
+                      );
                     }
-                    
+
                     return Promise.resolve();
                   },
                 },
@@ -227,24 +315,32 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
                 onKeyDown={(e) => {
                   // Allow only numbers, backspace, delete, tab, arrows, home, end
                   const allowedKeys = [
-                    'Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight',
-                    'ArrowUp', 'ArrowDown', 
+                    "Backspace",
+                    "Delete",
+                    "Tab",
+                    "ArrowLeft",
+                    "ArrowRight",
+                    "ArrowUp",
+                    "ArrowDown",
                   ];
-                  
+
                   const isNumber = /^[0-9]$/.test(e.key);
-                  
+
                   if (!isNumber && !allowedKeys.includes(e.key)) {
                     e.preventDefault();
                   }
                 }}
                 onChange={(e) => {
                   // Remove any non-numeric characters that might have been pasted
-                  const numericValue = e.target.value.replace(/[^0-9]/g, '');
+                  const numericValue = e.target.value.replace(/[^0-9]/g, "");
                   if (numericValue !== e.target.value) {
                     e.target.value = numericValue;
                   }
-                  
-                  form.setFieldValue('loanAmount', numericValue ? Number(numericValue) : undefined);
+
+                  form.setFieldValue(
+                    "loanAmount",
+                    numericValue ? Number(numericValue) : undefined
+                  );
                 }}
               />
             </Form.Item>
@@ -289,12 +385,22 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
               <Select
                 showSearch
                 placeholder="Select bank"
-                options={bankOptions}
+                options={
+                  currentDepartment === "PD" ? pdBankOptions : bankOptions
+                }
                 filterOption={(input, option) =>
                   (option?.label ?? "")
+                    .toString()
                     .toLowerCase()
-                    .includes(input.toLowerCase())
+                    .includes(input.toString().toLowerCase())
                 }
+                disabled={isVerificationCompleted}
+                onChange={(value) => {
+                  // Clear template name when bank changes
+                  if (currentDepartment === "PD") {
+                    form.setFieldValue("templateName", undefined);
+                  }
+                }}
               />
             </Form.Item>
           </Col>
@@ -315,6 +421,40 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
               />
             </Form.Item>
           </Col>
+          {currentDepartment === "PD" && (
+            <Col xs={24} sm={6} style={{ padding: 4 }}>
+              <Form.Item
+                labelCol={{ span: 24, style: { marginBottom: 0 } }}
+                label="Template Name"
+                name="templateName"
+                rules={[{ required: true, message: "Required" }]}
+              >
+                <Select
+                  showSearch
+                  placeholder="Select Template Name"
+                  options={filteredTemplateOptions}
+                  filterOption={(input, option) =>
+                    (option?.label ?? "")
+                      .toString()
+                      .toLowerCase()
+                      .includes(input.toString().toLowerCase())
+                  }
+                  disabled={!bankName}
+                  notFoundContent={
+                    bankName
+                      ? "No templates available for selected bank"
+                      : "Please select a bank first"
+                  }
+                  onChange={(value) => {
+                    // Clear template if bank changes and template is not valid for new bank
+                    if (value && !filteredTemplateOptions.some((opt) => opt.value === value)) {
+                      form.setFieldValue("templateName", undefined);
+                    }
+                  }}
+                />
+              </Form.Item>
+            </Col>
+          )}
         </Row>
         <Form.Item>
           <Space>

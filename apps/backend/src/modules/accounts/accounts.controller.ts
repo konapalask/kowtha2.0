@@ -2,7 +2,7 @@ import { Controller, Post, Body, UseGuards, Get, Request, Query, UnauthorizedExc
 import { AccountsService } from './accounts.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
-import { Roles, DeptFromQuery } from './decorators/roles.decorator';
+import { Roles, DeptFromQuery, All, PD } from './decorators/roles.decorator';
 import { AuthenticatedRequest } from '../common/types/request.types';
 import { ListUsersDto } from './dto/list-users.dto';
 import { ListAllUsersDto } from './dto/list-all-users.dto';
@@ -108,7 +108,7 @@ export class AccountsController {
                 type: 'object',
                 properties: {
                   department: { type: 'string', enum: ['FI', 'PD'] },
-                  role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier', 'PDAdmin', 'PDFieldExecutive', 'PDVerifier', 'PDOperationsExecutive'] }
+                  role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier'] }
                 },
                 description: 'Department role for the filtered department (only present when department filter is applied)',
                 nullable: true
@@ -175,7 +175,6 @@ export class AccountsController {
             mobile: { type: 'string' },
             email: { type: 'string' },
             employeeCode: { type: 'string' },
-            officeId: { type: 'number' },
             locality: { type: 'string' },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' },
@@ -187,7 +186,7 @@ export class AccountsController {
                   id: { type: 'number' },
                   userId: { type: 'number' },
                   department: { type: 'string', enum: ['FI', 'PD'] },
-                  role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier', 'PDAdmin', 'PDFieldExecutive', 'PDVerifier', 'PDOperationsExecutive'] },
+                  role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier'] },
                   createdAt: { type: 'string', format: 'date-time' },
                   updatedAt: { type: 'string', format: 'date-time' }
                 }
@@ -198,8 +197,8 @@ export class AccountsController {
       }
     }
   })
-  async createUser(@Body() createUserDto: CreateUserDto) {
-    const user = await this.accountsService.createUser(createUserDto);
+  async createUser(@Body() createUserDto: CreateUserDto, @Query('department') department: Department) {
+    const user = await this.accountsService.createUser(createUserDto, department);
     return {
       message: 'User created successfully',
       data: user
@@ -208,7 +207,7 @@ export class AccountsController {
 
   @Patch('users/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.Admin)
+  @Roles(All)
   @ApiOperation({ summary: 'Update an existing user' })
   @ApiResponse({ 
     status: 200, 
@@ -226,7 +225,6 @@ export class AccountsController {
             email: { type: 'string' },
             employeeCode: { type: 'string' },
             role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier'] },
-            officeId: { type: 'number' },
             locality: { type: 'string' },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' }
@@ -269,7 +267,7 @@ export class AccountsController {
             id: { type: 'number' },
             userId: { type: 'number' },
             department: { type: 'string', enum: ['FI', 'PD'] },
-            role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier', 'PDAdmin', 'PDFieldExecutive', 'PDVerifier', 'PDOperationsExecutive'] },
+            role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier'] },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' },
             user: {
@@ -324,7 +322,7 @@ export class AccountsController {
               id: { type: 'number' },
               userId: { type: 'number' },
               department: { type: 'string', enum: ['FI', 'PD'] },
-              role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier', 'PDAdmin', 'PDFieldExecutive', 'PDVerifier', 'PDOperationsExecutive'] },
+              role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier'] },
               createdAt: { type: 'string', format: 'date-time' },
               updatedAt: { type: 'string', format: 'date-time' },
               user: {
@@ -487,7 +485,7 @@ export class AccountsController {
               address: { type: 'string' },
               contactNumber: { type: 'string' },
               email: { type: 'string' },
-              employees: { type: 'number', description: 'Number of employees in this office' },
+              numberofEmployees: { type: 'number', description: 'Number of employees in this office' },
               createdAt: { type: 'string', format: 'date-time' },
               updatedAt: { type: 'string', format: 'date-time' }
             }

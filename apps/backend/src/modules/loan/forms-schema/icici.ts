@@ -1,0 +1,995 @@
+import { financialsSchema } from "../financials-schema/generic";
+export const iciciSchema = {
+  id: 16,
+  bankName: "ICICI",
+  sections: [
+    {
+      id: "proposal",
+      label: "Proposal",
+      schema: {
+        type: "object",
+        properties: {
+          apsId: {
+            type: "string",
+            title: "APS ID",
+          },
+          applicationNo: {
+            type: "string",
+            title: "Application No",
+            readOnly: true,
+          },
+          initiationDate: {
+            type: "string",
+            title: "Initiation Date",
+            format: "date",
+          },
+          branch: {
+            type: "string",
+            title: "Branch",
+          },
+        },
+        required: ["applicationNo"],
+      },
+      required: true,
+    },
+    {
+      id: "pdDetails",
+      label: "PD Details",
+      schema: {
+        type: "object",
+        properties: {
+          businessName: {
+            type: "string",
+            title: "Business Name",
+            readOnly: true,
+          },
+          pdConductedDate: {
+            type: "string",
+            title: "PD Conducted on (Date)",
+            format: "date",
+          },
+          locationOfPd: {
+            type: "string",
+            title: "Location of PD (Resi/Office)",
+            enum: ["Residence", "Office", "Factory", "Godown"],
+          },
+          locationAddressOfPd: {
+            type: "string",
+            title: "Location Address of PD",
+            readOnly: true,
+          },
+          personMetAtPd: {
+            type: "string",
+            title: "Person Met at PD",
+          },
+          relationshipWithApplicant: {
+            type: "string",
+            title: "Relationship of the Person Met During PD with Applicant",
+          },
+          distanceFromHfcBranch: {
+            type: "string",
+            title: "Distance from HFC Branch",
+          },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "applicants",
+      label: "Applicants",
+      schema: {
+        type: "object",
+        properties: {
+          applicants: {
+            type: "array",
+            title: "Applicants",
+            items: {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  title: "Name of the Applicant / Co-Applicant",
+                },
+                relationshipWithApplicant: {
+                  type: "string",
+                  title: "Relationship with Applicant",
+                },
+                currentAge: {
+                  type: "integer",
+                  title: "Current Age",
+                },
+                qualification: {
+                  type: "string",
+                  title: "Qualification",
+                  enum: [
+                    "Below 10th",
+                    "10th pass",
+                    "12th pass",
+                    "Diploma/ITI certification",
+                    "Graduate",
+                    "PG/Professional Certification",
+                  ],
+                },
+                incomeHolder: {
+                  type: "string",
+                  title: "Income Holder",
+                  enum: ["Yes", "No"],
+                },
+                propertyOwnership: {
+                  type: "string",
+                  title: "Property Ownership",
+                  enum: ["Yes", "No"],
+                },
+                incomeSource: {
+                  type: "string",
+                  title: "Income Source",
+                  enum: ["Business", "Rental", "Salary"],
+                },
+                remarks: {
+                  type: "string",
+                  title: "Remarks If Any",
+                },
+              },
+            },
+          },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "familyBackgroundPersonalDetails",
+      label: "Family Background & Personal Details",
+      schema: {
+        type: "object",
+        properties: {
+          residenceDetails: {
+            type: "object",
+            properties: {
+              currentResidenceOwnedRented: {
+                type: "string",
+                title: "Current Residence – Owned/Rented",
+                enum: ["Owned", "Rented"],
+              },
+              currentResidenceAddress: {
+                type: "string",
+                title: "Current Residence Address",
+              },
+              ifOwnedOwnerName: {
+                type: "string",
+                title: "If Current Residence is Owned – Owner Name",
+              },
+              ifRentedOwnerNameContactNo: {
+                type: "string",
+                title: "If Rented – Owner Name & Contact No",
+              },
+              ifRentedPermanentResidenceDetails: {
+                type: "string",
+                title: "If Rented – Permanent Residence Details",
+              },
+              noOfYearsInCurrentResidence: {
+                type: "integer",
+                title: "No. of Years in Current Residence",
+              },
+              previousResidenceDetails: {
+                type: "string",
+                title: "Previous Residence Details",
+              },
+              noOfYearsInSameCity: {
+                type: "integer",
+                title: "No. of Years in Same City",
+              },
+              distanceFromCurrentResidenceToBusiness: {
+                type: "string",
+                title: "Distance from Current Residence to Business Premises",
+              },
+            },
+          },
+
+          familyDetailsWithDependents: {
+            type: "string",
+            title: "Family Details with No. of Dependents",
+          },
+          earningMembersInFamily: {
+            type: "string",
+            title:
+              "Earning Members in Family, Their Source of Income and Total Income",
+          },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "natureOfBusinessAndVintage",
+      label: "Nature of Business and Business Vintage",
+      schema: {
+        type: "object",
+        properties: {
+          businessPremisesOwnedRented: {
+            type: "string",
+            title: "Business Premises Owned/Rented",
+            enum: ["Owned", "Rented"],
+          },
+          businessPremisesOwnerDetails: {
+            type: "string",
+            title: "Business Premises Owner Details",
+          },
+          noOfYearsInSamePremises: {
+            type: "integer",
+            title: "No. of Years in Same Premises",
+          },
+          noOfYearsInSameBusiness: {
+            type: "integer",
+            title: "No. of Years in Same Business",
+          },
+          previousExperience: {
+            type: "string",
+            title: "Previous Experience (if any)",
+          },
+          businessActivity: {
+            type: "string",
+            title: "Business Activity",
+          },
+          grossMargin: {
+            type: "string",
+            title: "Gross Margin %",
+          },
+          netMargin: {
+            type: "string",
+            title: "Net Margin %",
+          },
+          ideaToStartBusiness: {
+            type: "string",
+            title: "Idea/Reason to Start Business",
+          },
+          staffDetails: {
+            type: "string",
+            title: "Staff Details",
+          },
+          documentsVerified: {
+            type: "string",
+            title:
+              "Documents Verified (Kutcha Bills/License/Other Documents) and Period of bills verified and amount",
+          },
+          machineryAssetsUsed: {
+            type: "string",
+            title: "Machinery/Assets Used in Business",
+          },
+          businessVintageAsPerLocalReferences: {
+            type: "integer",
+            title: "Business Vintage as Per Local References (Years)",
+          },
+          businessVintageAsPerDocuments: {
+            type: "integer",
+            title: "Business Vintage as per Document Verified",
+          },
+          businessLocalityAndMarketCompetition: {
+            type: "string",
+            title: "Business Locality and Market Competition",
+          },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "incomeAssessment",
+      label: "Income Assessment",
+      schema: {
+        type: "object",
+        properties: {
+          coreBusinessIncome: {
+            type: "number",
+            title: "Core Business Income",
+          },
+          anyOtherIncome: {
+            type: "number",
+            title: "Any Other Income",
+          },
+          maximumEmiPayingCapability: {
+            type: "number",
+            title: "Maximum EMI Paying Capability Customer Confirmed",
+          },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "assetCreation",
+      label: "Asset Creation in Last 5 Years",
+      schema: {
+        type: "object",
+        properties: {
+          assetsCreated: {
+            type: "string",
+            title: "Assets Created in Last 5 Years",
+          },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "cashFlowAnalysis",
+      label: "Cash Flow Analysis During PD (Not Applicable in Salaried Cases)",
+      schema: {
+        type: "object",
+        properties: {
+          applicantMonthlyTO: {
+            type: "number",
+            title: "Applicant - Monthly TO / Gross Receipts (Weekly sales * 4)",
+          },
+          applicantCostOfRawMaterial: {
+            type: "number",
+            title: "Applicant - Less: Cost of Raw Material",
+          },
+          applicantRentIncome: {
+            type: "number",
+            title: "Applicant - Rent Income (If Any)",
+          },
+          applicantOtherIncome: {
+            type: "number",
+            title: "Applicant - Any Other Regular Income Other than Business",
+          },
+          applicantGrossMonthlyIncome: {
+            type: "number",
+            title: "Applicant - Gross Monthly Income",
+            formula:
+              "applicantMonthlyTO - applicantCostOfRawMaterial + applicantRentIncome + applicantOtherIncome",
+            readOnly: true,
+          },
+          applicantBusinessExpensesRent: {
+            type: "number",
+            title: "Applicant - Business Expenses: Rent",
+          },
+          applicantBusinessExpensesSalary: {
+            type: "number",
+            title: "Applicant - Business Expenses: Salary",
+          },
+          applicantBusinessExpensesElectricity: {
+            type: "number",
+            title: "Applicant - Business Expenses: Electricity",
+          },
+          applicantBusinessExpensesTravelling: {
+            type: "number",
+            title: "Applicant - Business Expenses: Travelling",
+          },
+          applicantBusinessExpensesOther: {
+            type: "number",
+            title: "Applicant - Business Expenses: Other Operating Expense",
+          },
+          applicantIncomeLeftForDomestic: {
+            type: "number",
+            title: "Applicant - Income Left for Domestic Expenses",
+            formula:
+              "applicantGrossMonthlyIncome - applicantBusinessExpensesRent - applicantBusinessExpensesSalary - applicantBusinessExpensesElectricity - applicantBusinessExpensesTravelling - applicantBusinessExpensesOther",
+            readOnly: true,
+          },
+          applicantHouseholdExpensesFood: {
+            type: "number",
+            title: "Applicant - Household Expenses: Food",
+          },
+          applicantHouseholdExpensesSchoolFees: {
+            type: "number",
+            title: "Applicant - Household Expenses: School and Tuition Fees",
+          },
+          applicantHouseholdExpensesOther: {
+            type: "number",
+            title: "Applicant - Household Expenses: Others household expenses",
+          },
+          applicantNetMonthlyIncome: {
+            type: "number",
+            title: "Applicant - Net Monthly Income Post All Expenses",
+            formula:
+              "applicantIncomeLeftForDomestic - applicantHouseholdExpensesFood - applicantHouseholdExpensesSchoolFees - applicantHouseholdExpensesOther",
+            readOnly: true,
+          },
+          applicantSavingsInvestments: {
+            type: "number",
+            title: "Applicant - Less: Savings/Investments/Insurance Premiums",
+          },
+          applicantExistingEmi: {
+            type: "number",
+            title: "Applicant - Less: Existing EMI",
+          },
+          applicantNetSurplusForEmi: {
+            type: "number",
+            title: "Applicant - Net Surplus Available for Proposed EMI",
+            formula:
+              "applicantNetMonthlyIncome - applicantSavingsInvestments - applicantExistingEmi",
+            readOnly: true,
+          },
+
+          coApplicantCases: {
+            type: "array",
+            title: "Co-Applicant Cases (Not applicable in Salaried cases)",
+            items: {
+              type: "object",
+              properties: {
+                coApplicantMonthlyTO: {
+                  type: "number",
+                  title:
+                    "Co-Applicant - Monthly TO / Gross Receipts (Weekly sales * 4)",
+                },
+                coApplicantCostOfRawMaterial: {
+                  type: "number",
+                  title: "Co-Applicant - Less: Cost of Raw Material",
+                },
+                coApplicantRentIncome: {
+                  type: "number",
+                  title: "Co-Applicant - Rent Income (If Any)",
+                },
+                coApplicantOtherIncome: {
+                  type: "number",
+                  title:
+                    "Co-Applicant - Any Other Regular Income Other than Business",
+                },
+                coApplicantGrossMonthlyIncome: {
+                  type: "number",
+                  title: "Co-Applicant - Gross Monthly Income",
+                  formula:
+                    "coApplicantMonthlyTO - coApplicantCostOfRawMaterial + coApplicantRentIncome + coApplicantOtherIncome",
+                  readOnly: true,
+                },
+                coApplicantBusinessExpensesRent: {
+                  type: "number",
+                  title: "Co-Applicant - Business Expenses: Rent",
+                },
+                coApplicantBusinessExpensesSalary: {
+                  type: "number",
+                  title: "Co-Applicant - Business Expenses: Salary",
+                },
+                coApplicantBusinessExpensesElectricity: {
+                  type: "number",
+                  title: "Co-Applicant - Business Expenses: Electricity",
+                },
+                coApplicantBusinessExpensesTravelling: {
+                  type: "number",
+                  title: "Co-Applicant - Business Expenses: Travelling",
+                },
+                coApplicantBusinessExpensesOther: {
+                  type: "number",
+                  title:
+                    "Co-Applicant - Business Expenses: Other Operating Expense",
+                },
+                coApplicantIncomeLeftForDomestic: {
+                  type: "number",
+                  title: "Co-Applicant - Income Left for Domestic Expenses",
+                  formula:
+                    "coApplicantGrossMonthlyIncome - coApplicantBusinessExpensesRent - coApplicantBusinessExpensesSalary - coApplicantBusinessExpensesElectricity - coApplicantBusinessExpensesTravelling - coApplicantBusinessExpensesOther",
+                  readOnly: true,
+                },
+                coApplicantHouseholdExpensesFood: {
+                  type: "number",
+                  title: "Co-Applicant - Household Expenses: Food",
+                },
+                coApplicantHouseholdExpensesSchoolFees: {
+                  type: "number",
+                  title: "Co-Applicant - Household Expenses: School Fees",
+                },
+                coApplicantHouseholdExpensesOther: {
+                  type: "number",
+                  title:
+                    "Co-Applicant - Household Expenses: Others household expenses",
+                },
+                coApplicantNetMonthlyIncome: {
+                  type: "number",
+                  title: "Co-Applicant - Net Monthly Income Post All Expenses",
+                  formula:
+                    "coApplicantIncomeLeftForDomestic - coApplicantHouseholdExpensesFood - coApplicantHouseholdExpensesSchoolFees - coApplicantHouseholdExpensesOther",
+                  readOnly: true,
+                },
+                coApplicantSavingsInvestments: {
+                  type: "number",
+                  title:
+                    "Co-Applicant - Less: Savings/Investments/Insurance Premiums",
+                },
+                coApplicantExistingEmi: {
+                  type: "number",
+                  title: "Co-Applicant - Less: Existing EMI",
+                },
+                coApplicantNetSurplusForEmi: {
+                  type: "number",
+                  title:
+                    "Co-Applicant - Net Surplus Available for Proposed EMI",
+                  formula:
+                    "coApplicantNetMonthlyIncome - coApplicantSavingsInvestments - coApplicantExistingEmi",
+                  readOnly: true,
+                },
+              },
+            },
+          },
+
+          weeklySalesMonday: {
+            type: "number",
+            title: "Weekly Sales - Monday",
+          },
+          weeklySalesTuesday: {
+            type: "number",
+            title: "Weekly Sales - Tuesday",
+          },
+          weeklySalesWednesday: {
+            type: "number",
+            title: "Weekly Sales - Wednesday",
+          },
+          weeklySalesThursday: {
+            type: "number",
+            title: "Weekly Sales - Thursday",
+          },
+          weeklySalesFriday: {
+            type: "number",
+            title: "Weekly Sales - Friday",
+          },
+          weeklySalesSaturday: {
+            type: "number",
+            title: "Weekly Sales - Saturday",
+          },
+          weeklySalesSunday: {
+            type: "number",
+            title: "Weekly Sales - Sunday",
+          },
+          totalWeeklySales: {
+            type: "number",
+            title: "Total Weekly Sales",
+            formula:
+              "weeklySalesMonday + weeklySalesTuesday + weeklySalesWednesday + weeklySalesThursday + weeklySalesFriday + weeklySalesSaturday + weeklySalesSunday",
+            readOnly: true,
+          },
+          coApplicantWeeklySalesMonday: {
+            type: "array",
+            title: "Co-Applicant Weekly Sales - Monday",
+            items: {
+              type: "object",
+              properties: {
+                coApplicantWeeklySalesMonday: {
+                  type: "number",
+                  title: "Co-Applicant Weekly Sales - Monday",
+                },
+                coApplicantWeeklySalesTuesday: {
+                  type: "number",
+                  title: "Co-Applicant Weekly Sales - Tuesday",
+                },
+                coApplicantWeeklySalesWednesday: {
+                  type: "number",
+                  title: "Co-Applicant Weekly Sales - Wednesday",
+                },
+                coApplicantWeeklySalesThursday: {
+                  type: "number",
+                  title: "Co-Applicant Weekly Sales - Thursday",
+                },
+                coApplicantWeeklySalesFriday: {
+                  type: "number",
+                  title: "Co-Applicant Weekly Sales - Friday",
+                },
+                coApplicantWeeklySalesSaturday: {
+                  type: "number",
+                  title: "Co-Applicant Weekly Sales - Saturday",
+                },
+                coApplicantWeeklySalesSunday: {
+                  type: "number",
+                  title: "Co-Applicant Weekly Sales - Sunday",
+                },
+                coApplicantTotalWeeklySales: {
+                  type: "number",
+                  title: "Co-Applicant Total Weekly Sales",
+                  formula:
+                    "coApplicantWeeklySalesMonday + coApplicantWeeklySalesTuesday + coApplicantWeeklySalesWednesday + coApplicantWeeklySalesThursday + coApplicantWeeklySalesFriday + coApplicantWeeklySalesSaturday + coApplicantWeeklySalesSunday",
+                  readOnly: true,
+                },
+              },
+            },
+          },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "observationsAtPd",
+      label: "Observations at the Time of PD",
+      schema: {
+        type: "object",
+        properties: {
+          stockValue: {
+            type: "string",
+            title: "Stock Value",
+          },
+          timeSpent: {
+            type: "string",
+            title: "Time Spent",
+          },
+          footfall: {
+            type: "string",
+            title: "Footfall",
+          },
+          sales: {
+            type: "string",
+            title: "Sales Observed",
+          },
+          coApplicantCases: {
+            type: "array",
+            title: "Co-Applicant Cases",
+            items: {
+              type: "object",
+              properties: {
+                coApplicantStockValue: {
+                  type: "string",
+                  title: "Co-Applicant Stock Value",
+                },
+                coApplicantTimeSpent: {
+                  type: "string",
+                  title: "Co-Applicant Time Spent",
+                },
+                coApplicantFootfall: {
+                  type: "string",
+                  title: "Co-Applicant Footfall",
+                },
+                coApplicantSales: {
+                  type: "string",
+                  title: "Co-Applicant Sales",
+                },
+                coApplicantSalesRemarks: {
+                  type: "string",
+                  title: "Co-Applicant Sales Remarks",
+                },
+              },
+            },
+          },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "triggerPointVerification",
+      label: "Trigger Point Verification",
+      schema: {
+        type: "object",
+        properties: {
+          forTraders: {
+            type: "string",
+            title: "For Traders",
+          },
+          forTradersRemarks: {
+            type: "string",
+            title: "For Traders Remarks",
+          },
+          forManufacturers: {
+            type: "string",
+            title: "For Manufacturers",
+          },
+
+          forManufacturersRemarks: {
+            type: "string",
+            title: "For Manufacturers Remarks",
+          },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "itrAndFinancial",
+      label: "ITR and Financial",
+      schema: {
+        type: "object",
+        properties: {
+          itrFiling: {
+            type: "string",
+            title: "ITR Filling",
+            enum: ["Yes", "No"],
+          },
+          itrAmountDeclared: {
+            type: "string",
+            title: "If Filing - Amount of Income Declared",
+          },
+          itrDetailsIfAny: {
+            type: "string",
+            title: "ITR Details If any",
+          },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "bankingDetails",
+      label: "Banking Details",
+      schema: {
+        type: "object",
+        properties: {
+          bankDetails: {
+            type: "array",
+            title: "Banking Details",
+            items: {
+              type: "object",
+              properties: {
+                bankName: {
+                  type: "string",
+                  title: "Bank Name",
+                },
+                accountType: {
+                  type: "string",
+                  title: "A/c Type",
+                  enum: ["Savings", "Current", "CC/OD"],
+                },
+                noOfYears: {
+                  type: "integer",
+                  title: "No. of Years",
+                },
+              },
+            },
+          },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "existingLoanDetails",
+      label: "Existing Loan Details",
+      schema: {
+        type: "object",
+        properties: {
+          loans: {
+            type: "array",
+            title: "Existing Loans",
+            items: {
+              type: "object",
+              properties: {
+                lender: {
+                  type: "string",
+                  title: "Lender",
+                },
+                typeOfLoan: {
+                  type: "string",
+                  title: "Type of Loan",
+                },
+                loanAvailedYear: {
+                  type: "integer",
+                  title: "Loan Availed Year",
+                },
+                loanAmount: {
+                  type: "number",
+                  title: "Loan Amount",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
+                },
+                posAmount: {
+                  type: "number",
+                  title: "POS (Principal Outstanding)",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
+                },
+                emi: {
+                  type: "number",
+                  title: "EMI",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
+                },
+                securityOffered: {
+                  type: "string",
+                  title: "Security Offered",
+                },
+                emiDeductingBankAccount: {
+                  type: "string",
+                  title: "EMI Deducting Bank Account",
+                },
+              },
+            },
+          },
+          totalLoanAmount: {
+            type: "number",
+            title: "Total Loan Amount",
+            formula:
+              "loans.reduce((sum, loan) => sum + (loan.loanAmount || 0), 0)",
+            readOnly: true,
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          totalEmi: {
+            type: "number",
+            title: "Total EMI",
+            formula: "loans.reduce((sum, loan) => sum + (loan.emi || 0), 0)",
+            readOnly: true,
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "references",
+      label: "References (Name & Contact No.)",
+      schema: {
+        type: "object",
+        properties: {
+          suppliersOrStaff: {
+            type: "array",
+            title: "Suppliers / Staff",
+            items: {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  title: "Name",
+                },
+                contactNo: {
+                  type: "string",
+                  title: "Contact No.",
+                },
+                feedback: {
+                  type: "string",
+                  title: "Feedback",
+                  enum: ["Positive", "Negative"],
+                },
+              },
+            },
+          },
+          customers: {
+            type: "array",
+            title: "Customers",
+            items: {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  title: "Name",
+                },
+                contactNo: {
+                  type: "string",
+                  title: "Contact No.",
+                },
+                feedback: {
+                  type: "string",
+                  title: "Feedback",
+                  enum: ["Positive", "Negative"],
+                },
+              },
+            },
+          },
+          neighbors: {
+            type: "array",
+            title: "Neighbor Feedback",
+            items: {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  title: "Neighbor Name",
+                },
+                contactNo: {
+                  type: "string",
+                  title: "Contact No.",
+                },
+                feedback: {
+                  type: "string",
+                  title: "Feedback",
+                  enum: ["Positive", "Negative"],
+                },
+              },
+            },
+          },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "collateralDetails",
+      label: "Collateral Details",
+      schema: {
+        type: "object",
+        properties: {
+          propertyLocation: {
+            type: "string",
+            title: "Property Location",
+          },
+          propertyType: {
+            type: "string",
+            title: "Property Type",
+          },
+          propertyArea: {
+            type: "string",
+            title: "Property Area (sq ft)",
+          },
+          propertyValue: {
+            type: "string",
+            title: "Property Value",
+          },
+          registrationValue: {
+            type: "string",
+            title: "Registration Value",
+          },
+          proposePropertyCurrentOccupancy: {
+            type: "string",
+            title: "Proposed Property Current Occupancy",
+          },
+          proposePropertyDistanceFromBusiness: {
+            type: "string",
+            title: "Proposed Property Distance from Business",
+          },
+          sellerDetails: {
+            type: "string",
+            title: "Seller Details",
+          },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "ocrDetails",
+      label: "OCR Details for Purchase Case",
+      schema: {
+        type: "object",
+        properties: {
+          ocrPaid: {
+            type: "string",
+            title: "OCR Paid",
+          },
+          ocrSource: {
+            type: "string",
+            title: "OCR Source",
+          },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "endUseOfLoan",
+      label: "End Use of Loan",
+      schema: {
+        type: "object",
+        properties: {
+          endUseOfLoan: {
+            type: "string",
+            title: "End Use of Loan",
+          },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "remarks",
+      label: "Remarks: Summary of Transaction",
+      schema: {
+        type: "object",
+        properties: {
+          summaryOfTransaction: {
+            type: "string",
+            title: "Summary of Transaction (Detailed Remarks)",
+          },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "pdStatus",
+      label: "PD Status",
+      schema: {
+        type: "object",
+        properties: {
+          pdStatus: {
+            type: "string",
+            title: "PD Status",
+            enum: ["Positive", "Negative", "Credit Refer"],
+          },
+        },
+      },
+    },
+    financialsSchema,
+  ],
+} as const;
+export default iciciSchema;

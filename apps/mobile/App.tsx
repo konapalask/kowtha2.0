@@ -31,8 +31,11 @@ import {getItem} from './src/helpers/utility';
 import BusinessVerification from './src/screens/BusinessVerification';
 import {getPlaystoreVersion} from './src/services/auth';
 import DeviceInfo from 'react-native-device-info';
-
-// Configure XMLHttpRequest
+import PD from './src/screens/PD';
+import QAFormTesting from './src/screens/QAFormTesting';
+import {UserProvider} from './src/contexts/UserContext';
+import ErrorBoundary from 'react-native-error-boundary';
+import RNRestart from 'react-native-restart';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -49,6 +52,11 @@ export type RootStackParamList = {
     item: {name: string; applicationNumber: string};
     verificationType: 'Business';
   };
+  PDVerification: {
+    item: {name: string; applicationNumber: string};
+    verificationType: 'Business';
+  };
+  QAFormTesting: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -67,7 +75,7 @@ function isVersionLess(current: string, latest: string) {
 
 const APP_VERSION = DeviceInfo.getVersion();
 
-const App = () => {
+const AppContent = () => {
   const [isConnected, setIsConnected] = useState<boolean | null>(true);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -77,12 +85,10 @@ const App = () => {
   }>({show: false});
 
   useEffect(() => {
-    // Subscribe to network state updates
     const unsubscribe = NetInfo.addEventListener(state => {
       setIsConnected(state.isConnected);
     });
 
-    // Check authentication state
     const checkAuth = async () => {
       try {
         const accessToken = await getItem('accessToken');
@@ -98,7 +104,6 @@ const App = () => {
 
     checkAuth();
 
-    // Cleanup subscription
     return () => {
       unsubscribe();
     };
@@ -114,7 +119,6 @@ const App = () => {
           setForceUpdate({show: true, playStoreUrl});
         }
       } catch (e) {
-        // Optionally handle error
         console.log('Error checking latest deployment', e);
       }
     };
@@ -208,6 +212,27 @@ const App = () => {
                 : 'Business Verification',
             })}
           />
+          <Stack.Screen
+            name="PDVerification"
+            component={PD}
+            options={({route}) => ({
+              headerShown: false,
+              title: route.params?.item
+                ? `${route.params.item.name}, ${route.params.item.applicationNumber}`
+                : 'PD Verification',
+              // headerStyle: {
+              //   height: 0,
+              // },
+            })}
+          />
+          <Stack.Screen
+            name="QAFormTesting"
+            component={QAFormTesting}
+            options={{
+              headerShown: false,
+              title: 'QA Form Testing',
+            }}
+          />
         </Stack.Navigator>
       </NavigationContainer>
       <Toast />
@@ -273,6 +298,59 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  errorTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 12,
+    color: '#b52424',
+  },
+  errorText: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 24,
+    textAlign: 'center',
+    paddingHorizontal: 20,
+  },
+  errorButton: {
+    backgroundColor: '#145886',
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 8,
+  },
+  errorButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
 });
+
+// Error Fallback Component
+const ErrorFallback = ({error}: {error: Error}) => {
+  return (
+    <View style={[styles.container, styles.centerContent]}>
+      <Text style={styles.errorTitle}>Something went wrong</Text>
+      <Text style={styles.errorText}>{error.message}</Text>
+      <Pressable
+        style={styles.errorButton}
+        onPress={() => {
+          // Optionally restart the app or navigate to a safe screen
+          console.log('Error occurred:', error);
+          RNRestart.restart();
+        }}>
+        <Text style={styles.errorButtonText}>Try Again</Text>
+      </Pressable>
+    </View>
+  );
+};
+
+const App = () => {
+  return (
+    <ErrorBoundary FallbackComponent={ErrorFallback}>
+      <UserProvider>
+        <AppContent />
+      </UserProvider>
+    </ErrorBoundary>
+  );
+};
 
 export default App;

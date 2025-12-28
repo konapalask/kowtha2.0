@@ -1,0 +1,643 @@
+import financialsSchema from "../financials-schema/generic";
+export const yesBankSchema = {
+  id: 26,
+  bankName: "Yes Bank",
+  sections: [
+    {
+      id: "generalInfo",
+      label: "General Information",
+      schema: {
+        type: "object",
+        properties: {
+          mainApplicantName: {
+            type: "string",
+            title: "Name of the Main applicant",
+            readOnly: true,
+          },
+          relationWithApplicant: {
+            type: "string",
+            title: "PD done with and relation with applicant",
+          },
+          addressVisited: {
+            type: "string",
+            title: "Address of the visit with landmark",
+            ui: { widget: "textarea", rows: 2 },
+            readOnly: true,
+          },
+          casId: {
+            type: "string",
+            title: "CAS ID",
+            readOnly: true,
+          },
+          product: {
+            type: "string",
+            title: "Product (AFHL/MLAP)",
+          },
+          pdVisitDate: {
+            type: "string",
+            title: "PD visit date",
+            format: "date",
+          },
+          pdVisitTime: {
+            type: "string",
+            title: "PD visit time",
+            format: "time",
+          },
+          applicantContactNumber: {
+            type: "integer",
+            title: "Contact number",
+            readOnly: true,
+          },
+          loanAppliedAmount: {
+            type: "number",
+            title: "Loan applied amount",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
+            readOnly: true,
+          },
+          tenorRequired: {
+            type: "string",
+            title: "Tenor required",
+          },
+          addressVisitedType: {
+            type: "string",
+            title: "Address visited type",
+            enum: ["Residence", "Business", "Employment place", "Other"],
+          },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "basicApplicantDetails",
+      label: "Basic Details of Applicant",
+      schema: {
+        type: "object",
+        properties: {
+          applicantBackground: {
+            type: "string",
+            title:
+              "Applicant – Business / Educational background / Past experience",
+            ui: { widget: "textarea", rows: 3 },
+          },
+          coApplicantBackground: {
+            type: "string",
+            title:
+              "Co-Applicant – Business / Employment / Educational background / Past experience",
+            ui: { widget: "textarea", rows: 3 },
+          },
+          parentsBackground: {
+            type: "string",
+            title: "Parents Occupation / Business / Employment background",
+          },
+          childrenDetails: {
+            type: "string",
+            title: "Details of children (studying / working)",
+          },
+          siblingsBackground: {
+            type: "string",
+            title:
+              "Siblings Business / Employment background (if residing together)",
+          },
+        },
+      },
+    },
+    {
+      id: "businessProfile",
+      label: "Self Employed Profile – Occupational Details",
+      schema: {
+        type: "object",
+        properties: {
+          businessName: {
+            type: "string",
+            title: "Name of the Business / Employment",
+            readOnly: true,
+          },
+          businessConstitution: {
+            type: "string",
+            title: "Constitution of Business Entity",
+          },
+          proprietorShareDetails: {
+            type: "string",
+            title: "Name of Proprietor / Partners / Shareholders with % share",
+          },
+          yearsInBusiness: {
+            type: "string",
+            title: "No. of Years in Current Business",
+          },
+          businessNarrative: {
+            type: "string",
+            title:
+              "Business profile (nature of industry, market, competition, seasonality etc.)",
+            ui: { widget: "textarea", rows: 5 },
+          },
+          gstRegistration: {
+            type: "string",
+            title:
+              "Whether GST registered (if Yes, since when GST registration exist)",
+          },
+          proofOfBusinessStability: {
+            type: "string",
+            title:
+              "Details of any other proof of business existence /stability available/verified during visit",
+          },
+          averageMonthlySales: {
+            type: "number",
+            title: "Average Monthly Sales / Receipts",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
+          },
+          averageMonthlyPurchase: {
+            type: "number",
+            title: "Average Monthly Purchase",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
+          },
+          grossMargin: {
+            type: "string",
+            title: "Gross margin on goods sold",
+          },
+          indirectExpenses: {
+            type: "string",
+            title: "Overheads to run the business (Indirect expenses)",
+          },
+          netMonthlyProfit: {
+            type: "string",
+            title: "Net monthly profit from business",
+          },
+          stockLevel: {
+            type: "string",
+            title: "Stock level",
+          },
+          majorCustomers: {
+            type: "string",
+            title: "Description about major customers with credit terms",
+            ui: { widget: "textarea", rows: 3 },
+          },
+          majorSuppliers: {
+            type: "string",
+            title: "Description about major suppliers with credit terms",
+            ui: { widget: "textarea", rows: 3 },
+          },
+          businessSetupDetails: {
+            type: "string",
+            title: "Business setup details",
+            ui: { widget: "textarea", rows: 3 },
+          },
+          infrastructureManpower: {
+            type: "string",
+            title:
+              "Infrastructure and manpower details (to include Business / factory details, plant capacity utilization and staff strength etc) ",
+            ui: { widget: "textarea", rows: 3 },
+          },
+          otherAssetsInvestments: {
+            type: "string",
+            title:
+              "Other owned assets / Investments (property, land, FD, MF etc.)",
+          },
+          otherIncomeSources: {
+            type: "string",
+            title: "Other sources of income (rental, agri, interest etc.)",
+          },
+          householdExpenses: {
+            type: "string",
+            title: "Monthly total household expenses",
+          },
+          collateralDetails: {
+            type: "string",
+            title:
+              "Collateral details (Type, occupancy status, year of purchase, parental owned etc.)",
+          },
+          mlapEndUse: {
+            type: "string",
+            title: "MLAP End use / consolidation details",
+          },
+        },
+      },
+    },
+    {
+      id: "addressDetails",
+      label: "Residence/Business Address Details",
+      schema: {
+        type: "object",
+        properties: {
+          residencePremiseAddress: {
+            type: "string",
+            title: "Residence premise address",
+            ui: { widget: "textarea", rows: 2 },
+          },
+          businessPremiseAddress: {
+            type: "string",
+            title: "Business premise address",
+            ui: { widget: "textarea", rows: 2 },
+          },
+          residenceOwnershipStatus: {
+            type: "string",
+            title: "Residence ownership status",
+          },
+          businessOwnershipStatus: {
+            type: "string",
+            title: "Business ownership status",
+          },
+          residenceDuration: {
+            type: "string",
+            title: "Residence Owned /rented since when (number of Years)",
+          },
+          businessDuration: {
+            type: "string",
+            title: "Business Owned / rented since when (number of Years)",
+          },
+          residenceProof: {
+            type: "string",
+            title:
+              "Residence Details of Proof of ownership (if available/documented)",
+          },
+          businessProof: {
+            type: "string",
+            title:
+              "Business Details of Proof of ownership (if available/documented)",
+          },
+          residenceRentedPremisedVerificationStatus: {
+            type: "string",
+            title: "Rented premised verification status",
+          },
+          businessRentedPremisedVerificationStatus: {
+            type: "string",
+            title: "Business rented premised verification status",
+          },
+          residenceRent: {
+            type: "string",
+            title: "Residence rent per month (if rented)",
+          },
+          businessRent: {
+            type: "string",
+            title: "Business rent per month (if rented)",
+          },
+          residenceLocality: {
+            type: "string",
+            title:
+              "Residence locality comment (Middle class/Upper middle class/Lower middle class/Lower class/Tin roof)",
+          },
+          businessLocality: {
+            type: "string",
+            title:
+              "Business locality comment (Middle class/Upper middle class/Lower middle class/Lower class/Tin roof)",
+          },
+          residenceMortgage: {
+            type: "string",
+            title:
+              "Residence Mortgage (if same is owned) – mention Bank/NBFC name",
+          },
+          businessMortgage: {
+            type: "string",
+            title:
+              "Business Mortgage (if same is owned) – mention Bank/NBFC name",
+          },
+          residenceQrCheck: {
+            type: "string",
+            title: "Residence QR code check status",
+          },
+          businessQrCheck: {
+            type: "string",
+            title: "Business QR code check status",
+          },
+          residenceVisitComment: {
+            type: "string",
+            title: "Residence visit comments / photos reference",
+          },
+          businessVisitComment: {
+            type: "string",
+            title: "Business visit comments / photos reference",
+          },
+        },
+      },
+    },
+    {
+      id: "businessReferences",
+      label: "Business Reference Checks",
+      schema: {
+        type: "object",
+        properties: {
+          references: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                referenceType: {
+                  type: "string",
+                  title:
+                    "Reference type (Nearby business premises, Buyer, Suppliers)",
+                },
+                businessName: {
+                  type: "string",
+                  title:
+                    "Name of Shop/Business premises with whom ref check done",
+                },
+                contactPerson: {
+                  type: "string",
+                  title: "Person spoken to",
+                },
+                feedback: {
+                  type: "string",
+                  title:
+                    "Feedback on stability, vintage, volume, payment regularity",
+                  ui: { widget: "textarea", rows: 2 },
+                },
+                otherFeedback: {
+                  type: "string",
+                  title: "Other feedback",
+                },
+                status: {
+                  type: "string",
+                  title: "Ref check status",
+                  enum: ["Positive", "Negative", "Neutral"],
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    {
+      id: "residenceReferences",
+      label: "Residence Reference Checks",
+      schema: {
+        type: "object",
+        properties: {
+          references: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                referenceType: {
+                  type: "string",
+                  title: "Reference type",
+                },
+                personMet: {
+                  type: "string",
+                  title: "Person / Shop name",
+                },
+                nameOfPersonSpokenTo: {
+                  type: "string",
+                  title: "Name of person spoken to",
+                },
+                feedback: {
+                  type: "string",
+                  title:
+                    "Feedback on behaviour, negative activity, residence vintage etc.",
+                  ui: { widget: "textarea", rows: 2 },
+                },
+                otherFeedback: {
+                  type: "string",
+                  title: "Other feedback",
+                },
+                status: {
+                  type: "string",
+                  title: "Ref check status",
+                  enum: ["Positive", "Negative", "Neutral"],
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    {
+      id: "finalComment",
+      label: "Final PD Comment",
+      schema: {
+        type: "object",
+        properties: {
+          interviewerComment: {
+            type: "string",
+            title: "Interviewer’s overall comments",
+            ui: { widget: "textarea", rows: 4 },
+          },
+          activityAndStocks: {
+            type: "string",
+            title: "Level of activity & stocks observed / other observations",
+          },
+          pdStatus: {
+            type: "string",
+            title: "PD Status",
+            enum: ["Positive", "Negative", "Credit Refer"],
+          },
+          remarks: {
+            type: "string",
+            title: "Remarks for Positive / Negative / Referred cases",
+          },
+          yblEmployeeName: {
+            type: "string",
+            title: "Name of the YBL employee",
+          },
+          yblDesignation: { type: "string", title: "Designation" },
+          yblEmpId: { type: "string", title: "Employee ID" },
+          pdAgencyInterviewer: {
+            type: "string",
+            title: "PD agency interviewer’s name",
+          },
+          reportProcessedBy: {
+            type: "string",
+            title: "Report processed by",
+          },
+        },
+      },
+    },
+    {
+      id: "annexureAfhl",
+      label: "Annexure 1 – AFHL Cases",
+      schema: {
+        type: "object",
+        properties: {
+          propertyIdentifiedThrough: {
+            type: "string",
+            title: "Source from which property was identified",
+          },
+          builderDetails: {
+            type: "string",
+            title: "Name of the Builder/ Project/ Builder Representative",
+          },
+          transactionType: {
+            type: "string",
+            title: "Type of Transaction (Purchase, BT/BT+Topup, Construction etc)",
+          },
+          propertyType: {
+            type: "string",
+            title: "Type of property",
+          },
+          propertyDetails: {
+            type: "string",
+            title: "Details of Property (Address/Flat No./Floor/2 BHK, 3 BHK etc./ Stage of completion, Landmark etc.)",
+            ui: { widget: "textarea", rows: 3 },
+          },
+          totalPropertyCost: {
+            type: "number",
+            title: "Total Cost of the Property",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
+          },
+          ocrSource: {
+            type: "string",
+            title: "Source of OCR-(Individual Savings, Sale of another property, Other family members help, etc )",
+          },
+          downPaymentDone: {
+            type: "string",
+            title: "Down payment details (if already done)",
+          },
+          downPaymentAmount: {
+            type: "number",
+            title: "Amount of Down Payment",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
+          },
+          downPaymentSource: {
+            type: "string",
+            title:
+              "Source of funds for down payment (Individual savings, sale of another property, other Family members help etc.)",
+          },
+          purposeOfPurchase: {
+            type: "string",
+            title: "Purpose of purchase (Self occupation / Investment)",
+          },
+          distanceFromWork: {
+            type: "string",
+            title:
+              "Distance of the property from current business and residence",
+          },
+          commutePlan: {
+            type: "string",
+            title:
+              "If distance is more than 15-20Km from work place provide details of commute plan / reason for buying in far area",
+          },
+        },
+      },
+    },
+    {
+      id: "annexureSalaried",
+      label: "Annexure 2 – Salaried Profile",
+      schema: {
+        type: "object",
+        properties: {
+          companyName: { type: "string", title: "Name of the Company" },
+          companyConstitution: {
+            type: "string",
+            title: "Constitution of the Company",
+          },
+          hrAndReportingContact: {
+            type: "string",
+            title: "Name & email ID of HR and reporting authority",
+          },
+          employerContact: {
+            type: "string",
+            title: "Name and designation of person met from Employer side alongwith contact no",
+          },
+          employerDetails: {
+            type: "string",
+            title: "Employer Details (i.e., Years in business, Number of employees, Industry etc.)",
+            ui: { widget: "textarea", rows: 3 },
+          },
+          employmentStatus: {
+            type: "string",
+            title: "Employment Status (Regular / Contract)",
+          },
+          currentDesignation: {
+            type: "string",
+            title: "Current Designation & Department",
+          },
+          employeeId: { type: "string", title: "Employee ID" },
+          salaryMode: {
+            type: "string",
+            title: "Salary Mode & Salary Account Details",
+          },
+          grossMonthlySalary: {
+            type: "number",
+            title: "Gross Monthly Salary",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
+          },
+          netMonthlySalary: {
+            type: "number",
+            title: "Net Monthly Salary",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
+          },
+          employerLoanDetails: {
+            type: "string",
+            title: "Whether any loan from employer, If Yes please provide details",
+          },
+          employmentTerms: {
+            type: "string",
+            title: "Terms of Employment",
+          },
+          currentEmployerVintage: {
+            type: "string",
+            title: "Vintage with Current Employer",
+          },
+          previousExperienceDetails: {
+            type: "string",
+            title: "Details of previous work experience with number of years of experience (If Applicable)",
+            ui: { widget: "textarea", rows: 2 },
+          },
+          previousExperienceYears: {
+            type: "string",
+            title: "How many Years worked in previous job",
+          },
+          otherIncome: {
+            type: "string",
+            title: "Any other source of Income",
+          },
+          residenceStatus: {
+            type: "string",
+            title: "Existing Residence status (Rented, Self-owned, Parental, Kachaa house/Chawl etc)",
+          },
+          rentExpenses: {
+            type: "string",
+            title: "Rental expenses per month (if existing Residence is rented)",
+          },
+          familyExpenses: {
+            type: "string",
+            title: "Other general family expenses per month",
+          },
+          employmentTPC: {
+            type: "string",
+            title: "Third party check for employment",
+          },
+          employmentDocuments: {
+            title: "Documentary evidence seen for employment, with Period/Validity Date",
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                document: { type: "string", title: "Document" },
+              },
+            },
+          },
+        },
+      },
+    },
+    financialsSchema,
+  ],
+} as const;
+
+export default yesBankSchema;

@@ -18,7 +18,10 @@ const BasicDetailsForm: React.FC<{ form: FormInstance }> = ({ form }) => {
   const maritalStatus = Form.useWatch("maritalStatus", form);
   const category = Form.useWatch("category", form);
   const isApplicantAvailable = Form.useWatch("isApplicantAvailable", form);
-  const availablePersonRelation = Form.useWatch("availablePersonRelation", form);
+  const availablePersonRelation = Form.useWatch(
+    "availablePersonRelation",
+    form
+  );
 
   return (
     <>
