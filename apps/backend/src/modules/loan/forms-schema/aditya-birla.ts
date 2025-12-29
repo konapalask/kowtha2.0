@@ -475,6 +475,8 @@ export const adityaBirlaSchema = {
           totalExpenses: {
             type: "number",
             title: "Total Expenses",
+            formula: "purchaseDetails + rentDetails + salaryAndWagesDetails + transportDetails + electricityDetails + otherExpensesDetails",
+            readOnly: true,
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
@@ -485,6 +487,8 @@ export const adityaBirlaSchema = {
           netProfit: {
             type: "number",
             title: "Net Profit",
+            formula: "salesDetails - totalExpenses",
+            readOnly: true,
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
@@ -492,7 +496,7 @@ export const adityaBirlaSchema = {
               minDecimalPlaces: 0,
             },
           },
-          netMargin: { type: "number", title: "Net Margin" },
+          netMargin: { type: "number", title: "Net Margin", formula: "(netProfit / salesDetails) * 100", readOnly: true },
         },
       },
     },
