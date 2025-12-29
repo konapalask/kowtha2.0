@@ -120,14 +120,6 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
   const loanPurpose = verificationData.loanPurposeAndUse || {};
   const observations = verificationData.observations || {};
 
-
-  const suppliersList = renderList(
-    ensureArray(business.majorSuppliers).map((entry: any) => entry)
-  );
-  const customersList = renderList(
-    ensureArray(business.majorCustomers).map((entry: any) => entry)
-  );
-
   const essQuestionKeys = [
     "entityInvolvementCommercialEtc",
     "entityInvolvementForceLabourEtc",
@@ -213,14 +205,24 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
               <td style="${labelCellStyle}">Occupation</td>
               <td style="${labelCellStyle}">Dependent</td>
             </tr>
-            ${personal?.familyMembers?.map((member: any) => `
+            ${
+              personal?.familyMembers &&
+              Array.isArray(personal.familyMembers) &&
+              personal.familyMembers.length > 0
+                ? personal.familyMembers
+                    .map(
+                      (member: any) => `
               <tr>
-              <td style="${valueCellStyle}">${member.name}</td>
-              <td style="${valueCellStyle}">${member.age} yrs</td>
-              <td style="${valueCellStyle}">${member.occupation}</td>
-              <td style="${valueCellStyle}">${member.isDependent}</td>
+              <td style="${valueCellStyle}">${formatMultiline(member?.name || "")}</td>
+              <td style="${valueCellStyle}">${member?.age ? `${member.age} yrs` : ""}</td>
+              <td style="${valueCellStyle}">${formatMultiline(member?.occupation || "")}</td>
+              <td style="${valueCellStyle}">${formatMultiline(member?.isDependent || "")}</td>
               </tr>
-          `).join("")}
+          `
+                    )
+                    .join("")
+                : `<tr><td style="${valueCellStyle}" colspan="4">Not provided</td></tr>`
+            }
           </table>
         </td>
       </tr>
@@ -378,7 +380,7 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
       )}
       ${renderKeyValueRow(
         "Gross & Net margins % in Business",
-        business.grossMargin+"%",
+        business.grossMargin + "%",
         undefined,
         { colSpan: 3 }
       )}
@@ -390,13 +392,31 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
       )}
       ${renderKeyValueRow(
         "Name and contact no of two major suppliers",
-        business.majorSuppliers?.map((supplier: any) => `${supplier.name} - ${supplier.contactNo}`).join("<br>"),
+        business.majorSuppliers &&
+          Array.isArray(business.majorSuppliers) &&
+          business.majorSuppliers.length > 0
+          ? business.majorSuppliers
+              .map(
+                (supplier: any) =>
+                  `${formatMultiline(supplier?.name || "")} - ${formatMultiline(supplier?.contactNo || "")}`
+              )
+              .join("<br>")
+          : "Not provided",
         undefined,
         { colSpan: 3 }
       )}
       ${renderKeyValueRow(
         "Name and contact no of two major buyers",
-        business.majorCustomers?.map((customer: any) => `${customer.name} - ${customer.contactNo}`).join("<br>"),
+        business.majorCustomers &&
+          Array.isArray(business.majorCustomers) &&
+          business.majorCustomers.length > 0
+          ? business.majorCustomers
+              .map(
+                (customer: any) =>
+                  `${formatMultiline(customer?.name || "")} - ${formatMultiline(customer?.contactNo || "")}`
+              )
+              .join("<br>")
+          : "Not provided",
         undefined,
         { colSpan: 3 }
       )}
@@ -443,12 +463,9 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
     <table style="${tableStyle}">
       <tr><th style="${subHeaderStyle}" colspan="3">Environmental & Social Safeguards (ESS)</th></tr>
       ${renderArrayTable(["#", "Question", "Response"], essRows)}
-      ${renderKeyValueRow(
-        "Others:",
-        ess.otherESSNotes,
-        undefined,
-        { colSpan: 3 }
-      )}
+      ${renderKeyValueRow("Others:", ess.otherESSNotes, undefined, {
+        colSpan: 3,
+      })}
     </table>
   `;
 
@@ -495,23 +512,33 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
         undefined,
         { colSpan: 3 }
       )}
-      ${renderKeyValueRow("Concerns", 
+      ${renderKeyValueRow(
+        "Concerns",
         (() => {
           const text = observations.concerns;
           if (!text) return "Not provided";
-          const lines = String(text).split(/\n+/).filter((line: string) => line.trim().length > 0);
+          const lines = String(text)
+            .split(/\n+/)
+            .filter((line: string) => line.trim().length > 0);
           if (lines.length === 0) return "Not provided";
           return `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;">${lines.map((line: string) => `<li style="margin-left: 8px;">${line.trim()}</li>`).join("")}</ul>`;
-        })(), 
-        undefined, {
-        colSpan: 3,
-      })}
-      ${renderKeyValueRow("Status of PD", html_data.approvedStatus|| "Not provided", undefined, {
-        colSpan: 3,
-      })}
+        })(),
+        undefined,
+        {
+          colSpan: 3,
+        }
+      )}
+      ${renderKeyValueRow(
+        "Status of PD",
+        html_data.approvedStatus || "Not provided",
+        undefined,
+        {
+          colSpan: 3,
+        }
+      )}
       <tr>
         <td style="${labelCellStyle}">PD Conducted By</td>
-        <td style="${valueCellStyle}">Name: ${formatMultiline(html_data.verifierName)}</td>
+        <td style="${valueCellStyle}">Name: ${formatMultiline(html_data.fieldExecutive)}</td>
         <td style="${valueCellStyle}">Designation: ${observations.pdDesignation || "PD Executive"}</td>
       </tr>
       <tr>

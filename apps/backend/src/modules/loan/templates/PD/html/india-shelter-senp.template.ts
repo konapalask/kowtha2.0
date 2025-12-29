@@ -7,7 +7,7 @@ const headerStyle =
 const subHeaderStyle =
   "background:#f7d8c7;color:#4a3426;font-weight:600;font-size:12px;padding:8px;border:1px solid #ccc;text-transform:uppercase";
 const labelCellStyle =
-  "background:#f4f6fb;font-weight:600;color:#1f2d3d;padding:8px;border:1px solid #d0d7de;vertical-align:top;";
+  "background:#f4f6fb;font-weight:600;color:#1f2d3d;padding:8px;border:1px solid #d0d7de;vertical-align:top;width:25%";
 const valueCellStyle =
   "padding:8px;border:1px solid #d0d7de;color:#2f3b52;vertical-align:top;";
 
@@ -165,6 +165,26 @@ export const indiaShelterSenpTemplate = (
     </table>
   `;
 
+  const dependentsRow = `
+    <tr>
+      <td style="${labelCellStyle}">Number of Dependents</td>
+      <td style="${valueCellStyle}"><strong>Children:</strong> ${
+        hasValue(basic.dependentsChildren)
+          ? basic.dependentsChildren
+          : "Not provided"
+      }</td>
+      <td style="${valueCellStyle}"><strong>Adults:</strong> ${
+        hasValue(basic.dependentsAdults)
+          ? basic.dependentsAdults
+          : "Not provided"
+      }</td>
+      <td style="${valueCellStyle}"><strong>Others:</strong> ${
+        hasValue(basic.dependentsOthers)
+          ? basic.dependentsOthers
+          : "Not provided"
+      }</td>
+    </tr>
+  `;
   const basicTable = `
     <table style="${tableStyle}">
       <tr><th style="${subHeaderStyle}" colspan="4">Basic Details</th></tr>
@@ -201,41 +221,19 @@ export const indiaShelterSenpTemplate = (
         undefined,
         { colSpan: 3 }
       )}
-      <tr>
-        <td style="${labelCellStyle}">Number of Dependents</td>
-        <td style="${valueCellStyle}">Children: ${
-            basic.dependentsChildren || "Not provided"
-          }</td>
-        <td style="${valueCellStyle}">Adults: ${basic.dependentsAdults || "Not provided"}</td>
-        <td style="${valueCellStyle}">Others: ${basic.dependentsOthers || "Not provided"}</td>
+      ${dependentsRow}<tr>
+        <td style="${labelCellStyle}">Residence Address & details</td>
+        <td style="${valueCellStyle}" colspan="3">
+          <div style="padding: 4px 0;">
+            <div style="margin-bottom: 8px;"><strong>Address:</strong> ${formatMultiline(residence.residenceAddress)}</div>
+            <div style="margin-bottom: 8px;"><strong>No. of Years at Current Residence:</strong> ${formatMultiline(residence.yearsAtCurrentResidence)}</div>
+            <div style="margin-bottom: 8px;"><strong>Area (in Sq ft):</strong> ${formatMultiline(residence.areaSqft)}</div>
+            <div style="margin-bottom: 8px;"><strong>Monthly Rent & Security Deposit (if Rented):</strong> ${formatMultiline(residence.monthlyRentDeposit)}</div>
+            <div style="margin-bottom: 8px;"><strong>Purchase price & MV (if owned):</strong> ${formatMultiline(residence.purchasePriceMv)}</div>
+            <div style="margin-bottom: 8px;"><strong>Number of Years in Current City:</strong> ${formatMultiline(residence.yearsInCurrentCity)}</div>
+          </div>
+        </td>
       </tr>
-      ${renderKeyValueRow(
-        "Residence Address",
-        residence.residenceAddress,
-        undefined,
-        { colSpan: 3 }
-      )}
-      ${renderKeyValueRow(
-        "No. of Years at Current Residence",
-        residence.yearsAtCurrentResidence,
-        undefined,
-        { colSpan: 3 }
-      )}
-      ${renderKeyValueRow("Area (in Sq ft)", residence.areaSqft, undefined, {
-        colSpan: 3,
-      })}
-      ${renderKeyValueRow(
-        "Monthly Rent & Security Deposit (if rented)",
-        residence.monthlyRentDeposit,
-        undefined,
-        { colSpan: 3 }
-      )}
-      ${renderKeyValueRow(
-        "Purchase price & MV (if owned)",
-        residence.purchasePriceMv,
-        undefined,
-        { colSpan: 3 }
-      )}
       ${renderKeyValueRow(
         "Number of Years in Current City",
         residence.yearsInCurrentCity,

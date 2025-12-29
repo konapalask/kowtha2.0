@@ -130,14 +130,18 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
     <h2 style="margin:24px 0 8px;text-align:center;font-size:20px;font-weight:600;color:#222;"><strong>PERSONAL DISCUSSION REPORT</strong></h2>
     <div class="template-content yes-bank-template">
       <table style="${tableStyle}">
-        ${renderKeyValue("Name of the Main applicant", general.mainApplicantName)}
+        ${renderKeyValue("Name of the Main applicant", general.mainApplicantName, undefined, { colspan: 3 })}
         ${renderKeyValue(
           "PD done with and relation with applicant",
-          general.relationWithApplicant
+          general.relationWithApplicant,
+          undefined,
+          { colspan: 3 }
         )}
         ${renderKeyValue(
           "Address of the visit with landmark",
-          general.addressVisited
+          general.addressVisited,
+          undefined,
+          { colspan: 3 }
         )}
         <tr>
           <td style="${labelCellStyle}">CAS ID</td>
@@ -154,8 +158,8 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
           </td>
           <td style="${labelCellStyle}">Contact number</td>
           <td style="${valueCellStyle}">${formatMultiline(
-    general.applicantContactNumber
-  )}</td>
+            general.applicantContactNumber
+          )}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">Loan applied amount</td>
@@ -176,7 +180,11 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
       </table>
 
       <table style="${tableStyle}">
-            <h3 style="margin:24px 0 8px;font-size:13px;font-weight:600;color:#222;">BASIC DETAILS OF APPLICANT</h3>
+            <h3 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;">BASIC DETAILS OF APPLICANT</h3>
+            <tr>
+              <td style="${labelCellStyle}"><p style="text-align:center;">Particulars</p></td>
+              <td style="${labelCellStyle}"><p style="text-align:center;">Remarks</p></td>
+            </tr>
         <tr>
           <td style="${labelCellStyle}">Applicant <br> &middot; Business <br> &middot; Educational background <br> &middot; Past experience</td>
           <td style="${valueCellStyle}">${formatMultiline(
@@ -337,7 +345,8 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
 
       <p style="margin:0 0 10px 0;font-size:12px;color:#333;">*If stability is less than 3 years at current business premises then capture details of earlier premises as applicable</p>
 
-      <h2 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;">Reference Check Details</h2>
+      <h2 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;">REFERENCE CHECK DETAILS</h2>
+      <h3 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;">Business Ref check</h3>
       ${renderArrayTable(
         [
           "Business Ref check",
@@ -351,6 +360,7 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
         businessRefRows
       )}
 
+      <h3 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;">Residence Ref check</h3>
       ${renderArrayTable(
         [
           "Residence Ref check (if visited)",
@@ -405,38 +415,38 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
       ${pdBaseTemplateFooter(html_data)}
 
       <!-- Annexure 1 – AFHL Cases -->
-      <h2 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;">Annexure 1 – AFHL Cases</h2>
+      <h2 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;text-align:center;"><u><strong>Annexure 1 – AFHL Cases</strong></u></h2>
       <table style="${tableStyle}">
         ${renderKeyValue(
           "Source from which property was identified",
           annexureAfhl.propertyIdentifiedThrough
         )}
         ${renderKeyValue(
-          "Builder / Project / Representative details",
+          "Name of the Builder/ Project/ Builder Representative",
           annexureAfhl.builderDetails
         )}
-        ${renderKeyValue("Type of transaction", annexureAfhl.transactionType)}
+        ${renderKeyValue("Type of Transaction (Purchase, BT/BT+Topup, Construction etc)", annexureAfhl.transactionType)}
         ${renderKeyValue("Type of property", annexureAfhl.propertyType)}
-        ${renderKeyValue("Property details", annexureAfhl.propertyDetails)}
+        ${renderKeyValue("Details of Property (Address/Flat No./Floor/2 BHK, 3 BHK etc./ Stage of completion, Landmark etc.)", annexureAfhl.propertyDetails)}
         ${renderKeyValue(
-          "Total cost of the property",
+          "Total Cost of the Property",
           annexureAfhl.totalPropertyCost,
           formatCurrency
         )}
-        ${renderKeyValue("Source of OCR", annexureAfhl.ocrSource)}
-        ${renderKeyValue("Down payment details", annexureAfhl.downPaymentDone)}
+        ${renderKeyValue("Source of OCR-(Individual Savings, Sale of another property, Other family members help, etc )", annexureAfhl.ocrSource)}
+        ${renderKeyValue("Down payment details (if already done)", annexureAfhl.downPaymentDone)}
         ${renderKeyValue(
-          "Amount of down payment",
+          "Amount of Down Payment",
           annexureAfhl.downPaymentAmount,
           formatCurrency
         )}
         ${renderKeyValue(
-          "Source of funds for down payment",
+          "Source of funds for Down Payment",
           annexureAfhl.downPaymentSource
         )}
-        ${renderKeyValue("Purpose of purchase", annexureAfhl.purposeOfPurchase)}
+        ${renderKeyValue("Purpose of Purchase (Self occupation / Investment)", annexureAfhl.purposeOfPurchase)}
         ${renderKeyValue(
-          "Distance of the property from current business and residence",
+          "Distance of the Property from current business and residence",
           annexureAfhl.distanceFromWork
         )}
         ${renderKeyValue(
@@ -445,7 +455,7 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
         )}
       </table>
 
-      <h2 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;">Annexure 2 – Salaried Profile</h2>
+      <h2 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;text-align:center;"><u><strong>Annexure 2 – Salaried Profile</strong></u></h2>
       <table style="${tableStyle}">
         ${renderKeyValue("Name of the Company", annexureSalaried.companyName)}
         ${renderKeyValue(
@@ -453,68 +463,68 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
           annexureSalaried.companyConstitution
         )}
         ${renderKeyValue(
-          "HR & Reporting Authority contact",
+          "Name & email ID of HR and reporting authority",
           annexureSalaried.hrAndReportingContact
         )}
         ${renderKeyValue(
-          "Employer representative",
+          "Name and designation of person met from Employer side alongwith contact no",
           annexureSalaried.employerContact
         )}
-        ${renderKeyValue("Employer details", annexureSalaried.employerDetails)}
+        ${renderKeyValue("Employer Details (i.e., Years in business, Number of employees, Industry etc.)", annexureSalaried.employerDetails)}
         ${renderKeyValue(
-          "Employment status",
+          "Employment Status (Regular / Contract)",
           annexureSalaried.employmentStatus
         )}
         ${renderKeyValue(
-          "Current designation & department",
+          "Current Designation & Department",
           annexureSalaried.currentDesignation
         )}
         ${renderKeyValue("Employee ID", annexureSalaried.employeeId)}
         ${renderKeyValue(
-          "Salary mode & account details",
+          "Salary Mode & Salary Account Details",
           annexureSalaried.salaryMode
         )}
         ${renderKeyValue(
-          "Gross monthly salary",
+          "Gross Monthly Salary",
           annexureSalaried.grossMonthlySalary,
           formatCurrency
         )}
         ${renderKeyValue(
-          "Net monthly salary",
+          "Net Monthly Salary",
           annexureSalaried.netMonthlySalary,
           formatCurrency
         )}
         ${renderKeyValue(
-          "Loans from employer",
+          "Whether any loan from employer, If Yes please provide details",
           annexureSalaried.employerLoanDetails
         )}
         ${renderKeyValue(
-          "Terms of employment",
+          "Terms of Employment",
           annexureSalaried.employmentTerms
         )}
         ${renderKeyValue(
-          "Vintage with current employer",
+          "Vintage with Current Employer",
           annexureSalaried.currentEmployerVintage
         )}
         ${renderKeyValue(
-          "Previous work experience details",
+          "Details of previous work experience with number of years of experience (If Applicable)",
           annexureSalaried.previousExperienceDetails
         )}
         ${renderKeyValue(
-          "Years worked in previous job",
+          "How many Years worked in previous job",
           annexureSalaried.previousExperienceYears
         )}
-        ${renderKeyValue("Other source of income", annexureSalaried.otherIncome)}
+        ${renderKeyValue("Any other source of Income", annexureSalaried.otherIncome)}
         ${renderKeyValue(
-          "Existing residence status",
+          "Existing Residence status (Rented, Self-owned, Parental, Kachaa house/Chawl etc)",
           annexureSalaried.residenceStatus
         )}
         ${renderKeyValue(
-          "Rental expenses per month",
+          "Rental expenses per month (if existing Residence is rented)",
           annexureSalaried.rentExpenses
         )}
         ${renderKeyValue(
-          "Other family expenses per month",
+          "Other general family expenses per month",
           annexureSalaried.familyExpenses
         )}
         ${renderKeyValue(
@@ -522,7 +532,7 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
           annexureSalaried.employmentTPC
         )}
         ${renderKeyValue(
-          "Documentary evidence seen for employment",
+          "Documentary evidence seen for employment, with Period/Validity Date",
           employmentDocs
         )}
       </table>
@@ -530,6 +540,5 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
 
 
     </div>
-    ${pdBaseTemplateFooter(html_data)}
   `;
 };

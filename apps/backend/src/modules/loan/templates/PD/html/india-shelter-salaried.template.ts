@@ -186,42 +186,20 @@ export const indiaShelterSalariedTemplate = (
         { colSpan: 3 }
       )}
       ${dependentsRow}
-    </table>
-  `;
-
-  const residenceTable = `
-    <table style="${tableStyle}">
-      <tr><th style="${subHeaderStyle}" colspan="4">Residence Address & details</th></tr>
-      ${renderKeyValueRow("Address: ", residence.residenceAddress, undefined, {
-        colSpan: 3,
-      })}
-      ${renderKeyValueRow(
-        "Years at Current Residence",
-        residence.yearsAtCurrentResidence,
-        undefined,
-        { colSpan: 3 }
-      )}
-      ${renderKeyValueRow("Area (in Sq ft)", residence.areaSqft, undefined, {
-        colSpan: 3,
-      })}
-      ${renderKeyValueRow(
-        "Monthly Rent & Security Deposit (if rented)",
-        residence.monthlyRentDeposit,
-        undefined,
-        { colSpan: 3 }
-      )}
-      ${renderKeyValueRow(
-        "Purchase price & MV (if owned)",
-        residence.purchasePriceMv,
-        undefined,
-        { colSpan: 3 }
-      )}
-      ${renderKeyValueRow(
-        "Number of Years in Current City",
-        residence.yearsInCurrentCity,
-        undefined,
-        { colSpan: 3 }
-      )}
+      
+      <tr>
+        <td style="${labelCellStyle}">Residence Address & details</td>
+        <td style="${valueCellStyle}" colspan="3">
+          <div style="padding: 4px 0;">
+            <div style="margin-bottom: 8px;"><strong>Address:</strong> ${formatMultiline(residence.residenceAddress)}</div>
+            <div style="margin-bottom: 8px;"><strong>No. of Years at Current Residence:</strong> ${formatMultiline(residence.yearsAtCurrentResidence)}</div>
+            <div style="margin-bottom: 8px;"><strong>Area (in Sq ft):</strong> ${formatMultiline(residence.areaSqft)}</div>
+            <div style="margin-bottom: 8px;"><strong>Monthly Rent & Security Deposit (if Rented):</strong> ${formatMultiline(residence.monthlyRentDeposit)}</div>
+            <div style="margin-bottom: 8px;"><strong>Purchase price & MV (if owned):</strong> ${formatMultiline(residence.purchasePriceMv)}</div>
+            <div style="margin-bottom: 8px;"><strong>Number of Years in Current City:</strong> ${formatMultiline(residence.yearsInCurrentCity)}</div>
+          </div>
+        </td>
+      </tr>
       ${renderKeyValueRow("Other Income", financial.otherIncome, undefined, {
         colSpan: 3,
       })}
@@ -294,7 +272,9 @@ export const indiaShelterSalariedTemplate = (
     )}
     ${renderKeyValueRow(
       "Usage of Property after Purchase",
-      collateral.usageAfterPurchase === "Others" ? formatMultiline(collateral.usageOtherNotes) : collateral.usageAfterPurchase,
+      collateral.usageAfterPurchase === "Others"
+        ? formatMultiline(collateral.usageOtherNotes)
+        : collateral.usageAfterPurchase,
       undefined,
       { colSpan: 3 }
     )}
@@ -405,13 +385,23 @@ export const indiaShelterSalariedTemplate = (
       )}
       ${renderKeyValueRow(
         "Applicant's Job Profile",
-        employer.jobProfile.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join(""),
+        hasValue(employer.jobProfile)
+          ? employer.jobProfile
+              .split("\n")
+              .map((line: string) => `<ul><li>${line}</li></ul>`)
+              .join("")
+          : formatMultiline(employer.jobProfile),
         undefined,
         { colSpan: 3 }
       )}
       ${renderKeyValueRow(
         "About the company",
-        employer.companyOverview.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join(""),
+        hasValue(employer.companyOverview)
+          ? employer.companyOverview
+              .split("\n")
+              .map((line: string) => `<ul><li>${line}</li></ul>`)
+              .join("")
+          : formatMultiline(employer.companyOverview),
         undefined,
         { colSpan: 3 }
       )}
@@ -543,6 +533,7 @@ export const indiaShelterSalariedTemplate = (
   const tpcTable = `
     <table style="${tableStyle}">
       <tr><th style="${subHeaderStyle}" colspan="5">TPC (Third Party Check) Details</th></tr>
+      <tr><th style="${subHeaderStyle}" colspan="5">Office Reference Checks</th></tr>
       <tr>
         <td style="${labelCellStyle}">Name</td>
         <td style="${labelCellStyle}">Mobile Number</td>
@@ -580,7 +571,7 @@ export const indiaShelterSalariedTemplate = (
       <tr>
         <td style="${labelCellStyle}">Document Type</td>
         <td style="${labelCellStyle}">Original / Copy / Not Provided</td>
-        <td style="${labelCellStyle}">Details Cross Checked</td>
+        <td style="${labelCellStyle}">Details Cross-Checked (Yes / No)</td>
         <td style="${labelCellStyle}">Comments</td>
       </tr>
       ${
@@ -611,24 +602,27 @@ export const indiaShelterSalariedTemplate = (
   const pdReviewTable = `
     <table style="${tableStyle}">
       <tr><th style="${subHeaderStyle}" colspan="4">To be filled by PD officer</th></tr>
-      ${renderKeyValueRow(
-        "Major Observations / Comments / Concerns",
-        pdReview.majorObservations.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join(""),
-        undefined,
-        { colSpan: 3 }
-      )}
-      ${renderKeyValueRow("Case Strengths", pdReview.caseStrengths.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join(""), undefined, {
-        colSpan: 3,
-      })}
-      ${renderKeyValueRow("Case Weakness", pdReview.caseWeakness.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join(""), undefined, {
-        colSpan: 3,
-      })}
+      <tr>
+        <td style="${labelCellStyle}">Major Observations / Comments / Concerns During PD</td>
+         <td style="border:1px solid #ccc;padding:8px" colspan="10">
+          <table style="${tableStyle}">
+            <tr>
+              <td style="${labelCellStyle}">Case Strengths</td>
+              <td style="${valueCellStyle}">${(pdReview.caseStrengths.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join(""))}</td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}">Case Weakness</td>
+              <td style="${valueCellStyle}">${(pdReview.caseWeakness.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join(""))}</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
       <tr>
         <td style="${labelCellStyle}">PD Status</td>
-        <td style="${valueCellStyle}">${html_data.approvedStatus|| "Not provided"}</td>
+        <td style="${valueCellStyle}">${html_data.approvedStatus || "Not provided"}</td>
         <td style="${labelCellStyle}">Name of PD Officer</td>
         <td style="${valueCellStyle}">${formatMultiline(
-          html_data.verifierName
+          html_data.fieldExecutive
         )}</td>
       </tr>
       <tr>
@@ -662,7 +656,6 @@ export const indiaShelterSalariedTemplate = (
     <div class="template-content india-shelter-salaried">
       ${generalTable}
       ${basicDetailsTable}
-      ${residenceTable}
       ${employerTable}
       ${familyMembersTable}
       ${currentLoansTable}

@@ -1,6 +1,15 @@
 import dynamic from "next/dynamic";
 import { useEffect, useState, useRef } from "react";
-import { Table, Card, Button, Space, Tag, Typography, Badge, Input } from "antd";
+import {
+  Table,
+  Card,
+  Button,
+  Space,
+  Tag,
+  Typography,
+  Badge,
+  Input,
+} from "antd";
 import {
   CheckCircleOutlined,
   CheckOutlined,
@@ -49,7 +58,8 @@ export default function Verify() {
   const currentDepartment = useDepartmentChange();
 
   // Search state
-  const [searchApplicationNumber, setSearchApplicationNumber] = useState<string>("");
+  const [searchApplicationNumber, setSearchApplicationNumber] =
+    useState<string>("");
   const [searchApplicantName, setSearchApplicantName] = useState<string>("");
 
   // Pagination state - similar to loans page approach
@@ -61,7 +71,6 @@ export default function Verify() {
     limit: 10,
     totalPages: 0,
   });
-
 
   useEffect(() => {
     if (router.isReady) {
@@ -82,15 +91,17 @@ export default function Verify() {
   }, [router.isReady, router.query.page]);
 
   useEffect(() => {
-    if (!router.isReady) return; 
-    
-    const fetchLoans = async () => {
+    if (!router.isReady) return;
 
-      const pageFromQuery = router.query.page 
-        ? parseInt(router.query.page as string, 10) 
+    const fetchLoans = async () => {
+      const pageFromQuery = router.query.page
+        ? parseInt(router.query.page as string, 10)
         : currentPage;
-      const pageToUse = (!isNaN(pageFromQuery) && pageFromQuery > 0) ? pageFromQuery : currentPage;
-      
+      const pageToUse =
+        !isNaN(pageFromQuery) && pageFromQuery > 0
+          ? pageFromQuery
+          : currentPage;
+
       setLoading(true);
       try {
         const res = await getVerifierLoansApi(pageToUse, pageSize, {
@@ -128,7 +139,14 @@ export default function Verify() {
     };
 
     fetchLoans();
-  }, [router.isReady, router.query.page, currentDepartment, pageSize, searchApplicationNumber, searchApplicantName]);
+  }, [
+    router.isReady,
+    router.query.page,
+    currentDepartment,
+    pageSize,
+    searchApplicationNumber,
+    searchApplicantName,
+  ]);
 
   const getStatusTags = (record: any) => {
     const types = [
@@ -170,6 +188,10 @@ export default function Verify() {
     );
   };
 
+  // Refs for filter inputs to focus them when dropdown opens
+  const applicationNumberInputRef = useRef<any>(null);
+  const applicantNameInputRef = useRef<any>(null);
+
   const columns: ColumnsType<LoanData> = [
     {
       title: "Application Number",
@@ -177,18 +199,31 @@ export default function Verify() {
       key: "applicationNumber",
       width: 150,
       render: (text) => text ?? "-",
-      filterDropdown: () => (
-        <div style={{ padding: 8 }}>
-          <Input
-            placeholder="Search Application Number"
-            prefix={<SearchOutlined />}
-            value={searchApplicationNumber}
-            onChange={(e) => setSearchApplicationNumber(e.target.value)}
-            allowClear
-            style={{ width: 200 }}
-          />
-        </div>
-      ),
+      filterDropdown: () => {
+        return (
+          <div style={{ padding: 8 }}>
+            <Input
+              ref={(input) => {
+                applicationNumberInputRef.current = input;
+                // Focus immediately when ref is set (dropdown is visible when ref callback runs)
+                if (input) {
+                  // Use requestAnimationFrame to ensure DOM is ready
+                  requestAnimationFrame(() => {
+                    input.focus();
+                  });
+                }
+              }}
+              placeholder="Search Application Number"
+              prefix={<SearchOutlined />}
+              value={searchApplicationNumber}
+              onChange={(e) => setSearchApplicationNumber(e.target.value)}
+              allowClear
+              style={{ width: 200 }}
+              autoFocus
+            />
+          </div>
+        );
+      },
       filterIcon: (filtered: boolean) => (
         <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
       ),
@@ -199,18 +234,31 @@ export default function Verify() {
       key: "applicantName",
       width: 150,
       render: (text) => text ?? "-",
-      filterDropdown: () => (
-        <div style={{ padding: 8 }}>
-          <Input
-            placeholder="Search Applicant Name"
-            prefix={<SearchOutlined />}
-            value={searchApplicantName}
-            onChange={(e) => setSearchApplicantName(e.target.value)}
-            allowClear
-            style={{ width: 200 }}
-          />
-        </div>
-      ),
+      filterDropdown: () => {
+        return (
+          <div style={{ padding: 8 }}>
+            <Input
+              ref={(input) => {
+                applicantNameInputRef.current = input;
+                // Focus immediately when ref is set (dropdown is visible when ref callback runs)
+                if (input) {
+                  // Use requestAnimationFrame to ensure DOM is ready
+                  requestAnimationFrame(() => {
+                    input.focus();
+                  });
+                }
+              }}
+              placeholder="Search Applicant Name"
+              prefix={<SearchOutlined />}
+              value={searchApplicantName}
+              onChange={(e) => setSearchApplicantName(e.target.value)}
+              allowClear
+              style={{ width: 200 }}
+              autoFocus
+            />
+          </div>
+        );
+      },
       filterIcon: (filtered: boolean) => (
         <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
       ),
@@ -247,14 +295,15 @@ export default function Verify() {
           record?.department === "FI"
             ? hasFeSubmission
             : hasFeSubmission || enabledStatuses.includes(record?.status ?? "");
-        
+
         return (
           <Button
             type="link"
             icon={<EyeOutlined />}
             onClick={() => {
               if (isEnabled) {
-                record?.id && router?.push?.(`/verify/${record.id}?page=${currentPage}`);
+                record?.id &&
+                  router?.push?.(`/verify/${record.id}?page=${currentPage}`);
               }
             }}
             disabled={!isEnabled}
@@ -269,33 +318,42 @@ export default function Verify() {
   ];
 
   // Table pagination config
-  const paginationConfig = paginationMeta.totalPages > 0
-    ? {
-        current: currentPage,
-        pageSize: paginationMeta.limit,
-        total: paginationMeta.total,
-        showSizeChanger: false,
-        showTotal: (total: number, range: [number, number]) => 
-          `${range[0]}-${range[1]} of ${total} items`,
-        position: ["bottomCenter" as "bottomCenter"],
-        onChange: (page: number) => {
-          setCurrentPage(page);
-          // Update query string
-          router.replace({
-            pathname: router.pathname,
-            query: { ...router.query, page },
-          }, undefined, { shallow: true });
-        },
-      }
-    : false;
+  const paginationConfig =
+    paginationMeta.totalPages > 0
+      ? {
+          current: currentPage,
+          pageSize: paginationMeta.limit,
+          total: paginationMeta.total,
+          showSizeChanger: false,
+          showTotal: (total: number, range: [number, number]) =>
+            `${range[0]}-${range[1]} of ${total} items`,
+          position: ["bottomCenter" as "bottomCenter"],
+          onChange: (page: number) => {
+            setCurrentPage(page);
+            // Update query string
+            router.replace(
+              {
+                pathname: router.pathname,
+                query: { ...router.query, page },
+              },
+              undefined,
+              { shallow: true }
+            );
+          },
+        }
+      : false;
 
   // Reset to first page when search changes
   useEffect(() => {
     setCurrentPage(1);
-    router.replace({
-      pathname: router.pathname,
-      query: { ...router.query, page: 1 },
-    }, undefined, { shallow: true });
+    router.replace(
+      {
+        pathname: router.pathname,
+        query: { ...router.query, page: 1 },
+      },
+      undefined,
+      { shallow: true }
+    );
   }, [searchApplicationNumber, searchApplicantName]);
 
   return (
@@ -344,7 +402,6 @@ export default function Verify() {
           bordered
         />
       </Card>
-
     </DashboardLayout>
   );
 }

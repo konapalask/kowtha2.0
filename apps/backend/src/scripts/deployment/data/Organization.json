@@ -1,0 +1,11 @@
+{
+  "schema": "public",
+  "table": "Organization",
+  "rows": [
+    {
+      "id": 1,
+      "name": "Kowtha & Co",
+      "description": "Loan Verification Portal - FI"
+    }
+  ]
+}

@@ -66,6 +66,10 @@ export const axisAgriSchema = {
             type: "string",
             title: "Name of Person Met",
           },
+          designation: {
+            type: "string",
+            title: "Designation",
+          },
         },
       },
       required: true,
@@ -173,9 +177,44 @@ export const axisAgriSchema = {
             title: "Is it a Takeover?",
           },
           otherLoanObligations: {
-            type: "string",
+            type: "array",
             title: "Any other loan obligations of the firm",
-            ui: { widget: "textarea", rows: 2 },
+            items: {
+              type: "object",
+              properties: {
+                bankName: {
+                  type: "string",
+                  title: "Bank",
+                },
+                loanType: {
+                  type: "string",
+                  title: "Loan Type",
+                },
+                loan: {
+                  type: "number",
+                  title: "Loan",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                  },
+                },
+                emi: {
+                  type: "number",
+                  title: "EMI",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                  },
+                },
+                openClose: {
+                  type: "string",
+                  title: "Open/Close",
+                  enum: ["Open", "Close"],
+                },
+              },
+            },
           },
           currentAccountIfAny: {
             type: "string",
@@ -237,9 +276,33 @@ export const axisAgriSchema = {
             ui: { widget: "textarea", rows: 2 },
           },
           familyBackgroundNetWorth: {
-            type: "string",
+            type: "array",
             title: "Family Background & Net-worth",
-            ui: { widget: "textarea", rows: 2 },
+            items: {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  title: "Name",
+                },
+                relationToApplicant: {
+                  type: "string",
+                  title: "Relationship",
+                },
+                age: {
+                  type: "integer",
+                  title: "Age",
+                },
+                education: {
+                  type: "string",
+                  title: "Education",
+                },
+                occupation: {
+                  type: "string",
+                  title: "Occupation",
+                },
+              },
+            },
           },
           businessSuccessionPlan: {
             type: "string",
@@ -270,11 +333,6 @@ export const axisAgriSchema = {
             type: "string",
             title: "PD Final Status",
             enum: ["Positive", "Negative", "Credit Refer"],
-          },
-          pdVendorDetails: {
-            type: "string",
-            title: "PD Vendor Name & Address",
-            ui: { widget: "textarea", rows: 2 },
           },
         },
       },
