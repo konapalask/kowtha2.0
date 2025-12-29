@@ -5024,18 +5024,17 @@ export const BusinessVerificationDetails: React.FC<
               const isNetProfitAbove10Lakh =
                 netProfitNum !== null && netProfitNum > 1000000;
 
-              const shouldBeReadOnly = isNetProfitAbove10Lakh
-                ? hasEditRequest 
-                : role === "VerificationExecutive"
-                ? hasEditRequest
-                : !!verificationData?.approvedStatus || hasEditRequest;
-
               return (
                 <CollapsibleFormSections
                   schema={schemaForm}
                   formData={dynamicFormData}
                   onEdit={handleDynamicSectionEdit}
-                  readOnly={shouldBeReadOnly}
+                  readOnly={
+                    isNetProfitAbove10Lakh ||
+                    (role === "VerificationExecutive"
+                      ? hasEditRequest
+                      : !!verificationData?.approvedStatus || hasEditRequest) // Others follow original logic
+                  }
                   activeSections={activeSections}
                   setActiveSections={setActiveSections}
                   role={role}
