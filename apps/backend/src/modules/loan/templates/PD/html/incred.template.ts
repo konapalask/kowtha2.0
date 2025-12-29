@@ -160,21 +160,21 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
                         <td style="${valueCellStyle}">${formatCurrency(debtorsCreditorsStock.debtors.fy2020to2021)}</td>
                         <td style="${valueCellStyle}">${formatMultiline(debtorsCreditorsStock.debtors.currentPeriodOrAtTimeOfPd)}</td>
                         <td style="${valueCellStyle}">Credit Period allowed to Debtors</td>
-                        <td style="${valueCellStyle}">${debtorsCreditorsStock.debtors.noOfDays}</td>
+                        <td style="${valueCellStyle}">${formatMultiline(debtorsCreditorsStock.debtors.noOfDays)}</td>
                     </tr>
                     <tr>
                         <td style="${labelCellStyle}">Creditors</td>
                         <td style="${valueCellStyle}">${formatCurrency(debtorsCreditorsStock.creditors.fy2020to2021)}</td>
                         <td style="${valueCellStyle}">${formatMultiline(debtorsCreditorsStock.creditors.currentPeriodOrAtTimeOfPd)}</td>
                         <td style="${valueCellStyle}">Credit Period allowed by Creditors/Supplies</td>
-                        <td style="${valueCellStyle}">${debtorsCreditorsStock.creditors.noOfDays}</td>
+                        <td style="${valueCellStyle}">${formatMultiline(debtorsCreditorsStock.creditors.noOfDays)}</td>
                     </tr>
                     <tr>
                         <td style="${labelCellStyle}">Stock</td>
                         <td style="${valueCellStyle}">${formatCurrency(debtorsCreditorsStock.stock.fy2020to2021)}</td>
                         <td style="${valueCellStyle}">${formatMultiline(debtorsCreditorsStock.stock.currentPeriodOrAtTimeOfPd)}</td>
                         <td style="${valueCellStyle}">Credit Period allowed by Creditors/Supplies</td>
-                        <td style="${valueCellStyle}">${debtorsCreditorsStock.stock.noOfDays}</td>
+                        <td style="${valueCellStyle}">${formatMultiline(debtorsCreditorsStock.stock.noOfDays)}</td>
                     </tr>
                 </table>
             </td>
