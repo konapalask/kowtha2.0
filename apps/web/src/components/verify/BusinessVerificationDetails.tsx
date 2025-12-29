@@ -2687,7 +2687,6 @@ export const BusinessVerificationDetails: React.FC<
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [formValues, isActive]);
-
     const calculateFormulasInArrayItem = (
       arrayField: any,
       arrayIndex: number,
@@ -3138,6 +3137,14 @@ export const BusinessVerificationDetails: React.FC<
               readOnly={readOnly}
               setSectionUncommittedChanges={setSectionUncommittedChanges}
               sectionId={section.id}
+              onArrayTotalsChange={(totals) => {
+                if (section.id === "existingLoanDetails" && fieldId === "loans") {
+                  form.setFieldsValue({
+                    totalLoanAmount: totals.totalLoanAmount,
+                    totalEmi: totals.totalEmi,
+                  });
+                }
+              }}
             />
           </div>
         );
@@ -4047,12 +4054,14 @@ export const BusinessVerificationDetails: React.FC<
     readOnly,
     setSectionUncommittedChanges,
     sectionId,
+    onArrayTotalsChange,
   }: {
     field: any;
     data: any;
     readOnly: boolean;
     setSectionUncommittedChanges: (fn: (prev: any) => any) => void;
     sectionId: string;
+    onArrayTotalsChange?: (totals: { totalLoanAmount: number; totalEmi: number }) => void;
   }) => {
     // Ensure data is an array and add unique IDs if missing
     const ensureArrayWithIds = (arrayData: any[]) => {
@@ -4243,6 +4252,33 @@ export const BusinessVerificationDetails: React.FC<
             [field.id]: arrayData,
           },
         }));
+
+        if (
+          onArrayTotalsChange &&
+          sectionId === "existingLoanDetails" &&
+          field.id === "loans"
+        ) {
+          let totalLoanAmount = 0;
+          let totalEmi = 0;
+          arrayData.forEach((loan) => {
+            if (loan && typeof loan === "object") {
+              const loanAmount =
+                typeof loan.loanAmount === "number"
+                  ? loan.loanAmount
+                  : parseFloat(String(loan.loanAmount || 0).replace(/,/g, "")) || 0;
+              const emi =
+                typeof loan.emi === "number"
+                  ? loan.emi
+                  : parseFloat(String(loan.emi || 0).replace(/,/g, "")) || 0;
+              if (!isNaN(loanAmount)) totalLoanAmount += loanAmount;
+              if (!isNaN(emi)) totalEmi += emi;
+            }
+          });
+          onArrayTotalsChange({
+            totalLoanAmount,
+            totalEmi,
+          });
+        }
       },
       [
         field.id,
