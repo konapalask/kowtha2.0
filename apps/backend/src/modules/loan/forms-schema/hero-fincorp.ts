@@ -139,6 +139,23 @@ export const heroFincorpSchema = {
       },
     },
     {
+      id: "residentialAddress",
+      label: "Residential Address",
+      schema: {
+        type: "object",
+        properties: {
+          residentialAddress: {
+            type: "string",
+            title: "Residential Address",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
+        },
+      },
+    },
+    {
       id: "businessProfile",
       label: "About the Business",
       schema: {
@@ -199,6 +216,20 @@ export const heroFincorpSchema = {
       },
     },
     {
+      id: "itrFilling",
+      label: "ITR’s filling U/s 44AD",
+      schema: {
+        type: "object",
+        properties: {
+          itrFilling: {
+            type: "string",
+            title: "ITR’s filling U/s 44AD",
+            enum: ["Yes", "No"],
+          },
+        },
+      },
+    },
+    {
       id: "documentsObserved",
       label: "Documents Observed",
       schema: {
@@ -233,14 +264,14 @@ export const heroFincorpSchema = {
       },
     },
     {
-      id: "relationships",
-      label: "Customers & Purchase References",
+      id: "majorSuppliers",
+      label: "Major Suppliers",
       schema: {
         type: "object",
         properties: {
-          customers: {
+          majorSuppliers: {
             type: "array",
-            title: "Customers",
+            title: "Major Suppliers",
             items: {
               type: "object",
               properties: {
@@ -252,12 +283,25 @@ export const heroFincorpSchema = {
                   type: "integer",
                   title: "Contact Number",
                 },
+                address: {
+                  type: "string",
+                  title: "Address",
+                },
               },
             },
           },
-          purchaseReferences: {
+        },
+      },
+    },
+    {
+      id: "majorCustomers",
+      label: "Major Customers",
+      schema: {
+        type: "object",
+        properties: {
+          majorCustomers: {
             type: "array",
-            title: "Purchase References",
+            title: "Major Customers",
             items: {
               type: "object",
               properties: {
@@ -269,17 +313,48 @@ export const heroFincorpSchema = {
                   type: "integer",
                   title: "Contact Number",
                 },
+                address: {
+                  type: "string",
+                  title: "Address",
+                },
               },
             },
           },
+        },
+      },
+    },
+    {
+      id: "margins",
+      label: "Margins",
+      schema: {
+        type: "object",
+        properties: {
           margins: {
             type: "string",
             title: "Margins",
           },
-          employeesCount: {
+        },
+      },
+    },
+    {
+      id: "employees",
+      label: "Employees",
+      schema: {
+        type: "object",
+        properties: {
+          employees: {
             type: "string",
             title: "Employees",
           },
+        },
+      },
+    },
+    {
+      id: "assets",
+      label: "Assets",
+      schema: {
+        type: "object",
+        properties: {
           assets: {
             type: "string",
             title: "Assets",
@@ -378,6 +453,14 @@ export const heroFincorpSchema = {
           concerns: {
             type: "string",
             title: "Concerns",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
+          tpcDetails: {
+            type: "string",
+            title: "TPC (Third Party check) Details",
             ui: {
               widget: "textarea",
               rows: 3,
