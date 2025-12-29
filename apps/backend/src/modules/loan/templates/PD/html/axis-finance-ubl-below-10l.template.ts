@@ -317,7 +317,7 @@ export const axisFinanceUBLBelow10lTemplate = (
       </tr>
       <tr>
         <td style="${labelCellStyle}">AFL Verifier's Name & Emp Code</td>
-        <td style="${cellStyle}">${aflVerifierNameAndEmpCode?.aflVerifierName || "Not provided"} ${aflVerifierNameAndEmpCode?.aflVerifierEmpCode ? "-"+aflVerifierNameAndEmpCode?.aflVerifierEmpCode : ""}</td>
+        <td style="${cellStyle}">${aflVerifierNameAndEmpCode?.aflVerifierName || "Not provided"} ${aflVerifierNameAndEmpCode?.aflVerifierEmpCode ? "- "+aflVerifierNameAndEmpCode?.aflVerifierEmpCode : ""}</td>
         <td style="${labelCellStyle}">PD Officer Signature</td> 
         <td style="${cellStyle}"></td>
       </tr>
