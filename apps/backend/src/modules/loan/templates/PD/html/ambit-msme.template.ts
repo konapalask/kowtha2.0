@@ -181,7 +181,7 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
         ${renderKeyValue("Type of Loan", generalInfo.typeOfLoan)}
         ${renderKeyValue("No. of Visit", generalInfo.noOfVisit)}
         ${renderKeyValue("Person Met (With name and Relation)", generalInfo.personMet)}
-        ${renderKeyValue("PD Done Person name", generalInfo.pdDoneBy)}
+        ${renderKeyValue("PD Done Person name", generalInfo.interviewedBy)}
         </table>
 
         <table class="section-table">
