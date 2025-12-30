@@ -734,13 +734,9 @@ export const tataUblSchema = {
             title: "Date of PD",
             format: "date-time",
           },
-          interviewedBy: {
+          personMet: {
             type: "string",
             title: "Person met at the time of PD",
-          },
-          personDesignation: {
-            type: "string",
-            title: "Person Designation",
           },
           phoneNoOfApplicant: {
             type: "integer",
@@ -756,9 +752,14 @@ export const tataUblSchema = {
             type: "string",
             title: "Video Link",
           },
+          personDesignation: {
+            type: "string",
+            title: "Interviewer's designation",
+          },
         },
       },
     },
+    
 
     financialsSchema,
   ],
