@@ -526,7 +526,7 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
         </tr>
         <tr>
           <td style="${labelCellStyle}">Name of Agency Executive</td>
-          <td style="${valueCellStyle}">${otherObservations?.nameOfAgencyExecutive || "Not provided"}</td>
+          <td style="${valueCellStyle}">${otherObservations?.interviewedBy || "Not provided"}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">Date & Time of Visit</td>

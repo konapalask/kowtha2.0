@@ -343,7 +343,7 @@ export const iiflTemplate = (verificationData: any, html_data: any) => {
       <table style="${tableStyle}">
         <tr>
           <td style="${labelCellStyle}">Name of PD Officer</td>
-          <td style="${valueCellStyle}">${html_data.verifierName}</td>
+          <td style="${valueCellStyle}">${html_data.fieldExecutive}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">Date of Discussion</td>
