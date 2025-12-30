@@ -98,7 +98,7 @@ const renderInnerTable = (headers: string[], rows: string[][]) => {
 };
 
 const sectionTitle = (text: string) =>
-  `<h2 style="margin:18px 0 6px 0;font-size:14px;font-weight:600;color:#1f2d3d;text-transform:uppercase;">${text}</h2>`;
+  `<h2 style="margin:18px 0 6px 0;font-size:14px;font-weight:600;color:#1f2d3d;text-transform:uppercase;"><u>${text}</u></h2>`;
 
 export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
   const basic = verificationData.basicDetails || {};
