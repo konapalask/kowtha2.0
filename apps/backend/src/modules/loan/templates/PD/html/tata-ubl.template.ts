@@ -601,7 +601,7 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                 </tr>
                 <tr>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>32</strong></p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Person met at the<br />time of PD:</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Person met at the time of PD:</strong></p></td>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.otherObservations?.personMet || ""}</p></td>
                 </tr>
                 <tr>
@@ -630,7 +630,7 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
             <p style="margin:8px 0;line-height:1.5;text-align:center">(For Tata Capital Financial Services Limited)</p>
             <p style="margin:8px 0;line-height:1.5">I, the undersigned, have applied for Micro Business Loan with Tata Capital Limited. In this regard, I have met ${html_data?.fieldExecutive || ""} from Kowtha & Co, on ${verificationData.basicDetails?.pdDate || istDate.split(" ")[0]} at ${verificationData.basicDetails?.pdTime || ""} for Personal Discussion.</p>
             <p style="margin:8px 0;line-height:1.5">I am informed that Executive is not authorized to collect any money. </p>
-            <p style="margin:8px 0;line-height:1.5"><strong>Person Interviewed / Met:</strong> ${verificationData.otherObservations?.interviewedBy || ""}</p>
+            <p style="margin:8px 0;line-height:1.5"><strong>Person Interviewed / Met:</strong> ${html_data.fieldExecutive || ""}</p>
             <p style="margin:8px 0;line-height:1.5"><strong>Designation:</strong> ${verificationData.otherObservations?.personDesignation || ""}</p>
             <p style="margin:8px 0;line-height:1.5"><strong>Sign:</strong> </p>
 
