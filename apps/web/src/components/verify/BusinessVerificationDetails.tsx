@@ -3143,7 +3143,7 @@ export const BusinessVerificationDetails: React.FC<
               setSectionUncommittedChanges={setSectionUncommittedChanges}
               sectionId={section.id}
               onArrayTotalsChange={(totals) => {
-                if (section.id === "existingLoanDetails" && fieldId === "loans") {
+                if (section.id === "existingLoanDetails" && (fieldId === "loans" || fieldId === "loanDetails")) {
                   form.setFieldsValue({
                     totalLoanAmount: totals.totalLoanAmount,
                     totalEmi: totals.totalEmi,
@@ -4261,7 +4261,7 @@ export const BusinessVerificationDetails: React.FC<
         if (
           onArrayTotalsChange &&
           sectionId === "existingLoanDetails" &&
-          field.id === "loans"
+          (field.id === "loans" || field.id === "loanDetails")
         ) {
           let totalLoanAmount = 0;
           let totalEmi = 0;
@@ -4271,10 +4271,13 @@ export const BusinessVerificationDetails: React.FC<
                 typeof loan.loanAmount === "number"
                   ? loan.loanAmount
                   : parseFloat(String(loan.loanAmount || 0).replace(/,/g, "")) || 0;
+              
+              const emiValue = loan.emi !== undefined ? loan.emi : loan.emiInterest;
               const emi =
-                typeof loan.emi === "number"
-                  ? loan.emi
-                  : parseFloat(String(loan.emi || 0).replace(/,/g, "")) || 0;
+                typeof emiValue === "number"
+                  ? emiValue
+                  : parseFloat(String(emiValue || 0).replace(/,/g, "")) || 0;
+              
               if (!isNaN(loanAmount)) totalLoanAmount += loanAmount;
               if (!isNaN(emi)) totalEmi += emi;
             }
