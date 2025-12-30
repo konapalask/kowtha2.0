@@ -401,7 +401,7 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
         </tr>
         ${renderKeyValue(
           "PD agency Interviewer’s Name",
-          finalComment.pdAgencyInterviewer
+          finalComment.nameOfInterviewer
         )}
         ${renderKeyValue("Report processed by", finalComment.reportProcessedBy)}
   </table>
@@ -452,6 +452,10 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
         ${renderKeyValue(
           "If distance is more than 15-20Km from work place provide details of commute plan / reason for buying in far area",
           annexureAfhl.commutePlan
+        )}
+        ${renderKeyValue(
+          "How borrower intend to commute from workplace to home in far area.",
+          annexureAfhl.howBorrowerIntendToCommute
         )}
       </table>
 

@@ -1024,6 +1024,10 @@ export const niwasSenpSchema = {
             title: "Concerns",
             ui: { widget: "textarea", rows: 2 },
           },
+          nameofInterviewer: {
+            type: "string",
+            title: "Name of Interviewer",
+          },
           discussionDate: { type: "date", title: "Date of Discussion" },
         },
       },
