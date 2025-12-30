@@ -734,7 +734,7 @@ export const tataUblSchema = {
             title: "Date of PD",
             format: "date-time",
           },
-          personMet: {
+          interviewedBy: {
             type: "string",
             title: "Person met at the time of PD",
           },
