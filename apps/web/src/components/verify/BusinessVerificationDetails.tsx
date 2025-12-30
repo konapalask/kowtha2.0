@@ -971,7 +971,12 @@ export const BusinessVerificationDetails: React.FC<
 
       message.success("Verification submitted successfully!");
 
-      router.push(`/verify`);
+      const page = router.query.page;
+      if (page) {
+        router.push({ pathname: "/verify", query: { page: page.toString() } });
+      } else {
+        router.push("/verify");
+      }
     } catch (error: any) {
       console.error("Error submitting verification executive data:", error);
       const errorMessage =
@@ -5060,13 +5065,14 @@ export const BusinessVerificationDetails: React.FC<
               const isNetProfitAbove10Lakh =
                 netProfitNum !== null && netProfitNum > 1000000;
 
+              const shouldBeReadOnlyDueToNetProfit = isNetProfitAbove10Lakh && hasEditRequest;
               return (
                 <CollapsibleFormSections
                   schema={schemaForm}
                   formData={dynamicFormData}
                   onEdit={handleDynamicSectionEdit}
                   readOnly={
-                    isNetProfitAbove10Lakh ||
+                    shouldBeReadOnlyDueToNetProfit ||
                     (role === "VerificationExecutive"
                       ? hasEditRequest
                       : !!verificationData?.approvedStatus || hasEditRequest) // Others follow original logic
