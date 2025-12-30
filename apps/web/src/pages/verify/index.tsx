@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import {
   Table,
   Card,
@@ -82,7 +82,6 @@ export default function Verify() {
           });
         }
       } else {
-        // If no page in query, reset to page 1
         setCurrentPage((prevPage) => {
           return prevPage !== 1 ? 1 : prevPage;
         });
@@ -90,54 +89,61 @@ export default function Verify() {
     }
   }, [router.isReady, router.query.page]);
 
-  useEffect(() => {
+  const fetchLoans = useCallback(async (page?: number) => {
     if (!router.isReady) return;
 
-    const fetchLoans = async () => {
-      const pageFromQuery = router.query.page
-        ? parseInt(router.query.page as string, 10)
-        : currentPage;
-      const pageToUse =
-        !isNaN(pageFromQuery) && pageFromQuery > 0
-          ? pageFromQuery
-          : currentPage;
-
-      setLoading(true);
-      try {
-        const res = await getVerifierLoansApi(pageToUse, pageSize, {
-          applicationNumber: searchApplicationNumber,
-          applicantName: searchApplicantName,
-        });
-        // Handle new API response structure: {items: [...], meta: {...}}
-        const responseData = res?.data?.data || res?.data || res;
-        const items = responseData?.items || responseData?.data || [];
-        const meta = responseData?.meta || {
-          total: items.length,
-          page: pageToUse,
-          limit: pageSize,
-          totalPages: Math.ceil(items.length / pageSize),
-        };
-
-        setLoans(Array.isArray(items) ? items : []);
-        setPaginationMeta(meta);
-        // Ensure currentPage state matches the page we actually fetched
-        if (pageToUse !== currentPage) {
-          setCurrentPage(pageToUse);
-        }
-      } catch (err) {
-        console.log(err);
-        setLoans([]);
-        setPaginationMeta({
-          total: 0,
-          page: 1,
-          limit: pageSize,
-          totalPages: 0,
-        });
-      } finally {
-        setLoading(false);
+    let pageToUse = 1;
+    
+    if (page !== undefined) {
+      pageToUse = page;
+    } else if (router.query.page) {
+      const pageFromQuery = parseInt(router.query.page as string, 10);
+      if (!isNaN(pageFromQuery) && pageFromQuery > 0) {
+        pageToUse = pageFromQuery;
       }
-    };
+    }
 
+    setLoading(true);
+    try {
+      const res = await getVerifierLoansApi(pageToUse, pageSize, {
+        applicationNumber: searchApplicationNumber,
+        applicantName: searchApplicantName,
+      });
+      const responseData = res?.data?.data || res?.data || res;
+      const items = responseData?.items || responseData?.data || [];
+      const meta = responseData?.meta || {
+        total: items.length,
+        page: pageToUse,
+        limit: pageSize,
+        totalPages: Math.ceil(items.length / pageSize),
+      };
+
+      setLoans(Array.isArray(items) ? items : []);
+      setPaginationMeta(meta);
+      setCurrentPage(pageToUse);
+    } catch (err) {
+      console.log(err);
+      setLoans([]);
+      setPaginationMeta({
+        total: 0,
+        page: 1,
+        limit: pageSize,
+        totalPages: 0,
+      });
+      setCurrentPage(1);
+    } finally {
+      setLoading(false);
+    }
+  }, [
+    router.isReady,
+    router.query.page,
+    currentDepartment,
+    pageSize,
+    searchApplicationNumber,
+    searchApplicantName,
+  ]);
+
+  useEffect(() => {
     fetchLoans();
   }, [
     router.isReady,
@@ -146,6 +152,7 @@ export default function Verify() {
     pageSize,
     searchApplicationNumber,
     searchApplicantName,
+    fetchLoans,
   ]);
 
   const getStatusTags = (record: any) => {
@@ -330,7 +337,6 @@ export default function Verify() {
           position: ["bottomCenter" as "bottomCenter"],
           onChange: (page: number) => {
             setCurrentPage(page);
-            // Update query string
             router.replace(
               {
                 pathname: router.pathname,
@@ -339,6 +345,7 @@ export default function Verify() {
               undefined,
               { shallow: true }
             );
+            fetchLoans(page);
           },
         }
       : false;

@@ -971,7 +971,12 @@ export const BusinessVerificationDetails: React.FC<
 
       message.success("Verification submitted successfully!");
 
-      router.push(`/verify`);
+      const page = router.query.page;
+      if (page) {
+        router.push({ pathname: "/verify", query: { page: page.toString() } });
+      } else {
+        router.push("/verify");
+      }
     } catch (error: any) {
       console.error("Error submitting verification executive data:", error);
       const errorMessage =
