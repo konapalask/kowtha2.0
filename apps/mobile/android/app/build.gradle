@@ -87,6 +87,11 @@ android {
         
         // Set default dimension strategy so React Native CLI knows which variant to use
         missingDimensionStrategy "env", "internal"
+        
+        // Exclude x86 and x86_64 architectures to avoid 16KB page size issue with libandroidlame.so
+        ndk {
+            abiFilters "armeabi-v7a", "arm64-v8a"
+        }
     }
     signingConfigs {
         debug {
@@ -96,7 +101,7 @@ android {
             keyPassword 'android'
         }
         release {
-             storeFile file(MYAPP_UPLOAD_STORE_FILE)
+            storeFile file(MYAPP_UPLOAD_STORE_FILE)
             storePassword MYAPP_UPLOAD_STORE_PASSWORD
             keyAlias MYAPP_UPLOAD_KEY_ALIAS
             keyPassword MYAPP_UPLOAD_KEY_PASSWORD
@@ -114,7 +119,8 @@ android {
         
         client {
             dimension "env"
-            applicationIdSuffix ".client"
+            // No suffix for client - both debug and release will use com.beyondscale.kowthafi
+            // This ensures client release is exactly com.beyondscale.kowthafi as required
             buildConfigField "boolean", "IS_INTERNAL", "false"
         }
     }
@@ -129,7 +135,8 @@ android {
             signingConfig signingConfigs.release
             minifyEnabled false  // Enable code shrinking
             shrinkResources false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'}
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
     }
 }
 
@@ -157,7 +164,7 @@ dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
     implementation 'androidx.activity:activity:1.7.0'
-implementation 'androidx.activity:activity-ktx:1.7.0'
+    implementation 'androidx.activity:activity-ktx:1.7.0'
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
