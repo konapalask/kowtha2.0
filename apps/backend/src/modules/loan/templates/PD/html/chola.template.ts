@@ -155,17 +155,6 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
       formatMultiline(loan?.tenureTotalCompleted || loan?.tenure || ""),
     ]
   );
-
-  // Calculate total EMI
-  const totalEMI = existingLoansArray.reduce((sum: number, loan: any) => {
-    const emiValue = loan?.emiInterest || loan?.emi || loan?.emiAmount;
-    if (hasValue(emiValue)) {
-      const numeric = Number(emiValue);
-      return sum + (Number.isNaN(numeric) ? 0 : numeric);
-    }
-    return sum;
-  }, 0);
-
   // Handle nested structures for banking details
   const bankingDetailsData = verificationData.bankingDetails || {};
   const bankingDetailsArray = Array.isArray(bankingDetailsData)
@@ -316,7 +305,7 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
           <td style="${valueCellStyle}"></td>
           <td style="${valueCellStyle}"></td>
           <td style="${labelCellStyle};font-weight:bold;background:#f5f5f5;">Total EMI</td>
-          <td style="${valueCellStyle}">${formatCurrency(existingLoansData?.totalEMI)}</td>
+          <td style="${valueCellStyle}">${formatCurrency(existingLoansData?.totalEmi)}</td>
           <td style="${valueCellStyle}"></td>
         </tr>`;
         return `

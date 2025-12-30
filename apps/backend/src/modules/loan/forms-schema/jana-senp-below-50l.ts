@@ -1236,7 +1236,7 @@ export const janaSenpBelow50lSchema = {
       schema: {
         type: "object",
         properties: {
-          interviewerName: { type: "string", title: "Interviewer Name" },
+          nameOfInterviewer: { type: "string", title: "Interviewer Name" },
           dateAndTimeOfInterview: {
             type: "string",
             title: "Visit Date and Time",

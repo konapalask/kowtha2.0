@@ -940,7 +940,7 @@ export const janaSenpBelow50lTemplate = (
               <td style="${labelCellStyle}">Visit Date and Time</td>
             </tr>
             <tr>
-              <td style="${valueCellStyle}">${interviewerDetails?.interviewerName}</td>
+              <td style="${valueCellStyle}">${interviewerDetails?.nameOfInterviewer}</td>
               <td style="${valueCellStyle}">${interviewerDetails?.dateAndTimeOfInterview}</td>
             </tr>
           </table>

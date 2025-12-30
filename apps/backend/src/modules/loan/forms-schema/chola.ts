@@ -621,12 +621,14 @@ export const cholaSchema = {
           netProfitExpenditure: {
             type: "number",
             title: "Net Profit",
+            formula: "totalNetProfitIncome - (salaries + rentExpenses + electricity + transportOrTravelling + generalExpenses + maintenanceExpenses + otherIndirectExpenses)",
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
               maxDecimalPlaces: 2,
               minDecimalPlaces: 0,
             },
+            readOnly: true,
           },
           totalNetProfitExpenditure: {
             type: "number",
