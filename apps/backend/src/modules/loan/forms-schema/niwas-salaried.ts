@@ -801,6 +801,10 @@ export const niwasSalariedSchema = {
             title: "Brief Comments / Observations of the case",
             ui: { widget: "textarea", rows: 4 },
           },
+          nameofInterviewer: {
+            type: "string",
+            title: "Name of Interviewer",
+          },
           discussionDate: {
             type: "string",
             title: "Date of Discussion",
