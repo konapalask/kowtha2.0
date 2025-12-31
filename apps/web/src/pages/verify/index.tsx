@@ -61,6 +61,7 @@ export default function Verify() {
   const [searchApplicationNumber, setSearchApplicationNumber] =
     useState<string>("");
   const [searchApplicantName, setSearchApplicantName] = useState<string>("");
+  const [activeSearchField, setActiveSearchField] = useState<string | null>(null);
 
   // Pagination state - similar to loans page approach
   const pageSize = 10;
@@ -195,80 +196,98 @@ export default function Verify() {
     );
   };
 
-  // Refs for filter inputs to focus them when dropdown opens
   const applicationNumberInputRef = useRef<any>(null);
   const applicantNameInputRef = useRef<any>(null);
 
+  useEffect(() => {
+    if (activeSearchField === "applicationNumber" && applicationNumberInputRef.current) {
+      setTimeout(() => {
+        applicationNumberInputRef.current?.focus();
+      }, 100);
+    } else if (activeSearchField === "applicantName" && applicantNameInputRef.current) {
+      setTimeout(() => {
+        applicantNameInputRef.current?.focus();
+      }, 100);
+    }
+  }, [activeSearchField]);
+
   const columns: ColumnsType<LoanData> = [
     {
-      title: "Application Number",
-      dataIndex: "applicationNumber",
-      key: "applicationNumber",
-      width: 150,
-      render: (text) => text ?? "-",
-      filterDropdown: () => {
-        return (
-          <div style={{ padding: 8 }}>
+      title: (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+          {activeSearchField === "applicationNumber" ? (
             <Input
-              ref={(input) => {
-                applicationNumberInputRef.current = input;
-                // Focus immediately when ref is set (dropdown is visible when ref callback runs)
-                if (input) {
-                  // Use requestAnimationFrame to ensure DOM is ready
-                  requestAnimationFrame(() => {
-                    input.focus();
-                  });
-                }
-              }}
+              ref={applicationNumberInputRef}
               placeholder="Search Application Number"
               prefix={<SearchOutlined />}
               value={searchApplicationNumber}
               onChange={(e) => setSearchApplicationNumber(e.target.value)}
-              allowClear
-              style={{ width: 200 }}
-              autoFocus
-            />
-          </div>
-        );
-      },
-      filterIcon: (filtered: boolean) => (
-        <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
-      ),
-    },
-    {
-      title: "Applicant Name",
-      dataIndex: "applicantName",
-      key: "applicantName",
-      width: 150,
-      render: (text) => text ?? "-",
-      filterDropdown: () => {
-        return (
-          <div style={{ padding: 8 }}>
-            <Input
-              ref={(input) => {
-                applicantNameInputRef.current = input;
-                // Focus immediately when ref is set (dropdown is visible when ref callback runs)
-                if (input) {
-                  // Use requestAnimationFrame to ensure DOM is ready
-                  requestAnimationFrame(() => {
-                    input.focus();
-                  });
+              onBlur={() => {
+                if (!searchApplicationNumber) {
+                  setActiveSearchField(null);
                 }
               }}
+              allowClear
+              style={{ width: "100%" }}
+              autoFocus
+            />
+          ) : (
+            <>
+              <span>Application Number</span>
+              <SearchOutlined
+                style={{
+                  color: searchApplicationNumber ? "#1890ff" : undefined,
+                  cursor: "pointer",
+                }}
+                onClick={() => setActiveSearchField("applicationNumber")}
+              />
+            </>
+          )}
+        </div>
+      ),
+      dataIndex: "applicationNumber",
+      key: "applicationNumber",
+      width: 200,
+      render: (text) => text ?? "-",
+    },
+    {
+      title: (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+          {activeSearchField === "applicantName" ? (
+            <Input
+              ref={applicantNameInputRef}
               placeholder="Search Applicant Name"
               prefix={<SearchOutlined />}
               value={searchApplicantName}
               onChange={(e) => setSearchApplicantName(e.target.value)}
+              onBlur={() => {
+
+                if (!searchApplicantName) {
+                  setActiveSearchField(null);
+                }
+              }}
               allowClear
-              style={{ width: 200 }}
+              style={{ width: "100%" }}
               autoFocus
             />
-          </div>
-        );
-      },
-      filterIcon: (filtered: boolean) => (
-        <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
+          ) : (
+            <>
+              <span>Applicant Name</span>
+              <SearchOutlined
+                style={{
+                  color: searchApplicantName ? "#1890ff" : undefined,
+                  cursor: "pointer",
+                }}
+                onClick={() => setActiveSearchField("applicantName")}
+              />
+            </>
+          )}
+        </div>
       ),
+      dataIndex: "applicantName",
+      key: "applicantName",
+      width: 200,
+      render: (text) => text ?? "-",
     },
     {
       title: "Investigations",
