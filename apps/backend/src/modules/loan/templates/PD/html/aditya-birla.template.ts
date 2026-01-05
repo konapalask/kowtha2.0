@@ -41,7 +41,7 @@ const formatObservations = (value: any): string => {
     .split(/\n+/)
     .filter((line: string) => line.trim().length > 0);
   if (lines.length === 0) return "Not provided";
-  return lines.map((line: string) => `<ul><li>${line.trim()}</li></ul>`).join("<br>");
+  return lines.map((line: string) => `<ul style="margin:0 0 0 12px;padding:0;"><li>${line.trim()}</li></ul>`).join("<br>");
 };
 
 const ensureArray = <T>(value: T | T[] | null | undefined): T[] => {
@@ -84,12 +84,14 @@ export const adityaBirlaTemplate = (verificationData: any, html_data: any) => {
   return `
     ${pdBaseTemplate(html_data)}
     <div class="template-content aditya-birla-template">
-      <h2 style="margin:16px 0 8px;font-size:16px;font-weight:600;color:#222;text-align:center;">${templateName}</h2>
+      <!-- <h2 style="margin:16px 0 8px;font-size:16px;font-weight:600;color:#222;text-align:center;">${templateName}</h2> -->
       <table style="${tableStyle}">
         ${renderKeyValue("Proposal No.", proposal.proposalNumber)}
         <tr>
           <td style="${labelCellStyle}">Date of Visit</td>
           <td style="${valueCellStyle}">${formatMultiline(proposal.dateOfVisit)}</td>
+        </tr>
+        <tr>
           <td style="${labelCellStyle}">Time of Visit</td>
           <td style="${valueCellStyle}">${formatMultiline(proposal.timeOfVisit)}</td>
         </tr>
@@ -137,7 +139,10 @@ export const adityaBirlaTemplate = (verificationData: any, html_data: any) => {
         ${renderKeyValue("Sales payment terms", financials.salesPaymentTerms)}
         ${renderKeyValue("GST registration", financials.gstRegistration)}
         ${renderKeyValue("ITRs filing", financials.itrsFiling)}
-        ${renderKeyValue("Number of employees (Co- applicant)", financials.numberOfEmployees)}
+        <tr>
+          <td style="${labelCellStyle}">Number of employees & Salaries</td>
+          <td style="${valueCellStyle}"><p><strong>Declared by customer:</strong> ${formatMultiline(financials.numberOfEmployees.declaredByCustomer)}</p> <br><p><strong>Observed:</strong> ${formatMultiline(financials.numberOfEmployees.observed)}</p> <br><p><strong>Salaries:</strong> ${formatCurrency(financials.numberOfEmployees.salaries)}</p></td>
+        </tr>
         ${renderKeyValue("Godown address (if any)", financials.godownAddress)}
         ${renderKeyValue("Other business details (if any)", financials.otherBusinessDetails)}
       </table>
@@ -146,7 +151,7 @@ export const adityaBirlaTemplate = (verificationData: any, html_data: any) => {
       <table style="${tableStyle}">
       <tr>
         <td colspan="2">
-        ${renderKeyValue("APPLICANT:", formatObservations(businessProfile.applicantSummary))}
+        ${renderKeyValue("BUSINESS PROFILE:", formatObservations(businessProfile.applicantSummary))}
         </td>
         <td colspan="2">
           ${renderKeyValue("Native Place", businessProfile.nativePlace)}
@@ -212,19 +217,37 @@ export const adityaBirlaTemplate = (verificationData: any, html_data: any) => {
             }
             // Fallback to direct observation fields
             if (
-              observations.neighbourCheckName ||
+              observations.neighbourCheckNameAndNumber ||
               observations.neighbourCheck
             ) {
-              return `${observations.neighbourCheckName || ""} - ${observations.neighbourCheckNumber || ""}`.trim();
+              return `${observations.neighbourCheckNameAndNumber.split("\n").map((line: string) => `<p style="margin:0 0 0 12px;padding:0;">${line.trim()}</p>`).join("") || ""}`;
             }
             return "Not provided";
           })()
         )}
         ${renderKeyValue("CIBIL Details", observations.cibilDetails)}
-        ${renderKeyValue(
-          "Previous Loans",
-          formatMultiline(observations.previousLoans)
-        )}
+        <tr>
+          <td style="${labelCellStyle}">Previous Loans</td>
+          <td style="border-collapse:collapse;">
+            <table style="${tableStyle}">
+              <tr>
+                <td style="${labelCellStyle}">BANK</td>
+                <td style="${labelCellStyle}">TYPE</td>
+                <td style="${labelCellStyle}">LOAN</td>
+                <td style="${labelCellStyle}">EMI</td>
+                <td style="${labelCellStyle}">Open/Close</td>
+              </tr>
+              ${ensureArray(observations.previousLoans || [])
+                .map((loan: any) => `<tr>
+                  <td style="${valueCellStyle}">${formatMultiline(loan.bank)}</td>
+                  <td style="${valueCellStyle}">${formatMultiline(loan.type)}</td>
+                  <td style="${valueCellStyle}">${formatCurrency(loan.loan)}</td>
+                  <td style="${valueCellStyle}">${formatCurrency(loan.emi)}</td>
+                  <td style="${valueCellStyle}">${formatMultiline(loan.status)}</td>
+                </tr>`).join("")}
+            </table>
+          <td>
+        </tr>
         ${renderKeyValue("Banking Details", observations.bankingDetails)}
         ${renderKeyValue("Firm Account", observations.firmAccount)}
         ${renderKeyValue("Savings Account", observations.savingsAccount)}

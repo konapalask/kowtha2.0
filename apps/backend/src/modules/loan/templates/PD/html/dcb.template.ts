@@ -6,6 +6,10 @@ const labelCellStyle =
   "border:1px solid #c7cdd1;padding:8px;font-weight:600;color:#222;background:#f4f6fb;vertical-align:top;width:32%";
 const valueCellStyle =
   "border:1px solid #c7cdd1;padding:8px;color:#333;vertical-align:top";
+const snoCellHeaderStyle =
+  "border:1px solid #c7cdd1;padding:4px 8px;font-weight:600;color:#222;background:#f4f6fb;vertical-align:top;width:5%;text-align:center";
+const snoCellValueStyle =
+  "border:1px solid #c7cdd1;padding:4px 8px;color:#333;vertical-align:top;text-align:center";
 
 const hasValue = (value: any): boolean => {
   if (value === null || value === undefined) return false;
@@ -170,19 +174,19 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
     <table style="${tableStyle}">
     ${renderKeyValue(
       "Office Set-up with Overall Look",
-      formatMultiline(businessSetup.officeSetUpWithOverallLook),
+      businessSetup.officeSetUpWithOverallLook ? businessSetup.officeSetUpWithOverallLook.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("<br>") : "Not provided",
       undefined,
       { colspan: 3 }
     )}
     ${renderKeyValue(
       "Expenses",
-      formatMultiline(businessSetup.expenses),
+      businessSetup.expenses ? businessSetup.expenses.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("<br>") : "Not provided",
       undefined,
       { colspan: 3 }
     )}
     ${renderKeyValue(
       "Transactions",
-      formatMultiline(businessSetup.transactions),
+      businessSetup.transactions ? businessSetup.transactions.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("<br>") : "Not provided",
       undefined,
       { colspan: 3 }
     )}
@@ -222,7 +226,7 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
     <h2 style="margin:0 0 16px;color:#1f2a37;font-size:16px;">Personal Assets of Proprietor</h2>
     <table style="${tableStyle}">
     <tr>
-    <td style="${labelCellStyle}">S.No</td>
+    <td style="${snoCellHeaderStyle}">S.No</td>
       <td style="${labelCellStyle}">Asset</td>
       <td style="${labelCellStyle}">Value</td>
     </tr>
@@ -230,7 +234,7 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
       .map(
         (item: any, index: number) => `
       <tr>
-        <td style="${valueCellStyle}">${index + 1}</td>
+        <td style="${snoCellValueStyle}">${index + 1}</td>
         <td style="${valueCellStyle}">${item.asset || ""}</td>
         <td style="${valueCellStyle}">${item.value || ""}</td>
       </tr>
@@ -242,7 +246,7 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
     <h2 style="margin:0 0 16px;color:#1f2a37;font-size:16px;">Details of Customers / Clients: Not Applicable- Walk in Customers</h2>
     <table style="${tableStyle}">
     <tr>
-      <td style="${labelCellStyle}">S.No</td>
+      <td style="${snoCellHeaderStyle}">S.No</td>
       <td style="${labelCellStyle}">Name of Customers</td>
       <td style="${labelCellStyle}">Location</td>
       <td style="${labelCellStyle}">Contact No</td>
@@ -251,7 +255,7 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
       .map(
         (item: any, index: number) => `
       <tr>
-        <td style="${valueCellStyle}">${index + 1}</td>
+        <td style="${snoCellValueStyle}">${index + 1}</td>
         <td style="${valueCellStyle}">${item.nameOfCustomers || ""}</td>
         <td style="${valueCellStyle}">${item.location || ""}</td>
         <td style="${valueCellStyle}">${item.contactNo || ""}</td>
@@ -264,7 +268,7 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
     <h2 style="margin:0 0 16px;color:#1f2a37;font-size:16px;">Details of Suppliers</h2>
     <table style="${tableStyle}">
     <tr>
-      <td style="${labelCellStyle}">S.No</td>
+      <td style="${snoCellHeaderStyle}">S.No</td>
       <td style="${labelCellStyle}">Name of Suppliers</td>
       <td style="${labelCellStyle}">Location</td>
       <td style="${labelCellStyle}">Contact No</td>
@@ -273,7 +277,7 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
       .map(
         (item: any, index: number) => `
       <tr>
-        <td style="${valueCellStyle}">${index + 1}</td>
+        <td style="${snoCellValueStyle}">${index + 1}</td>
         <td style="${valueCellStyle}">${item.nameOfSuppliers || ""}</td>
         <td style="${valueCellStyle}">${item.location || ""}</td>
         <td style="${valueCellStyle}">${item.contactNo || ""}</td>
@@ -286,7 +290,7 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
     <h2 style="margin:0 0 16px;color:#1f2a37;font-size:16px;">Sister Companies :</h2>
     <table style="${tableStyle}">
     <tr>
-      <td style="${labelCellStyle}">S.No</td>
+      <td style="${snoCellHeaderStyle}">S.No</td>
       <td style="${labelCellStyle}">Name of Firm</td>
       <td style="${labelCellStyle}">Business Profile</td>
       <td style="${labelCellStyle}">Turnover</td>
@@ -296,7 +300,7 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
       .map(
         (item: any, index: number) => `
       <tr>
-        <td style="${valueCellStyle}">${index + 1}</td>
+        <td style="${snoCellValueStyle}">${index + 1}</td>
         <td style="${valueCellStyle}">${item.nameOfSisterCompanies}</td>
         <td style="${valueCellStyle}">${item.businessProfile}</td>
         <td style="${valueCellStyle}">${item.turnover}</td>
@@ -311,7 +315,7 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
     <p><strong>Insurance Company Name:-</strong> ${insuranceDetails.insuranceCompanyName} <br> <strong>Due they are taking the exemptions by taking the Children Education Fee:</strong> ${insuranceDetails.dueExemptions}</p>
     <table style="${tableStyle}">
     <tr>
-    <td style="${labelCellStyle}">S.No</td>
+    <td style="${snoCellHeaderStyle}">S.No</td>
     <td style="${labelCellStyle}">Assets Covered</td>
     <td style="${labelCellStyle}">Cover Note No. / Policy No</td>
     <td style="${labelCellStyle}">Valid up to</td>
@@ -322,7 +326,7 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
       .map(
         (item: any, index: number) => `
       <tr>
-        <td style="${valueCellStyle}">${index + 1}</td>
+        <td style="${snoCellValueStyle}">${index + 1}</td>
         <td style="${valueCellStyle}">${item.assetsCovered || ""}</td>
         <td style="${valueCellStyle}">${item.coverNoteNoPolicyNo || ""}</td>
         <td style="${valueCellStyle}">${item.validUpTo || ""}</td>
@@ -350,7 +354,7 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
 
     <h2 style="margin:0 0 16px;color:#1f2a37;font-size:16px;">Other Business Interests of the Proprietor</h2>
     <table style="${tableStyle}">
-    ${renderKeyValue("Other Business Interests of the Proprietor", otherBusinessInterests.otherBusinessInterestsOfTheProprietor, undefined, { colspan: 3 })}
+    ${renderKeyValue("Other Business Interests of the Proprietor", otherBusinessInterests.otherBusinessInterestsOfTheProprietor ? otherBusinessInterests.otherBusinessInterestsOfTheProprietor.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("<br>") : "Not provided", undefined, { colspan: 3 })}
     </table>
 
     <h2 style="margin:0 0 16px;color:#1f2a37;font-size:16px;">Banking Details & Statutory Obligations</h2>
@@ -416,7 +420,7 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
     <table style="${tableStyle}">
     <tr>
         <td style="${labelCellStyle}">Document Verified</td>
-        <td style="${valueCellStyle}">${formatMultiline(verification.documentVerification)}</td>
+        <td style="${valueCellStyle}">${verification.documentVerification ? verification.documentVerification.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("<br>") : "Not provided"}</td>
     </tr>
     </table>
             
@@ -424,7 +428,7 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
     <table style="${tableStyle}">
     <tr>
         <td style="${labelCellStyle}">Concluding Impressions</td>
-        <td style="${valueCellStyle}">${formatMultiline(concludingImpressions.concludingImpressions)}</td>
+        <td style="${valueCellStyle}">${concludingImpressions.concludingImpressions ? concludingImpressions.concludingImpressions.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("<br>") : "Not provided"}</td>
     </tr>
     <tr>
         <td style="${labelCellStyle}">PD Status</td>
