@@ -267,32 +267,32 @@ export const adityaBirlaTemplate = (verificationData: any, html_data: any) => {
       
       <table style="${tableStyle}">
       <tr>
-        <td style="${labelCellStyle}">Particulars</td>
-        <td style="${labelCellStyle}">Units</td>
-        <td style="${labelCellStyle}">Charge</td>
-        <td style="${labelCellStyle}">Total</td>
+        <td style="${labelCellStyle};width:25%;">Particulars</td>
+        <td style="${labelCellStyle};width:25%;">Units</td>
+        <td style="${labelCellStyle};width:25%;">Charge</td>
+        <td style="${labelCellStyle};width:25%;">Total</td>
       </tr>
       ${ensureArray(dailyIncomeCalculation?.details || [])
         .map(
           (detail: any) => `<tr>
-          <td style="${valueCellStyle}">${formatMultiline(detail.particulars)}</td>
-          <td style="${valueCellStyle}">${formatMultiline(detail.units)}</td>
-          <td style="${valueCellStyle}">${formatMultiline(detail.charge)}</td>
-          <td style="${valueCellStyle}">${formatCurrency(detail.total)}</td>
+          <td style="${valueCellStyle};width:25%;">${formatMultiline(detail.particulars)}</td>
+          <td style="${valueCellStyle};width:25%;">${formatMultiline(detail.units)}</td>
+          <td style="${valueCellStyle};width:25%;">${formatMultiline(detail.charge)}</td>
+          <td style="${valueCellStyle};width:25%;">${formatCurrency(detail.total)}</td>
         </tr>`
         )
         .join("\n")}
       <tr>
         <td style="${labelCellStyle}" colspan="3">Daily Gross Income (Total)</td>
-        <td style="${valueCellStyle}">${formatCurrency(dailyIncomeCalculation.dailyGrossIncome)}</td>
+        <td style="${valueCellStyle};width:25%;">${formatCurrency(dailyIncomeCalculation.dailyGrossIncome)}</td>
       </tr>
       <tr>
         <td style="${labelCellStyle}" colspan="3">Labour & Material (Total)</td>
-        <td style="${valueCellStyle}">${formatCurrency(dailyIncomeCalculation.labourAndMaterialEveryday)}</td>
+        <td style="${valueCellStyle};width:25%;">${formatCurrency(dailyIncomeCalculation.labourAndMaterialEveryday)}</td>
       </tr>
       <tr>
         <td style="${labelCellStyle}" colspan="3">Net Income/Day (Total)</td>
-        <td style="${valueCellStyle}">${formatCurrency(dailyIncomeCalculation.netIncomePerDay)}</td>
+        <td style="${valueCellStyle};width:25%;">${formatCurrency(dailyIncomeCalculation.netIncomePerDay)}</td>
       </tr>
       </table>
 
