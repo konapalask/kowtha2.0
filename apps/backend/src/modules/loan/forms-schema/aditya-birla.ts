@@ -175,7 +175,7 @@ export const adityaBirlaSchema = {
             properties: {
               declaredByCustomer: { type: "string", title: "Declared by customer" },
               observed: { type: "string", title: "Observed" },
-              salaries: { type: "number", title: "Salaries", formatter: { useIndianFormat: true, locale: "en-IN", maxDecimalPlaces: 2, minDecimalPlaces: 0 } },
+              salaries: { type: "string", title: "Salaries"},
             },
           },
           godownAddress: { type: "string", title: "Godown address (if any)" },
