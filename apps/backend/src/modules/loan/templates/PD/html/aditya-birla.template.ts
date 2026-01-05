@@ -140,8 +140,8 @@ export const adityaBirlaTemplate = (verificationData: any, html_data: any) => {
         ${renderKeyValue("GST registration", financials.gstRegistration)}
         ${renderKeyValue("ITRs filing", financials.itrsFiling)}
         <tr>
-          <td style="${labelCellStyle}">Number of employees & Salaries</td>
-          <td style="${valueCellStyle}"><p><strong>Declared by customer:</strong> ${formatMultiline(financials.numberOfEmployees.declaredByCustomer)}</p> <br><p><strong>Observed:</strong> ${formatMultiline(financials.numberOfEmployees.observed)}</p> <br><p><strong>Salaries:</strong> ${formatCurrency(financials.numberOfEmployees.salaries)}</p></td>
+          <td style="${labelCellStyle}">No. of employees & Salaries</td>
+          <td style="${valueCellStyle}"><p style="margin:0 0 8px 0;"><strong>Declared by customer:</strong> ${formatMultiline(financials.numberOfEmployees.declaredByCustomer)}</p><p style="margin:0 0 8px 0;"><strong>Observed:</strong> ${formatMultiline(financials.numberOfEmployees.observed)}</p><p style="margin:0;"><strong>Salaries:</strong> ${formatCurrency(financials.numberOfEmployees.salaries)}</p></td>
         </tr>
         ${renderKeyValue("Godown address (if any)", financials.godownAddress)}
         ${renderKeyValue("Other business details (if any)", financials.otherBusinessDetails)}
@@ -201,7 +201,7 @@ export const adityaBirlaTemplate = (verificationData: any, html_data: any) => {
         ${renderKeyValue("Sales Bills", observations.salesBills || observations.salesBills || "NP")}
         ${renderKeyValue("Purchase Bills", observations.purchaseBills || observations.purchaseBills || "Not Provided")}
         ${renderKeyValue(
-          "Neighbour check with name",
+          "Neighbour check with name & number",
           (() => {
             const thirdPartyCheck = verificationData.thirdPartyCheck || {};
             const checks = Array.isArray(thirdPartyCheck.checks)
