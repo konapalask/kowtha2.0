@@ -281,19 +281,19 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
         ${renderKeyValue("PD Status", html_data.approvedStatus|| "Not provided")}
       </table>
 
-      <p style="font-size:18px;font-weight:bold;text-align:center;"><u>Estimated Income</u></p>
+      <p style="font-size:14px;font-weight:bold;text-align:center;"><u>Estimated Income</u></p>
       <p style="margin:8px 0;line-height:1.5">${formatMultiline(estimatedIncome?.estimatedIncomeDetails)}</p> 
       <p style="margin:8px 0;line-height:1.5"><strong>Gross Sales as per our assumptions</strong> <span style="margin-left:35px;">${verificationData.financialAnalysis?.grossProfitAsPerAssumption ? formatCurrency(verificationData.financialAnalysis.grossProfitAsPerAssumption) : "Not provided"}</span></p>
       <p style="margin:8px 0;line-height:1.5"><strong>PBDIT Margin</strong> <span style="margin-left:35px;">${verificationData.financialAnalysis?.pbditMargin ? verificationData.financialAnalysis.pbditMargin.toFixed(2) + "%" : "Not provided"}</span></p>
       <p style="margin:8px 0;line-height:1.5"><strong>PAT of the Business Concern (Rs.)</strong> <span style="margin-left:35px;">${verificationData.financialAnalysis?.netProfitAfterTax ? formatCurrency(verificationData.financialAnalysis.netProfitAfterTax) : "Not provided"}</span></p>
 
-      <p style="font-size:18px;"><strong>Overall Positives or Negatives:</strong>  ${formatMultiline(overallPositivesOrNegatives.overallPositivesOrNegatives)}</p>
+      <p style="font-size:14px;"><strong>Overall Positives or Negatives:</strong>  ${formatMultiline(overallPositivesOrNegatives.overallPositivesOrNegatives)}</p>
       <br>
       ${renderKeyValue("<strong>Accept/Reject:</strong> ", verificationData.acceptRejectPD?.acceptReject || "Not provided", undefined)}
-      <p style="margin:8px 0;line-height:1.5"><strong>Signature of the PD Officer:</strong></p>
+      <p style="margin:8px 0;line-height:1.5"><strong>Signature / Name:</strong></p>
       <br>  
-      <p style="font-size:18px;"><strong>Note:</strong> We have taken the estimated figures based on customer feedback and the gross profit has been arrived taking into consideration market information gathered on our experience.</p>
-      <p style="font-size:18px;"><strong>Disclaimer:</strong> The Report (Including any attachments) has been prepared based on verbal information provided by the person contacted. Incred Financial Services will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. Our efficient services will not be liable in any case</p>
+      <p style="margin:8px 0;line-height:1.5"><strong>Note:- </strong> We have taken the estimated figures based on customer feedback and the gross profit has been arrived taking into consideration market information gathered on our experience.</p>
+      <p style="margin:8px 0;line-height:1.5"><strong>Disclaimer Clause:- </strong> The Report (Including any attachments) has been prepared based on verbal information provided by the person contacted. Incred Financial Services will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. Our efficient services will not be liable in any case</p>
 
     </div>
     ${pdBaseTemplateFooter(html_data)}

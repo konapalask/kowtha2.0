@@ -318,7 +318,7 @@ export const niwasSenpTemplate = (verificationData: any, html_data: any) => {
           <td style="text-align:center;font-size:14px;${labelCellStyle}" colspan="2"><b>Business Details</b></td>
         </tr>
         ${renderKeyValue("Type of industry", business.typeOfIndustry)}
-        ${renderKeyValue("Business Profile", business.businessProfile)}
+        ${renderKeyValue("Business Profile", business.businessProfile === "Others, Please Specify" ? business.otherBusinessProfileSpecify : business.businessProfile)}
         ${renderKeyValue("Business Premises Ownership", business.businessPremisesOwnership)}
         ${renderKeyValue("Area of office", business.areaOfOffice)}
         ${renderKeyValue(
