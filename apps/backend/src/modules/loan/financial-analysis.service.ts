@@ -604,8 +604,8 @@ export class FinancialAnalysisTemplatesService {
 
     // Set up columns - single column format with Particulars and Value
     worksheet.columns = [
-      { width: 40 }, // A - Particulars
-      { width: 20 }, // B - Value
+      { width: 60 }, // A - Particulars
+      { width: 30 }, // B - Value
     ];
 
     // Title
@@ -631,7 +631,7 @@ export class FinancialAnalysisTemplatesService {
       "", // Column B
     ]);
     worksheet.mergeCells("A3:B3");
-    subTitleRow.font = { bold: true };
+    subTitleRow.font = { bold: true, size: 12 };
     subTitleRow.alignment = { horizontal: "center" };
 
     worksheet.addRow([]); // Empty row

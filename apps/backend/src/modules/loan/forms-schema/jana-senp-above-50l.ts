@@ -717,6 +717,16 @@ export const janaSenpAbove50lSchema = {
                     minDecimalPlaces: 0,
                   },
                 },
+                outstandingBalance: {
+                  type: "number",
+                  title: "O/S Balance in Lakhs",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
+                },
                 emi: {
                   type: "number",
                   title: "EMI (in Rs.)",
@@ -926,6 +936,20 @@ export const janaSenpAbove50lSchema = {
       },
     },
 
+    {
+      id: "siteCoordinates",
+      label: "Site Coordinates",
+      schema: {
+        type: "object",
+        properties: {
+          siteCoordinates: {
+            type: "string",
+            title: "Site Coordinates",
+            ui: { widget: "textarea", rows: 3 },
+          },
+        },
+      },
+    },
     {
       id: "remarks",
       label: "Remarks",
