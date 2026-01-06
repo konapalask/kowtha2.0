@@ -389,30 +389,30 @@ export const niwasSenpTemplate = (verificationData: any, html_data: any) => {
           </tr>
           <tr>
             <td style="${labelCellStyle}">Sales</td>
-            <td style="${valueCellStyle};text-align:right">${formatCurrency(businessIncomeComputationMonthly?.revenue?.sales)}</td>
+            <td style="${valueCellStyle};text-align:right">${formatCurrency(businessIncomeComputationMonthly?.sales)}</td>
             <td style="${labelCellStyle}">Wages</td>
-            <td style="${valueCellStyle};text-align:right">${formatCurrency(businessIncomeComputationMonthly?.expenditure?.wages)}</td>
+            <td style="${valueCellStyle};text-align:right">${formatCurrency(businessIncomeComputationMonthly?.wages)}</td>
           </tr>
           <tr>
             <td style="${valueCellStyle}" colspan="2"></td>
             <td style="${labelCellStyle}">Diesel</td>
-            <td style="${valueCellStyle};text-align:right">${formatCurrency(businessIncomeComputationMonthly?.expenditure?.diesel)}</td>
+            <td style="${valueCellStyle};text-align:right">${formatCurrency(businessIncomeComputationMonthly?.diesel)}</td>
           </tr>
           <tr>
             <td style="${valueCellStyle}" colspan="2"></td>
             <td style="${labelCellStyle}">Maintenance & Repairs</td>
-            <td style="${valueCellStyle};text-align:right">${formatCurrency(businessIncomeComputationMonthly?.expenditure?.maintenanceRepairs)}</td>
+            <td style="${valueCellStyle};text-align:right">${formatCurrency(businessIncomeComputationMonthly?.maintenanceRepairs)}</td>
           </tr>
           <tr>
             <td style="${valueCellStyle}" colspan="2"></td>
             <td style="${labelCellStyle}">Other expenses</td>
-            <td style="${valueCellStyle};text-align:right">${formatCurrency(businessIncomeComputationMonthly?.expenditure?.otherExpenses)}</td>
+              <td style="${valueCellStyle};text-align:right">${formatCurrency(businessIncomeComputationMonthly?.otherExpenses)}</td>
           </tr>
           <tr>
             <td style="${labelCellStyle};font-weight:600;" colspan="1">Total Monthly Revenue (A)</td>
-            <td style="${valueCellStyle};font-weight:600;text-align:right">${formatCurrency(businessIncomeComputationMonthly?.revenue?.totalMonthlyRevenueA)}</td>
+            <td style="${valueCellStyle};font-weight:600;text-align:right">${formatCurrency(businessIncomeComputationMonthly?.totalMonthlyRevenueA)}</td>
             <td style="${labelCellStyle};font-weight:600;" colspan="1">Total Monthly Expenses(B)</td>
-            <td style="${valueCellStyle};font-weight:600;text-align:right">${formatCurrency(businessIncomeComputationMonthly?.expenditure?.totalMonthlyExpensesB)}</td>
+            <td style="${valueCellStyle};font-weight:600;text-align:right">${formatCurrency(businessIncomeComputationMonthly?.totalMonthlyExpensesB)}</td>
           </tr>
           <tr>
             <td style="${labelCellStyle};font-weight:600;" colspan="4"></td>
