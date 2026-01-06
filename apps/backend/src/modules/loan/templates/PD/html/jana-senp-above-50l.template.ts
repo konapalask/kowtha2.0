@@ -540,15 +540,15 @@ export const janaSenpAbove50lTemplate = (
          .map(
            (loan: any) => `
         <tr>
-        <td style="${valueCellStyle}">${loan.bankOrNbfcName}</td>
-        <td style="${valueCellStyle}">${loan.typeOfLoan}</td>
-        <td style="${valueCellStyle}">${formatCurrency(loan.sanctionedAmount)}</td>
-        <td style="${valueCellStyle}">${formatCurrency(loan.outstandingBalance)}</td>
+        <td style="${valueCellStyle}">${formatMultiline(loan.bankOrNbfcName)}</td>
+        <td style="${valueCellStyle}">${formatMultiline(loan.typeOfLoan)}</td>
+        <td style="${valueCellStyle}">${formatMultiline(loan.sanctionedAmount)}</td>
+        <td style="${valueCellStyle}">${formatMultiline(loan.outstandingBalance)}</td>
         <td style="${valueCellStyle}">${formatCurrency(loan.emi)}</td>
-        <td style="${valueCellStyle}">${loan.tenureRemaining}</td>
-        <td style="${valueCellStyle}">${loan.monthOnBooks}</td>
-        <td style="${valueCellStyle}">${loan.emiPaidBank}</td>
-        <td style="${valueCellStyle}">${loan.securedAgainstAsset}</td>
+        <td style="${valueCellStyle}">${formatMultiline(loan.tenureRemaining)}</td>
+        <td style="${valueCellStyle}">${formatMultiline(loan.monthOnBooks)}</td>
+        <td style="${valueCellStyle}">${formatMultiline(loan.emiPaidBank)}</td>
+        <td style="${valueCellStyle}">${formatMultiline(loan.securedAgainstAsset)}</td>
        </tr>
        `
          )
@@ -661,7 +661,7 @@ export const janaSenpAbove50lTemplate = (
         <td style="text-align: center;${labelCellStyle}">Observations</td>
        </tr>
        <tr>
-        <td style="${valueCellStyle}">${formatObservations(observations.observations)}</td>
+        <td style="${valueCellStyle}">${observations.observations ? observations.observations.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("") : "Not provided"}</td>
        </tr>
        </table>
 
@@ -688,16 +688,28 @@ export const janaSenpAbove50lTemplate = (
          .join("")}
        </table>
 
+       <table style="${tableStyle}">
+       <tr>
+        <td style="text-align: center;${labelCellStyle}">Site Coordinates</td>
+       </tr>
+       <tr>
+        <td style="${valueCellStyle}">${verificationData?.siteCoordinates?.siteCoordinates ? verificationData.siteCoordinates.siteCoordinates : "Not provided"}</td>
+       </tr>
+       </table>
+
         <table style="${tableStyle}">
        <tr>
         <td style="text-align: center;${labelCellStyle}">Remarks</td>
        </tr>
        <tr>
-        <td style="${valueCellStyle}">${formatObservations(remarks.remarks)}</td>
+        <td style="${valueCellStyle}">${remarks.remarks ? remarks.remarks.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("") : "Not provided"}</td>
        </tr>
        </table>
 
-        <table style="${tableStyle}">
+
+       <p style="margin:8px 0;line-height:1.5;font-weight:600;">Financial statement being estimated on the basis of availability of information, setup observation, business calculations, provided Banking, GST returns, and location of operation, Verbal information, and vintage of business, types of industry & TPC Subject to verification of above-mentioned concern in the report.</p>
+      
+       <table style="${tableStyle}">
        <tr>
         <td style="text-align: center;${labelCellStyle}">Status</td>
        </tr>
@@ -712,8 +724,8 @@ export const janaSenpAbove50lTemplate = (
     </div>
     ${pdBaseTemplateFooter(html_data)}
 
-    <p style="margin:20px 0 8px;font-weight:600;color:#222;"> <strong><u>Disclaimer:</u></strong></p>
-       <p style="margin:0 0 24px;color:#333;">This report (including any attachments) has been prepared on the basis of information provided by the person contacted. Jana Small Finance Bank Ltd. will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. Veeraraghavan & Co. will not be held liable in any case.</P>
+    <p style="margin:16px 16px 0 16px;font-weight:600;color:#222;"> <strong><u>Disclaimer:</u></strong></p>
+       <p style="margin:16px 16px 0 16px;color:#333;">This report (including any attachments) has been prepared on the basis of information provided by the person contacted. Jana Small Finance Bank Ltd. will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. M/s. KOWTHA & CO will not be held liable in any case.</P>
 
 
   `;
