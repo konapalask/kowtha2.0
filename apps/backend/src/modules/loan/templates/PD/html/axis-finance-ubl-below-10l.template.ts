@@ -296,7 +296,7 @@ export const axisFinanceUBLBelow10lTemplate = (
         <td style="${labelCellStyle}">Loan Amount & Affordable EMI</td>
         <td style="${cellStyle}">${loanapplied?.loanAmount ? "Loan Amount: "+formatCurrency(loanapplied?.loanAmount): ""} ${loanapplied?.affordableEMI? "<br>Affordable EMI: "+formatCurrency(loanapplied?.affordableEMI): ""}</td>
         <td style="${labelCellStyle}">Documents Seen</td>
-        <td style="${cellStyle}">${documentsSeen?.details || "Not provided"}</td>
+        <td style="${cellStyle}">${documentsSeen?.details ? documentsSeen.details.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("") : "Not provided"}</td>
       </tr>
       <tr>
         <td style="${labelCellStyle}" colspan="4">TPC / Neighbour Check</td>

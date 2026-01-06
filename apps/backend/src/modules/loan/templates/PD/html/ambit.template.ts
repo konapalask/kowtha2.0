@@ -228,7 +228,7 @@ export const ambitTemplate = (verificationData: any, html_data: any) => {
         ${renderKeyValue("Net Margin", businessActivityAndStockLevelObserved.netMargin + "%" || "Not provided")}
         ${renderKeyValue("Expenditure", formatCurrency(businessActivityAndStockLevelObserved.expenditure))}
         ${renderKeyValue("Employees", businessActivityAndStockLevelObserved.employees)}
-        ${renderKeyValue("Assets", formatMultiline(businessActivityAndStockLevelObserved.assets))}
+        ${renderKeyValue("Assets", businessActivityAndStockLevelObserved.assets ? businessActivityAndStockLevelObserved.assets.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("") : "Not provided")}
         ${renderKeyValue("LIC/Mutual funds", formatMultiline(businessActivityAndStockLevelObserved.licMutualFunds))}
         
         <tr>
