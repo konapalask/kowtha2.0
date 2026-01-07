@@ -188,10 +188,9 @@ export class LoanService {
             width: 100%;
             padding: 4px 16px;
             color: #999;
-            border-bottom: 1px solid #eee;
             text-align: center;
           ">
-          ${bankName || "Kowtha"} - Verification Report
+          <!-- ${bankName || "Kowtha"} - Verification Report -->
         </div>
       `,
       footerTemplate: footerTemplate,

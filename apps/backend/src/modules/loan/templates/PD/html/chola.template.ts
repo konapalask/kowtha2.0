@@ -182,7 +182,7 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
             `<ul><li>${formatMultiline(asset?.assetDetails || asset?.details || "")}</li></ul>`
         )
         .join("")
-    : "<ul><li>Not provided</li></ul>";
+    : "Not provided";
 
   // Handle nested structures for customer references
   const customerReferences = ensureArray(verificationData.customersReference?.customersReference).map((item: any) => [formatMultiline(item?.customerName || ""), formatMultiline(item?.customerReferenceNumber || ""), formatMultiline(item?.feedback || "")]);
@@ -214,35 +214,10 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
 
 
 
-  const businessList = [
-    hasValue(aboutBusiness?.aboutTheApplicant)
-      ? `<p style="${paragraphStyle}"><strong>About the Applicant & Business content:</strong><br>${
-          aboutBusiness?.aboutTheApplicant
-            ?.split("\n")
-            .map(
-              (line: string) =>
-                `<ul style="margin-left: 8px;"><li>${line}</li></ul>`
-            )
-            .join("") || ""
-        }</p>`
-      : "",
-    hasValue(residentialDetails?.residentialDetails)
-      ? `<p style="${paragraphStyle}"><strong>Residential Details:</strong> ${formatMultiline(residentialDetails?.residentialDetails || "")}</p>`
-      : "",
-    hasValue(aboutBusiness?.aboutTheBusiness)
-      ? `<p style="${paragraphStyle}"><strong>About the Business's Industry Overview:</strong><br>${
-          aboutBusiness?.aboutTheBusiness
-            ?.split("\n")
-            .map(
-              (line: string) =>
-                `<ul style="margin-left: 8px;"><li>${line}</li></ul>`
-            )
-            .join("") || ""
-        }</p>`
-      : "",
-  ]
-    .filter((item) => item !== "")
-    .join("");
+  const businessList = 
+      `<p style="${paragraphStyle}"><strong>About the Applicant & Business content:</strong><br>${aboutBusiness?.aboutTheApplicant ? aboutBusiness?.aboutTheApplicant.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("") : "Not Provided"}</p>
+    <p style="${paragraphStyle}"><strong>Residential Details:</strong> ${residentialDetails?.residentialDetails ? residentialDetails?.residentialDetails.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("") : "Not Provided"}</p>
+    <p style="${paragraphStyle}"><strong>About the Business's Industry Overview:</strong><br>${aboutBusiness?.aboutTheBusiness ? aboutBusiness?.aboutTheBusiness.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("") : "Not Provided"}</p>`
 
 
   const generalSection = renderKeyValueTable([
@@ -368,7 +343,7 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
         ${
           comfortFactors.length
             ? comfortFactors.join("")
-            : "<li>Not provided</li>"
+            : "Not provided"
         }
       </ul>
 
@@ -377,7 +352,7 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
         ${
           discomfortFactors
             ? discomfortFactors
-            : "<li>Not provided</li>"
+            : "Not provided"
         }
       </ul>
 
@@ -385,7 +360,7 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
         ${
           tpcDetails
             ? String(tpcDetails).split("\n").filter((line: string) => line.trim()).map((line: string) => `<ul><li>${line.trim()}</li></ul>`).join("")
-            : "<li>Not provided</li>"
+            : "Not provided"
         }
 
       <p style="${paragraphStyle}"><strong>Recommendations:-</strong></p>
@@ -393,7 +368,7 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
         ${
           recommendations
             ? recommendations
-            : "<li>Not provided</li>"
+            : "Not provided"
         }
       </ul>
 
