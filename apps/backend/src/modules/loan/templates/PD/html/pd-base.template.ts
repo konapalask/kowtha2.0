@@ -186,10 +186,12 @@ export const pdBaseTemplate = (html_data?: any) => {
             }
             .photos-section {
               margin: 24px 0;
-              page-break-inside: avoid;
+              border: 1px solid #ddd;
+              padding: 8px;
             }
             .photos-title {
               font-size: 16px;
+              page-break-inside: avoid;
               font-weight: bold;
               margin-bottom: 16px;
               text-transform: uppercase;
@@ -370,24 +372,25 @@ export const pdBaseTemplateFooter = (html_data?: any) => {
     : "";
 
   return `
-      ${
-        filteredImagesData
-          ? `
-        <div class="photos-section">
-          <div class="photos-title">PHOTOS</div>
-          <div class="photo-grid">
-            ${filteredImagesData}
-          </div>
-        </div>
-      `
-          : ""
-      }
+     <div style="page-break-before: always;"></div>
       ${
         html_data?.imageDataUri
           ? `
         <div class="signature-section">
           <p style="margin:8px 0;line-height:1.5"><strong>Agency Name & Seal:</strong> Kowtha & Co.</p>
           <img src="${html_data.imageDataUri}" alt="Kowtha Signature" />
+        </div>
+      `
+          : ""
+      }
+      ${
+        filteredImagesData
+          ? `
+        <div class="photos-title">PHOTOS</div>
+        <div class="photos-section">
+          <div class="photo-grid">
+            ${filteredImagesData}
+          </div>
         </div>
       `
           : ""
