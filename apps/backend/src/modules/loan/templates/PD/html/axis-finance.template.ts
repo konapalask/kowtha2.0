@@ -632,16 +632,16 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
   const endUseOfFundsTable = `
       <div>
       <p style="${sectionTitleStyle}"><strong><u>End Use of Funds</u></strong></p> 
-      <p style="${paragraphStyle}">${formatMultiline(endUseOfFunds.endUseOfFunds)}</p> 
+      <p>${formatMultiline(endUseOfFunds.endUseOfFunds)}</p> 
       </div>`;
 
   const otherObservationsTable = `
     <div>
       <p style="${sectionTitleStyle}"><strong><u>Other Observations</u></strong></p>
-      <ul>${otherObservations?.otherObservations
+      ${otherObservations?.otherObservations
         ?.split("\n")
-        .map((line) => `<li style="margin:8px 0;">${line}</li>`)
-        .join("")}</ul>
+        .map((line) => `<ul style="margin:0 6px;"><li>${line}</li></ul>`)
+        .join("")}
     </div>
   `;
 
@@ -741,6 +741,7 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
       ${renderCenteredTitle("Personal Discussion Sheet")}
       ${renderSection("Personal Details", personalDetailsTable)}
       ${renderSection("Family Background", familyMembersTable + familySummaryTable)}
+      <div style="page-break-before: always;"></div>
       ${renderSection("Place of Residence/Office", residenceTable)}
       ${renderTextSection(
         "Company Profile",
@@ -752,14 +753,17 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
       ${renderSection("Self Employed/Salaried", employmentTable)}
       ${renderBusinessSection("BUSINESS DETAILS", businessDetailsTable)}
       ${renderBusinessSection("EMPLOYEE/OTHER MAJOR COST", employeeCostsTable)}
+      <div style="page-break-before: always;"></div>
       ${renderBusinessSection("BUSINESS DATA", combinedBusinessTable)}
       ${renderSection("Co-Applicant Income", coApplicantIncomeTable)}
       ${renderSection("Other Income", otherIncomeTable)}
       ${renderSection("Assets & Investments", assetsTable)}
+      <div style="page-break-before: always;"></div>
       ${liabilitiesTable}
       ${renderSection("Budget Analysis", budgetTable)}
       ${endUseOfFundsTable}
       ${otherObservationsTable}
+      <div style="page-break-before: always;"></div>
       ${overallPositivesOrNegativesTable}
       ${renderSection("Trade References ", tradeReferenceTable)}
       ${pdStatusTable}
