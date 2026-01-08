@@ -252,7 +252,7 @@ export const pdBaseTemplate = (html_data?: any) => {
               background: #f5f5f5;
             }
             .signature-section {
-              margin: 16px 0 24px;
+              margin: 16px 0 24px 12px;
               text-align: left;
             }
             .signature-section img {
@@ -396,7 +396,5 @@ export const pdBaseTemplateFooter = (html_data?: any) => {
           : ""
       }
     
-    </body>
-    </html>
     `;
 };

@@ -159,6 +159,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
             </tr>
         </table>
         
+        <div style="page-break-before: always;"></div>
         <table style="${tableStyle}">
             <tr>
                 <td colspan="2" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Borrower Details</strong></p></td>
@@ -250,6 +251,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
             }
         </table>
         
+        <div style="page-break-before: always;"></div>
         <table style="${tableStyle}">
             <tr>
                 <td colspan="9" style="${labelCellStyle}"><strong>Business/Financial Profile</strong></p></td>
@@ -301,9 +303,8 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
             <tr>
                 <td colspan="2" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Any other business or alternate source of income such as rentals, commission etc. (Provide details)</strong></p></td>
                 <td colspan="7" style="${valueCellStyle}">
-                    <ul>
-                        <li><strong>Other business interest / source of income / family income:</strong> ${verificationData.commonPoints?.otherIncomes || verificationData.otherDetailsObserved?.otherBusinessIncomeSource || ""}</li>
-                    </ul>
+                        <p style="font-size: 11px;"><strong><i>Other business interest / source of income / family income (Details of properties and tenants/ lessees in rental income):</i></strong></p> 
+                        ${verificationData.otherDetailsObserved?.otherBusinessIncomeSource ? verificationData.otherDetailsObserved?.otherBusinessIncomeSource.split("\n").map((line: string) => `<ul style="margin: 0 6px;"><li>${line}</li></ul>`).join("") : "Not provided"}
                 </td>
             </tr>
             <tr>
@@ -326,6 +327,9 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
                 <td colspan="2" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Details of neighbor check /<br />Third party check done and status:</strong></p></td>
                 <td colspan="7" style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${verificationData.otherDetailsObserved?.neighborCheckThirdParty || ""}</p></td>
             </tr>
+            </table>
+    <div style="page-break-before: always;"></div>
+            <table style="${tableStyle}">
             <tr>
                 <td colspan="9" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Common Points applicable for all cases</strong></p></td>
             </tr>
@@ -398,7 +402,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
                 <td colspan="7" style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${verificationData.commonPoints?.endUseOfProposedLoan || ""}</p></td>
             </tr>
         </table>
-        
+    <div style="page-break-before: always;"></div>
         <table style="${tableStyle}">
             <tr>
                 <td colspan="5" style="${labelCellStyle}"></td>
@@ -450,6 +454,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
         </table>
 
 
+    <div style="page-break-before: always;"></div>
         <!-- Annexure 1 -->
         <table style="${tableStyle}">
             <tr>
