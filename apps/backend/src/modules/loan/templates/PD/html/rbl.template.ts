@@ -420,6 +420,7 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
         },
       ])}
 
+      <div style="page-break-before: always;"></div>
       ${renderSubHeading("Business owner Details")}
       ${renderMultiColumnTable(
         [
@@ -481,6 +482,7 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
           : `<tr><td style="${valueCellStyle}"><p style="${paragraphStyle}">Family details not provided</p></td></tr>`
       }
 
+      <div style="page-break-before: always;"></div>
       ${renderSubHeading("Business Details (Separate for additional business)")}
       ${renderTwoColumnTable([
         { label: "Business Name", value: businessDetails.businessName },
@@ -517,6 +519,9 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
               : formatMultiline(businessDetails.businessProcess)
             : "",
         },
+      ])}
+      <div style="page-break-before: always;"></div>
+      ${renderTwoColumnTable([
         { label: "Margins", value: businessDetails.margins },
         {
           label: "Documents Observed",
@@ -561,6 +566,7 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
         { label: "PF/ESI Applied", value: employeeDetails.pfEsiApplied },
       ])}
 
+      <div style="page-break-before: always;"></div>
       ${renderSubHeading("Trade References - Suppliers")}
       ${renderMultiColumnTable(
         [
@@ -591,6 +597,7 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
         "No other sources of income provided"
       )}
 
+      <div style="page-break-before: always;"></div>
       ${renderSubHeading("Loans Details")}
       ${renderMultiColumnTable(
         [
@@ -622,12 +629,9 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
         applicantBankingTable ||
         renderSingleColumnTable(["Applicant banking details not provided"])
       }
+      ${renderSubHeading("End Use")}
       ${
-        endUseOfLoan
-          ? renderParagraph(
-              `<strong>End Use:</strong> ${formatMultiline(endUseOfLoan)}`
-            )
-          : ""
+        renderSingleColumnTable([endUseOfLoan])
       }
 
       ${amountPurposeText ? renderSingleColumnTable([amountPurposeText]) : ""}
@@ -645,6 +649,7 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
         )
       }
 
+      <div style="page-break-before: always;"></div>
       ${renderSubHeading("Net Worth")}
       ${renderMultiColumnTable(
         [
@@ -696,8 +701,6 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
       ${renderParagraph(
         "The report contains information provided by the Applicant met. The information is provided verbally and could be verified only to a limited extent. RBL will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions."
       )}
-
-      ${renderSubHeading("Photographs taken during visit")}
     </div>
     ${pdBaseTemplateFooter(html_data)}
   `;
