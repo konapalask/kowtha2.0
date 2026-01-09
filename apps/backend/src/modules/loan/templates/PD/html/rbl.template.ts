@@ -534,7 +534,7 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
               : formatMultiline(businessDetails.documentsObserved)
             : "",
         },
-        { label: "Activity Observed", value: businessDetails.activityObserved },
+        { label: "Activity Observed", value: businessDetails.activityObserved ? businessDetails.activityObserved.split("\n").map((line: string) => `<ul style="margin: 0 6px;"><li>${line}</li></ul>`).join("") : "Not Provided" },
       ])}
 
       ${renderSubHeading("Inputs/Purchases")}

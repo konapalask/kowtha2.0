@@ -8,7 +8,7 @@ const labelCellStyle =
   "border:1px solid #ccc;border-right:1px solid #ccc;padding:8px;width:40%;vertical-align:middle";
 const valueCellStyle =
   "border:1px solid #ccc;padding:8px;width:60%;vertical-align:top";
-const paragraphStyle = "margin:8px 0;line-height:1.5;font-size:12px;color:#333";
+const paragraphStyle = "margin:8px 0;font-size:12px;color:#333";
 
 const hasValue = (value: any): boolean => {
   if (value === null || value === undefined) return false;
@@ -319,19 +319,19 @@ export const heroHousingSelfTemplate = (
     },
     {
       left: `<p style="${paragraphStyle}"><strong>PD address & location</strong></p>`,
-      right: wrapParagraph(formatMultiline(summary.pdAddress || "")),
+      right: formatMultiline(summary.pdAddress || ""),
     },
     {
       left: `<p style="${paragraphStyle}"><strong>Lat log of business address</strong></p>`,
       right:
         hasValue(latitude) || hasValue(longitude)
           ? [
-              latitude && wrapParagraph(formatMultiline(latitude)),
-              longitude && wrapParagraph(formatMultiline(longitude)),
+              latitude && formatMultiline(latitude),
+              longitude && formatMultiline(longitude),
             ]
               .filter(Boolean)
               .join("")
-          : wrapParagraph("Not provided"),
+          : formatMultiline("Not provided"),
     },
     {
       left: `<p style="${paragraphStyle}"><strong>Requested loan amount</strong></p>`,
@@ -714,11 +714,11 @@ export const heroHousingSelfTemplate = (
       right: currentBusinessValue,
     },
     {
-      left: `<p style="${paragraphStyle}"><strong>Details of business premises</strong></p>`,
+      left: `<div style="page-break-before: always;"></div><p style="${paragraphStyle}"><strong>Details of business premises</strong></p>`,
       right: businessPremisesValue,
     },
     {
-      left: `<p style="${paragraphStyle}"><strong>Details about business details</strong></p>`,
+      left: `<div style="page-break-before: always;"></div><p style="${paragraphStyle}"><strong>Details about business details</strong></p>`,
       right: businessOperationsValue,
     },
     {
