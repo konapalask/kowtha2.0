@@ -359,10 +359,12 @@ export const idfcPlTemplate = (verificationData: any, html_data: any) => {
       ${sectionTitle("Personal Discussion Report")}
       ${renderKeyValueTable(generalRows)}
 
+      <div style="page-break-before: always;"></div>
 
       ${sectionTitle("Income Details")}
       ${renderKeyValueTable(incomeRows)}
 
+      <div style="page-break-before: always;"></div>
       ${sectionTitle("Banking Details")}
       ${renderKeyValueTable(bankingRows)}
 
@@ -372,6 +374,7 @@ export const idfcPlTemplate = (verificationData: any, html_data: any) => {
       ${sectionTitle("Residence & Assets")}
       ${renderKeyValueTable(residenceRows)}
 
+      <div style="page-break-before: always;"></div>
       ${sectionTitle("BIL LOAN DETAILS:")}
       ${renderKeyValueTable([
         [
