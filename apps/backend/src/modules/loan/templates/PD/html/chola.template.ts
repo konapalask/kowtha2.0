@@ -94,23 +94,23 @@ const renderInstructionTable = (
 };
 
 const renderInnerTable = (headers: string[], rows: string[][]) => {
-  if (!rows.length) {
-    return wrapParagraph("Not provided");
-  }
+  // if (!rows.length) {
+  //   return wrapParagraph("Not provided");
+  // }
   const headerRow = headers
     .map(
       (header) =>
         `<td style="${labelCellStyle};font-weight:bold;background:#f5f5f5;">${header}</td>`
     )
     .join("");
-  const rowsHtml = rows
+  const rowsHtml = rows.length ? rows
     .map(
       (row) =>
         `<tr>${row
           .map((cell) => `<td style="${valueCellStyle}">${cell}</td>`)
           .join("")}</tr>`
     )
-    .join("");
+    .join("") : `<tr><td style="${valueCellStyle}" colspan="${headers.length}">Not provided</td></tr>`;
   return `
     <table style="${tableStyle}">
       <tr>${headerRow}</tr>
@@ -146,7 +146,7 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
     verificationData.existingLoans ||
     {};
   const existingLoansArray = ensureArray(existingLoansData?.loanDetails);
-  const existingLoans = existingLoansArray.map(
+  const existingLoans = existingLoansArray.length ? existingLoansArray.map(
     (loan: any) => [
       formatMultiline(loan?.bankName || loan?.bankOrNbfcName || ""),
       formatMultiline(loan?.typeOfLoan || ""),
@@ -154,7 +154,7 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
       formatCurrency(loan?.emiInterest || loan?.emi || loan?.emiAmount),
       formatMultiline(loan?.tenureTotalCompleted || loan?.tenure || ""),
     ]
-  );
+  ) : [];
   // Handle nested structures for banking details
   const bankingDetailsData = verificationData.bankingDetails || {};
   const bankingDetailsArray = Array.isArray(bankingDetailsData)
@@ -218,7 +218,7 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
       `<p style="${paragraphStyle}"><strong>About the Applicant & Business content:</strong><br>${aboutBusiness?.aboutTheApplicant ? aboutBusiness?.aboutTheApplicant.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("") : "Not Provided"}</p>
       <div style="page-break-before: always;"></div>
       <p style="${paragraphStyle}"><strong>Residential Details:</strong> ${residentialDetails?.residentialDetails ? residentialDetails?.residentialDetails.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("") : "Not Provided"}</p>
-    <p style="${paragraphStyle}"><strong>About the Business's Industry Overview:</strong><br>${aboutBusiness?.aboutTheBusiness ? aboutBusiness?.aboutTheBusiness.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("") : "Not Provided"}</p>`
+    <p style="${paragraphStyle}"><strong>Applicant Business's Industry Overview:</strong><br>${aboutBusiness?.aboutTheBusiness ? aboutBusiness?.aboutTheBusiness.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("") : "Not Provided"}</p>`
 
 
   const generalSection = renderKeyValueTable([
@@ -261,38 +261,36 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
     "EMI/Interest (In Rs.)",
     "Total Tenure / Completed [in months]",
   ];
-  const existingLoanTable = existingLoans.length > 0
-    ? (() => {
-        const headerRow = existingLoanHeaders
-          .map(
-            (header) =>
-              `<td style="${labelCellStyle};font-weight:bold;background:#f5f5f5;">${header}</td>`
-          )
-          .join("");
-        const rowsHtml = existingLoans
-          .map(
-            (row) =>
-              `<tr>${row
-                .map((cell) => `<td style="${valueCellStyle}">${cell}</td>`)
-                .join("")}</tr>`
-          )
-          .join("");
-        const totalEMIRow = `<tr>
-          <td style="${valueCellStyle}"></td>
-          <td style="${valueCellStyle}"></td>
-          <td style="${labelCellStyle};font-weight:bold;background:#f5f5f5;">Total EMI</td>
-          <td style="${valueCellStyle}">${formatCurrency(existingLoansData?.totalEmi)}</td>
-          <td style="${valueCellStyle}"></td>
-        </tr>`;
-        return `
-          <table style="${tableStyle}">
-            <tr>${headerRow}</tr>
-            ${rowsHtml}
-            ${totalEMIRow}
-          </table>
-        `;
-      })()
-    : wrapParagraph("Not provided");
+  const headerRow = existingLoanHeaders
+    .map(
+      (header) =>
+        `<td style="${labelCellStyle};font-weight:bold;background:#f5f5f5;">${header}</td>`
+    )
+    .join("");
+  const rowsHtml = existingLoans.length > 0
+    ? existingLoans
+        .map(
+          (row) =>
+            `<tr>${row
+              .map((cell) => `<td style="${valueCellStyle}">${cell}</td>`)
+              .join("")}</tr>`
+        )
+        .join("")
+    : `<tr><td style="${valueCellStyle}" colspan="${existingLoanHeaders.length}">Not provided</td></tr>`;
+  const totalEMIRow = `<tr>
+    <td style="${valueCellStyle}"></td>
+    <td style="${valueCellStyle}"></td>
+    <td style="${labelCellStyle};font-weight:bold;background:#f5f5f5;">Total EMI</td>
+    <td style="${valueCellStyle}">${formatCurrency(existingLoansData?.totalEmi || 0)}</td>
+    <td style="${valueCellStyle}"></td>
+  </tr>`;
+  const existingLoanTable = `
+    <table style="${tableStyle}">
+      <tr>${headerRow}</tr>
+      ${rowsHtml}
+      ${totalEMIRow}
+    </table>
+  `;
 
   const bankingTable = renderInnerTable(
     ["Bank Name", "A/c No", "A/c Type", "Average Balance"],
@@ -309,7 +307,7 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
 
 
       
-      <p style="${paragraphStyle}"><strong>Assets Owned by the Applicant: -</strong></p>
+      <p style="${paragraphStyle}"><strong>Assets Owned by the Applicant / Co-applicant / Guarantor:-</strong></p>
         ${assets}
       <p style="${paragraphStyle}"><strong>Applicant's Net Worth: </strong>  ${formatMultiline(applicantsNetWorth?.applicantsNetWorth || "Not provided")}</p>
      

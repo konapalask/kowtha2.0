@@ -656,13 +656,16 @@ export const indiaShelterSalariedTemplate = (
     <div class="template-content india-shelter-salaried">
       ${generalTable}
       ${basicDetailsTable}
+      <div style="page-break-before: always;"></div>
       ${employerTable}
       ${familyMembersTable}
       ${currentLoansTable}
+      <div style="page-break-before: always;"></div>
       ${bankingTable}
       ${loanPurposeTable}
       ${collateralTable}
       ${referencesTable}
+      <div style="page-break-before: always;"></div>
       ${tpcTable}
       ${documentsTable}
       ${pdReviewTable}
