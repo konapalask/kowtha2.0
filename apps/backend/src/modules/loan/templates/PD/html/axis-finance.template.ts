@@ -502,7 +502,7 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
   const otherIncomeTable = renderTwoColumnTable([
     {
       label: "Other Income",
-      value: otherIncome.otherIncome || "Not Provided",
+      value: otherIncome.otherIncome ? otherIncome.otherIncome.split("\n").map((line: string) => `<ul style="margin: 0 6px;"><li>${line}</li></ul>`).join("") : "Not Provided",
     },
   ]);
 
@@ -734,7 +734,14 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
       </tr>
     </table>
   `;
-
+  const signatureTable = `
+    <table style="${tableStyle}">
+      <tr>
+        <td style="${headerCellStyle};width:35%;">Signature</td>
+        <td style="${cellStyle}"></td>
+      </tr>
+    </table>
+  `;
   return `
     ${pdBaseTemplate(html_data)}
     <div class="template-content axis-finance">
@@ -768,6 +775,7 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
       ${renderSection("Trade References ", tradeReferenceTable)}
       ${pdStatusTable}
       ${acceptRejectPDTable}
+      ${signatureTable}
       ${estimatedIncomeTable}
       ${noteBlock}
     </div>
