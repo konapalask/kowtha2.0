@@ -201,6 +201,11 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
         { colSpan: 3 }
       )}
       ${renderKeyValueRow("Details on management of business", formatMultiline(profile.managementDetails), undefined, { colSpan: 3 })}
+      </table>
+      `;
+
+  const totalExperienceTable = `
+    <table style="${tableStyle}">
       ${renderKeyValueRow(
         "Total Experience in Same line Business",
         profile.totalExperience,
@@ -443,6 +448,9 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
     <div class="template-content axis-agri-template">
       ${generalTable}
       ${profileTable}
+      <div style="page-break-after: always;"></div>
+      ${totalExperienceTable}
+      <div style="page-break-after: always;"></div>
       ${supplierClientTable}
       ${observationsTable}
     </div>
