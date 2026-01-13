@@ -153,6 +153,7 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
         ])
     )}
 
+    <div style="page-break-after: always;"></div>
     <h2 style="margin:0 0 16px;color:#1f2a37;font-size:16px;">History</h2>
     <table style="${tableStyle}">
       ${renderKeyValue("Year of Establishment", history.yearOfEstablishment)}
@@ -174,22 +175,28 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
     <table style="${tableStyle}">
     ${renderKeyValue(
       "Office Set-up with Overall Look",
-      businessSetup.officeSetUpWithOverallLook ? businessSetup.officeSetUpWithOverallLook.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("<br>") : "Not provided",
+      businessSetup.officeSetUpWithOverallLook ? businessSetup.officeSetUpWithOverallLook.split("\n").map((line: string) => `<ul style="margin:0 6px;"><li>${line}</li></ul>`).join("<br>") : "Not provided",
       undefined,
       { colspan: 3 }
     )}
+    </table>
+    <div style="page-break-after: always;"></div>
+    <table style="${tableStyle}">
     ${renderKeyValue(
       "Expenses",
-      businessSetup.expenses ? businessSetup.expenses.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("<br>") : "Not provided",
+      businessSetup.expenses ? businessSetup.expenses.split("\n").map((line: string) => `<ul style="margin:0 6px;"><li>${line}</li></ul>`).join("<br>") : "Not provided",
       undefined,
       { colspan: 3 }
     )}
     ${renderKeyValue(
       "Transactions",
-      businessSetup.transactions ? businessSetup.transactions.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("<br>") : "Not provided",
+      businessSetup.transactions ? businessSetup.transactions.split("\n").map((line: string) => `<ul style="margin:0 6px;"><li>${line}</li></ul>`).join("<br>") : "Not provided",
       undefined,
       { colspan: 3 }
     )}
+    </table>
+    <div style="page-break-after: always;"></div>
+    <table style="${tableStyle}">
     ${renderKeyValue("Plant and Machinery", businessSetup.plantAndMachinery, undefined, { colspan: 3 })}
     ${renderKeyValue("Office Equipment", businessSetup.officeEquipment, undefined, { colspan: 3 })}
     ${renderKeyValue("Workers and Salaries", businessSetup.workersAndSalaries, undefined, { colspan: 3 })}
@@ -242,7 +249,6 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
       )
       .join("")}
     </table>
-
     <h2 style="margin:0 0 16px;color:#1f2a37;font-size:16px;">Details of Customers / Clients: Not Applicable- Walk in Customers</h2>
     <table style="${tableStyle}">
     <tr>
@@ -286,7 +292,7 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
       )
       .join("")}
     </table>
-
+    <div style="page-break-after: always;"></div>
     <h2 style="margin:0 0 16px;color:#1f2a37;font-size:16px;">Sister Companies :</h2>
     <table style="${tableStyle}">
     <tr>
@@ -352,9 +358,10 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
     ${renderKeyValue("Creditors Position as on", performanceDetails.creditorsPositionAsOn)}
     </table>
 
+    <div style="page-break-after:always;"></div>
     <h2 style="margin:0 0 16px;color:#1f2a37;font-size:16px;">Other Business Interests of the Proprietor</h2>
     <table style="${tableStyle}">
-    ${renderKeyValue("Other Business Interests of the Proprietor", otherBusinessInterests.otherBusinessInterestsOfTheProprietor ? otherBusinessInterests.otherBusinessInterestsOfTheProprietor.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("<br>") : "Not provided", undefined, { colspan: 3 })}
+    ${renderKeyValue("Other Business Interests of the Proprietor", otherBusinessInterests.otherBusinessInterestsOfTheProprietor ? otherBusinessInterests.otherBusinessInterestsOfTheProprietor.split("\n").map((line: string) => `<ul style="margin:0 6px;"><li>${line}</li></ul>`).join("<br>") : "Not provided", undefined, { colspan: 3 })}
     </table>
 
     <h2 style="margin:0 0 16px;color:#1f2a37;font-size:16px;">Banking Details & Statutory Obligations</h2>
@@ -368,7 +375,7 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
     ${renderKeyValue("Municipal & Corporation Taxes (BST, CST & MVAT)", bankingDetails.municipalCorporationTaxesBstCstMvat)}
     ${renderKeyValue("Last Utility Payment Made (Electricity)", bankingDetails.lastUtilityPaymentMadeElectricity)}
     </table>
-
+    <div style="page-break-after: always;"></div>
     <h2 style="margin:0 0 16px;color:#1f2a37;font-size:16px;">Activity Levels at CPA Visit</h2>
     <table style="${tableStyle}">
     ${renderKeyValue("Number of Employees & Workers Observed", activityLevelsAtCPAVisit.numberOfEmployeesWorkersObserved)}
@@ -395,6 +402,7 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
     ${renderKeyValue("Estimated Value as per Customer", detailsOfPropertyToBeMortgaged.estimatedValueAsPerCustomer)}
     </table>
 
+    <div style="page-break-after: always;"></div>
     <h2 style="margin:0 0 16px;color:#1f2a37;font-size:16px;">Verification</h2>
     <h3 style="margin:0 0 16px;color:#1f2a37;font-size:14px;">a) Details of Sales and Purchases during the Period from as follows: as per applicant’s oral information</h3>
     <table style="${tableStyle}">
@@ -420,15 +428,15 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
     <table style="${tableStyle}">
     <tr>
         <td style="${labelCellStyle}">Document Verified</td>
-        <td style="${valueCellStyle}">${verification.documentVerification ? verification.documentVerification.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("<br>") : "Not provided"}</td>
+        <td style="${valueCellStyle}">${verification.documentVerification ? verification.documentVerification.split("\n").map((line: string) => `<ul style="margin:0 6px;"><li>${line}</li></ul>`).join("<br>") : "Not provided"}</td>
     </tr>
     </table>
-            
+    <div style="page-break-after: always;"></div>
     <h2 style="margin:0 0 16px;color:#1f2a37;font-size:16px;">Concluding Impressions</h2>
     <table style="${tableStyle}">
     <tr>
         <td style="${labelCellStyle}">Concluding Impressions</td>
-        <td style="${valueCellStyle}">${concludingImpressions.concludingImpressions ? concludingImpressions.concludingImpressions.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("<br>") : "Not provided"}</td>
+        <td style="${valueCellStyle}">${concludingImpressions.concludingImpressions ? concludingImpressions.concludingImpressions.split("\n").map((line: string) => `<ul style="margin:0 6px;"><li>${line}</li></ul>`).join("<br>") : "Not provided"}</td>
     </tr>
     <tr>
         <td style="${labelCellStyle}">PD Status</td>
