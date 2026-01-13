@@ -209,6 +209,7 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
         )}
       </table>
 
+      <div style="page-break-after: always;"></div>
       <table style="${tableStyle}">
       <h2 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;">Self Employed Profile – Occupational Details</h2>
       <tr>
@@ -275,7 +276,7 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
         ${renderKeyValue("Collateral Details (for MLAP) – Capture Type, Occupancy status, Year of purchase, Parental owned etc", business.collateralDetails)}
       </table>
 
-
+     <div style="page-break-after: always;"></div>
       <table style="${tableStyle}">
       <h2 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;">End use (MLAP)</h2>
         <tr><td style="${labelCellStyle}">MLAP (End use in detail), (In case of BT Loan/Loan consolidation, capture end use of earlier loans), (For LCP - capture Cost, AV, source of OCR etc)</td>
@@ -345,6 +346,7 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
 
       <p style="margin:0 0 10px 0;font-size:12px;color:#333;">*If stability is less than 3 years at current business premises then capture details of earlier premises as applicable</p>
 
+      <div style="page-break-after: always;"></div>
       <h2 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;">REFERENCE CHECK DETAILS</h2>
       <h3 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;">Business Ref check</h3>
       ${renderArrayTable(
@@ -414,6 +416,7 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
 
       ${pdBaseTemplateFooter(html_data)}
 
+      <div style="page-break-after: always;"></div>
       <!-- Annexure 1 – AFHL Cases -->
       <h2 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;text-align:center;"><u><strong>Annexure 1 – AFHL Cases</strong></u></h2>
       <table style="${tableStyle}">
@@ -459,6 +462,7 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
         )}
       </table>
 
+      <div style="page-break-after: always;"></div>
       <h2 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;text-align:center;"><u><strong>Annexure 2 – Salaried Profile</strong></u></h2>
       <table style="${tableStyle}">
         ${renderKeyValue("Name of the Company", annexureSalaried.companyName)}
@@ -540,9 +544,6 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
           employmentDocs
         )}
       </table>
-
-
-
     </div>
   `;
 };
