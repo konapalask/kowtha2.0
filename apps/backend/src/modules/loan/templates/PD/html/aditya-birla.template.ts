@@ -126,6 +126,7 @@ export const adityaBirlaTemplate = (verificationData: any, html_data: any) => {
         ${renderKeyValue("Vendors / suppliers to applicant", natureOfBusiness.vendorsSuppliersToApplicant)}
       </table>
 
+      <div style="page-break-after: always;"></div>
       <table style="${tableStyle}">
         ${renderKeyValue("Business Transaction", business.businessTransaction)}
         ${renderKeyValue("Stock observed", business.stockObserved)}
@@ -163,6 +164,9 @@ export const adityaBirlaTemplate = (verificationData: any, html_data: any) => {
           ${renderKeyValue("Market Reference from", businessProfile.marketReferenceFrom)}
           
         </td>
+        </table>
+        <div style="page-break-after: always;"></div>
+        <table style="${tableStyle}">
         <td colspan="2">
           ${renderKeyValue("Vendors contact Details", businessProfile.vendorsContactDetails)}
           ${renderKeyValue("Daily Sales/ Monthly Sales", businessProfile.dailySalesMonthlySales)}
@@ -228,7 +232,7 @@ export const adityaBirlaTemplate = (verificationData: any, html_data: any) => {
         ${renderKeyValue("CIBIL Details", observations.cibilDetails)}
         <tr>
           <td style="${labelCellStyle}">Previous Loans</td>
-          <td style="border-collapse:collapse;">
+          <td style="border-right:1px solid #ccc;border-bottom:1px solid #ccc;">
             <table style="${tableStyle}">
               <tr>
                 <td style="${labelCellStyle}">BANK</td>
@@ -248,6 +252,9 @@ export const adityaBirlaTemplate = (verificationData: any, html_data: any) => {
             </table>
           <td>
         </tr>
+        </table>
+        <div style="page-break-after: always;"></div>
+        <table style="${tableStyle}">
         ${renderKeyValue("Banking Details", observations.bankingDetails)}
         ${renderKeyValue("Firm Account", observations.firmAccount)}
         ${renderKeyValue("Savings Account", observations.savingsAccount)}
@@ -264,7 +271,7 @@ export const adityaBirlaTemplate = (verificationData: any, html_data: any) => {
             <td style="${valueCellStyle}">Loan Amount: ${loanDetails.loanAmountApplied} <br>Purpose of Loan: ${loanDetails.purposeOfLoan}</td>
         </tr>
       </table>     
-      
+      <div style="page-break-after: always;"></div>
       <table style="${tableStyle}">
       <tr>
         <td style="${labelCellStyle};width:25%;">Particulars</td>
