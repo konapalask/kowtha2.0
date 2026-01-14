@@ -278,6 +278,7 @@ export const niwasSenpTemplate = (verificationData: any, html_data: any) => {
           </tr>
       </table>
 
+      <div style="page-break-after: always;"></div>
       <table style="${tableStyle}">
         <tr>
           <td style="text-align:center;font-size:14px;${labelCellStyle}" colspan="2">Employment Details</td>
@@ -338,6 +339,9 @@ export const niwasSenpTemplate = (verificationData: any, html_data: any) => {
         ${renderKeyValue("Is Business seasonal?", business.businessSeasonal)}
         ${renderKeyValue("Number of Employees", business.numberOfEmployees)}
         ${renderKeyValue("Profile Description of employee/staff", business.profileDescriptionOfEmployeeStaff)}
+        </table>
+        <div style="page-break-after: always;"></div>
+        <table style="${tableStyle}">
         ${renderKeyValue("Designation of Employee/Staff member", business.designationOfEmployeeStaffMember)}
         ${renderKeyValue("No. of Employees in that role", business.noOfEmployeesInThatRole)}
         ${renderKeyValue("No of Years Business Running in this Premises", business.yearsAtCurrentPremises)}
@@ -372,7 +376,7 @@ export const niwasSenpTemplate = (verificationData: any, html_data: any) => {
               </tr>
               `).join("")}  
         </table>
-
+        <div style="page-break-after: always;"></div>
         <table style="${tableStyle}; text-align:left;">
         <tr>
           <td style="text-align:center;font-size:14px;${labelCellStyle}" colspan="4"><b>Business Income Computation (Monthly Basis)</b></td>
@@ -458,7 +462,7 @@ export const niwasSenpTemplate = (verificationData: any, html_data: any) => {
           </tr>
           `).join("")}
         </table>
-
+        <div style="page-break-after: always;"></div>
       <table style="${tableStyle}">
         <tr>
           <td style="text-align:center;font-size:14px;${labelCellStyle}" colspan="2">Loan Details</td>
@@ -519,6 +523,7 @@ export const niwasSenpTemplate = (verificationData: any, html_data: any) => {
         familyRows
       )}
 
+      <div style="page-break-after: always;"></div>
       <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:14px;text-align:center;">
         Reference (Business Parties)
       </h2>
@@ -564,6 +569,9 @@ export const niwasSenpTemplate = (verificationData: any, html_data: any) => {
         ${renderKeyValue("Initiated address", pdComments.initiatedAddress)}
         ${renderKeyValue("Visited address", pdComments.visitedAddress)}
         ${renderKeyValue("Residential address", pdComments.residentialAddress)}
+        </table>
+        <div style="page-break-after: always;"></div>
+        <table style="${tableStyle}">
         ${renderKeyValue("Other observations", pdComments.otherObservations ? pdComments.otherObservations.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("") : "Not provided")}
         ${renderKeyValue("Concerns", pdComments.concerns ? pdComments.concerns.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("") : "Not provided")}
         ${renderKeyValue("Status of the case", html_data.approvedStatus || "Not provided")}

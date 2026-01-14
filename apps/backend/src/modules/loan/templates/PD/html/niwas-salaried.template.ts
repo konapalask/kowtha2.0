@@ -258,6 +258,7 @@ export const niwasSalariedTemplate = (
           </td>
       </table>
 
+      <div style="page-break-after: always;"></div>
       <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">
         Assets and Investments
       </h2>
@@ -364,6 +365,7 @@ export const niwasSalariedTemplate = (
         </tr>
       </table>
 
+      <div style="page-break-after: always;"></div>
       <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">
         Past Employment/Business Details
       </h2>
@@ -459,6 +461,7 @@ export const niwasSalariedTemplate = (
         
       </table>
 
+      <div style="page-break-after: always;"></div>
       <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">
         cost and Funds Information (Loan Details)
         </h2>
@@ -526,6 +529,7 @@ export const niwasSalariedTemplate = (
         referenceRows
       )}
 
+      <div style="page-break-after: always;"></div>
       <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">
         Employer Firm Check (From Neighbor)
       </h2>

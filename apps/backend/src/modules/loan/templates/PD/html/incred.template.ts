@@ -114,8 +114,11 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
         ${renderKeyValue("PD Done by with Designation", html_data.fieldExecutive + (general.personDesignation ? " - " + general.personDesignation : ""))}
         ${renderKeyValue("Loan Amt. Applied and Purpose", formatCurrency(general.loanAmtApplied) + " <br>" + (general.purposeOfLoan ? "<strong>Purpose of Loan:</strong> " + general.purposeOfLoan : ""))}
 
-        ${renderKeyValue("About the Applicant/Business", applicantAndBusinessDetails.aboutTheApplicantOrBusiness ? applicantAndBusinessDetails.aboutTheApplicantOrBusiness.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("") : "Not provided")}
-        ${renderKeyValue("About the Co-Applicant", applicantAndBusinessDetails.aboutTheCoApplicant ? applicantAndBusinessDetails.aboutTheCoApplicant.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("") : "Not provided")}
+        ${renderKeyValue("About the Applicant/Business", applicantAndBusinessDetails.aboutTheApplicantOrBusiness ? applicantAndBusinessDetails.aboutTheApplicantOrBusiness.split("\n").map((line: string) => `<ul style="margin:0 6px;"><li>${line}</li></ul>`).join("") : "Not provided")}
+        </table>
+        <div style="page-break-after: always;"></div>
+        <table style="${tableStyle}">
+        ${renderKeyValue("About the Co-Applicant", applicantAndBusinessDetails.aboutTheCoApplicant ? applicantAndBusinessDetails.aboutTheCoApplicant.split("\n").map((line: string) => `<ul style="margin:0 6px;"><li>${line}</li></ul>`).join("") : "Not provided")}
 
         <tr>
             <td style="${labelCellStyle}">As Per Audited ITR's</td>
@@ -182,8 +185,11 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
 
         ${renderKeyValue("Capital Investment till date", capitalInvestmentTillDate.tillDate)}
 
-        ${renderKeyValue("Documents observed/Statutory requirement docs", documentsObserved.documentsObserved ? documentsObserved.documentsObserved.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("") : "Not provided")}
-        ${renderKeyValue("Docs Verified for P&L", documentsObserved.docsVerified ? documentsObserved.docsVerified.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("") : "Not provided")}
+        ${renderKeyValue("Documents observed/Statutory requirement docs", documentsObserved.documentsObserved ? documentsObserved.documentsObserved.split("\n").map((line: string) => `<ul style="margin:0 6px;"><li>${line}</li></ul>`).join("") : "Not provided")}
+        </table>
+        <div style="page-break-after: always;"></div>
+        <table style="${tableStyle}">
+        ${renderKeyValue("Docs Verified for P&L", documentsObserved.docsVerified ? documentsObserved.docsVerified.split("\n").map((line: string) => `<ul style="margin:0 6px;"><li>${line}</li></ul>`).join("") : "Not provided")}
 
 
       </table>
@@ -250,10 +256,11 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
         </tr>
       </table>
 
+      <div style="page-break-after: always;"></div>
       <table style="${tableStyle}">
-        ${renderKeyValue("Other Assets", assets.otherAssets ? assets.otherAssets.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("") : "Not provided")}
+        ${renderKeyValue("Other Assets", assets.otherAssets ? assets.otherAssets.split("\n").map((line: string) => `<ul style="margin:0 6px;"><li>${line}</li></ul>`).join("") : "Not provided")}
 
-        ${renderKeyValue("Other Sources of Income", otherSourcesOfIncome.otherSourcesOfIncome ? otherSourcesOfIncome.otherSourcesOfIncome.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("") : "Not provided")}
+        ${renderKeyValue("Other Sources of Income", otherSourcesOfIncome.otherSourcesOfIncome ? otherSourcesOfIncome.otherSourcesOfIncome.split("\n").map((line: string) => `<ul style="margin:0 6px;"><li>${line}</li></ul>`).join("") : "Not provided")}
       </table>
 
       <h2 style="margin:0 0 16px;color:#1f2a37;font-size:16px;">References:</h2>
@@ -281,6 +288,7 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
         ${renderKeyValue("PD Status", html_data.approvedStatus|| "Not provided")}
       </table>
 
+      <div style="page-break-after: always;"></div>
       <p style="font-size:14px;font-weight:bold;text-align:center;"><u>Estimated Income</u></p>
       <p style="margin:8px 0;line-height:1.5">${formatMultiline(estimatedIncome?.estimatedIncomeDetails)}</p> 
       <p style="margin:8px 0;line-height:1.5"><strong>Gross Sales as per our assumptions</strong> <span style="margin-left:35px;">${verificationData.financialAnalysis?.grossProfitAsPerAssumption ? formatCurrency(verificationData.financialAnalysis.grossProfitAsPerAssumption) : "Not provided"}</span></p>
