@@ -146,6 +146,9 @@ export const janaSenpAbove50lTemplate = (
         <tr>
         <td style="${valueCellStyle}">${residentialDetails.residentialDetails}</td>
        </tr>
+       </table>
+       <div style="page-break-after: always;"></div>
+       <table style="${tableStyle}">
        <tr>
         <td style="text-align: center;${labelCellStyle}">Co-Applicant Details</td>
         </tr>
@@ -254,7 +257,7 @@ export const janaSenpAbove50lTemplate = (
          .join("")}
        </table>
 
-
+       <div style="page-break-after: always;"></div>
        <table style="${tableStyle}">
        <tr>
         <td style="text-align: center;${labelCellStyle}" colspan="4">Financial Comparison & Status</td>
@@ -367,7 +370,7 @@ export const janaSenpAbove50lTemplate = (
        </table>
 
 
-
+       <div style="page-break-after: always;"></div>
 
        <table style="${tableStyle}">
             <tr>
@@ -465,7 +468,7 @@ export const janaSenpAbove50lTemplate = (
        </table>
 
 
-
+        <div style="page-break-after: always;"></div>
 
         <table style="${tableStyle}">
        <tr>
@@ -558,7 +561,7 @@ export const janaSenpAbove50lTemplate = (
        </tr>
        </table>
 
-
+        <div style="page-break-after: always;"></div>
         <table style="${tableStyle}">
        <tr>
         <td style="text-align: center;${labelCellStyle}" colspan="4">Banking Details</td>
@@ -655,7 +658,7 @@ export const janaSenpAbove50lTemplate = (
          .join("")}
        </table>
 
-
+        <div style="page-break-after: always;"></div>
         <table style="${tableStyle}">
        <tr>
         <td style="text-align: center;${labelCellStyle}">Observations</td>

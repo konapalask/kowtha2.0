@@ -162,6 +162,7 @@ export const iiflTemplate = (verificationData: any, html_data: any) => {
         ${renderKeyValue("Usage of Property after Purchase", basic.propertyUsage, undefined, { colspan: 6 })}
       </table>
 
+      <div style="page-break-after: always;"></div>
       <table style="${tableStyle}">
         <tr>
           <td style="text-align: center; ${labelCellStyle}"colspan="7">Brief Comments/Observation of the case</td>
@@ -225,6 +226,7 @@ export const iiflTemplate = (verificationData: any, html_data: any) => {
               </tr>
             `).join("")}
           </table>
+          <div style="page-break-after: always;"></div>
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}">Applicant Profile</td>
@@ -313,6 +315,7 @@ export const iiflTemplate = (verificationData: any, html_data: any) => {
               <td style="${valueCellStyle}">${((incomeDetails.income.grossReceipts + incomeDetails.income.otherIncomes - (incomeDetails.expenses.purchases + incomeDetails.expenses.salaries + incomeDetails.expenses.electricity + incomeDetails.expenses.otherExpenses)) / (incomeDetails.income.grossReceipts + incomeDetails.income.otherIncomes) * 100).toFixed(2)}%</td>
             </tr>
           </table>
+          <div style="page-break-after: always;"></div>
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}">Other Income</td>
