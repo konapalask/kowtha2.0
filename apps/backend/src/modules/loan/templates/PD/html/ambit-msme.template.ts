@@ -152,10 +152,9 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
             </table>
           </td>
         </tr>
-
-
-
-
+      </table>
+      <div style="page-break-after: always;"></div>
+      <table style="${tableStyle}">
         <tr>
             <td style="${labelCellStyle}">Property Details (with Latitude and Longitude)</td>
             <td style="border:1px solid #ccc;padding:8px">
@@ -175,15 +174,15 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
         </tr>
 
 
-        ${renderKeyValue("Mob no. of App and Co app", "Applicant: " + generalInfo.phoneNumberOfApplicant + "<br>" + "Co-Applicant: " + generalInfo.phoneNumberOfCoApplicant)}
-        ${renderKeyValue("App & Co app KYC details and Utility bills/license", "Applicant: " + generalInfo.kycDetailsOfApplicant + "<br>" + "Co-Applicant: " + generalInfo.kycDetailsOfCoApplicant)}
+        ${renderKeyValue("Mob no. of App and Co app", "<strong>Applicant:</strong> " + generalInfo.phoneNumberOfApplicant + "<br>" + "<strong>Co-Applicant:</strong> " + generalInfo.phoneNumberOfCoApplicant)}
+        ${renderKeyValue("App & Co app KYC details and Utility bills/license", "<strong>Applicant:</strong> " + generalInfo.kycDetailsOfApplicant + "<br>" + "<strong>Co-Applicant:</strong> " + generalInfo.kycDetailsOfCoApplicant)}
         ${renderKeyValue("PD Done Date and Time", generalInfo.pdDoneDateAndTime)}
         ${renderKeyValue("Type of Loan", generalInfo.typeOfLoan)}
         ${renderKeyValue("No. of Visit", generalInfo.noOfVisit)}
         ${renderKeyValue("Person Met (With name and Relation)", generalInfo.personMet)}
         ${renderKeyValue("PD Done Person name", generalInfo.interviewedBy)}
         </table>
-
+        <div style="page-break-after: always;"></div>
         <table class="section-table">
             <tr>
                 <td style="${labelCellStyle}"> Sr. No.</td>
@@ -254,7 +253,6 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
                 </table>
                 </td>
             </tr>
-
             <tr>
                 <td style="${labelCellStyle}">4</td>
                 <td style="${labelCellStyle}">Business/Employment Details</td>
@@ -287,6 +285,9 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
                     : "Not provided"
                 }</td>
             </tr>
+            </table>
+            <div style="page-break-after: always;"></div>
+            <table style="${tableStyle}">
             <tr>
                 <td style="${labelCellStyle}">6</td>
                 <td style="${labelCellStyle}">Suppliers/ Customer/ Neighbour (TPC) (Minimum 2 required)</td>
@@ -374,8 +375,9 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
                     </table>
                 </td>
             </tr>
-
-            
+            </table>
+            <div style="page-break-after:always;"></div>
+            <table style="${tableStyle}">
             <tr>
                 <td style="${labelCellStyle}">7</td>
                 <td style="${labelCellStyle}">Average Stock Maintained</td>
@@ -457,7 +459,9 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
                 </table>
             </td>
         </tr>
-
+        </table>
+        <div style="page-break-after: always;"></div>
+        <table style="${tableStyle}">
         <tr>
             <td style="${labelCellStyle}">12</td>
             <td style="${labelCellStyle}">Stregths</td>
