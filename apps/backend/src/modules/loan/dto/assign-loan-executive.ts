@@ -60,4 +60,12 @@ export class createAssignmentDto {
   @IsString()
   @IsOptional()
   currentOfficeName?: string;
+
+  @ApiProperty({
+    description: 'ID of the assistant verifier to assign to the loan',
+    required: false
+  })
+  @IsNumber()
+  @IsOptional()
+  assistantVerifierId?: number;
 } 

@@ -30,6 +30,7 @@ model User {
   verificationsVerifier    Verification[]        @relation("VerificationVerifier")
   verificationRetries      VerificationRetries[]
   closedLoans              Loan[]                @relation("UserClosedLoans")
+  assistantVerifications   Verification[]        @relation("AssistantVerifier")
 }
 
 model DepartmentRole {
@@ -118,6 +119,8 @@ model Verification {
   finalReportPath     String?
   locationType        LocationType?
   verifierId          Int?
+  assistantVerifierId Int?
+  assistantVerifier   User?                 @relation("AssistantVerifier", fields: [assistantVerifierId], references: [id])
   businessName        String?
   isPostponed         Boolean?
   initialSubmitted    Boolean? @default(false)

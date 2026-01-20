@@ -525,8 +525,9 @@ export class LoanService {
         );
       }
 
+
       return await this.prisma.$transaction(async (prisma) => {
-        const verification = await prisma.verification.create({
+        let verificationData = await prisma.verification.create({
           data: {
             loan: { connect: { id: loan.id } },
             type: createData.verificationType || "AddressOne",
@@ -541,6 +542,15 @@ export class LoanService {
           },
         });
 
+        if (createData.assistantVerifierId) {
+          console.log("assistantVerifierId", createData.assistantVerifierId);
+          
+          verificationData = await prisma.verification.update({
+            where: { id: verificationData.id },
+            data: { assistantVerifier: { connect: { id: createData.assistantVerifierId } } },
+          });
+        }
+
         const loanStatusChange = await prisma.loan.update({
           where: { id: loanId },
           data: { status: "Assigned" },
@@ -551,7 +561,7 @@ export class LoanService {
           createData,
         });
 
-        return verification;
+        return verificationData;
       });
     } catch (error) {
       if (
@@ -1197,7 +1207,8 @@ export class LoanService {
         !updateData.address &&
         !updateData.businessName &&
         !updateData.currentOfficeName &&
-        !updateData.verifierId
+        !updateData.verifierId &&
+        !updateData.assistantVerifierId
       ) {
         throw new BadRequestException(
           "Address is required when assigning a field executive"
@@ -1225,6 +1236,9 @@ export class LoanService {
             }),
             ...(updateData.currentOfficeName && {
               currentOfficeName: updateData.currentOfficeName,
+            }),
+            ...(updateData.assistantVerifierId && {
+              assistantVerifierId: updateData.assistantVerifierId,
             }),
             status: "Pending", // Reset status when assignment is updated
           },
