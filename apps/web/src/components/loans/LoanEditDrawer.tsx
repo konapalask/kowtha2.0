@@ -76,6 +76,7 @@ interface LoanEditProps {
   fetchExecutives: any;
   pdBankOptions: any;
   templateOptions: any[];
+  verificationExecutives?: any[];
 }
 
 const LoanEditDrawer: React.FC<LoanEditProps> = ({
@@ -97,6 +98,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
   fetchExecutives,
   pdBankOptions,
   templateOptions,
+  verificationExecutives = [],
 }) => {
   const [form] = Form.useForm();
   const userDetails = getUserDetails();
@@ -623,6 +625,13 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                                   </div>
                                 </div>
                               )}
+                              {fieldExecutiveEdit[type]? <div style={{ marginTop: 8 }}></div> : (
+                                <div style={{ marginTop: 8 }}>
+                                  <span>Verification Executive:</span>{" "}
+                                  {verification?.assistantVerifier?.name ||
+                                    "Not assigned"}
+                                </div>
+                              )}
                               {fieldExecutiveEdit[type] ? (
                                 <div style={{ marginTop: 8 }}></div>
                               ) : (
@@ -650,6 +659,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                               setRefresh={setRefresh}
                               setFieldExecutiveEdit={setFieldExecutiveEdit}
                               fetchExecutives={fetchExecutives}
+                              verificationExecutives={verificationExecutives}
                             />
                           )}
                         </Card>
