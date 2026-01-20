@@ -1138,6 +1138,14 @@ export class LoanService {
                   employeeCode: true,
                 },
               },
+              assistantVerifier: {
+                select: {
+                  id: true,
+                  name: true,
+                  mobile: true,
+                  employeeCode: true,
+                },
+              },
               verificationRetries: {
                 select: {
                   reason: true,
