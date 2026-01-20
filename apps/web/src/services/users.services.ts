@@ -131,3 +131,11 @@ export const getAllFieldExecutivesApi = async () => {
     }
   });
 };
+
+export const getAllVerificationExecutivesApi = async () => {
+  return getWithDepartment("/accounts/users", {
+    params: {
+      role: "VerificationExecutive"
+    }
+  });
+};

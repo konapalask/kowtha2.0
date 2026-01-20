@@ -38,6 +38,7 @@ interface FieldAssignmentFormProps {
   setRefresh: any;
   setFieldExecutiveEdit: any;
   fetchExecutives: any;
+  verificationExecutives?: any[];
 }
 
 const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
@@ -55,7 +56,9 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
   setRefresh,
   setFieldExecutiveEdit,
   fetchExecutives,
+  verificationExecutives = [],
 }) => {
+  console.log(verification)
   const [form] = Form.useForm();
   const [localLoading, setLocalLoading] = useState(false);
   const [localFieldExecutives, setLocalFieldExecutives] = useState<any[]>([]);
@@ -286,6 +289,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
       verifierId: string;
       businessName: string;
       currentOfficeName: string;
+      assistantVerifierId: any;
     }
   ) => {
     // Validate required loan fields before assigning executives
@@ -310,6 +314,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
       fieldExecutiveId:
         values.fieldExecutiveId?.value ?? values.fieldExecutiveId,
       address: values.address,
+      assistantVerifierId: values.assistantVerifierId?.value ?? values.assistantVerifierId,
     };
     try {
       setLocalLoading(true);
@@ -366,6 +371,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                 fieldExecutiveId: verification?.fieldExecutiveId,
                 address: verification?.applicantAddress || "",
                 verifierId: verification?.verifierId,
+                assistantVerifierId: verification?.assistantVerifierId,
               }
             : {
                 assignmentMethod: "Local",
@@ -547,6 +553,44 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                     (option?.label?.toString().toLowerCase() || '').includes(input.toLowerCase())
                   }
                   // onSelect removed to allow form validation to show error
+                />
+              </Form.Item>
+            );
+          }}
+        </Form.Item>
+        <Form.Item
+          noStyle
+          shouldUpdate={(prevValues, currentValues) =>
+            prevValues?.assignmentMethod !== currentValues?.assignmentMethod ||
+            prevValues?.office !== currentValues?.office ||
+            !prevValues?.address
+          }
+        >
+          {({ getFieldValue }) => {
+            const address = getFieldValue("address");
+            const assignmentMethod = getFieldValue("assignmentMethod");
+            const office = getFieldValue("office");
+            return (
+              <Form.Item
+                label="Verification Executive"
+                name={"assistantVerifierId"}
+                style={{ marginBottom: 0 }}
+                rules={[
+                  {
+                    required: true,
+                    message: "Please select a verification executive",
+                  },
+                ]}
+                hidden={!address || (assignmentMethod === "Remote" && !office)}
+              >
+                <Select
+                  placeholder="Select Verification Executive"
+                  value={verification?.assistantVerifierId || null}
+                  options={verificationExecutives}
+                  style={{ width: "100%" }}
+                  disabled={
+                    !address || (assignmentMethod === "Remote" && !office)
+                  }
                 />
               </Form.Item>
             );
