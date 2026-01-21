@@ -2833,6 +2833,9 @@ export class LoanService {
                   verifier: { connect: { id: v.verifierId } },
                 }),
                 fieldExecutive: { connect: { id: v.fieldExecutiveId } },
+                ...(v.assistantVerifierId && {
+                  assistantVerifier: { connect: { id: v.assistantVerifierId } },
+                }),
                 status: VerificationStatus.Pending,
                 locationType: v.locationType,
                 isPostponed: false,
