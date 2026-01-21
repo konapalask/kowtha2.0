@@ -66,6 +66,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
   
   const currentDepartmentOfficeId = getCurrentDepartmentOfficeId();
   const currentDepartment = getCurrentDepartment();
+  console.log(currentDepartment)
   const remoteOffices = offices?.filter(
     (option: any) => Number(option?.value) !== Number(currentDepartmentOfficeId)
   );
@@ -314,7 +315,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
       fieldExecutiveId:
         values.fieldExecutiveId?.value ?? values.fieldExecutiveId,
       address: values.address,
-      assistantVerifierId: values.assistantVerifierId?.value ?? values.assistantVerifierId,
+      ...(currentDepartment === "PD" ? { assistantVerifierId: values.assistantVerifierId?.value ?? values.assistantVerifierId } : {}),
     };
     try {
       setLocalLoading(true);
@@ -371,7 +372,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                 fieldExecutiveId: verification?.fieldExecutiveId,
                 address: verification?.applicantAddress || "",
                 verifierId: verification?.verifierId,
-                assistantVerifierId: verification?.assistantVerifierId,
+                ...(currentDepartment === "PD" ? { assistantVerifierId: verification?.assistantVerifierId } : {}),
               }
             : {
                 assignmentMethod: "Local",
@@ -558,6 +559,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
             );
           }}
         </Form.Item>
+        {currentDepartment === "PD" && (
         <Form.Item
           noStyle
           shouldUpdate={(prevValues, currentValues) =>
@@ -593,9 +595,10 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                   }
                 />
               </Form.Item>
-            );
-          }}
-        </Form.Item>
+              );
+            }}
+          </Form.Item>
+        )}
         <Form.Item
           noStyle
           shouldUpdate={(prevValues, currentValues) =>

@@ -625,13 +625,13 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                                   </div>
                                 </div>
                               )}
-                              {fieldExecutiveEdit[type]? <div style={{ marginTop: 8 }}></div> : (
+                              {currentDepartment === "PD" && (fieldExecutiveEdit[type]? <div style={{ marginTop: 8 }}></div> : (
                                 <div style={{ marginTop: 8 }}>
                                   <span>Verification Executive:</span>{" "}
                                   {verification?.assistantVerifier?.name ||
                                     "Not assigned"}
                                 </div>
-                              )}
+                              ))}
                               {fieldExecutiveEdit[type] ? (
                                 <div style={{ marginTop: 8 }}></div>
                               ) : (
