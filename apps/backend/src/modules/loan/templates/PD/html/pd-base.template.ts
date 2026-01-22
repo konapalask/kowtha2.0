@@ -186,10 +186,12 @@ export const pdBaseTemplate = (html_data?: any) => {
             }
             .photos-section {
               margin: 24px 0;
-              page-break-inside: avoid;
+              border: 1px solid #ddd;
+              padding: 8px;
             }
             .photos-title {
               font-size: 16px;
+              page-break-inside: avoid;
               font-weight: bold;
               margin-bottom: 16px;
               text-transform: uppercase;
@@ -250,7 +252,7 @@ export const pdBaseTemplate = (html_data?: any) => {
               background: #f5f5f5;
             }
             .signature-section {
-              margin: 16px 0 24px;
+              margin: 16px 0 24px 12px;
               text-align: left;
             }
             .signature-section img {
@@ -370,18 +372,7 @@ export const pdBaseTemplateFooter = (html_data?: any) => {
     : "";
 
   return `
-      ${
-        filteredImagesData
-          ? `
-        <div class="photos-section">
-          <div class="photos-title">PHOTOS</div>
-          <div class="photo-grid">
-            ${filteredImagesData}
-          </div>
-        </div>
-      `
-          : ""
-      }
+     <div style="page-break-before: always;"></div>
       ${
         html_data?.imageDataUri
           ? `
@@ -392,8 +383,18 @@ export const pdBaseTemplateFooter = (html_data?: any) => {
       `
           : ""
       }
+      ${
+        filteredImagesData
+          ? `
+        <div class="photos-title">PHOTOS</div>
+        <div class="photos-section">
+          <div class="photo-grid">
+            ${filteredImagesData}
+          </div>
+        </div>
+      `
+          : ""
+      }
     
-    </body>
-    </html>
     `;
 };

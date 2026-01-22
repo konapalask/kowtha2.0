@@ -604,8 +604,8 @@ export class FinancialAnalysisTemplatesService {
 
     // Set up columns - single column format with Particulars and Value
     worksheet.columns = [
-      { width: 40 }, // A - Particulars
-      { width: 20 }, // B - Value
+      { width: 60 }, // A - Particulars
+      { width: 30 }, // B - Value
     ];
 
     // Title
@@ -631,7 +631,7 @@ export class FinancialAnalysisTemplatesService {
       "", // Column B
     ]);
     worksheet.mergeCells("A3:B3");
-    subTitleRow.font = { bold: true };
+    subTitleRow.font = { bold: true, size: 12 };
     subTitleRow.alignment = { horizontal: "center" };
 
     worksheet.addRow([]); // Empty row
@@ -786,13 +786,13 @@ export class FinancialAnalysisTemplatesService {
     // Set up columns for P&L with comparison columns
     worksheet.columns = [
       { width: 30 }, // A - Particulars (left)
-      { width: 20 }, // B - Previous Year Actuals
-      { width: 20 }, // C - This Year Actuals
-      { width: 15 }, // D - Estimated
+      { width: 30 }, // B - Previous Year Actuals
+      { width: 30 }, // C - This Year Actuals
+      { width: 20 }, // D - Estimated
       { width: 30 }, // E - Particulars (right)
-      { width: 20 }, // F - Previous Year Actuals
-      { width: 20 }, // G - This Year Actuals
-      { width: 15 }, // H - Estimated
+      { width: 30 }, // F - Previous Year Actuals
+      { width: 30 }, // G - This Year Actuals
+      { width: 20 }, // H - Estimated
       { width: 10 }, // I - Empty
       { width: 25 }, // J - Monthly Calculations / Margin Percentages
       { width: 25 }, // K - Values
@@ -828,12 +828,12 @@ export class FinancialAnalysisTemplatesService {
     // Column headers row
     const columnHeaderRow = worksheet.addRow([
       "PARTICULARS",
-      `${this.getFinancialYearEndingYear() - 2} Actuals`,
-      `${this.getFinancialYearEndingYear() - 1} Actuals`,
+      `Actuals as on 31/03/${this.getFinancialYearEndingYear() - 2}`,
+      `Actuals as on 31/03/${this.getFinancialYearEndingYear() - 1}`,
       "Estimated",
       "PARTICULARS",
-      `${this.getFinancialYearEndingYear() - 2} Actuals`,
-      `${this.getFinancialYearEndingYear() - 1} Actuals`,
+      `Actuals as on 31/03/${this.getFinancialYearEndingYear() - 2}`,
+      `Actuals as on 31/03/${this.getFinancialYearEndingYear() - 1}`,
       "Estimated",
     ]);
     columnHeaderRow.font = { bold: true };
@@ -1256,12 +1256,12 @@ export class FinancialAnalysisTemplatesService {
     // Balance Sheet Column Headers (same as financials)
     const balanceSheetHeaderRow = worksheet.addRow([
       "LIABILITIES",
-      `${this.getFinancialYearEndingYear() - 2} Actuals`,
-      `${this.getFinancialYearEndingYear() - 1} Actuals`,
+      `Actuals as on 31/03/${this.getFinancialYearEndingYear() - 2}`,
+      `Actuals as on 31/03/${this.getFinancialYearEndingYear() - 1}`,
       "Estimated",
       "ASSETS",
-      `${this.getFinancialYearEndingYear() - 2} Actuals`,
-      `${this.getFinancialYearEndingYear() - 1} Actuals`,
+      `Actuals as on 31/03/${this.getFinancialYearEndingYear() - 2}`,
+      `Actuals as on 31/03/${this.getFinancialYearEndingYear() - 1}`,
       "Estimated",
     ]);
     balanceSheetHeaderRow.font = { bold: true };

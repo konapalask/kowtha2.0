@@ -4,11 +4,11 @@ import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.template";
 const tableStyle =
   "border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0";
 const labelCellStyle =
-  "border:1px solid #c7cdd1;padding:8px;font-weight:600;color:#222;background:#b6bec3;vertical-align:top;width:25%";
+  "border:1px solid #c7cdd1;padding:8px;font-weight:600;color:#222;background:#b6bec3;font-size:12px;vertical-align:top;width:25%";
 const cellStyle =
-  "border:1px solid #ccc;padding:8px;vertical-align:top;line-height:1.5";
-const paragraphStyle = "margin:8px 0;line-height:1.5;font-size:14px;color:#333";
-
+  "border:1px solid #ccc;padding:8px;vertical-align:top;line-height:1.5;font-size:12px;";
+const paragraphStyle = "margin:8px 0;line-height:1.5;font-size:12px;color:#333;";
+const headingStyle = "margin:8px 0;line-height:1.5;font-size:16px;color:#333;text-align:center;text-decoration:underline;font-weight:bold;";
 const hasValue = (value: any): boolean => {
   if (value === null || value === undefined) return false;
   if (typeof value === "string") return value.trim().length > 0;
@@ -76,8 +76,8 @@ const renderKeyValueTable = (
               : wrapParagraph(rendered);
           return `
           <tr>
-            <td style="${labelCellStyle}">${wrapParagraph(label)}</td>
-            <td style="${cellStyle}">${valueHtml}</td>
+            <td style="${labelCellStyle};line-height:1;">${(label)}</td>
+            <td style="${cellStyle};line-height:1;">${valueHtml}</td>
           </tr>`;
         })
         .join("")}
@@ -301,7 +301,7 @@ export const axisFinanceUBLTemplate = (
   const generalTable = `
     <table style="${tableStyle}">
       <tr>
-        <td colspan="21" style="${cellStyle}"><p style="${paragraphStyle};font-size:14px;"><strong>PERSONAL DISCUSSION SHEET</strong></p></td>
+        <td colspan="21" style="${cellStyle}"><p style="${headingStyle}">PERSONAL DISCUSSION SHEET</p></td>
       </tr>
       <tr>
         <td colspan="6" style="${labelCellStyle}"><strong>Region</strong></td>
@@ -353,7 +353,8 @@ export const axisFinanceUBLTemplate = (
     <div class="template-content">
       ${generalTable}
 
-      <p style="${paragraphStyle};font-size:14px;"><strong>Family Details</strong></p>
+      <div style="page-break-before: always;"></div>
+      <p style="${headingStyle}">Family Details</p>
       ${renderInnerTable(
         [
           "Name",
@@ -367,7 +368,7 @@ export const axisFinanceUBLTemplate = (
         familyMembers
       )}
 
-      <p style="${paragraphStyle};font-size:14px;"><strong>Shareholding Details</strong></p>
+      <p style="${headingStyle}">Shareholding Details</p>
       ${renderInnerTable(
         [
           "Name of the Shareholder",
@@ -380,7 +381,7 @@ export const axisFinanceUBLTemplate = (
         shareholding
       )}
 
-      <p style="${paragraphStyle};font-size:14px;"><strong>About the Business</strong></p>
+      <p style="${headingStyle}">About the Business</p>
       <table style="${tableStyle}">
       <tr>
       <td width="25%" style="${labelCellStyle}"><strong>About the Business</strong></td>
@@ -388,8 +389,8 @@ export const axisFinanceUBLTemplate = (
       </tr>
       </table>
 
-
-      <p style="${paragraphStyle};font-size:14px;"><strong>Documents Observed</strong></p>
+      <div style="page-break-before: always;"></div>
+      <p style="${headingStyle}">Documents Observed</p>
       ${
         renderInnerTable(
           ["Document Category", "Document Name", "Document Type", "Remarks"],
@@ -404,7 +405,7 @@ export const axisFinanceUBLTemplate = (
         ) || ""
       }
 
-      <p style="${paragraphStyle};font-size:14px;"><strong>Suppliers / Creditors</strong></p>
+      <p style="${headingStyle}">Suppliers / Creditors</p>
       ${renderKeyValueTable([
         [
           "No of fixed suppliers",
@@ -437,7 +438,8 @@ export const axisFinanceUBLTemplate = (
         })()
       )}
 
-      <p style="${paragraphStyle};font-size:14px;"><strong>Clients / Debtors</strong></p>
+      <div style="page-break-before: always;"></div>
+      <p style="${headingStyle}">Clients / Debtors</p>
       ${renderKeyValueTable([
         [
           "No of fixed customers",
@@ -472,17 +474,17 @@ export const axisFinanceUBLTemplate = (
       ${renderKeyValueTable([
         [
           "Average stock maintained",
-          customersSection.averageStockMaintained || "Not provided",
+          customersSection.averageStockMaintained ? formatCurrency(customersSection.averageStockMaintained) : "Not provided",
         ],
         [
           "Machinery/Equipment",
-          customersSection.machineryEquipment || "Not provided",
+          customersSection.machineryEquipment ? formatCurrency(customersSection.machineryEquipment) : "Not provided",
         ],
-        ["Turnover", customersSection.turnover || "Not provided"],
-        ["Margins", customersSection.margins || "Not provided"],
+        ["Turnover", customersSection.turnover ? formatCurrency(customersSection.turnover) : "Not provided"],
+        ["Margins", customersSection.margins ? `${customersSection.margins}%` : "Not provided"],
       ])}
 
-      <p style="${paragraphStyle};font-size:14px;"><strong>Expenditure - Salaries & Wages</strong></p>
+      <p style="${headingStyle}">Expenditure - Salaries & Wages</p>
       ${renderInnerTable(
         [
           "No. of Employees",
@@ -503,7 +505,8 @@ export const axisFinanceUBLTemplate = (
         ],
       ])}
 
-      <p style="${paragraphStyle};font-size:14px;"><strong>Asset Details</strong></p>
+      <div style="page-break-before: always;"></div>
+      <p style="${headingStyle}">Asset Details</p>
       <p style="${paragraphStyle}"><i>All Immovable properties held that is Residential, Commercial, Land, Plot and any fixed structure:</i></p>
       
       ${renderInnerTable(
@@ -536,9 +539,9 @@ export const axisFinanceUBLTemplate = (
           assetSection.vehicles || "NA",
         ],
       ])}
-      <p style="${paragraphStyle};font-size:12px;font-style:italic;margin-top:8px;"><strong>NOTE:</strong> AMOUNTS MENTIONED ABOVE ARE APPROX</p>
+      <p style="${paragraphStyle};font-style:italic;margin-top:8px;"><strong>NOTE:</strong> AMOUNTS MENTIONED ABOVE ARE APPROX</p>
 
-      <p style="${paragraphStyle};font-size:14px;"><strong>Loan Details</strong></p>
+      <p style="${headingStyle}">Loan Details</p>
       ${renderInnerTable(
         [
           "Name of Bank / NBFC",
@@ -552,7 +555,8 @@ export const axisFinanceUBLTemplate = (
         existingLoans
       )}
 
-      <p style="${paragraphStyle};font-size:14px;"><strong>Bank Details</strong></p>
+      <div style="page-break-before: always;"></div>
+      <p style="${headingStyle}">Bank Details</p>
       ${renderInnerTable(
         ["Bank Name", "Branch Name", "Account Type", "Open since (Year)"],
         bankingAccounts
@@ -565,7 +569,7 @@ export const axisFinanceUBLTemplate = (
         ],
       ])}
 
-      <p style="${paragraphStyle};font-size:14px;"><strong>Third Party Check</strong></p>
+      <p style="${headingStyle}">Third Party Check</p>
       ${renderInnerTable(
         [
           "Individual / Business Name",

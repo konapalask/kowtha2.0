@@ -160,6 +160,7 @@ export const herohousingSalariedTemplate = (
         </tr>
       </table>
 
+      <div style="page-break-after: always;"></div>
       <p style="margin:8px 0;line-height:1.5"><strong>Profile of customer</strong></p>
       
       <table style="border-collapse:collapse;border:1px solid #ccc;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
@@ -275,6 +276,10 @@ export const herohousingSalariedTemplate = (
             <ul><li style="margin:8px 0;line-height:1.5">${currentJobProfile.reportingTo || "Not provided"}</li></ul>
           </td>
         </tr>
+        </table>
+        <div style="page-break-after: always;"></div>
+        <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
+       
         <tr>
           <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-bottom:none;padding:8px;width:40%;vertical-align:top">
             <p style="margin:8px 0;line-height:1.5"><strong>Details of employer</strong></p>
@@ -346,13 +351,16 @@ export const herohousingSalariedTemplate = (
           </td>
         </tr>
         <tr>
-          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:1px solid #ccc;padding:8px;width:40%;vertical-align:middle">
             <ul><li style="margin:8px 0;line-height:1.5"><strong>Brief details about the locality of business, surrounding competitors, overall prospect of location etc and any negative feedback</strong></li></ul>
           </td>
-          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:1px solid #ccc;padding:8px;width:60%;vertical-align:middle">
             <ul><li style="margin:8px 0;line-height:1.5">${detailsOfEmployer.localityFeedback || "Not provided"}</li></ul>
           </td>
         </tr>
+        </table>
+        <div style="page-break-after: always;"></div>
+        <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
         <tr>
           <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-bottom:none;padding:8px;width:40%;vertical-align:top">
             <p style="margin:8px 0;line-height:1.5"><strong>Details of Property –</strong></p>
@@ -431,6 +439,9 @@ export const herohousingSalariedTemplate = (
             <ul><li style="margin:8px 0;line-height:1.5">${propertyDetails.whenSellerBoughtTheProperty || "Not provided"}</li></ul>
           </td>
         </tr>
+        </table>
+        <div style="page-break-after: always;"></div>
+        <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
         <tr>
           <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-bottom:none;padding:8px;width:40%;vertical-align:top">
             <p style="margin:8px 0;line-height:1.5"><strong>Investment and properties -</strong></p>
@@ -476,13 +487,16 @@ export const herohousingSalariedTemplate = (
           </td>
         </tr>
         <tr>
-          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:1px solid #ccc;padding:8px;width:40%;vertical-align:middle">
             <ul><li style="margin:8px 0;line-height:1.5"><strong>Clear and detailed end use of fund in LAP cases</strong></li></ul>
           </td>
-          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:1px solid #ccc;padding:8px;width:60%;vertical-align:middle">
             <ul><li style="margin:8px 0;line-height:1.5">${endUseOfPropertyFund?.detailedEndUseOfFundInLapCases || "Not provided"}</li></ul>
           </td>
         </tr>
+        </table>
+        <div style="page-break-after: always;"></div>
+        <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
         <tr>
           <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-bottom:none;padding:8px;width:40%;vertical-align:top">
             <p style="margin:8px 0;line-height:1.5"><strong>Details of loans –</strong></p>
@@ -559,10 +573,10 @@ export const herohousingSalariedTemplate = (
           </td>
         </tr>
         <tr>
-          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:1px solid #ccc;padding:8px;width:40%;vertical-align:middle">
             <ul><li style="margin:8px 0;line-height:1.5"><strong>Please check any saving account of applicant and co applicant and provide the details of these accounts</strong></li></ul>
           </td>
-          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:1px solid #ccc;padding:8px;width:60%;vertical-align:middle">
             ${
               bankingDetails?.savingAccounts &&
               Array.isArray(bankingDetails.savingAccounts) &&
@@ -581,6 +595,9 @@ export const herohousingSalariedTemplate = (
             }
           </td>
         </tr>
+        </table>
+        <div style="page-break-after: always;"></div>
+        <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
         <tr>
           <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-bottom:none;padding:8px;width:40%;vertical-align:top">
             <p style="margin:8px 0;line-height:1.5"><strong>Document verification and other checks</strong></p>
@@ -620,10 +637,10 @@ export const herohousingSalariedTemplate = (
           </td>
         </tr>
         <tr>
-          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:1px solid #ccc;padding:8px;width:40%;vertical-align:middle">
             <ul><li style="margin:8px 0;line-height:1.5"><strong>Google check and any negative observation/feedback/dedupe match or any other feedback</strong></li></ul>
           </td>
-          <td style="border:1px solid #ccc;border-top:none;padding:8px;width:60%;vertical-align:middle">
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:1px solid #ccc;padding:8px;width:60%;vertical-align:middle">
             <ul><li style="margin:8px 0;line-height:1.5">${doc.googleCheckAnyNegativeObservationsFeedbackDedupeMatch || "Not provided"}</li></ul>
           </td>
         </tr>

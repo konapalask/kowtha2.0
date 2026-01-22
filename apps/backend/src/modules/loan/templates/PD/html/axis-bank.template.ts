@@ -7,7 +7,7 @@ const labelCellStyle =
   "border:1px solid #c7cdd1;padding:8px;font-weight:600;color:#222;background:#f4f6fb;vertical-align:top;width:32%";
 const valueCellStyle =
   "border:1px solid #c7cdd1;padding:8px;color:#333;vertical-align:top";
-
+const headingStyle = "margin:8px 0;line-height:1.5;font-size:16px;font-weight:bold;text-transform:uppercase;color:#222";
 export const axisBankTemplate = (verificationData: any, html_data: any) => {
   console.log("=== AXIS BANK TEMPLATE FUNCTION CALLED ===");
   console.log("Verification data sections:", Object.keys(verificationData));
@@ -116,9 +116,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
     ${pdBaseTemplate(html_data)}
 
     <div class="template-content">
-        <h2 style="margin:8px 0;line-height:1.5;text-align:center;">AXIS BANK</h2>
-        <p style="margin:8px 0;line-height:1.5"></p>
-        <p style="margin:8px 0;line-height:1.5"><strong>PERSONAL DISCUSSION REPORT</strong></p>
+        <p style="text-align:center;${headingStyle}"><u><strong>PERSONAL DISCUSSION REPORT</strong></u></p>
             
         <table style="${tableStyle}">
             <tr>
@@ -159,9 +157,10 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
             </tr>
         </table>
         
+        <div style="page-break-before: always;"></div>
         <table style="${tableStyle}">
             <tr>
-                <td colspan="2" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Borrower Details</strong></p></td>
+                <td colspan="2" style="${labelCellStyle}"><p style="${headingStyle}"><strong>Borrower Details</strong></p></td>
             </tr>
             <tr>
                 <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Family Background (Details of family members, major income earning member, dependents details etc.)</strong></p></td>
@@ -198,7 +197,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
         
         <table style="${tableStyle}">
             <tr>
-                <td colspan="2" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Business place and vintage details</strong></p></td>
+                <td colspan="2" style="${labelCellStyle}"><p style="${headingStyle}"><strong>Business place and vintage details</strong></p></td>
             </tr>
             <tr>
                 <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Name of firm:</strong></p></td>
@@ -250,9 +249,10 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
             }
         </table>
         
+        <div style="page-break-before: always;"></div>
         <table style="${tableStyle}">
             <tr>
-                <td colspan="9" style="${labelCellStyle}"><strong>Business/Financial Profile</strong></p></td>
+                <td colspan="9" style="${labelCellStyle}"><p style="${headingStyle}"><strong>Business/Financial Profile</strong></p></td>
             </tr>
             <tr>
                 <td colspan="2" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Nature of business Trading / manufacturing /<br />services / others: please specify)</strong></p></td>
@@ -301,9 +301,8 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
             <tr>
                 <td colspan="2" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Any other business or alternate source of income such as rentals, commission etc. (Provide details)</strong></p></td>
                 <td colspan="7" style="${valueCellStyle}">
-                    <ul>
-                        <li><strong>Other business interest / source of income / family income:</strong> ${verificationData.commonPoints?.otherIncomes || verificationData.otherDetailsObserved?.otherBusinessIncomeSource || ""}</li>
-                    </ul>
+                        <p style="font-size: 11px;"><strong><i>Other business interest / source of income / family income (Details of properties and tenants/ lessees in rental income):</i></strong></p> 
+                        ${verificationData.otherDetailsObserved?.otherBusinessIncomeSource ? verificationData.otherDetailsObserved?.otherBusinessIncomeSource.split("\n").map((line: string) => `<ul style="margin: 0 6px;"><li>${line}</li></ul>`).join("") : "Not provided"}
                 </td>
             </tr>
             <tr>
@@ -326,8 +325,11 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
                 <td colspan="2" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Details of neighbor check /<br />Third party check done and status:</strong></p></td>
                 <td colspan="7" style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${verificationData.otherDetailsObserved?.neighborCheckThirdParty || ""}</p></td>
             </tr>
+            </table>
+    <div style="page-break-before: always;"></div>
+            <table style="${tableStyle}">
             <tr>
-                <td colspan="9" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Common Points applicable for all cases</strong></p></td>
+                <td colspan="9" style="${labelCellStyle}"><p style="${headingStyle}"><strong>Common Points applicable for all cases</strong></p></td>
             </tr>
             <tr>
                 <td colspan="2" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>1) Turnover and Margin</strong></p></td>
@@ -398,7 +400,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
                 <td colspan="7" style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${verificationData.commonPoints?.endUseOfProposedLoan || ""}</p></td>
             </tr>
         </table>
-        
+    <div style="page-break-before: always;"></div>
         <table style="${tableStyle}">
             <tr>
                 <td colspan="5" style="${labelCellStyle}"></td>
@@ -450,6 +452,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
         </table>
 
 
+    <div style="page-break-before: always;"></div>
         <!-- Annexure 1 -->
         <table style="${tableStyle}">
             <tr>

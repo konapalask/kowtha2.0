@@ -7,8 +7,8 @@ const cellStyle =
 const labelCellStyle =
   "border:1px solid #ccc;border-right:1px solid #ccc;padding:8px;width:40%;vertical-align:middle";
 const valueCellStyle =
-  "border:1px solid #ccc;padding:8px;width:60%;vertical-align:middle";
-const paragraphStyle = "margin:8px 0;line-height:1.5;font-size:12px;color:#333";
+  "border:1px solid #ccc;padding:8px;width:60%;vertical-align:top";
+const paragraphStyle = "margin:8px 0;font-size:12px;color:#333";
 
 const hasValue = (value: any): boolean => {
   if (value === null || value === undefined) return false;
@@ -319,19 +319,19 @@ export const heroHousingSelfTemplate = (
     },
     {
       left: `<p style="${paragraphStyle}"><strong>PD address & location</strong></p>`,
-      right: wrapParagraph(formatMultiline(summary.pdAddress || "")),
+      right: formatMultiline(summary.pdAddress || ""),
     },
     {
       left: `<p style="${paragraphStyle}"><strong>Lat log of business address</strong></p>`,
       right:
         hasValue(latitude) || hasValue(longitude)
           ? [
-              latitude && wrapParagraph(formatMultiline(latitude)),
-              longitude && wrapParagraph(formatMultiline(longitude)),
+              latitude && formatMultiline(latitude),
+              longitude && formatMultiline(longitude),
             ]
               .filter(Boolean)
               .join("")
-          : wrapParagraph("Not provided"),
+          : formatMultiline("Not provided"),
     },
     {
       left: `<p style="${paragraphStyle}"><strong>Requested loan amount</strong></p>`,
@@ -706,7 +706,7 @@ export const heroHousingSelfTemplate = (
       right: borrowerValue,
     },
     {
-      left: `<p style="${paragraphStyle}"><strong>Family details</strong></p><br><ul><li><strong>Family details – Including dependents</strong></li><li><strong>Family background (Parents and siblings including all dependents)</strong></li></ul>`,
+      left: `<div style="page-break-before: always;"></div><p style="${paragraphStyle}"><strong>Family details</strong></p><br><ul><li><strong>Family details – Including dependents</strong></li><li><strong>Family background (Parents and siblings including all dependents)</strong></li></ul>`,
       right: familyValue,
     },
     {
@@ -714,15 +714,15 @@ export const heroHousingSelfTemplate = (
       right: currentBusinessValue,
     },
     {
-      left: `<p style="${paragraphStyle}"><strong>Details of business premises</strong></p>`,
+      left: `<div style="page-break-before: always;"></div><p style="${paragraphStyle}"><strong>Details of business premises</strong></p>`,
       right: businessPremisesValue,
     },
     {
-      left: `<p style="${paragraphStyle}"><strong>Details about business details</strong></p>`,
+      left: `<div style="page-break-before: always;"></div><p style="${paragraphStyle}"><strong>Details about business details</strong></p>`,
       right: businessOperationsValue,
     },
     {
-      left: `<p style="${paragraphStyle}"><strong>Details of supplier and customer</strong></p>`,
+      left: `<div style="page-break-before: always;"></div><p style="${paragraphStyle}"><strong>Details of supplier and customer</strong></p>`,
       right: [
         ...supplierCustomerList,
         { 
@@ -733,11 +733,11 @@ export const heroHousingSelfTemplate = (
       ],
     },
     {
-      left: `<p style="${paragraphStyle}"><strong>Details of Property –</strong></p>`,
+      left: `<div style="page-break-before: always;"></div><p style="${paragraphStyle}"><strong>Details of Property –</strong></p>`,
       right: propertyDetailsValue,
     },
     {
-      left: `<p style="${paragraphStyle}"><strong>Investment and properties -</strong></p>`,
+      left: `<div style="page-break-before: always;"></div><p style="${paragraphStyle}"><strong>Investment and properties -</strong></p>`,
       right: investmentAssetsValue,
     },
     {
@@ -745,7 +745,7 @@ export const heroHousingSelfTemplate = (
       right: endUseValue,
     },
     {
-      left: `<p style="${paragraphStyle}"><strong>Details of loans –</strong></p>`,
+      left: `<div style="page-break-before: always;"></div><p style="${paragraphStyle}"><strong>Details of loans –</strong></p>`,
       right: loanObligationsValue,
     },
     {
@@ -753,7 +753,7 @@ export const heroHousingSelfTemplate = (
       right: bankingValue,
     },
     {
-      left: `<p style="${paragraphStyle}"><strong>Document verification and other checks</strong></p>`,
+      left: `<div style="page-break-before: always;"></div><p style="${paragraphStyle}"><strong>Document verification and other checks</strong></p>`,
       right: documentChecksValue,
     },
     {
@@ -770,7 +770,7 @@ export const heroHousingSelfTemplate = (
 
   const noteBlock = `
     <div style="font-size:12px;line-height:1.6;margin-top:16px;">
-      <p style="margin:8px 0;">
+      <p style="margin:8px 0;font-size:14px;">
         <strong>Disclaimer Clause:</strong>
       </p>
       <p style="margin:8px 0;">
@@ -782,11 +782,12 @@ export const heroHousingSelfTemplate = (
   return `
     ${pdBaseTemplate(html_data)}
     <div class="template-content hero-housing-self">
-      <p style="${paragraphStyle}"><strong>PD REPORT – SELF-EMPLOYED</strong></p>
+      <p style="${paragraphStyle};font-size:14px;"><strong>PD REPORT – SELF-EMPLOYED</strong></p>
       ${loanSummaryTable}
-      <p style="${paragraphStyle}"><strong>Profile of customer</strong></p>
+      <p style="${paragraphStyle};font-size:14px;"><strong>Profile of customer</strong></p>
       ${profileTable}
-      <p style="${paragraphStyle}"><strong>Income assessment details</strong></p>
+      <div style="page-break-before: always;"></div>
+      <p style="margin:8px 0;line-height:1.5;color:#333;font-size:14px;"><strong>Income assessment details</strong></p>
       <p style="font-size:12px;">(Please provide the monthly net income of applicant and also mention comment/mode of validation under the column “Comments”)</p>
       ${incomeTable}
       ${noteBlock}

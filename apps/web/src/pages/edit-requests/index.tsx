@@ -14,6 +14,7 @@ import {
   updateEditRequestApi,
 } from "@/services/verifier.services";
 import { useDepartmentChange } from "@/utils/utility";
+import dayjs from "dayjs";
 
 const { Title } = Typography;
 
@@ -124,7 +125,7 @@ const EditRequests: React.FC = () => {
       title: "Requested At",
       dataIndex: "createdAt",
       key: "createdAt",
-      render: (date: string) => new Date(date).toLocaleDateString(),
+      render: (date: string) => dayjs(date).format("DD-MM-YYYY"),
     },
     {
       title: "Action",

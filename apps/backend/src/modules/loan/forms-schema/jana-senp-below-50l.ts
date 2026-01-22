@@ -334,7 +334,7 @@ export const janaSenpBelow50lSchema = {
 
     {
       id: "otherIncome",
-      label: "Other Sources ofIncome",
+      label: "Other Sources of Income",
       schema: {
         type: "object",
         properties: {

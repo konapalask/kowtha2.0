@@ -291,6 +291,7 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
           : `<p style="${paragraphStyle}">Not provided</p>`
       }
 
+      <div style="page-break-before: always;"></div>
       <h3 style="margin:12px 0 6px;font-size:16px;font-weight:600;color:#1f2d3d;">Family Details</h3>
       ${familyTable}
 
@@ -314,7 +315,8 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
       ${sectionTitle("Turnover and net profit details for last one year audited financials.")}
       ${financialSummaryTable}
 
-      <p style="margin: 0; padding-left: 8px;">${verificationData.itrFilling?.itrFilling ? `<strong>ITR’s filling U/s 44AD:</strong> ${verificationData.itrFilling?.itrFilling}` : "Not provided"}</p>
+      <div style="page-break-before: always;"></div>
+      <p style="margin: 0; padding-left: 8px;"><span style="margin:12px 0 6px;font-size:16px;font-weight:600;color:#1f2d3d;">ITR’s filling U/s 44AD:</span> ${verificationData.itrFilling?.itrFilling ? formatMultiline(verificationData.itrFilling?.itrFilling) : "Not provided"}</p>
 
       <h3 style="margin:12px 0 6px;font-size:16px;font-weight:600;color:#1f2d3d;">Documents Observed</h3>
       ${documentsList}
@@ -345,6 +347,7 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
         ])
       )}
 
+      <div style="page-break-before: always;"></div>
       ${sectionTitle("Major Customers")}
       ${renderInnerTable(
         ["Sl No", "Name", "Contact Number", "Address"],
@@ -406,6 +409,7 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
           : "Not provided"
       }
 
+      <div style="page-break-before: always;"></div>
       ${sectionTitle("Loans")}
       ${renderInnerTable(
         ["Financial Institution", "Loan Amount", "Nature of Loan", "EMI"],
@@ -424,6 +428,7 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
       ${sectionTitle("Observation")}
       ${observationList}
 
+      <div style="page-break-before: always;"></div>
       ${sectionTitle("Concerns")}
       ${concernsList}
 

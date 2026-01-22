@@ -94,23 +94,23 @@ const renderInstructionTable = (
 };
 
 const renderInnerTable = (headers: string[], rows: string[][]) => {
-  if (!rows.length) {
-    return wrapParagraph("Not provided");
-  }
+  // if (!rows.length) {
+  //   return wrapParagraph("Not provided");
+  // }
   const headerRow = headers
     .map(
       (header) =>
         `<td style="${labelCellStyle};font-weight:bold;background:#f5f5f5;">${header}</td>`
     )
     .join("");
-  const rowsHtml = rows
+  const rowsHtml = rows.length ? rows
     .map(
       (row) =>
         `<tr>${row
           .map((cell) => `<td style="${valueCellStyle}">${cell}</td>`)
           .join("")}</tr>`
     )
-    .join("");
+    .join("") : `<tr><td style="${valueCellStyle}" colspan="${headers.length}">Not provided</td></tr>`;
   return `
     <table style="${tableStyle}">
       <tr>${headerRow}</tr>
@@ -127,7 +127,7 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
 
   const basic = verificationData.basicInformation || {};
   const aboutBusiness = verificationData.aboutTheApplicantAndItsBusiness || {};
-  const residentialDetails = verificationData.rlabelCellStyleesidentialDetails || {};
+  const residentialDetails = verificationData.residentialDetails || {};
   const assetsOwnedByTheApplicant = verificationData.assetsOwnedByTheApplicant || {};
   const applicantsNetWorth = verificationData.applicantsNetWorth || {};
   const familyMembers = ensureArray(
@@ -146,7 +146,7 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
     verificationData.existingLoans ||
     {};
   const existingLoansArray = ensureArray(existingLoansData?.loanDetails);
-  const existingLoans = existingLoansArray.map(
+  const existingLoans = existingLoansArray.length ? existingLoansArray.map(
     (loan: any) => [
       formatMultiline(loan?.bankName || loan?.bankOrNbfcName || ""),
       formatMultiline(loan?.typeOfLoan || ""),
@@ -154,7 +154,7 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
       formatCurrency(loan?.emiInterest || loan?.emi || loan?.emiAmount),
       formatMultiline(loan?.tenureTotalCompleted || loan?.tenure || ""),
     ]
-  );
+  ) : [];
   // Handle nested structures for banking details
   const bankingDetailsData = verificationData.bankingDetails || {};
   const bankingDetailsArray = Array.isArray(bankingDetailsData)
@@ -182,7 +182,7 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
             `<ul><li>${formatMultiline(asset?.assetDetails || asset?.details || "")}</li></ul>`
         )
         .join("")
-    : "<ul><li>Not provided</li></ul>";
+    : "Not provided";
 
   // Handle nested structures for customer references
   const customerReferences = ensureArray(verificationData.customersReference?.customersReference).map((item: any) => [formatMultiline(item?.customerName || ""), formatMultiline(item?.customerReferenceNumber || ""), formatMultiline(item?.feedback || "")]);
@@ -214,35 +214,11 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
 
 
 
-  const businessList = [
-    hasValue(aboutBusiness?.aboutTheApplicant)
-      ? `<p style="${paragraphStyle}"><strong>About the Applicant & Business content:</strong><br>${
-          aboutBusiness?.aboutTheApplicant
-            ?.split("\n")
-            .map(
-              (line: string) =>
-                `<ul style="margin-left: 8px;"><li>${line}</li></ul>`
-            )
-            .join("") || ""
-        }</p>`
-      : "",
-    hasValue(residentialDetails?.residentialDetails)
-      ? `<p style="${paragraphStyle}"><strong>Residential Details:</strong> ${formatMultiline(residentialDetails?.residentialDetails || "")}</p>`
-      : "",
-    hasValue(aboutBusiness?.aboutTheBusiness)
-      ? `<p style="${paragraphStyle}"><strong>About the Business's Industry Overview:</strong><br>${
-          aboutBusiness?.aboutTheBusiness
-            ?.split("\n")
-            .map(
-              (line: string) =>
-                `<ul style="margin-left: 8px;"><li>${line}</li></ul>`
-            )
-            .join("") || ""
-        }</p>`
-      : "",
-  ]
-    .filter((item) => item !== "")
-    .join("");
+  const businessList = 
+      `<p style="${paragraphStyle}"><strong>About the Applicant & Business content:</strong><br>${aboutBusiness?.aboutTheApplicant ? aboutBusiness?.aboutTheApplicant.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("") : "Not Provided"}</p>
+      <div style="page-break-before: always;"></div>
+      <p style="${paragraphStyle}"><strong>Residential Details:</strong> ${residentialDetails?.residentialDetails ? residentialDetails?.residentialDetails.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("") : "Not Provided"}</p>
+    <p style="${paragraphStyle}"><strong>Applicant Business's Industry Overview:</strong><br>${aboutBusiness?.aboutTheBusiness ? aboutBusiness?.aboutTheBusiness.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("") : "Not Provided"}</p>`
 
 
   const generalSection = renderKeyValueTable([
@@ -285,38 +261,36 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
     "EMI/Interest (In Rs.)",
     "Total Tenure / Completed [in months]",
   ];
-  const existingLoanTable = existingLoans.length > 0
-    ? (() => {
-        const headerRow = existingLoanHeaders
-          .map(
-            (header) =>
-              `<td style="${labelCellStyle};font-weight:bold;background:#f5f5f5;">${header}</td>`
-          )
-          .join("");
-        const rowsHtml = existingLoans
-          .map(
-            (row) =>
-              `<tr>${row
-                .map((cell) => `<td style="${valueCellStyle}">${cell}</td>`)
-                .join("")}</tr>`
-          )
-          .join("");
-        const totalEMIRow = `<tr>
-          <td style="${valueCellStyle}"></td>
-          <td style="${valueCellStyle}"></td>
-          <td style="${labelCellStyle};font-weight:bold;background:#f5f5f5;">Total EMI</td>
-          <td style="${valueCellStyle}">${formatCurrency(existingLoansData?.totalEmi)}</td>
-          <td style="${valueCellStyle}"></td>
-        </tr>`;
-        return `
-          <table style="${tableStyle}">
-            <tr>${headerRow}</tr>
-            ${rowsHtml}
-            ${totalEMIRow}
-          </table>
-        `;
-      })()
-    : wrapParagraph("Not provided");
+  const headerRow = existingLoanHeaders
+    .map(
+      (header) =>
+        `<td style="${labelCellStyle};font-weight:bold;background:#f5f5f5;">${header}</td>`
+    )
+    .join("");
+  const rowsHtml = existingLoans.length > 0
+    ? existingLoans
+        .map(
+          (row) =>
+            `<tr>${row
+              .map((cell) => `<td style="${valueCellStyle}">${cell}</td>`)
+              .join("")}</tr>`
+        )
+        .join("")
+    : `<tr><td style="${valueCellStyle}" colspan="${existingLoanHeaders.length}">Not provided</td></tr>`;
+  const totalEMIRow = `<tr>
+    <td style="${valueCellStyle}"></td>
+    <td style="${valueCellStyle}"></td>
+    <td style="${labelCellStyle};font-weight:bold;background:#f5f5f5;">Total EMI</td>
+    <td style="${valueCellStyle}">${formatCurrency(existingLoansData?.totalEmi || 0)}</td>
+    <td style="${valueCellStyle}"></td>
+  </tr>`;
+  const existingLoanTable = `
+    <table style="${tableStyle}">
+      <tr>${headerRow}</tr>
+      ${rowsHtml}
+      ${totalEMIRow}
+    </table>
+  `;
 
   const bankingTable = renderInnerTable(
     ["Bank Name", "A/c No", "A/c Type", "Average Balance"],
@@ -333,13 +307,14 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
 
 
       
-      <p style="${paragraphStyle}"><strong>Assets Owned by the Applicant: -</strong></p>
+      <p style="${paragraphStyle}"><strong>Assets Owned by the Applicant / Co-applicant / Guarantor:-</strong></p>
         ${assets}
       <p style="${paragraphStyle}"><strong>Applicant's Net Worth: </strong>  ${formatMultiline(applicantsNetWorth?.applicantsNetWorth || "Not provided")}</p>
      
       <p style="${paragraphStyle}"><strong>Applicant's Family Details:</strong></p>
       ${familyTable}
 
+      <div style="page-break-before: always;"></div>
       <p style="${paragraphStyle}"><strong>Customer Reference Details:</strong></p>
       ${customerReferenceTable}
 
@@ -357,6 +332,7 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
       <p style="${paragraphStyle}"><strong>Banking Details:</strong></p>
       ${bankingTable}
 
+      <div style="page-break-before: always;"></div>
       <p style="${paragraphStyle}"><strong>ITR, Receipts, Verification, GP Margin & Expenses details:</strong></p>
       <p style="margin-left: 8px;">${formatMultiline(
         verificationData.itrFinancialDetails
@@ -368,7 +344,7 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
         ${
           comfortFactors.length
             ? comfortFactors.join("")
-            : "<li>Not provided</li>"
+            : "Not provided"
         }
       </ul>
 
@@ -377,7 +353,7 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
         ${
           discomfortFactors
             ? discomfortFactors
-            : "<li>Not provided</li>"
+            : "Not provided"
         }
       </ul>
 
@@ -385,7 +361,7 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
         ${
           tpcDetails
             ? String(tpcDetails).split("\n").filter((line: string) => line.trim()).map((line: string) => `<ul><li>${line.trim()}</li></ul>`).join("")
-            : "<li>Not provided</li>"
+            : "Not provided"
         }
 
       <p style="${paragraphStyle}"><strong>Recommendations:-</strong></p>
@@ -393,7 +369,7 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
         ${
           recommendations
             ? recommendations
-            : "<li>Not provided</li>"
+            : "Not provided"
         }
       </ul>
 
@@ -401,38 +377,38 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
       <p style="${paragraphStyle}"><strong>Disclaimer if any:</strong> ${verificationData?.disclaimer?.disclaimer || "Not provided"}</p>
 
 
-      
+      <div style="page-break-before: always;"></div>
       <table style="${tableStyle}">
         <tr>
           <td style="${labelCellStyle};text-align:center;background:#f5f5f5;" colspan="4"><strong>Estimated Profit & Loss Account For the year ended 31st March ${getFinancialYearEndingYear()}</strong></td>
         </tr>
         <tr>
           <td style="${labelCellStyle};text-align:center;background:#f5f5f5;">Expenditure</td>
-          <td style="${labelCellStyle};text-align:center;background:#f5f5f5;">Ampunt (In Rs.)</td>
+          <td style="${labelCellStyle};text-align:center;background:#f5f5f5;">Amount (In Rs.)</td>
           <td style="${labelCellStyle};text-align:center;background:#f5f5f5;">Income</td>
           <td style="${labelCellStyle};text-align:center;background:#f5f5f5;">Amount (In Rs.)</td>
         </tr>
         <tr>
           <td style="${labelCellStyle};">Opening Stock</td>
-          <td style="${labelCellStyle};">${formatCurrency(estimatedProfitAndLoss?.openingStock)}</td>
+          <td style="${valueCellStyle};">${formatCurrency(estimatedProfitAndLoss?.openingStock)}</td>
           <td style="${labelCellStyle};">Gross Receipts</td>
-          <td style="${labelCellStyle};">${formatCurrency(estimatedProfitAndLoss?.grossReceipts)}</td>
+          <td style="${valueCellStyle};">${formatCurrency(estimatedProfitAndLoss?.grossReceipts)}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle};">Purchases</td>
-          <td style="${labelCellStyle};">${formatCurrency(estimatedProfitAndLoss?.purchases)}</td>
+          <td style="${valueCellStyle};">${formatCurrency(estimatedProfitAndLoss?.purchases)}</td>
           <td style="${labelCellStyle};">Other Income</td>
-          <td style="${labelCellStyle};">${formatCurrency(estimatedProfitAndLoss?.otherIncome)}</td>
+          <td style="${valueCellStyle};">${formatCurrency(estimatedProfitAndLoss?.otherIncome)}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle};">Other Direct Expenses</td>
-          <td style="${labelCellStyle};">${formatCurrency(estimatedProfitAndLoss?.otherDirectExpenses)}</td>
+          <td style="${valueCellStyle};">${formatCurrency(estimatedProfitAndLoss?.otherDirectExpenses)}</td>
           <td style="${labelCellStyle};">closing Stock</td>
-          <td style="${labelCellStyle};">${formatCurrency(estimatedProfitAndLoss?.closingStock)}</td>
+          <td style="${valueCellStyle};">${formatCurrency(estimatedProfitAndLoss?.closingStock)}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle};">Gross Profit</td>
-          <td style="${labelCellStyle};">${formatCurrency(estimatedProfitAndLoss?.grossProfitExpenditure)}</td>
+          <td style="${valueCellStyle};">${formatCurrency(estimatedProfitAndLoss?.grossProfitExpenditure)}</td>
           <td style="${labelCellStyle};"></td>
           <td style="${labelCellStyle};"></td>
         </tr>
@@ -444,9 +420,9 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
         </tr>
         <tr>
           <td style="${labelCellStyle};background:yellow;">Total</td>
-          <td style="${labelCellStyle};background:yellow;">${formatCurrency(estimatedProfitAndLoss?.totalExpenditure)}</td>
+          <td style="${valueCellStyle};background:yellow;">${formatCurrency(estimatedProfitAndLoss?.totalExpenditure)}</td>
           <td style="${labelCellStyle};background:yellow;"></td>
-          <td style="${labelCellStyle};background:yellow;">${formatCurrency(estimatedProfitAndLoss?.totalIncome)}</td>
+          <td style="${valueCellStyle};background:yellow;">${formatCurrency(estimatedProfitAndLoss?.totalIncome)}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle};"></td>
@@ -456,57 +432,57 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
         </tr>
         <tr>
           <td style="${labelCellStyle};">salaries</td>
-          <td style="${labelCellStyle};">${formatCurrency(estimatedProfitAndLoss?.salaries)}</td>
+          <td style="${valueCellStyle};">${formatCurrency(estimatedProfitAndLoss?.salaries)}</td>
           <td style="${labelCellStyle};">Gross Profit</td>
-          <td style="${labelCellStyle};">${formatCurrency(estimatedProfitAndLoss?.grossProfitIncome)}</td>
+          <td style="${valueCellStyle};">${formatCurrency(estimatedProfitAndLoss?.grossProfitIncome)}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle};">Rent Expenses</td>
-          <td style="${labelCellStyle};">${formatCurrency(estimatedProfitAndLoss?.rentExpenses)}</td>
+          <td style="${valueCellStyle};">${formatCurrency(estimatedProfitAndLoss?.rentExpenses)}</td>
           <td style="${labelCellStyle};"></td>
           <td style="${labelCellStyle};"></td>
         </tr>
         <tr>
           <td style="${labelCellStyle};">Electricity</td>
-          <td style="${labelCellStyle};">${formatCurrency(estimatedProfitAndLoss?.electricity)}</td>
+          <td style="${valueCellStyle};">${formatCurrency(estimatedProfitAndLoss?.electricity)}</td>
           <td style="${labelCellStyle};"></td>
           <td style="${labelCellStyle};"></td>
         </tr>
         <tr>
           <td style="${labelCellStyle};">Transport/Travelling</td>
-          <td style="${labelCellStyle};">${formatCurrency(estimatedProfitAndLoss?.transportOrTravelling)}</td>
+          <td style="${valueCellStyle};">${formatCurrency(estimatedProfitAndLoss?.transportOrTravelling)}</td>
           <td style="${labelCellStyle};"></td>
           <td style="${labelCellStyle};"></td>
         </tr>
         <tr>
           <td style="${labelCellStyle};">General Expenses</td>
-          <td style="${labelCellStyle};">${formatCurrency(estimatedProfitAndLoss?.generalExpenses)}</td>
+          <td style="${valueCellStyle};">${formatCurrency(estimatedProfitAndLoss?.generalExpenses)}</td>
           <td style="${labelCellStyle};"></td>
           <td style="${labelCellStyle};"></td>
         </tr>
         <tr>
           <td style="${labelCellStyle};">Maintenance Expenses</td>
-          <td style="${labelCellStyle};">${formatCurrency(estimatedProfitAndLoss?.maintenanceExpenses)}</td>
+          <td style="${valueCellStyle};">${formatCurrency(estimatedProfitAndLoss?.maintenanceExpenses)}</td>
           <td style="${labelCellStyle};"></td>
           <td style="${labelCellStyle};"></td>
         </tr>
         <tr>
           <td style="${labelCellStyle};">Other Indirect Expenses</td>
-          <td style="${labelCellStyle};">${formatCurrency(estimatedProfitAndLoss?.otherIndirectExpenses)}</td>
+          <td style="${valueCellStyle};">${formatCurrency(estimatedProfitAndLoss?.otherIndirectExpenses)}</td>
           <td style="${labelCellStyle};"></td>
           <td style="${labelCellStyle};"></td>
         </tr>
         <tr>
           <td style="${labelCellStyle};">Net Profit</td>
-          <td style="${labelCellStyle};">${formatCurrency(estimatedProfitAndLoss?.netProfitExpenditure)}</td>
+          <td style="${valueCellStyle};">${formatCurrency(estimatedProfitAndLoss?.netProfitExpenditure)}</td>
           <td style="${labelCellStyle};"></td>
           <td style="${labelCellStyle};"></td>
         </tr>
         <tr>
           <td style="${labelCellStyle};background:yellow;">Total</td>
-          <td style="${labelCellStyle};background:yellow;">${formatCurrency(estimatedProfitAndLoss?.totalNetProfitExpenditure)}</td>
+          <td style="${valueCellStyle};background:yellow;">${formatCurrency(estimatedProfitAndLoss?.totalNetProfitExpenditure)}</td>
           <td style="${labelCellStyle};background:yellow;"></td>
-          <td style="${labelCellStyle};background:yellow;">${formatCurrency(estimatedProfitAndLoss?.totalNetProfitIncome)}</td>
+          <td style="${valueCellStyle};background:yellow;">${formatCurrency(estimatedProfitAndLoss?.totalNetProfitIncome)}</td>
         </tr>
       </table>
 

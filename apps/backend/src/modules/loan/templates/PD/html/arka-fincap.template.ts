@@ -639,7 +639,8 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Appointment Fixed</strong></p></td>
                 <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${appointmentFixed}</p></td>
-                <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Date of Visit</strong>: ${applicantDetails?.dateOfVisit || istDate.split(" ")[0]}</p></td>
+                <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Date of Visit</strong>: </p></td>
+                <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${applicantDetails?.dateOfVisit || istDate.split(" ")[0]}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Person Met</strong></p></td>
@@ -657,14 +658,14 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Collateral Property Address</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${collateralPropertyAddress}</p></td>
             </tr>
+          </table>
+          <div style="page-break-before: always;"></div>
+          <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>About the Applicant</strong></p></td>
-                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${
-                  applicantDetails?.aboutTheApplicant
-                    ?.split("\n")
-                    .map((line: string) => `<ul><li>${line}</li></ul>`)
-                    .join("") || "Not Provided"
-                }</p></td>
+                <td colspan="6" style="border:1px solid #ccc;padding:8px">${
+                  applicantDetails?.aboutTheApplicant ? applicantDetails?.aboutTheApplicant.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("") : "Not Provided"
+                }</td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px;vertical-align:top;width:25%"><p style="margin:8px 0;line-height:1.5"><strong>Family Details</strong></p></td>
@@ -687,7 +688,6 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
             </tr>
         </table>
         
-        <div style="margin-bottom: 40px;"></div>
         
         <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
             <tr>
@@ -695,7 +695,8 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
                 <td colspan="6" style="border:1px solid #ccc;padding:8px">${renderExistingLoans()}</td>
             </tr>
         </table>
-            
+                    <div style="page-break-before: always;"></div>
+
             <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
             <tr>
                 <td style="border:1px solid #ccc;padding:8px;vertical-align:top"><p style="margin:8px 0;line-height:1.5"><strong>About the Business</strong></p></td>
@@ -798,6 +799,9 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
                   employees.numberOfEmployees
                 )}</p></td>
             </tr>
+            </table>
+            <div style="page-break-before: always;"></div>
+            <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Concerns</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px">${renderConcernsSummary()}</td>
@@ -808,7 +812,7 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
                 ${ensureArray(otherObservations)
                   .map(
                     (item: any) =>
-                      `<ul><li>${item?.observation || ""}</li></ul>`
+                      `<ul style="margin: 0 6px;"><li>${item?.observation || ""}</li></ul>`
                   )
                   .join("<br>")}
                 </td>
@@ -819,7 +823,7 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
                 ${ensureArray(otherIncomes.otherIncomes)
                   .map(
                     (income: any) =>
-                      `<ul><li>${income?.otherIncome || ""}</li></ul>`
+                      `<ul style="margin: 0 6px;"><li>${income?.otherIncome || ""}</li></ul>`
                   )
                   .join("<br>")}
                 </td>

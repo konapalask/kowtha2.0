@@ -146,7 +146,9 @@ export const ambitTemplate = (verificationData: any, html_data: any) => {
         ${renderKeyValue("Phone Number", contactDetails.phoneNumber)}
         ${renderKeyValue("Appointment Fixed", contactDetails.appointmentFixed)}
         ${renderKeyValue("Date of Visit", contactDetails.dateOfVisit)}
-
+        </table>
+        <div style="page-break-after: always;"></div>
+        <table style="${tableStyle}">
         ${renderKeyValue("Structure of Loan", formatMultiline(structureOfLoan.structureOfLoan))}
 
         ${renderKeyValue("No. of Visit", visitDetails.noOfVisit)}
@@ -179,6 +181,9 @@ export const ambitTemplate = (verificationData: any, html_data: any) => {
 
         ${renderKeyValue("About the Business", aboutTheBusiness.aboutTheBusiness ? `<ul style="margin: 0; padding-left: 8px;">${aboutTheBusiness.aboutTheBusiness.split("\n").map((line: string) => line.trim()).map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("")}</ul>` : "Not provided")}
         ${renderKeyValue("Other Observations", otherObservations.observations ? `<ul style="margin: 0; padding-left: 8px;">${otherObservations.observations.split("\n").map((line: string) => line.trim()).map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("")}</ul>` : "Not provided")}
+        </table>
+        <div style="page-break-after: always;"></div>
+        <table style="${tableStyle}">
         ${renderKeyValue("Concerns", otherObservations.concerns ? `<ul style="margin: 0; padding-left: 8px;">${otherObservations.concerns.split("\n").map((line: string) => line.trim()).map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("")}</ul>` : "Not provided")}
         ${renderKeyValue("Purpose of Loan", formatMultiline(purposeOfLoan.purposeOfLoan))}
         ${renderKeyValue("As per Audited individual ITR's", purposeOfLoan.asPerAuditedIndividualItrS)}
@@ -189,7 +194,9 @@ export const ambitTemplate = (verificationData: any, html_data: any) => {
         ${renderKeyValue("Receipts", formatCurrency(documentsObserved.receipts))}
         ${renderKeyValue("Payments", formatCurrency(documentsObserved.payments))}
         
-
+        </table>
+        <div style="page-break-after: always;"></div>
+        <table style="${tableStyle}">
         
         <tr>
           <td style="${labelCellStyle}">Name and Contact number of Regular Customers</td>
@@ -228,9 +235,11 @@ export const ambitTemplate = (verificationData: any, html_data: any) => {
         ${renderKeyValue("Net Margin", businessActivityAndStockLevelObserved.netMargin + "%" || "Not provided")}
         ${renderKeyValue("Expenditure", formatCurrency(businessActivityAndStockLevelObserved.expenditure))}
         ${renderKeyValue("Employees", businessActivityAndStockLevelObserved.employees)}
-        ${renderKeyValue("Assets", formatMultiline(businessActivityAndStockLevelObserved.assets))}
+        ${renderKeyValue("Assets", businessActivityAndStockLevelObserved.assets ? businessActivityAndStockLevelObserved.assets.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("") : "Not provided")}
         ${renderKeyValue("LIC/Mutual funds", formatMultiline(businessActivityAndStockLevelObserved.licMutualFunds))}
-        
+        </table>
+        <div style="page-break-after: always;"></div>
+        <table style="${tableStyle}">
         <tr>
           <td style="${labelCellStyle}">Banking Details</td>
           <td style="border:1px solid #ccc;padding:8px">

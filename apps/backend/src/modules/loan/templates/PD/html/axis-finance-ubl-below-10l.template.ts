@@ -192,6 +192,9 @@ export const axisFinanceUBLBelow10lTemplate = (
         <td style="${labelCellStyle}">Salary paid to employees</td>
         <td style="${cellStyle}">${formatCurrency(businessDetails?.salaryPaidToEmployees) || "Not provided"}</td>
       </tr>
+      </table>
+      <div style="page-break-after: always;"></div>
+      <table style="${tableStyle}">
       <tr>
         <td style="${labelCellStyle}">Major customers</td>
         <td style="border:1px solid #ccc;padding:8px" colspan="3"> 
@@ -292,11 +295,14 @@ export const axisFinanceUBLBelow10lTemplate = (
         <td style="${labelCellStyle}">Loan Purpose</td>
         <td style="${cellStyle}">${loanapplied?.loanPurpose || "Not provided"}</td>
       </tr>
+      </table>
+      <div style="page-break-after: always;"></div>
+      <table style="${tableStyle}">
       <tr>
         <td style="${labelCellStyle}">Loan Amount & Affordable EMI</td>
         <td style="${cellStyle}">${loanapplied?.loanAmount ? "Loan Amount: "+formatCurrency(loanapplied?.loanAmount): ""} ${loanapplied?.affordableEMI? "<br>Affordable EMI: "+formatCurrency(loanapplied?.affordableEMI): ""}</td>
         <td style="${labelCellStyle}">Documents Seen</td>
-        <td style="${cellStyle}">${documentsSeen?.details || "Not provided"}</td>
+        <td style="${cellStyle}">${documentsSeen?.details ? documentsSeen.details.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("") : "Not provided"}</td>
       </tr>
       <tr>
         <td style="${labelCellStyle}" colspan="4">TPC / Neighbour Check</td>

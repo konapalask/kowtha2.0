@@ -417,7 +417,12 @@ export const indiaShelterSenpTemplate = (
           </table>
         </td>
       </tr>
+      </table>
+      <div style="page-break-before: always;"></div>
+    `;
 
+    const houseTable = `
+      <table style="${tableStyle}">
       <tr>
         <td style="${labelCellStyle}">House</td>
         <td style="border:1px solid #ccc;padding:8px" colspan="10">
@@ -1158,17 +1163,22 @@ export const indiaShelterSenpTemplate = (
     <div class="template-content india-shelter-senp">
       ${generalTable}
       ${basicTable}
+      <div style="page-break-before: always;"></div>
       ${assetsTable}
+      ${houseTable}
       ${businessTable}
       ${businessIncomeTable}
       ${loanPurposeTable}
+      <div style="page-break-before: always;"></div>
       ${collateralTable}
       ${currentLoansTable}
       ${costFundsTable}
       ${bankingTable}
+      <div style="page-break-before: always;"></div>
       ${otherFamilyTable}
       ${referencesTable}
       ${tpcTable}
+      <div style="page-break-before: always;"></div>
       ${pdReviewTable}
       ${disclaimerTable}
     </div>
