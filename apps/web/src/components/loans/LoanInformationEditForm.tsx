@@ -11,6 +11,7 @@ import {
   message,
 } from "antd";
 import { createLoanApi, updateLoanApi } from "@/services/loans.services";
+import { getBanksApi } from "@/services/settings.services";
 import {
   applicantTypeOptions,
   bankOptions,
@@ -49,6 +50,32 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
 
   const loanType = Form.useWatch("loanType", form);
   const bankName = Form.useWatch("bankName", form);
+
+
+  const [fiBankOptions, setFiBankOptions] = React.useState<
+    Array<{ value: string; label: string }>
+  >([]);
+
+  React.useEffect(() => {
+    const fetchFiBanks = async () => {
+      if (currentDepartment === "FI") {
+        try {
+          const result = await getBanksApi();
+          const banks = result?.data?.data ?? [];
+          const bankOptions = banks.map((bank: { name: string }) => ({
+            value: bank.name,
+            label: bank.name,
+          }));
+          setFiBankOptions(bankOptions);
+        } catch (error) {
+          console.error("Failed to fetch FI banks:", error);
+          setFiBankOptions(bankOptions);
+        }
+      }
+    };
+
+    fetchFiBanks();
+  }, [currentDepartment]);
 
   // Check if mobile verification is completed to disable bank name field
   const isVerificationCompleted = isMobileVerificationCompleted(selectedLoan);
@@ -386,7 +413,13 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
                 showSearch
                 placeholder="Select bank"
                 options={
-                  currentDepartment === "PD" ? pdBankOptions : bankOptions
+                  currentDepartment === "PD"
+                    ? pdBankOptions
+                    : currentDepartment === "FI"
+                    ? fiBankOptions.length > 0
+                      ? fiBankOptions
+                      : bankOptions
+                    : bankOptions
                 }
                 filterOption={(input, option) =>
                   (option?.label ?? "")
