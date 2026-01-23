@@ -671,41 +671,11 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
       setLoading(true);
       // Validate form first. If invalid, this will throw and skip the rest.
       const values = await form.validateFields();
+      console.log("values", values);
 
-      // Additional validation for empty strings/spaces - only save if at least one non-whitespace character
-      const validationErrors: string[] = [];
-      Object.entries(values).forEach(([key, value]) => {
-        if (typeof value === "string" && value.trim() === "") {
-          validationErrors.push(key);
-        }
-
-        // Check nested objects and arrays
-        if (typeof value === "object" && value !== null) {
-          const checkNestedValues = (obj: any, path: string = "") => {
-            Object.entries(obj).forEach(([nestedKey, nestedValue]) => {
-              const currentPath = path ? `${path}.${nestedKey}` : nestedKey;
-              if (
-                typeof nestedValue === "string" &&
-                nestedValue.trim() === ""
-              ) {
-                validationErrors.push(currentPath);
-              } else if (
-                typeof nestedValue === "object" &&
-                nestedValue !== null
-              ) {
-                checkNestedValues(nestedValue, currentPath);
-              }
-            });
-          };
-          checkNestedValues(value, key);
-        }
-      });
-
-      if (validationErrors.length > 0) {
-        message.error(validationErrors.join(", "));
-        setLoading(false);
-        return;
-      }
+      // Ant Design form validation already handles required fields correctly
+      // including conditional requirements (e.g., otherRelation when relation === "Other")
+      // Empty strings for optional fields will be cleaned by cleanWhitespaceValues below
 
       // Only proceed if validation passes
 
