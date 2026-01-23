@@ -350,14 +350,18 @@ export default function Loans() {
         render: (date: string) => dayjs(date).format("DD-MM-YYYY"),
         width: 120,
       },
-      {
-        title: "Closed At",
-        dataIndex: "closedAt",
-        key: "closedAt",
-        render: (date: string) =>
-          date ? dayjs(date).format("DD-MM-YYYY") : "-",
-        width: 120,
-      },
+      ...(currentDepartment !== "FI"
+        ? [
+            {
+              title: "Closed At",
+              dataIndex: "closedAt",
+              key: "closedAt",
+              render: (date: string) =>
+                date ? dayjs(date).format("DD-MM-YYYY") : "-",
+              width: 120,
+            },
+          ]
+        : []),
     ];
 
     if (currentDepartment === "PD") {
