@@ -481,6 +481,9 @@ export default function Users() {
             case "Verifier":
             case "PDVerifier":
               return "volcano";
+            case "VerificationExecutive":
+            case "PDVerificationExecutive":
+              return "pink";
             default:
               return "default";
           }
