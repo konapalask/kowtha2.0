@@ -886,7 +886,7 @@ export class AccountsService {
     try {
       // Check if office with same name already exists
       const existingOffice = await this.prisma.office.findFirst({
-        where: { name: createOfficeDto.name },
+        where: { name: createOfficeDto.name, department: department },
       });
 
       if (existingOffice) {
