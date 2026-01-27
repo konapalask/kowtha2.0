@@ -7,6 +7,7 @@ import ThirdPartyCheckForm from "./ThirdPartyCheckForm";
 // import FinalObservationsForm from './FinalObservationsForm';
 import OfficeVerificationForm from "./OfficeVerificationForm";
 import WorkBasicDetails from "./WorkBasicDetails";
+import WorkEmploymentDetails from "./WorkEmploymentDetails";
 import BusinessBasicDetails from "./BusinessBasicDetails";
 import BusinessDetails from "./BusinessDetails";
 import BusinessMiscellaneous from "./BusinessMiscellaneous";
@@ -47,7 +48,11 @@ export const FormSelector: React.FC<FormSelectorProps> = ({
     // case 'finalObservations':
     //   return <FinalObservationsForm form={form} />;
     case "employmentDetails":
-      return <OfficeVerificationForm form={form} />;
+      return currentTab === "Work" ? (
+        <WorkEmploymentDetails form={form} />
+      ) : (
+        <OfficeVerificationForm form={form} />
+      );
     case "workBasicDetails":
       return <WorkBasicDetails form={form} />;
     case "colleagueReferences":
