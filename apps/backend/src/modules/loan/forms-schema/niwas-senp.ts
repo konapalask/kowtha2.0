@@ -316,6 +316,18 @@ export const niwasSenpSchema = {
               "Others, Please Specify",
             ],
           },
+          otherBusinessProfileSpecify: {
+            type: "string",
+            title: "Others, Please Specify",
+            dependencies: {
+              show: {
+                businessProfile: "Others, Please Specify",
+              },
+              required: {
+                businessProfile: "Others, Please Specify",
+              },
+            },
+          },
           businessPremisesOwnership: {
             type: "string",
             title: "BusinessPremises Ownership",
@@ -465,91 +477,85 @@ export const niwasSenpSchema = {
       schema: {
         type: "object",
         properties: {
-          revenue: {
-            type: "object",
-            title: "Revenue",
-            properties: {
-              sales: {
-                type: "number",
-                title: "Sales",
-                formatter: {
-                  useIndianFormat: true,
-                  locale: "en-IN",
-                  maxDecimalPlaces: 2,
-                  minDecimalPlaces: 0,
-                },
-              },
-              totalMonthlyRevenueA: {
-                type: "number",
-                title: "Total Monthly Revenue (A)",
-                formatter: {
-                  useIndianFormat: true,
-                  locale: "en-IN",
-                  maxDecimalPlaces: 2,
-                  minDecimalPlaces: 0,
-                },
-              },
+          sales: {
+            type: "number",
+            title: "Sales",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
             },
           },
-          expenditure: {
-            type: "object",
-            title: "Expenditure",
-            properties: {
-              wages: {
-                type: "number",
-                title: "Wages",
-                formatter: {
-                  useIndianFormat: true,
-                  locale: "en-IN",
-                  maxDecimalPlaces: 2,
-                  minDecimalPlaces: 0,
-                },
-              },
-              diesel: {
-                type: "number",
-                title: "Diesel",
-                formatter: {
-                  useIndianFormat: true,
-                  locale: "en-IN",
-                  maxDecimalPlaces: 2,
-                  minDecimalPlaces: 0,
-                },
-              },
-              maintenanceRepairs: {
-                type: "number",
-                title: "Maintenance & Repairs",
-                formatter: {
-                  useIndianFormat: true,
-                  locale: "en-IN",
-                  maxDecimalPlaces: 2,
-                  minDecimalPlaces: 0,
-                },
-              },
-              otherExpenses: {
-                type: "number",
-                title: "Other Expenses",
-                formatter: {
-                  useIndianFormat: true,
-                  locale: "en-IN",
-                  maxDecimalPlaces: 2,
-                  minDecimalPlaces: 0,
-                },
-              },
-              totalMonthlyExpensesB: {
-                type: "number",
-                title: "Total Monthly Expenses (B)",
-                formatter: {
-                  useIndianFormat: true,
-                  locale: "en-IN",
-                  maxDecimalPlaces: 2,
-                  minDecimalPlaces: 0,
-                },
-              },
+          totalMonthlyRevenueA: {
+            type: "number",
+            title: "Total Monthly Revenue (A)",
+            formula: "sales",
+            readOnly: true,
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          wages: {
+            type: "number",
+            title: "Wages",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          diesel: {
+            type: "number",
+            title: "Diesel",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          maintenanceRepairs: {
+            type: "number",
+            title: "Maintenance & Repairs",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          otherExpenses: {
+            type: "number",
+            title: "Other Expenses",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          totalMonthlyExpensesB: {
+            type: "number",
+            title: "Total Monthly Expenses (B)",
+            formula: "wages + diesel + maintenanceRepairs + otherExpenses",
+            readOnly: true,
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
             },
           },
           netMonthlyProfitAB: {
             type: "number",
             title: "Net Monthly Profit (=A-B)",
+            formula: "totalMonthlyRevenueA - totalMonthlyExpensesB",
+            readOnly: true,
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
@@ -1023,6 +1029,10 @@ export const niwasSenpSchema = {
             type: "string",
             title: "Concerns",
             ui: { widget: "textarea", rows: 2 },
+          },
+          nameofInterviewer: {
+            type: "string",
+            title: "Name of Interviewer",
           },
           discussionDate: { type: "date", title: "Date of Discussion" },
         },

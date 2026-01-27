@@ -738,10 +738,6 @@ export const tataUblSchema = {
             type: "string",
             title: "Person met at the time of PD",
           },
-          personDesignation: {
-            type: "string",
-            title: "Person Designation",
-          },
           phoneNoOfApplicant: {
             type: "integer",
             title: "Phone No. of Applicant",
@@ -756,9 +752,14 @@ export const tataUblSchema = {
             type: "string",
             title: "Video Link",
           },
+          personDesignation: {
+            type: "string",
+            title: "Interviewer's designation",
+          },
         },
       },
     },
+    
 
     financialsSchema,
   ],

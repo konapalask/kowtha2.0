@@ -971,7 +971,12 @@ export const BusinessVerificationDetails: React.FC<
 
       message.success("Verification submitted successfully!");
 
-      router.push(`/verify`);
+      const page = router.query.page;
+      if (page) {
+        router.push({ pathname: "/verify", query: { page: page.toString() } });
+      } else {
+        router.push("/verify");
+      }
     } catch (error: any) {
       console.error("Error submitting verification executive data:", error);
       const errorMessage =
@@ -2687,7 +2692,6 @@ export const BusinessVerificationDetails: React.FC<
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [formValues, isActive]);
-
     const calculateFormulasInArrayItem = (
       arrayField: any,
       arrayIndex: number,
@@ -3138,6 +3142,14 @@ export const BusinessVerificationDetails: React.FC<
               readOnly={readOnly}
               setSectionUncommittedChanges={setSectionUncommittedChanges}
               sectionId={section.id}
+              onArrayTotalsChange={(totals) => {
+                if (section.id === "existingLoanDetails" && (fieldId === "loans" || fieldId === "loanDetails")) {
+                  form.setFieldsValue({
+                    totalLoanAmount: totals.totalLoanAmount,
+                    totalEmi: totals.totalEmi,
+                  });
+                }
+              }}
             />
           </div>
         );
@@ -4047,12 +4059,14 @@ export const BusinessVerificationDetails: React.FC<
     readOnly,
     setSectionUncommittedChanges,
     sectionId,
+    onArrayTotalsChange,
   }: {
     field: any;
     data: any;
     readOnly: boolean;
     setSectionUncommittedChanges: (fn: (prev: any) => any) => void;
     sectionId: string;
+    onArrayTotalsChange?: (totals: { totalLoanAmount: number; totalEmi: number }) => void;
   }) => {
     // Ensure data is an array and add unique IDs if missing
     const ensureArrayWithIds = (arrayData: any[]) => {
@@ -4243,6 +4257,36 @@ export const BusinessVerificationDetails: React.FC<
             [field.id]: arrayData,
           },
         }));
+
+        if (
+          onArrayTotalsChange &&
+          sectionId === "existingLoanDetails" &&
+          (field.id === "loans" || field.id === "loanDetails")
+        ) {
+          let totalLoanAmount = 0;
+          let totalEmi = 0;
+          arrayData.forEach((loan) => {
+            if (loan && typeof loan === "object") {
+              const loanAmount =
+                typeof loan.loanAmount === "number"
+                  ? loan.loanAmount
+                  : parseFloat(String(loan.loanAmount || 0).replace(/,/g, "")) || 0;
+              
+              const emiValue = loan.emi !== undefined ? loan.emi : loan.emiInterest;
+              const emi =
+                typeof emiValue === "number"
+                  ? emiValue
+                  : parseFloat(String(emiValue || 0).replace(/,/g, "")) || 0;
+              
+              if (!isNaN(loanAmount)) totalLoanAmount += loanAmount;
+              if (!isNaN(emi)) totalEmi += emi;
+            }
+          });
+          onArrayTotalsChange({
+            totalLoanAmount,
+            totalEmi,
+          });
+        }
       },
       [
         field.id,
@@ -5024,13 +5068,14 @@ export const BusinessVerificationDetails: React.FC<
               const isNetProfitAbove10Lakh =
                 netProfitNum !== null && netProfitNum > 1000000;
 
+              const shouldBeReadOnlyDueToNetProfit = isNetProfitAbove10Lakh && hasEditRequest;
               return (
                 <CollapsibleFormSections
                   schema={schemaForm}
                   formData={dynamicFormData}
                   onEdit={handleDynamicSectionEdit}
                   readOnly={
-                    isNetProfitAbove10Lakh ||
+                    shouldBeReadOnlyDueToNetProfit ||
                     (role === "VerificationExecutive"
                       ? hasEditRequest
                       : !!verificationData?.approvedStatus || hasEditRequest) // Others follow original logic

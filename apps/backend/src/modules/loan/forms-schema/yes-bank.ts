@@ -441,7 +441,7 @@ export const yesBankSchema = {
           },
           yblDesignation: { type: "string", title: "Designation" },
           yblEmpId: { type: "string", title: "Employee ID" },
-          pdAgencyInterviewer: {
+          nameOfInterviewer: {
             type: "string",
             title: "PD agency interviewer’s name",
           },
@@ -523,6 +523,11 @@ export const yesBankSchema = {
             type: "string",
             title:
               "If distance is more than 15-20Km from work place provide details of commute plan / reason for buying in far area",
+          },
+          howBorrowerIntendToCommute: {
+            type: "string",
+            title: "How borrower intend to commute from workplace to home in far area.",
+            ui: { widget: "textarea", rows: 3 },
           },
         },
       },

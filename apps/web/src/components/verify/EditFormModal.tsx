@@ -302,10 +302,22 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
       initialValuesSetRef.current = true;
       
       const currentVerification = initialValues?.verifications?.find(
-        (v: any) => v.type === currentTab
+        (v: any) => v.type === currentTab || v.addressType === currentTab
       );
 
-      if (formKey === "financialAnalysis") {
+      if (currentTab === "Work") {
+        if (formKey === "workBasicDetails") {
+          const basicData = currentVerification?.verificationData?.basicDetails;
+          if (basicData) {
+            form.setFieldsValue(basicData);
+          }
+        } else if (formKey === "employmentDetails") {
+          const employmentData = currentVerification?.verificationData?.employmentDetails;
+          if (employmentData) {
+            form.setFieldsValue(employmentData);
+          }
+        }
+      } else if (formKey === "financialAnalysis") {
         const financialData = currentVerification?.financialAnalysis;
         if (financialData) {
           const formValues: Record<string, any> = {};
@@ -555,8 +567,17 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
 
   const getInitialValues = async () => {
     const currentVerification = initialValues?.verifications?.find(
-      (v: any) => v.addressType === currentTab
+      (v: any) => v.addressType === currentTab || v.type === currentTab
     );
+
+    if (currentTab === "Work") {
+      if (formKey === "workBasicDetails") {
+        return currentVerification?.verificationData?.basicDetails;
+      }
+      if (formKey === "employmentDetails") {
+        return currentVerification?.verificationData?.employmentDetails;
+      }
+    }
 
     // Handle financial analysis data differently
     if (formKey === "financialAnalysis") {
@@ -671,41 +692,11 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
       setLoading(true);
       // Validate form first. If invalid, this will throw and skip the rest.
       const values = await form.validateFields();
+      console.log("values", values);
 
-      // Additional validation for empty strings/spaces - only save if at least one non-whitespace character
-      const validationErrors: string[] = [];
-      Object.entries(values).forEach(([key, value]) => {
-        if (typeof value === "string" && value.trim() === "") {
-          validationErrors.push(key);
-        }
-
-        // Check nested objects and arrays
-        if (typeof value === "object" && value !== null) {
-          const checkNestedValues = (obj: any, path: string = "") => {
-            Object.entries(obj).forEach(([nestedKey, nestedValue]) => {
-              const currentPath = path ? `${path}.${nestedKey}` : nestedKey;
-              if (
-                typeof nestedValue === "string" &&
-                nestedValue.trim() === ""
-              ) {
-                validationErrors.push(currentPath);
-              } else if (
-                typeof nestedValue === "object" &&
-                nestedValue !== null
-              ) {
-                checkNestedValues(nestedValue, currentPath);
-              }
-            });
-          };
-          checkNestedValues(value, key);
-        }
-      });
-
-      if (validationErrors.length > 0) {
-        message.error(validationErrors.join(", "));
-        setLoading(false);
-        return;
-      }
+      // Ant Design form validation already handles required fields correctly
+      // including conditional requirements (e.g., otherRelation when relation === "Other")
+      // Empty strings for optional fields will be cleaned by cleanWhitespaceValues below
 
       // Only proceed if validation passes
 
@@ -746,9 +737,22 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
         // Handle other forms normally
         const mappedKey = formKeyMapping[formKey] || formKey;
 
-        // For PD department, handle data structure differently
         let finalData: Record<string, any>;
-        if (currentDepartment === "PD") {
+        if (currentTab === "Work") {
+          if (formKey === "workBasicDetails") {
+            finalData = {
+              basicDetails: formValues,
+            };
+          } else if (formKey === "employmentDetails") {
+            finalData = {
+              employmentDetails: formValues,
+            };
+          } else {
+            finalData = {
+              [mappedKey]: formValues,
+            };
+          }
+        } else if (currentDepartment === "PD") {
           if (formKey === "businessBasicDetails") {
             finalData = {
               basicDetails: formValues,
@@ -944,10 +948,16 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
               }
             : formKey === "financialAnalysis"
               ? {
-                  // For financial analysis, we'll set initial values in useEffect
-                  // since the data structure is different
                 }
-              : currentDepartment === "PD" && formKey === "familyDetails"
+              : currentTab === "Work" && formKey === "workBasicDetails"
+                ? initialValues?.verifications?.find(
+                    (v: any) => v.addressType === currentTab || v.type === currentTab
+                  )?.verificationData?.basicDetails
+                : currentTab === "Work" && formKey === "employmentDetails"
+                  ? initialValues?.verifications?.find(
+                      (v: any) => v.addressType === currentTab || v.type === currentTab
+                    )?.verificationData?.employmentDetails
+                  : currentDepartment === "PD" && formKey === "familyDetails"
                 ? {
                     familyMemberDetails:
                       initialValues?.verifications?.find(

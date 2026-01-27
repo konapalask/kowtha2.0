@@ -170,8 +170,13 @@ export const adityaBirlaSchema = {
           gstRegistration: { type: "string", title: "GST registration" },
           itrsFiling: { type: "string", title: "ITRs filing" },
           numberOfEmployees: {
-            type: "number",
-            title: "Number of employees (Co- applicant)",
+            type: "object",
+            title: "Number of employees & Salaries",
+            properties: {
+              declaredByCustomer: { type: "string", title: "Declared by customer" },
+              observed: { type: "string", title: "Observed" },
+              salaries: { type: "string", title: "Salaries"},
+            },
           },
           godownAddress: { type: "string", title: "Godown address (if any)" },
           otherBusinessDetails: {
@@ -188,7 +193,7 @@ export const adityaBirlaSchema = {
       schema: {
         type: "object",
         properties: {
-          applicantSummary: { type: "string", title: "Applicant summary" },
+          applicantSummary: { type: "string", title: "Business Profile" },
           nativePlace: { type: "string", title: "Native Place" },
           businessSince: {
             type: "string",
@@ -279,16 +284,49 @@ export const adityaBirlaSchema = {
         properties: {
           salesBills: { type: "string", title: "Sales bills" },
           purchaseBills: { type: "string", title: "Purchase bills" },
-          neighbourCheckName: { type: "string", title: "Neighbour check name" },
-          neighbourCheckNumber: {
-            type: "string",
-            title: "Neighbour check number",
-          },
+          neighbourCheckNameAndNumber: { type: "string", title: "Neighbour check with Name & Number" },
           cibilDetails: { type: "string", title: "Cibil details" },
           previousLoans: {
-            type: "string",
-            title: "Previous loans",
-            ui: { widget: "textarea", rows: 4 },
+            type: "array",
+            title: "No. of Loans",
+            items: {
+              type: "object",
+              properties: {
+                bank: {
+                  type: "string",
+                  title: "BANK",
+                },
+                type: {
+                  type: "string",
+                  title: "TYPE",
+                },
+                loan: {
+                  type: "number",
+                  title: "LOAN",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
+                },
+                emi: {
+                  type: "number",
+                  title: "EMI",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
+                },
+                status: {
+                  type: "string",
+                  title: "OPEN/CLOSE",
+                  enum: ["Open", "Close"],
+                },
+              },
+            },
           },
           bankingDetails: { type: "string", title: "Banking details" },
           firmAccount: { type: "string", title: "Firm account" },
@@ -475,6 +513,8 @@ export const adityaBirlaSchema = {
           totalExpenses: {
             type: "number",
             title: "Total Expenses",
+            formula: "purchaseDetails + rentDetails + salaryAndWagesDetails + transportDetails + electricityDetails + otherExpensesDetails",
+            readOnly: true,
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
@@ -485,6 +525,8 @@ export const adityaBirlaSchema = {
           netProfit: {
             type: "number",
             title: "Net Profit",
+            formula: "salesDetails - totalExpenses",
+            readOnly: true,
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
@@ -492,7 +534,7 @@ export const adityaBirlaSchema = {
               minDecimalPlaces: 0,
             },
           },
-          netMargin: { type: "number", title: "Net Margin" },
+          netMargin: { type: "number", title: "Net Margin", formula: "(netProfit / salesDetails) * 100", readOnly: true },
         },
       },
     },

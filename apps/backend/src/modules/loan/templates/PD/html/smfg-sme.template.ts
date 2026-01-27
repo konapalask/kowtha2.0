@@ -390,6 +390,10 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
         formatCurrency,
         { colSpan: 3 }
       )}
+      </table>`;
+
+    const majorSuppliersTable = `
+      <table style="${tableStyle}">
       ${renderKeyValueRow(
         "Name and contact no of two major suppliers",
         business.majorSuppliers &&
@@ -476,6 +480,10 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
         ["Type of Loan", "Bank Name", "Loan Amount", "EMI", "Tenure Remaining"],
         loanRows
       )}
+      </table>`;
+
+  const bankingTable = `
+      <table style="${tableStyle}">
       <tr><th style="${subHeaderStyle}" colspan="7">Banking Details:-</th></tr>
 
       ${renderArrayTable(
@@ -559,9 +567,14 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
     <div class="template-content smfg-sme-template">
       ${generalTable}
       ${personalTable}
+      <div style="page-break-after: always;"></div>
       ${businessTable}
+      <div style="page-break-after: always;"></div>
+      ${majorSuppliersTable}
       ${essTable}
       ${existingLoansTable}
+      <div style="page-break-after: always;"></div>
+      ${bankingTable}
       ${observationsTable}
     </div>
     ${pdBaseTemplateFooter(html_data)}

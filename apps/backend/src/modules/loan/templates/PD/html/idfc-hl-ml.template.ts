@@ -642,22 +642,22 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
       : ""
   }`;
 
-  return `
-${pdBaseTemplate(html_data)}
-<div class="template-content">
-<h1 style="margin:8px 0;line-height:1.5;font-size:20px;color:#333">IDFC Bank LTD – Personal Discussion Report</h1>
-${SideHeading("I] General Details:-")}
-${generalTable}
-
-${SideHeading("II] Personal Details:-")}
+    return `
+      ${pdBaseTemplate(html_data)}
+      <div class="template-content">
+      <h1 style="margin:8px 0;line-height:1.5;font-size:20px;color:#333">IDFC Bank LTD – Personal Discussion Report</h1>
+      ${SideHeading("I] General Details:-")}
+      ${generalTable}
+      <div style="page-break-before: always;"></div>
+      ${SideHeading("II] Personal Details:-")}
       ${personalTable}
-
+      <div style="page-break-before: always;"></div>
       ${SideHeading("III] Business/ Work Details:-")}
       ${businessTable}
-
+      <div style="page-break-before: always;"></div>
       ${SideHeading("IV] Operational Details:-")}
       ${operationalTable}
-
+      <div style="page-break-before: always;"></div>
       ${SideHeading("V] Financial Details:-")}
       ${financialTable}
 
@@ -676,6 +676,7 @@ ${SideHeading("II] Personal Details:-")}
           )
           .join("") || "-"
       )}
+      <div style="page-break-before: always;"></div>
       ${SideHeading("Other Business if any:")}
       ${wrapParagraph(
         termLoansSection?.otherBusiness
@@ -691,7 +692,7 @@ ${SideHeading("II] Personal Details:-")}
 
       ${SideHeading("VI] Loan Details:-")}
       ${loanDetailsTable}
-
+      <div style="page-break-before: always;"></div>
       ${SideHeading("VII] Personal Discussion Details:-")}
       ${personalDiscussionTable}
       ${detailsConfirmationRows}

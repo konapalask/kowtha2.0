@@ -213,8 +213,10 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
           .join("\n")}
 
         </tr>
+        </table>
 
-
+        <div style="page-break-before: always;"></div>
+        <table style="${tableStyle}">
         <tr>
           <td style="${labelCellStyle};vertical-align: middle;"><strong>Family Background and Personal details</strong></td>
           <td style="${labelCellStyle};vertical-align: middle;"><strong>Residence Details</strong></td>
@@ -260,10 +262,12 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
           <td style="${labelCellStyle}" colspan="2"><strong>Earning members in family , their source of income and total income</strong></td>
           <td style="${valueCellStyle}" colspan="6">${familyDetails.earningMembersInFamily || ""}</td>  
         </tr>
+        </table>
 
-
+        <div style="page-break-before: always;"></div>
 
         <!-- Nature of Business Section -->
+        <table style="${tableStyle}">
         <tr>
           <td style="${labelCellStyle};vertical-align: middle;"><strong>Nature of Business and Business Vintage</strong></td>
           <td style="border:1px solid #ccc;padding:8px" colspan="7">
@@ -356,7 +360,7 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
 
 
 
-
+        <div style="page-break-before: always;"></div>
          <!--******** Cash Flow Analysis Section********* -->
 
          <table style="${tableStyle}">
@@ -574,7 +578,7 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
          </table>
 
 
-
+        <div style="page-break-before: always;"></div>
          <table style="${tableStyle}">
           <tr>
             <td style="${labelCellStyle}" colspan="3"><strong>ITR and Financial</strong></td>
@@ -726,7 +730,7 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
         </table>
 
 
-
+        <div style="page-break-before: always;"></div>
 
         <table style="${tableStyle}">
         <!-- Collateral Details Section -->

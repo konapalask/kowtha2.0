@@ -188,10 +188,9 @@ export class LoanService {
             width: 100%;
             padding: 4px 16px;
             color: #999;
-            border-bottom: 1px solid #eee;
             text-align: center;
           ">
-          ${bankName || "Kowtha"} - Verification Report
+          <!-- ${bankName || "Kowtha"} - Verification Report -->
         </div>
       `,
       footerTemplate: footerTemplate,
@@ -489,7 +488,11 @@ export class LoanService {
   }
 
   // Assign a field executive to a verification for a loan
-  async assignVerification(loanId: number, createData: createAssignmentDto, department: Department) {
+  async assignVerification(
+    loanId: number,
+    createData: createAssignmentDto,
+    department: Department
+  ) {
     try {
       const loan = await this.prisma.loan.findUnique({ where: { id: loanId } });
 
@@ -502,7 +505,9 @@ export class LoanService {
       }
 
       if (department === Department.PD && !loan.templateName) {
-        throw new BadRequestException("Please assign a template to the loan first");
+        throw new BadRequestException(
+          "Please assign a template to the loan first"
+        );
       }
 
       if (!createData.fieldExecutiveId || !createData.verifierId) {
@@ -520,8 +525,9 @@ export class LoanService {
         );
       }
 
+
       return await this.prisma.$transaction(async (prisma) => {
-        const verification = await prisma.verification.create({
+        let verificationData = await prisma.verification.create({
           data: {
             loan: { connect: { id: loan.id } },
             type: createData.verificationType || "AddressOne",
@@ -536,6 +542,15 @@ export class LoanService {
           },
         });
 
+        if (createData.assistantVerifierId) {
+          console.log("assistantVerifierId", createData.assistantVerifierId);
+          
+          verificationData = await prisma.verification.update({
+            where: { id: verificationData.id },
+            data: { assistantVerifier: { connect: { id: createData.assistantVerifierId } } },
+          });
+        }
+
         const loanStatusChange = await prisma.loan.update({
           where: { id: loanId },
           data: { status: "Assigned" },
@@ -546,7 +561,7 @@ export class LoanService {
           createData,
         });
 
-        return verification;
+        return verificationData;
       });
     } catch (error) {
       if (
@@ -890,7 +905,6 @@ export class LoanService {
       }
 
       const userRole = role.find((r: any) => r.department === department);
-
       if (userRole.role === UserRole.Verifier) {
         where.verifierId = verifierId;
         if (department === Department.PD) {
@@ -901,7 +915,7 @@ export class LoanService {
           where.initialSubmitted = false;
         }
         where.initialSubmitted = false;
-      } else {
+        where.assistantVerifierId = verifierId;
       }
 
       const verifications = await this.prisma.verification.findMany({
@@ -1124,6 +1138,14 @@ export class LoanService {
                   employeeCode: true,
                 },
               },
+              assistantVerifier: {
+                select: {
+                  id: true,
+                  name: true,
+                  mobile: true,
+                  employeeCode: true,
+                },
+              },
               verificationRetries: {
                 select: {
                   reason: true,
@@ -1192,7 +1214,8 @@ export class LoanService {
         !updateData.address &&
         !updateData.businessName &&
         !updateData.currentOfficeName &&
-        !updateData.verifierId
+        !updateData.verifierId &&
+        !updateData.assistantVerifierId
       ) {
         throw new BadRequestException(
           "Address is required when assigning a field executive"
@@ -1220,6 +1243,9 @@ export class LoanService {
             }),
             ...(updateData.currentOfficeName && {
               currentOfficeName: updateData.currentOfficeName,
+            }),
+            ...(updateData.assistantVerifierId && {
+              assistantVerifierId: updateData.assistantVerifierId,
             }),
             status: "Pending", // Reset status when assignment is updated
           },
@@ -2076,11 +2102,15 @@ export class LoanService {
       }
 
       try {
-        let financialAnalysis = editVerificationDto.verificationData?.financialAnalysis;
+        let financialAnalysis =
+          editVerificationDto.verificationData?.financialAnalysis;
 
-        if (financialAnalysis?.netProfit && financialAnalysis?.netProfit > 1000000) {
+        if (
+          financialAnalysis?.netProfit &&
+          financialAnalysis?.netProfit > 1000000
+        ) {
           delete editVerificationDto.verificationData?.financialAnalysis;
-          
+
           const createEditRequest = await this.prisma.editRequest.create({
             data: {
               loan: {
@@ -2096,9 +2126,9 @@ export class LoanService {
               type: EditRequestType.LoanData,
               changes: financialAnalysis,
             },
-        });
-        
-        return verification;
+          });
+
+          return verification;
         }
       } catch (error) {
         await this.loggingService.error("Failed to edit verification data", {
@@ -2109,7 +2139,7 @@ export class LoanService {
         });
         throw error;
       }
-      
+
       const updatedVerification = await this.prisma.verification.update({
         where: {
           id: verification.id,
@@ -2803,6 +2833,9 @@ export class LoanService {
                   verifier: { connect: { id: v.verifierId } },
                 }),
                 fieldExecutive: { connect: { id: v.fieldExecutiveId } },
+                ...(v.assistantVerifierId && {
+                  assistantVerifier: { connect: { id: v.assistantVerifierId } },
+                }),
                 status: VerificationStatus.Pending,
                 locationType: v.locationType,
                 isPostponed: false,
@@ -3376,46 +3409,46 @@ export class LoanService {
       }
 
       // 3. Get uploaded PDFs from verification data
-      try {
-        const verificationData = verification.verificationData as any;
-        const uploadedItems = verificationData?.uploadedItems || [];
-        const pdfItems = uploadedItems.filter(
-          (item: any) =>
-            item?.fileType === "pdf" ||
-            item?.type === "document" ||
-            (item?.s3ImageUrl && item.s3ImageUrl.toLowerCase().endsWith(".pdf"))
-        );
+      // try {
+      //   const verificationData = verification.verificationData as any;
+      //   const uploadedItems = verificationData?.uploadedItems || [];
+      //   const pdfItems = uploadedItems.filter(
+      //     (item: any) =>
+      //       item?.fileType === "pdf" ||
+      //       item?.type === "document" ||
+      //       (item?.s3ImageUrl && item.s3ImageUrl.toLowerCase().endsWith(".pdf"))
+      //   );
 
-        for (const pdfItem of pdfItems) {
-          try {
-            if (pdfItem.s3ImageUrl) {
-              const pdfBuffer = await downloadFromS3(pdfItem.s3ImageUrl);
-              const fileName =
-                pdfItem.fileName ||
-                `uploaded-document-${pdfItem.id || Date.now()}.pdf`;
-              attachments.push({
-                name: fileName,
-                content: pdfBuffer,
-                contentType: "application/pdf",
-              });
-            }
-          } catch (error) {
-            await this.loggingService.warn(
-              "Failed to get uploaded PDF for email reply",
-              {
-                loanId,
-                s3Path: pdfItem.s3ImageUrl,
-                error: error.message,
-              }
-            );
-          }
-        }
-      } catch (error) {
-        await this.loggingService.warn(
-          "Failed to process uploaded PDFs for email reply",
-          { loanId, error: error.message }
-        );
-      }
+      //   for (const pdfItem of pdfItems) {
+      //     try {
+      //       if (pdfItem.s3ImageUrl) {
+      //         const pdfBuffer = await downloadFromS3(pdfItem.s3ImageUrl);
+      //         const fileName =
+      //           pdfItem.fileName ||
+      //           `uploaded-document-${pdfItem.id || Date.now()}.pdf`;
+      //         attachments.push({
+      //           name: fileName,
+      //           content: pdfBuffer,
+      //           contentType: "application/pdf",
+      //         });
+      //       }
+      //     } catch (error) {
+      //       await this.loggingService.warn(
+      //         "Failed to get uploaded PDF for email reply",
+      //         {
+      //           loanId,
+      //           s3Path: pdfItem.s3ImageUrl,
+      //           error: error.message,
+      //         }
+      //       );
+      //     }
+      //   }
+      // } catch (error) {
+      //   await this.loggingService.warn(
+      //     "Failed to process uploaded PDFs for email reply",
+      //     { loanId, error: error.message }
+      //   );
+      // }
 
       // Log all attachments being prepared
       await this.loggingService.info("Prepared attachments for email reply", {

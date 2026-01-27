@@ -241,6 +241,10 @@ export const ambitMsmeSchema = {
             type: "string",
             title: "Person Met (with name and Relation)",
           },
+          interviewedBy: {
+            type: "string",
+            title: "PD Done By",
+          },
         },
       },
     },

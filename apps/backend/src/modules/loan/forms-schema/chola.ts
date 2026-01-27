@@ -1,4 +1,18 @@
 import financialsSchema from "../financials-schema/generic";
+const getFinancialYearEndingYear = (): number => {
+  const now = new Date();
+  const currentMonth = now.getMonth(); // 0-indexed: 0=Jan, 1=Feb, ..., 3=Apr, ..., 11=Dec
+  const currentYear = now.getFullYear();
+  
+  // If we're in April (3) or later, the financial year ending is next year
+  // If we're in Jan-Mar (0-2), the financial year ending is this year
+  if (currentMonth >= 3) {
+    return currentYear + 1;
+  } else {
+    return currentYear;
+  }
+}
+
 export const cholaSchema = {
   id: 11,
   bankName: "Chola",
@@ -69,7 +83,7 @@ export const cholaSchema = {
     },
     {
       id: "aboutTheApplicantAndItsBusiness",
-      label: "About the Applicant & its Business",
+      label: "About the Applicant & its Business content",
       schema: {
         type: "object",
         properties: {
@@ -88,6 +102,58 @@ export const cholaSchema = {
               widget: "textarea",
               rows: 8,
             },
+          },
+        },
+      },
+    },
+    {
+      id: "residentialDetails",
+      label: "Residential Details",
+      schema: {
+        type: "object",
+        properties: {
+          residentialDetails: {
+            type: "string",
+            title: "Residential Details",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
+        },
+      },
+    },
+    {
+      id: "assets",
+      label: "Assets Owned by the Applicant",
+      schema: {
+        type: "object",
+        properties: {
+          assetDetails: {
+            type: "array",
+            title: "Asset details",
+            items: {
+              type: "object",
+              properties: {
+                assetDetails: {
+                  type: "string",
+                  title: "Asset details",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    {
+      id: "applicantsNetWorth",
+      label: "Applicant's Net Worth",
+      schema: {
+        type: "object",
+        properties: {
+          applicantsNetWorth: {
+            type: "string",
+            title: "Applicant's Net Worth",
           },
         },
       },
@@ -126,27 +192,13 @@ export const cholaSchema = {
                   type: "integer",
                   title: "Age",
                 },
-              },
-            },
-          },
-        },
-      },
-    },
-    {
-      id: "assets",
-      label: "Assets",
-      schema: {
-        type: "object",
-        properties: {
-          assetDetails: {
-            type: "array",
-            title: "Asset details",
-            items: {
-              type: "object",
-              properties: {
-                assetDetails: {
+                occupation: {
                   type: "string",
-                  title: "Asset details",
+                  title: "Occupation",
+                },
+                qualification: {
+                  type: "string",
+                  title: "Qualification",
                 },
               },
             },
@@ -155,20 +207,58 @@ export const cholaSchema = {
       },
     },
     {
-      id: "customersReferenceNumbers",
-      label: "Customers - Reference Numbers",
+      id: "customersReference",
+      label: "Customers Reference",
       schema: {
         type: "object",
         properties: {
-          customerReferenceNumbers: {
+          customersReference: {
             type: "array",
-            title: "Customer Reference Numbers",
+            title: "Customers Reference",
             items: {
               type: "object",
               properties: {
+                customerName: {
+                  type: "string",
+                  title: "Customer Name",
+                },
                 customerReferenceNumber: {
                   type: "string",
                   title: "Customer Reference Number",
+                },
+                feedback: {
+                  type: "string",
+                  title: "Feedback",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    {
+      id: "suppliersReference",
+      label: "Suppliers Reference",
+      schema: {
+        type: "object",
+        properties: {
+          suppliersReference: {
+            type: "array",
+            title: "Suppliers Reference",
+            items: {
+              type: "object",
+              properties: {
+                supplierName: {
+                  type: "string",
+                  title: "Supplier Name",
+                },
+                supplierReferenceNumber: {
+                  type: "string",
+                  title: "Supplier Reference Number",
+                },
+                feedback: {
+                  type: "string",
+                  title: "Feedback",
                 },
               },
             },
@@ -243,6 +333,18 @@ export const cholaSchema = {
                   title: "Total Tenure / Completed [in months]",
                 },
               },
+            },
+          },
+          totalEmi: {
+            type: "number",
+            title: "Total EMI",
+            formula: "loanDetails.reduce((sum, emi) => sum + (emi.emiInterest || 0), 0)",
+            readOnly: true,
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
             },
           },
         },
@@ -340,6 +442,23 @@ export const cholaSchema = {
       },
     },
     {
+      id: "thirdPartyChecks",
+      label: "Third Party Checks",
+      schema: {
+        type: "object",
+        properties: {
+          tpcDetails: {
+            type: "string",
+            title: "TPC (Third Party check) Details",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
+        },
+      },
+    },
+    {
       id: "Recommendations",
       label: "Recommendations",
       schema: {
@@ -365,6 +484,232 @@ export const cholaSchema = {
           disclaimer: {
             type: "string",
             title: "Disclaimer",
+          },
+        },
+      },
+    },
+    {
+      id: "estimatedProfitAndLoss",
+      label: `Estimated Profit & Loss Account For the year ended 31st March ${getFinancialYearEndingYear()}`,
+      schema: {
+        type: "object",
+        properties: {
+          openingStock: {
+            type: "number",
+            title: "Opening Stock",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          purchases: {
+            type: "number",
+            title: "Purchases",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          otherDirectExpenses: {
+            type: "number",
+            title: "Other Direct Expenses",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          grossProfitExpenditure: {
+            type: "number",
+            title: "Gross Profit Expenditure",
+            formula: "totalIncome - (openingStock + purchases + otherDirectExpenses)",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+            readOnly: true,
+          },
+          totalExpenditure: {
+            type: "number",
+            title: "Total Expenditure",
+            formula: "totalIncome",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+            readOnly: true,
+          },
+          salaries: {
+            type: "number",
+            title: "Salaries",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          rentExpenses: {
+            type: "number",
+            title: "Rent",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          electricity: {
+            type: "number",
+            title: "Electricity",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          transportOrTravelling: {
+            type: "number",
+            title: "Transport/Travelling",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          generalExpenses: {
+            type: "number",
+            title: "General Expenses",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          maintenanceExpenses: {
+            type: "number",
+            title: "Maintenance Expenses",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          otherIndirectExpenses: {
+            type: "number",
+            title: "Other Indirect Expenses",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          netProfitExpenditure: {
+            type: "number",
+            title: "Net Profit",
+            formula: "totalNetProfitIncome - (salaries + rentExpenses + electricity + transportOrTravelling + generalExpenses + maintenanceExpenses + otherIndirectExpenses)",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+            readOnly: true,
+          },
+          totalNetProfitExpenditure: {
+            type: "number",
+            title: "Total",
+            formula:"totalNetProfitIncome",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+            readOnly: true,
+          },
+
+
+          // Income Section
+          grossReceipts: {
+            type: "number",
+            title: "Gross Receipts",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          otherIncome: {
+            type: "number",
+            title: "Other Income",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          closingStock: {
+            type: "number",
+            title: "Closing Stock",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          totalIncome: {
+            type: "number",
+            title: "Total Income",
+            formula: "grossReceipts + otherIncomes + closingStock",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+            readOnly: true,
+          },
+          grossProfitIncome: {
+            type: "number",
+            title: "Gross Profit",
+            formula: "totalIncome - (openingStock + purchases + otherDirectExpenses)",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+            readOnly: true,
+          },
+          totalNetProfitIncome: {
+            type: "number",
+            title: "Total",
+            formula: "grossProfitIncome + otherIncomes + closingStock + grossReceipts",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+            readOnly: true,
           },
         },
       },

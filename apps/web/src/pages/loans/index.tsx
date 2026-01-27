@@ -31,6 +31,7 @@ import { getOfficesApi, Office } from "@/services/settings.services";
 import {
   getFieldExecutivesByOfficeIdApi,
   getVerifiersApi,
+  getAllVerificationExecutivesApi,
 } from "@/services/users.services";
 // import { colors } from "@/styles/colors";
 import LoanEditDrawer from "@/components/loans/LoanEditDrawer";
@@ -88,6 +89,7 @@ export default function Loans() {
       ""
   );
   const [fieldExecutives, setFieldExecutives] = useState<FieldExecutive[]>([]);
+  const [verificationExecutives, setVerificationExecutives] = useState<any[]>([]);
   const [offices, setOffices] = useState<Office[]>([]);
   const [editLoanInfo, setEditLoanInfo] = useState<boolean>(false);
   const [verifiers, setVerifiers] = useState<Verifiers[]>([]);
@@ -197,6 +199,18 @@ export default function Loans() {
     getTemplateOptionsApi()
       .then((res) => {
         setTemplateOptions(res ?? []);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    getAllVerificationExecutivesApi()
+      .then((res) => {
+        const options =
+          res?.data?.data?.map((item: any) => ({
+            label: item.name,
+            value: item.id,
+          })) ?? [];
+        setVerificationExecutives(options);
       })
       .catch((err) => {
         console.log(err);
@@ -336,14 +350,18 @@ export default function Loans() {
         render: (date: string) => dayjs(date).format("DD-MM-YYYY"),
         width: 120,
       },
-      {
-        title: "Closed At",
-        dataIndex: "closedAt",
-        key: "closedAt",
-        render: (date: string) =>
-          date ? dayjs(date).format("DD-MM-YYYY") : "-",
-        width: 120,
-      },
+      ...(currentDepartment !== "FI"
+        ? [
+            {
+              title: "Closed At",
+              dataIndex: "closedAt",
+              key: "closedAt",
+              render: (date: string) =>
+                date ? dayjs(date).format("DD-MM-YYYY") : "-",
+              width: 120,
+            },
+          ]
+        : []),
     ];
 
     if (currentDepartment === "PD") {
@@ -894,6 +912,7 @@ export default function Loans() {
           fetchExecutives={fetchExecutives}
           pdBankOptions={pdBankOptions}
           templateOptions={templateOptions}
+          verificationExecutives={verificationExecutives}
         />
       )}
 

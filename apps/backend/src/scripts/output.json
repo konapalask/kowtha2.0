@@ -1,0 +1,602 @@
+[
+  {
+    "Employee ID NO": "2002026",
+    "Name of the Employee": "D SEKHAR",
+    "Location": "KHAIRATABAD",
+    "Mobile Number": "8688038221",
+    "Mail ID": "sekhar.dumpa2016@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 2
+  },
+  {
+    "Employee ID NO": "2012026",
+    "Name of the Employee": "C SAMSON",
+    "Location": "ECIL",
+    "Mobile Number": "9494627407",
+    "Mail ID": "samsoncallusingh@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 2
+  },
+  {
+    "Employee ID NO": "2022026",
+    "Name of the Employee": "K RAJESH",
+    "Location": "SECUNDERABAD",
+    "Mobile Number": "9441168110",
+    "Mail ID": "rajeshh2403@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 2
+  },
+  {
+    "Employee ID NO": "2032026",
+    "Name of the Employee": "P SHANKAR",
+    "Location": "MALL",
+    "Mobile Number": "9849697595",
+    "Mail ID": "shankarpagadala972@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 2
+  },
+  {
+    "Employee ID NO": "2042026",
+    "Name of the Employee": "P RAMAKRISHNA",
+    "Location": "UPPAL",
+    "Mobile Number": "8121920020",
+    "Mail ID": "peddiganiramkrishna3@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 2
+  },
+  {
+    "Employee ID NO": "2052026",
+    "Name of the Employee": "CH SATEESH",
+    "Location": "GACHIBOWLI",
+    "Mobile Number": "6305148007",
+    "Mail ID": "sathishsalla2004@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 2
+  },
+  {
+    "Employee ID NO": "2062026",
+    "Name of the Employee": "G AKHIL",
+    "Location": "PEDAAMBARPET",
+    "Mobile Number": "9391506923",
+    "Mail ID": "gyaraakhil@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 2
+  },
+  {
+    "Employee ID NO": "2072026",
+    "Name of the Employee": "A AJITH KUMAR",
+    "Location": "KUKATPALLY",
+    "Mobile Number": "6300191445",
+    "Mail ID": "ajithkumar99199@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 2
+  },
+  {
+    "Employee ID NO": "2082026",
+    "Name of the Employee": "K VENKATA SURESH",
+    "Location": "UPPAL",
+    "Mobile Number": "7386086088",
+    "Mail ID": "sureshkalluri528@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 2
+  },
+  {
+    "Employee ID NO": "2092026",
+    "Name of the Employee": "J RAJESH",
+    "Location": "JEEDIMETLA",
+    "Mobile Number": "9603898059",
+    "Mail ID": "rajeshj882@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 2
+  },
+  {
+    "Employee ID NO": "2102026",
+    "Name of the Employee": "G RAMESH",
+    "Location": "LAKDIKAPOOL",
+    "Mobile Number": "9542958112",
+    "Mail ID": "rameshguglothu@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 2
+  },
+  {
+    "Employee ID NO": "2112026",
+    "Name of the Employee": "S RAJU",
+    "Location": "SANGAREDDY",
+    "Mobile Number": "9676597523",
+    "Mail ID": "rajuyadavpandu@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 2
+  },
+  {
+    "Employee ID NO": "2122026",
+    "Name of the Employee": "ABDUL SAYEED ",
+    "Location": "VIKARABAD",
+    "Mobile Number": "9381489903",
+    "Mail ID": "shaiksayeed415@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 2
+  },
+  {
+    "Employee ID NO": "2132026",
+    "Name of the Employee": "E SATHISH KUMAR",
+    "Location": "YELDURTHY",
+    "Mobile Number": "9182808380",
+    "Mail ID": "sathishearanti@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 2
+  },
+  {
+    "Employee ID NO": "2142026",
+    "Name of the Employee": "SHADAB",
+    "Location": "MAHABUBNAGAR",
+    "Mobile Number": "9581529182",
+    "Mail ID": "mujtabashadab6@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 2
+  },
+  {
+    "Employee ID NO": "2152026",
+    "Name of the Employee": "MOHD MUZAMMIL ATIF",
+    "Location": "MAHABUBNAGAR",
+    "Mobile Number": "9347749725",
+    "Mail ID": "muzammilatifm@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 2
+  },
+  {
+    "Employee ID NO": "2162026",
+    "Name of the Employee": "M AKBAR",
+    "Location": "MAHABUBNAGAR",
+    "Mobile Number": "6301977459",
+    "Mail ID": "shoaibmohammed4111@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 2
+  },
+  {
+    "Employee ID NO": "2172026",
+    "Name of the Employee": "SHAIK SADHIKODDIN",
+    "Location": "MANCHERIAL",
+    "Mobile Number": "9110339090",
+    "Mail ID": "shaiksadhikoddin7@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 2
+  },
+  {
+    "Employee ID NO": "2182026",
+    "Name of the Employee": "A THARUN",
+    "Location": "WARANGAL",
+    "Mobile Number": "9704091243",
+    "Mail ID": "tarunalupula123@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 2
+  },
+  {
+    "Employee ID NO": "2192026",
+    "Name of the Employee": "K NAGARAJU",
+    "Location": "WARANGAL",
+    "Mobile Number": "7981541552",
+    "Mail ID": "nagaraju.kandukuri0812@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 2
+  },
+  {
+    "Employee ID NO": "2202026",
+    "Name of the Employee": "K SRIKANTH",
+    "Location": "WARANGAL",
+    "Mobile Number": "9010098394",
+    "Mail ID": "kankalasrikanth1@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 2
+  },
+  {
+    "Employee ID NO": "2212026",
+    "Name of the Employee": "ADAM KHAN",
+    "Location": "ADILABAD",
+    "Mobile Number": "7032492597",
+    "Mail ID": "adamkhan2107@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 2
+  },
+  {
+    "Employee ID NO": "2222026",
+    "Name of the Employee": "A AJAY",
+    "Location": "JAGITYALA",
+    "Mobile Number": "9705414424",
+    "Mail ID": "ajayalle2000@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 2
+  },
+  {
+    "Employee ID NO": "2232026",
+    "Name of the Employee": "B MAHESH",
+    "Location": "KARIMNAGAR",
+    "Mobile Number": "7569776428",
+    "Mail ID": "badavathmahesh380@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 2
+  },
+  {
+    "Employee ID NO": "2242026",
+    "Name of the Employee": "N AAKASH",
+    "Location": "KARIMNAGAR",
+    "Mobile Number": "9515231919",
+    "Mail ID": "aakashnenavath143@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 2
+  },
+  {
+    "Employee ID NO": "2252026",
+    "Name of the Employee": "G PREM KUMAR",
+    "Location": "SIDDIPET",
+    "Mobile Number": "9030045247",
+    "Mail ID": "premjanu566@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 2
+  },
+  {
+    "Employee ID NO": "2262026",
+    "Name of the Employee": "G NAGARJUNA",
+    "Location": "KHAMMAM",
+    "Mobile Number": "9912083797",
+    "Mail ID": "chownagi83@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 2
+  },
+  {
+    "Employee ID NO": "2272026",
+    "Name of the Employee": "D VENKATESH",
+    "Location": "SURYAPET",
+    "Mobile Number": "6300332962",
+    "Mail ID": "venkydhasari444@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 2
+  },
+  {
+    "Employee ID NO": "2282026",
+    "Name of the Employee": "S VENKANNA",
+    "Location": "NALGONDA",
+    "Mobile Number": "8897342470",
+    "Mail ID": "venkannavenkanna279@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 2
+  },
+  {
+    "Employee ID NO": "2292026",
+    "Name of the Employee": "K PRASAD",
+    "Location": "KAMAREDDY",
+    "Mobile Number": "8897572105",
+    "Mail ID": "naniprasad044@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 2
+  },
+  {
+    "Employee ID NO": "2302026",
+    "Name of the Employee": "B NARESH",
+    "Location": "NIZAMABAD",
+    "Mobile Number": "8106675203",
+    "Mail ID": "bhukya.narica2@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 2
+  },
+  {
+    "Employee ID NO": "2312026",
+    "Name of the Employee": "P DILIP KUMAR",
+    "Location": "NIRMAL",
+    "Mobile Number": "9618465680",
+    "Mail ID": "patildilip96015@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 2
+  },
+  {
+    "Employee ID NO": "2322026",
+    "Name of the Employee": "CHUKKA LOKANADHAM",
+    "Location": "SRIKAKULAM",
+    "Mobile Number": "6281862804",
+    "Mail ID": "chukkalokesh970@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 1
+  },
+  {
+    "Employee ID NO": "2332026",
+    "Name of the Employee": "T RAMESH",
+    "Location": "MOPPADA",
+    "Mobile Number": "9381200408",
+    "Mail ID": "kellaramadevi2000@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 1
+  },
+  {
+    "Employee ID NO": "2342026",
+    "Name of the Employee": "APPALARAJU",
+    "Location": "VISAKHAPATNAM",
+    "Mobile Number": "6303511633",
+    "Mail ID": "sidagamraju17@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 1
+  },
+  {
+    "Employee ID NO": "2352026",
+    "Name of the Employee": "A JAYA KUMAR",
+    "Location": "VISAKHAPATNAM",
+    "Mobile Number": "8074638549",
+    "Mail ID": "rao.kumar4@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 1
+  },
+  {
+    "Employee ID NO": "2362026",
+    "Name of the Employee": "B RAMU",
+    "Location": "ANAKAPALLI",
+    "Mobile Number": "7036574959",
+    "Mail ID": "ramubandaru7945@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 1
+  },
+  {
+    "Employee ID NO": "2372026",
+    "Name of the Employee": "REDDY JAGADEESH",
+    "Location": "KAKINADA",
+    "Mobile Number": "9182795937",
+    "Mail ID": "jagadeesh.reddi777@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 1
+  },
+  {
+    "Employee ID NO": "2382026",
+    "Name of the Employee": "V AJAY KUMAR",
+    "Location": "RAJAHMUNDRY",
+    "Mobile Number": "6300422457",
+    "Mail ID": "varadaajay3@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 1
+  },
+  {
+    "Employee ID NO": "2392026",
+    "Name of the Employee": "R BALA BALAJI",
+    "Location": "TADEPALLIGUDEM",
+    "Mobile Number": "9100392339",
+    "Mail ID": "baluaudit@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 1
+  },
+  {
+    "Employee ID NO": "2402026",
+    "Name of the Employee": "K PREM KUMAR",
+    "Location": "ELURU",
+    "Mobile Number": "9052121215",
+    "Mail ID": "premkmr147@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 1
+  },
+  {
+    "Employee ID NO": "2412026",
+    "Name of the Employee": "K V NAVEEN KUMAR",
+    "Location": "KUCHIPUDI",
+    "Mobile Number": "8099374997",
+    "Mail ID": "naveen.ktkl@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 1
+  },
+  {
+    "Employee ID NO": "2422026",
+    "Name of the Employee": "CH DURGA PRASAD",
+    "Location": "VIJAYAWADA",
+    "Mobile Number": "7842291367",
+    "Mail ID": "choragudi.durga83@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 1
+  },
+  {
+    "Employee ID NO": "2432026",
+    "Name of the Employee": "N CHINNA KRISHNA",
+    "Location": "VISSANNAPETA",
+    "Mobile Number": "8500543530",
+    "Mail ID": "chinnikrishna.n42@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 1
+  },
+  {
+    "Employee ID NO": "2442026",
+    "Name of the Employee": "RT RAJU",
+    "Location": "VIJAYAWADA",
+    "Mobile Number": "9948177493",
+    "Mail ID": "rtrmba100520@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 1
+  },
+  {
+    "Employee ID NO": "2452026",
+    "Name of the Employee": "CH SAI KRISHNA",
+    "Location": "GUNTUR",
+    "Mobile Number": "7997277771",
+    "Mail ID": "chalamalachettysaikrishna8@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 1
+  },
+  {
+    "Employee ID NO": "2462026",
+    "Name of the Employee": "P BHAGYARAJU",
+    "Location": "SATTENAPALLI",
+    "Mobile Number": "9494969020",
+    "Mail ID": "pairthabhagyaraju@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 1
+  },
+  {
+    "Employee ID NO": "2472026",
+    "Name of the Employee": "CH RAMESH",
+    "Location": "GUNTUR",
+    "Mobile Number": "9861354942",
+    "Mail ID": "rameshchandaka7032@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 1
+  },
+  {
+    "Employee ID NO": "2482026",
+    "Name of the Employee": "D RAJA SEKHAR",
+    "Location": "ONGOLE",
+    "Mobile Number": "9492397055",
+    "Mail ID": "dasari1987dasari@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 1
+  },
+  {
+    "Employee ID NO": "2492026",
+    "Name of the Employee": "K SOMU",
+    "Location": "NELLORE",
+    "Mobile Number": "8686115853",
+    "Mail ID": "somuraJ53@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 1
+  },
+  {
+    "Employee ID NO": "2502026",
+    "Name of the Employee": "G SUDHA",
+    "Location": "NELLORE",
+    "Mobile Number": "9494896902",
+    "Mail ID": "gunjisudha3@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 1
+  },
+  {
+    "Employee ID NO": "2512026",
+    "Name of the Employee": "CH SRINIVASULU",
+    "Location": "KADAPA",
+    "Mobile Number": "7095823440",
+    "Mail ID": "vasu60965@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 1
+  },
+  {
+    "Employee ID NO": "2522026",
+    "Name of the Employee": "M SURENDRA BABU",
+    "Location": "CHITTOOR",
+    "Mobile Number": "8297045036",
+    "Mail ID": "msbglobe2021@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 1
+  },
+  {
+    "Employee ID NO": "2532026",
+    "Name of the Employee": "P BALAKRISHNA",
+    "Location": "TIRUPATI",
+    "Mobile Number": "9701774075",
+    "Mail ID": "balakrishnapolakala70940@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 1
+  },
+  {
+    "Employee ID NO": "2542026",
+    "Name of the Employee": "M RAMACHANDRAPPA",
+    "Location": "ANANTAPUR",
+    "Mobile Number": "8897818409",
+    "Mail ID": "ramachandrappamala@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 1
+  },
+  {
+    "Employee ID NO": "2552026",
+    "Name of the Employee": "N RAMBABU",
+    "Location": "ANANTAPUR",
+    "Mobile Number": "9398368768",
+    "Mail ID": "nagadhanirambabu@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 1
+  },
+  {
+    "Employee ID NO": "2562026",
+    "Name of the Employee": "V HAREESH",
+    "Location": "HINDHUPUR",
+    "Mobile Number": "9966520887",
+    "Mail ID": "vaddeharish005@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 1
+  },
+  {
+    "Employee ID NO": "2572026",
+    "Name of the Employee": "M LOKESH",
+    "Location": "YEMMIGNUR",
+    "Mobile Number": "9398469506",
+    "Mail ID": "lokeshbabu540@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 1
+  },
+  {
+    "Employee ID NO": "2582026",
+    "Name of the Employee": "SHAIK NAYEEMUDDIN",
+    "Location": "KURNOOL",
+    "Mobile Number": "9059819120",
+    "Mail ID": "nayeemuddinshaik31@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 1
+  },
+  {
+    "Employee ID NO": "2592026",
+    "Name of the Employee": "S VINOD",
+    "Location": "KURNOOL",
+    "Mobile Number": "7093976614",
+    "Mail ID": "veeraswamyvinod@gmail.com",
+    "Gender": "MALE",
+    "Designation": "FIELD EXECUTIVE",
+    "officeId": 1
+  }
+]

@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import {
   Table,
   Card,
@@ -61,6 +61,7 @@ export default function Verify() {
   const [searchApplicationNumber, setSearchApplicationNumber] =
     useState<string>("");
   const [searchApplicantName, setSearchApplicantName] = useState<string>("");
+  const [activeSearchField, setActiveSearchField] = useState<string | null>(null);
 
   // Pagination state - similar to loans page approach
   const pageSize = 10;
@@ -82,7 +83,6 @@ export default function Verify() {
           });
         }
       } else {
-        // If no page in query, reset to page 1
         setCurrentPage((prevPage) => {
           return prevPage !== 1 ? 1 : prevPage;
         });
@@ -90,54 +90,61 @@ export default function Verify() {
     }
   }, [router.isReady, router.query.page]);
 
-  useEffect(() => {
+  const fetchLoans = useCallback(async (page?: number) => {
     if (!router.isReady) return;
 
-    const fetchLoans = async () => {
-      const pageFromQuery = router.query.page
-        ? parseInt(router.query.page as string, 10)
-        : currentPage;
-      const pageToUse =
-        !isNaN(pageFromQuery) && pageFromQuery > 0
-          ? pageFromQuery
-          : currentPage;
-
-      setLoading(true);
-      try {
-        const res = await getVerifierLoansApi(pageToUse, pageSize, {
-          applicationNumber: searchApplicationNumber,
-          applicantName: searchApplicantName,
-        });
-        // Handle new API response structure: {items: [...], meta: {...}}
-        const responseData = res?.data?.data || res?.data || res;
-        const items = responseData?.items || responseData?.data || [];
-        const meta = responseData?.meta || {
-          total: items.length,
-          page: pageToUse,
-          limit: pageSize,
-          totalPages: Math.ceil(items.length / pageSize),
-        };
-
-        setLoans(Array.isArray(items) ? items : []);
-        setPaginationMeta(meta);
-        // Ensure currentPage state matches the page we actually fetched
-        if (pageToUse !== currentPage) {
-          setCurrentPage(pageToUse);
-        }
-      } catch (err) {
-        console.log(err);
-        setLoans([]);
-        setPaginationMeta({
-          total: 0,
-          page: 1,
-          limit: pageSize,
-          totalPages: 0,
-        });
-      } finally {
-        setLoading(false);
+    let pageToUse = 1;
+    
+    if (page !== undefined) {
+      pageToUse = page;
+    } else if (router.query.page) {
+      const pageFromQuery = parseInt(router.query.page as string, 10);
+      if (!isNaN(pageFromQuery) && pageFromQuery > 0) {
+        pageToUse = pageFromQuery;
       }
-    };
+    }
 
+    setLoading(true);
+    try {
+      const res = await getVerifierLoansApi(pageToUse, pageSize, {
+        applicationNumber: searchApplicationNumber,
+        applicantName: searchApplicantName,
+      });
+      const responseData = res?.data?.data || res?.data || res;
+      const items = responseData?.items || responseData?.data || [];
+      const meta = responseData?.meta || {
+        total: items.length,
+        page: pageToUse,
+        limit: pageSize,
+        totalPages: Math.ceil(items.length / pageSize),
+      };
+
+      setLoans(Array.isArray(items) ? items : []);
+      setPaginationMeta(meta);
+      setCurrentPage(pageToUse);
+    } catch (err) {
+      console.log(err);
+      setLoans([]);
+      setPaginationMeta({
+        total: 0,
+        page: 1,
+        limit: pageSize,
+        totalPages: 0,
+      });
+      setCurrentPage(1);
+    } finally {
+      setLoading(false);
+    }
+  }, [
+    router.isReady,
+    router.query.page,
+    currentDepartment,
+    pageSize,
+    searchApplicationNumber,
+    searchApplicantName,
+  ]);
+
+  useEffect(() => {
     fetchLoans();
   }, [
     router.isReady,
@@ -146,6 +153,7 @@ export default function Verify() {
     pageSize,
     searchApplicationNumber,
     searchApplicantName,
+    fetchLoans,
   ]);
 
   const getStatusTags = (record: any) => {
@@ -188,80 +196,98 @@ export default function Verify() {
     );
   };
 
-  // Refs for filter inputs to focus them when dropdown opens
   const applicationNumberInputRef = useRef<any>(null);
   const applicantNameInputRef = useRef<any>(null);
 
+  useEffect(() => {
+    if (activeSearchField === "applicationNumber" && applicationNumberInputRef.current) {
+      setTimeout(() => {
+        applicationNumberInputRef.current?.focus();
+      }, 100);
+    } else if (activeSearchField === "applicantName" && applicantNameInputRef.current) {
+      setTimeout(() => {
+        applicantNameInputRef.current?.focus();
+      }, 100);
+    }
+  }, [activeSearchField]);
+
   const columns: ColumnsType<LoanData> = [
     {
-      title: "Application Number",
-      dataIndex: "applicationNumber",
-      key: "applicationNumber",
-      width: 150,
-      render: (text) => text ?? "-",
-      filterDropdown: () => {
-        return (
-          <div style={{ padding: 8 }}>
+      title: (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+          {activeSearchField === "applicationNumber" ? (
             <Input
-              ref={(input) => {
-                applicationNumberInputRef.current = input;
-                // Focus immediately when ref is set (dropdown is visible when ref callback runs)
-                if (input) {
-                  // Use requestAnimationFrame to ensure DOM is ready
-                  requestAnimationFrame(() => {
-                    input.focus();
-                  });
-                }
-              }}
+              ref={applicationNumberInputRef}
               placeholder="Search Application Number"
               prefix={<SearchOutlined />}
               value={searchApplicationNumber}
               onChange={(e) => setSearchApplicationNumber(e.target.value)}
-              allowClear
-              style={{ width: 200 }}
-              autoFocus
-            />
-          </div>
-        );
-      },
-      filterIcon: (filtered: boolean) => (
-        <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
-      ),
-    },
-    {
-      title: "Applicant Name",
-      dataIndex: "applicantName",
-      key: "applicantName",
-      width: 150,
-      render: (text) => text ?? "-",
-      filterDropdown: () => {
-        return (
-          <div style={{ padding: 8 }}>
-            <Input
-              ref={(input) => {
-                applicantNameInputRef.current = input;
-                // Focus immediately when ref is set (dropdown is visible when ref callback runs)
-                if (input) {
-                  // Use requestAnimationFrame to ensure DOM is ready
-                  requestAnimationFrame(() => {
-                    input.focus();
-                  });
+              onBlur={() => {
+                if (!searchApplicationNumber) {
+                  setActiveSearchField(null);
                 }
               }}
+              allowClear
+              style={{ width: "100%" }}
+              autoFocus
+            />
+          ) : (
+            <>
+              <span>Application Number</span>
+              <SearchOutlined
+                style={{
+                  color: searchApplicationNumber ? "#1890ff" : undefined,
+                  cursor: "pointer",
+                }}
+                onClick={() => setActiveSearchField("applicationNumber")}
+              />
+            </>
+          )}
+        </div>
+      ),
+      dataIndex: "applicationNumber",
+      key: "applicationNumber",
+      width: 200,
+      render: (text) => text ?? "-",
+    },
+    {
+      title: (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+          {activeSearchField === "applicantName" ? (
+            <Input
+              ref={applicantNameInputRef}
               placeholder="Search Applicant Name"
               prefix={<SearchOutlined />}
               value={searchApplicantName}
               onChange={(e) => setSearchApplicantName(e.target.value)}
+              onBlur={() => {
+
+                if (!searchApplicantName) {
+                  setActiveSearchField(null);
+                }
+              }}
               allowClear
-              style={{ width: 200 }}
+              style={{ width: "100%" }}
               autoFocus
             />
-          </div>
-        );
-      },
-      filterIcon: (filtered: boolean) => (
-        <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
+          ) : (
+            <>
+              <span>Applicant Name</span>
+              <SearchOutlined
+                style={{
+                  color: searchApplicantName ? "#1890ff" : undefined,
+                  cursor: "pointer",
+                }}
+                onClick={() => setActiveSearchField("applicantName")}
+              />
+            </>
+          )}
+        </div>
       ),
+      dataIndex: "applicantName",
+      key: "applicantName",
+      width: 200,
+      render: (text) => text ?? "-",
     },
     {
       title: "Investigations",
@@ -330,7 +356,6 @@ export default function Verify() {
           position: ["bottomCenter" as "bottomCenter"],
           onChange: (page: number) => {
             setCurrentPage(page);
-            // Update query string
             router.replace(
               {
                 pathname: router.pathname,
@@ -339,6 +364,7 @@ export default function Verify() {
               undefined,
               { shallow: true }
             );
+            fetchLoans(page);
           },
         }
       : false;

@@ -111,11 +111,14 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
         ${renderKeyValue("Visited Premise / Business Address", general.visitedPremiseBusinessAddress)}
         ${renderKeyValue("Person Meet/owner of the business with Contact No", general.personMeetOwnerOfTheBusinessWithContactNo)}
         ${renderKeyValue("Date & time of Visit", general.dateTimeOfVisit)}
-        ${renderKeyValue("PD Done by with Designation", html_data.verifierName)}
-        ${renderKeyValue("Loan Amt. Applied and Purpose", general.loanAmtApplied + " <br>" + (general.purposeOfLoan ? "<strong>Purpose of Loan:</strong> " + general.purposeOfLoan : ""))}
+        ${renderKeyValue("PD Done by with Designation", html_data.fieldExecutive + (general.personDesignation ? " - " + general.personDesignation : ""))}
+        ${renderKeyValue("Loan Amt. Applied and Purpose", formatCurrency(general.loanAmtApplied) + " <br>" + (general.purposeOfLoan ? "<strong>Purpose of Loan:</strong> " + general.purposeOfLoan : ""))}
 
-        ${renderKeyValue("About the Applicant/Business", formatMultiline(applicantAndBusinessDetails.aboutTheApplicantOrBusiness))}
-        ${renderKeyValue("About the Co-Applicant", formatMultiline(applicantAndBusinessDetails.aboutTheCoApplicant))}
+        ${renderKeyValue("About the Applicant/Business", applicantAndBusinessDetails.aboutTheApplicantOrBusiness ? applicantAndBusinessDetails.aboutTheApplicantOrBusiness.split("\n").map((line: string) => `<ul style="margin:0 6px;"><li>${line}</li></ul>`).join("") : "Not provided")}
+        </table>
+        <div style="page-break-after: always;"></div>
+        <table style="${tableStyle}">
+        ${renderKeyValue("About the Co-Applicant", applicantAndBusinessDetails.aboutTheCoApplicant ? applicantAndBusinessDetails.aboutTheCoApplicant.split("\n").map((line: string) => `<ul style="margin:0 6px;"><li>${line}</li></ul>`).join("") : "Not provided")}
 
         <tr>
             <td style="${labelCellStyle}">As Per Audited ITR's</td>
@@ -160,21 +163,21 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
                         <td style="${valueCellStyle}">${formatCurrency(debtorsCreditorsStock.debtors.fy2020to2021)}</td>
                         <td style="${valueCellStyle}">${formatMultiline(debtorsCreditorsStock.debtors.currentPeriodOrAtTimeOfPd)}</td>
                         <td style="${valueCellStyle}">Credit Period allowed to Debtors</td>
-                        <td style="${valueCellStyle}">${debtorsCreditorsStock.debtors.noOfDays}</td>
+                        <td style="${valueCellStyle}">${formatMultiline(debtorsCreditorsStock.debtors.noOfDays)}</td>
                     </tr>
                     <tr>
                         <td style="${labelCellStyle}">Creditors</td>
                         <td style="${valueCellStyle}">${formatCurrency(debtorsCreditorsStock.creditors.fy2020to2021)}</td>
                         <td style="${valueCellStyle}">${formatMultiline(debtorsCreditorsStock.creditors.currentPeriodOrAtTimeOfPd)}</td>
                         <td style="${valueCellStyle}">Credit Period allowed by Creditors/Supplies</td>
-                        <td style="${valueCellStyle}">${debtorsCreditorsStock.creditors.noOfDays}</td>
+                        <td style="${valueCellStyle}">${formatMultiline(debtorsCreditorsStock.creditors.noOfDays)}</td>
                     </tr>
                     <tr>
                         <td style="${labelCellStyle}">Stock</td>
                         <td style="${valueCellStyle}">${formatCurrency(debtorsCreditorsStock.stock.fy2020to2021)}</td>
                         <td style="${valueCellStyle}">${formatMultiline(debtorsCreditorsStock.stock.currentPeriodOrAtTimeOfPd)}</td>
                         <td style="${valueCellStyle}">Credit Period allowed by Creditors/Supplies</td>
-                        <td style="${valueCellStyle}">${debtorsCreditorsStock.stock.noOfDays}</td>
+                        <td style="${valueCellStyle}">${formatMultiline(debtorsCreditorsStock.stock.noOfDays)}</td>
                     </tr>
                 </table>
             </td>
@@ -182,8 +185,11 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
 
         ${renderKeyValue("Capital Investment till date", capitalInvestmentTillDate.tillDate)}
 
-        ${renderKeyValue("Documents observed/Statutory requirement docs", documentsObserved.documentsObserved)}
-        ${renderKeyValue("Docs Verified for P&L", documentsObserved.docsVerified)}
+        ${renderKeyValue("Documents observed/Statutory requirement docs", documentsObserved.documentsObserved ? documentsObserved.documentsObserved.split("\n").map((line: string) => `<ul style="margin:0 6px;"><li>${line}</li></ul>`).join("") : "Not provided")}
+        </table>
+        <div style="page-break-after: always;"></div>
+        <table style="${tableStyle}">
+        ${renderKeyValue("Docs Verified for P&L", documentsObserved.docsVerified ? documentsObserved.docsVerified.split("\n").map((line: string) => `<ul style="margin:0 6px;"><li>${line}</li></ul>`).join("") : "Not provided")}
 
 
       </table>
@@ -250,10 +256,11 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
         </tr>
       </table>
 
+      <div style="page-break-after: always;"></div>
       <table style="${tableStyle}">
-        ${renderKeyValue("Other Assets", formatMultiline(assets.otherAssets))}
+        ${renderKeyValue("Other Assets", assets.otherAssets ? assets.otherAssets.split("\n").map((line: string) => `<ul style="margin:0 6px;"><li>${line}</li></ul>`).join("") : "Not provided")}
 
-        ${renderKeyValue("Other Sources of Income", formatMultiline(otherSourcesOfIncome.otherSourcesOfIncome))}
+        ${renderKeyValue("Other Sources of Income", otherSourcesOfIncome.otherSourcesOfIncome ? otherSourcesOfIncome.otherSourcesOfIncome.split("\n").map((line: string) => `<ul style="margin:0 6px;"><li>${line}</li></ul>`).join("") : "Not provided")}
       </table>
 
       <h2 style="margin:0 0 16px;color:#1f2a37;font-size:16px;">References:</h2>
@@ -281,19 +288,20 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
         ${renderKeyValue("PD Status", html_data.approvedStatus|| "Not provided")}
       </table>
 
-      <p style="font-size:18px;font-weight:bold;text-align:center;"><u>Estimated Income</u></p>
+      <div style="page-break-after: always;"></div>
+      <p style="font-size:14px;font-weight:bold;text-align:center;"><u>Estimated Income</u></p>
       <p style="margin:8px 0;line-height:1.5">${formatMultiline(estimatedIncome?.estimatedIncomeDetails)}</p> 
-      <p style="margin:8px 0;line-height:1.5"><strong>Gross Sales as per our assumptions</strong> ${formatCurrency(estimatedIncome.grossSalesAsPerOurAssumptions)}</p>
-      <p style="margin:8px 0;line-height:1.5"><strong>PBDIT Margin</strong> ${estimatedIncome?.pbditMargin + "%" || "Not provided"}</p>
-      <p style="margin:8px 0;line-height:1.5"><strong>PAT of the Business Concern (Rs.)</strong> ${formatCurrency(estimatedIncome.patOfTheBusinessConcern)}</p>
+      <p style="margin:8px 0;line-height:1.5"><strong>Gross Sales as per our assumptions</strong> <span style="margin-left:35px;">${verificationData.financialAnalysis?.grossProfitAsPerAssumption ? formatCurrency(verificationData.financialAnalysis.grossProfitAsPerAssumption) : "Not provided"}</span></p>
+      <p style="margin:8px 0;line-height:1.5"><strong>PBDIT Margin</strong> <span style="margin-left:35px;">${verificationData.financialAnalysis?.pbditMargin ? verificationData.financialAnalysis.pbditMargin.toFixed(2) + "%" : "Not provided"}</span></p>
+      <p style="margin:8px 0;line-height:1.5"><strong>PAT of the Business Concern (Rs.)</strong> <span style="margin-left:35px;">${verificationData.financialAnalysis?.netProfitAfterTax ? formatCurrency(verificationData.financialAnalysis.netProfitAfterTax) : "Not provided"}</span></p>
 
-      <p style="font-size:18px;"><strong>Overall Positives or Negatives:</strong>  ${formatMultiline(overallPositivesOrNegatives.overallPositivesOrNegatives)}</p>
+      <p style="font-size:14px;"><strong>Overall Positives or Negatives:</strong>  ${formatMultiline(overallPositivesOrNegatives.overallPositivesOrNegatives)}</p>
       <br>
       ${renderKeyValue("<strong>Accept/Reject:</strong> ", verificationData.acceptRejectPD?.acceptReject || "Not provided", undefined)}
-      <p style="margin:8px 0;line-height:1.5"><strong>Signature of the PD Officer:</strong></p>
+      <p style="margin:8px 0;line-height:1.5"><strong>Signature / Name:</strong></p>
       <br>  
-      <p style="font-size:18px;"><strong>Note:</strong> We have taken the estimated figures based on customer feedback and the gross profit has been arrived taking into consideration market information gathered on our experience.</p>
-      <p style="font-size:18px;"><strong>Disclaimer:</strong> The Report (Including any attachments) has been prepared based on verbal information provided by the person contacted. Incred Financial Services will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. Our efficient services will not be liable in any case</p>
+      <p style="margin:8px 0;line-height:1.5"><strong>Note:- </strong> We have taken the estimated figures based on customer feedback and the gross profit has been arrived taking into consideration market information gathered on our experience.</p>
+      <p style="margin:8px 0;line-height:1.5"><strong>Disclaimer Clause:- </strong> The Report (Including any attachments) has been prepared based on verbal information provided by the person contacted. Incred Financial Services will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. Our efficient services will not be liable in any case</p>
 
     </div>
     ${pdBaseTemplateFooter(html_data)}

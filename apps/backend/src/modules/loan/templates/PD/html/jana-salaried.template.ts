@@ -175,6 +175,9 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
           <td style="${labelCellStyle}">No.of non-earning Family Members/dependents</td>
           <td style="${valueCellStyle}">${familyDetails?.nonearningFamilyMembers}</td>
         </tr>
+        </table>
+        <div style="page-break-after: always;"></div>
+        <table style="${tableStyle}">
         <tr>
           <td style="${labelCellStyle}">Residence Details</td>
           <td style="border:1px solid #ccc;padding:8px">
@@ -290,7 +293,9 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
             <p style="margin-top: 8px; font-size: 12px; color: #666;"><strong>Note: Amounts Mentioned above are approx</strong></p>
           </td>
         </tr>
-
+        </table>
+        <div style="page-break-after: always;"></div>
+        <table style="${tableStyle}">
         <tr>
           <td style="${labelCellStyle}">Loan Details</td>
           <td style="border:1px solid #ccc;padding:8px">
@@ -398,7 +403,9 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
             <p style="margin-top: 8px; font-size: 12px; color: #666;"><strong>Note: Amounts Mentioned above are approx</strong></p>
           </td>
         </tr>
-
+        </table>
+        <div style="page-break-after: always;"></div>
+        <table style="${tableStyle}">
         <tr>
           <td style="${labelCellStyle}">Other Income</td>
           <td style="border:1px solid #ccc;padding:8px">
@@ -484,7 +491,9 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
             </table>
           </td>
         </tr>
-
+        </table>
+        <div style="page-break-after: always;"></div>
+        <table style="${tableStyle}">
         <tr>
           <td style="${labelCellStyle}">Major Observations / Comments / Concerns during PD</td>
           <td style="border:1px solid #ccc;padding:8px"> 
@@ -526,7 +535,7 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
         </tr>
         <tr>
           <td style="${labelCellStyle}">Name of Agency Executive</td>
-          <td style="${valueCellStyle}">${otherObservations?.nameOfAgencyExecutive || "Not provided"}</td>
+          <td style="${valueCellStyle}">${otherObservations?.interviewedBy || "Not provided"}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">Date & Time of Visit</td>

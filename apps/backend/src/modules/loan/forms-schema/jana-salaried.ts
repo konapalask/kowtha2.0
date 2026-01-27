@@ -598,7 +598,7 @@ export const janaSalariedSchema = {
             title: "PD Status",
             enum: ["Positive", "Negative", "Credit Refer"],
           },
-          nameOfAgencyExecutive: {
+          interviewedBy: {
             type: "string",
             title: "Name of Agency Executive",
           },

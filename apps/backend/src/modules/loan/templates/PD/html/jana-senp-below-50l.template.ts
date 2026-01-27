@@ -206,8 +206,6 @@ export const janaSenpBelow50lTemplate = (
       ${renderKeyValue("Name of Firm (employer/business)", nameOfFirm?.nameOfFirm)}
 
       ${renderKeyValue("Designation of Borrower/ownership type of business", designation?.designation)}
-
-
       <tr>
         <td style="${labelCellStyle}">If Partnership or Pvt. Ltd. Firm details of partner’s/share holders</td>
         <td style="border:1px solid #ccc;padding:8px">
@@ -240,8 +238,9 @@ export const janaSenpBelow50lTemplate = (
           </table>
         </td>
       </tr>
-
-
+    </table>
+    <div style="page-break-after: always;"></div>
+    <table style="${tableStyle}">
       <tr>
         <td style="${labelCellStyle}">Employment/ Business Details & Stability Business premises details</td>
         <td style="${valueCellStyle}">${formatMultiline(employmentOrBusinessDetails?.employmentDetails)} <br> ${formatMultiline(employmentOrBusinessDetails?.businessPremises)}</td>
@@ -347,7 +346,9 @@ export const janaSenpBelow50lTemplate = (
           </table>
         </td>
       </tr>
-
+    </table>
+    <div style="page-break-after: always;"></div>
+    <table style="${tableStyle}">
       <tr>
         <td style="${labelCellStyle}">Specific for Cash Salaried Profile</td>
         <td style="border:1px solid #ccc;padding:8px">
@@ -419,8 +420,9 @@ export const janaSenpBelow50lTemplate = (
           </table>
         </td>
       </tr>
-
-
+    </table>
+    <div style="page-break-after: always;"></div>
+    <table style="${tableStyle}">
       <tr>
         <td style="${labelCellStyle}">Main Business, Products and End use of the same</td>
         <td style="${valueCellStyle}">${formatMultiline(businessAndProuctsAndEndUseOfTheSame?.endUseOfProducts)}</td>
@@ -532,9 +534,9 @@ export const janaSenpBelow50lTemplate = (
           </table>
         </td>
       </tr>
-
-
-
+    </table>
+    <div style="page-break-after: always;"></div>
+    <table style="${tableStyle}">
       <tr>
         <td style="${labelCellStyle}">Income Assessment</td>
         <td style="border:1px solid #ccc;padding:8px">
@@ -608,7 +610,9 @@ export const janaSenpBelow50lTemplate = (
           </table>
         </td>
       </tr>
-
+    </table>
+    <div style="page-break-after: always;"></div>
+    <table style="${tableStyle}">
       <tr>
         <td style="${labelCellStyle}">Specific for Contractor Profile</td>
         <td style="border:1px solid #ccc;padding:8px">
@@ -713,8 +717,9 @@ export const janaSenpBelow50lTemplate = (
           </table>
         </td>
       </tr>
-
-
+    </table>
+    <div style="page-break-after: always;"></div>
+    <table style="${tableStyle}">
       <tr>
         <td style="${labelCellStyle}">End Use of Loan</td>
         <td style="border:1px solid #ccc;padding:8px">
@@ -836,7 +841,9 @@ export const janaSenpBelow50lTemplate = (
           </table>
         </td>
       </tr>
-
+    </table>
+    <div style="page-break-after: always;"></div>
+    <table style="${tableStyle}">
       <tr>
         <td style="${labelCellStyle}">Banking Details</td>
         <td style="border:1px solid #ccc;padding:8px">
@@ -940,7 +947,7 @@ export const janaSenpBelow50lTemplate = (
               <td style="${labelCellStyle}">Visit Date and Time</td>
             </tr>
             <tr>
-              <td style="${valueCellStyle}">${interviewerDetails?.interviewerName}</td>
+              <td style="${valueCellStyle}">${interviewerDetails?.nameOfInterviewer}</td>
               <td style="${valueCellStyle}">${interviewerDetails?.dateAndTimeOfInterview}</td>
             </tr>
           </table>

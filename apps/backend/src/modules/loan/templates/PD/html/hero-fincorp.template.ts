@@ -66,9 +66,9 @@ const renderTwoColumnTable = (
 
 const renderList = (items: string[]) =>
   items.length
-    ? `<ul style="margin:8px 0;padding-left:18px;">${items
-        .map((item) => `<li>${item}</li>`)
-        .join("")}</ul>`
+    ? `${items
+        .map((item) => `<ul><li>${item}</li></ul>`)
+        .join("")}`
     : `<p style="${paragraphStyle}">Not provided</p>`;
 
 const renderInnerTable = (headers: string[], rows: string[][]) => {
@@ -98,7 +98,7 @@ const renderInnerTable = (headers: string[], rows: string[][]) => {
 };
 
 const sectionTitle = (text: string) =>
-  `<h2 style="margin:18px 0 6px 0;font-size:14px;font-weight:600;color:#1f2d3d;text-transform:uppercase;">${text}</h2>`;
+  `<h2 style="margin:18px 0 6px 0;font-size:14px;font-weight:600;color:#1f2d3d;text-transform:uppercase;"><u>${text}</u></h2>`;
 
 export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
   const basic = verificationData.basicDetails || {};
@@ -109,7 +109,11 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
     verificationData.turnoverAndNetProfitDetails || {};
   const documentsObserved = verificationData.documentsObserved || {};
   const automationLevel = verificationData.automationLevel || {};
-  const relationships = verificationData.relationships || {};
+  const majorSuppliers = verificationData.majorSuppliers || {};
+  const majorCustomers = verificationData.majorCustomers || {};
+  const margins = verificationData.margins || {};
+  const employees = verificationData.employees || {};
+  const assets = verificationData.assets || {};
   // Handle nested structures for existing loans
   const existingLoansData = verificationData.existingLoanDetails || {};
 
@@ -171,48 +175,13 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
   );
 
   const documentsList = documentsObserved?.documentsObserved
-    ? `<ul style="margin: 0; padding-left: 20px;">${
+    ? `${
         documentsObserved?.documentsObserved
           .split("\n")
           .map((line: string) => line.trim())
-          .map((line: string) => `<li style="margin-left: 8px;">${line}</li>`)
-          .join("") || "Not provided"
-      }
-    </ul>`
+          .map((line: string) => `<ul><li>${line}</li></ul>`)
+          .join("") || "Not provided"}`
     : "Not provided";
-
-  // Handle nested structures for customers
-  const customersData =
-    relationships.customers || verificationData.customers || {};
-  const customersArray = Array.isArray(customersData)
-    ? customersData
-    : Array.isArray(customersData.topCustomers)
-      ? customersData.topCustomers
-      : [];
-  const customersList = ensureArray(customersArray).map(
-    (customer: any) =>
-      `<li>${formatMultiline(customer?.name || customer?.customerName || "Mr. Name")} – ${formatMultiline(
-        customer?.contactNumber || customer?.contactDetails || "Number"
-      )}</li>`
-  );
-
-  // Handle nested structures for suppliers
-  const suppliersData =
-    relationships.purchaseReferences ||
-    relationships.suppliers ||
-    verificationData.suppliers ||
-    {};
-  const suppliersArray = Array.isArray(suppliersData)
-    ? suppliersData
-    : Array.isArray(suppliersData.topSuppliers)
-      ? suppliersData.topSuppliers
-      : [];
-  const purchaseReferencesList = ensureArray(suppliersArray).map(
-    (supplier: any) =>
-      `<li>${formatMultiline(supplier?.name || supplier?.supplierName || "Mr. Name")} – ${formatMultiline(
-        supplier?.contactNumber || supplier?.contactDetails || "Number"
-      )}</li>`
-  );
 
   const existingLoansRows = ensureArray(existingLoansData?.existingLoans).map(
     (loan: any) => [
@@ -243,12 +212,12 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
 
   const securityList =
     loanAnalysis?.securityOffered?.length > 0
-      ? `<ul style="margin: 0; padding-left: 20px;">${ensureArray(
+      ? `${ensureArray(
           loanAnalysis?.securityOffered
         )
           .map((line: string) => line.trim())
-          .map((line: string) => `<li style="margin-left: 8px;">${line}</li>`)
-          .join("")}</ul>`
+          .map((line: string) => `<ul><li>${line}</li></ul>`)
+          .join("")}`
       : "Not provided";
 
   // Handle observations - can be string or array
@@ -278,14 +247,12 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
   );
 
   const otherBusinessList = loanAnalysis.otherBusinessIncome
-    ? `<ul style="margin: 0; padding-left: 20px;">${
+    ? `${
         loanAnalysis?.otherBusinessIncome
           ?.split("\n")
           .map((line: string) => line.trim())
-          .map((line: string) => `<li style="margin-left: 8px;">${line}</li>`)
-          .join("") || "Not provided"
-      }
-    </ul>`
+          .map((line: string) => `<ul><li>${line}</li></ul>`)
+          .join("") || "Not provided"}`
     : "Not provided";
 
   const statusTable = renderTwoColumnTable([
@@ -312,20 +279,24 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
       ${sectionTitle("About the Applicant")}
       ${
         applicantProfile.applicantSummary
-          ? `<ul style="margin: 0; padding-left: 20px;">${
+          ? `${
               applicantProfile?.applicantSummary
                 ?.split("\n")
                 .map((line: string) => line.trim())
                 .map(
-                  (line: string) => `<li style="margin-left: 8px;">${line}</li>`
+                  (line: string) => `<ul><li>${line}</li></ul>`
                 )
                 .join("") || "Not provided"
-            }</ul>`
-          : "Not provided"
+            }`
+          : `<p style="${paragraphStyle}">Not provided</p>`
       }
 
+      <div style="page-break-before: always;"></div>
       <h3 style="margin:12px 0 6px;font-size:16px;font-weight:600;color:#1f2d3d;">Family Details</h3>
       ${familyTable}
+
+      ${sectionTitle("Residential Address")}
+      ${verificationData.residentialAddress?.residentialAddress ? `<p style="margin: 0; padding-left: 8px;">${formatMultiline(verificationData.residentialAddress?.residentialAddress)}</p>` : "Not provided"}
 
       ${sectionTitle("About the Business")}
       ${
@@ -344,89 +315,101 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
       ${sectionTitle("Turnover and net profit details for last one year audited financials.")}
       ${financialSummaryTable}
 
+      <div style="page-break-before: always;"></div>
+      <p style="margin: 0; padding-left: 8px;"><span style="margin:12px 0 6px;font-size:16px;font-weight:600;color:#1f2d3d;">ITR’s filling U/s 44AD:</span> ${verificationData.itrFilling?.itrFilling ? formatMultiline(verificationData.itrFilling?.itrFilling) : "Not provided"}</p>
+
       <h3 style="margin:12px 0 6px;font-size:16px;font-weight:600;color:#1f2d3d;">Documents Observed</h3>
       ${documentsList}
 
       <h3 style="margin:12px 0 6px;font-size:16px;font-weight:600;color:#1f2d3d;">Automation Level</h3>
       ${
         automationLevel?.automationLevel
-          ? `<ul style="margin: 0; padding-left: 20px;">${
+          ? `${
               automationLevel?.automationLevel
                 ?.split("\n")
                 .map((line: string) => line.trim())
                 .map(
-                  (line: string) => `<li style="margin-left: 8px;">${line}</li>`
+                  (line: string) => `<ul><li>${line}</li></ul>`
                 )
                 .join("") || "Not provided"
-            }</ul>`
+            }`
           : "Not provided"
       }
 
-      ${sectionTitle("Customers")}
-      <ul>
-        ${customersList.length ? customersList.join("") : "<li>Not provided</li>"}
-      </ul>
+      ${sectionTitle("Major Suppliers")}
+      ${renderInnerTable(
+        ["Sl No", "Name", "Contact Number", "Address"],
+        ensureArray(majorSuppliers?.majorSuppliers).map((supplier: any, index: number) => [
+          formatMultiline(`${index + 1}`),
+          formatMultiline(supplier?.name || "Not provided"),
+          formatMultiline(supplier?.contactNumber || "Not provided"),
+          formatMultiline(supplier?.address || "Not provided"),
+        ])
+      )}
 
-      ${sectionTitle("Purchase")}
-      <ul>
-        ${
-          purchaseReferencesList.length
-            ? purchaseReferencesList.join("")
-            : "<li>Not provided</li>"
-        }
-      </ul>
-
+      <div style="page-break-before: always;"></div>
+      ${sectionTitle("Major Customers")}
+      ${renderInnerTable(
+        ["Sl No", "Name", "Contact Number", "Address"],
+        ensureArray(majorCustomers?.majorCustomers).map((customer: any, index: number) => [
+          formatMultiline(`${index + 1}`),
+          formatMultiline(customer?.name || "Not provided"),
+          formatMultiline(customer?.contactNumber || "Not provided"),
+          formatMultiline(customer?.address || "Not provided"),
+        ])
+      )}
       ${sectionTitle("Margins")}
       ${
-        relationships.margins
-          ? `<ul style="margin: 0; padding-left: 20px;">${
-              String(relationships.margins)
+        margins?.margins
+          ? `${
+              String(margins?.margins)
                 .split("\n")
                 .map((line: string) => line.trim())
                 .filter((line: string) => line.length > 0)
                 .map(
                   (line: string) =>
-                    `<li style="margin-left: 8px;">${formatMultiline(line)}</li>`
+                    `<ul><li>${formatMultiline(line)}</li></ul>`
                 )
                 .join("") || "Not provided"
-            }</ul>`
+            }`
           : "Not provided"
       }
 
       ${sectionTitle("Employees")}
       ${
-        relationships.employeesCount
-          ? `<ul style="margin: 0; padding-left: 20px;">${
-              String(relationships.employeesCount)
+        employees?.employees
+          ? `${
+              String(employees?.employees)
                 .split("\n")
                 .map((line: string) => line.trim())
                 .filter((line: string) => line.length > 0)
                 .map(
                   (line: string) =>
-                    `<li style="margin-left: 8px;">${formatMultiline(line)}</li>`
+                    `<ul><li>${formatMultiline(line)}</li></ul>`
                 )
                 .join("") || "Not provided"
-            }</ul>`
+            }`
           : "Not provided"
       }
 
       ${sectionTitle("Assets")}
       ${
-        relationships.assets
-          ? `<ul style="margin: 0; padding-left: 20px;">${
-              String(relationships.assets)
+        assets?.assets
+          ? `${
+              String(assets?.assets)
                 .split("\n")
                 .map((line: string) => line.trim())
                 .filter((line: string) => line.length > 0)
                 .map(
                   (line: string) =>
-                    `<li style="margin-left: 8px;">${formatMultiline(line)}</li>`
+                    `<ul><li>${formatMultiline(line)}</li></ul>`
                 )
                 .join("") || "Not provided"
-            }</ul>`
+            }`
           : "Not provided"
       }
 
+      <div style="page-break-before: always;"></div>
       ${sectionTitle("Loans")}
       ${renderInnerTable(
         ["Financial Institution", "Loan Amount", "Nature of Loan", "EMI"],
@@ -445,8 +428,16 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
       ${sectionTitle("Observation")}
       ${observationList}
 
+      <div style="page-break-before: always;"></div>
       ${sectionTitle("Concerns")}
       ${concernsList}
+
+      ${sectionTitle("TPC (Third Party check) Details")}
+      ${loanAnalysis?.tpcDetails ? `${loanAnalysis?.tpcDetails
+          .split("\n")
+          .map((line: string) => line.trim())
+          .map((line: string) => `<ul><li>${line}</li></ul>`)
+          .join("") || "Not provided"}` : "Not provided"}
 
       ${sectionTitle("Other Business / Income")}
       ${otherBusinessList}

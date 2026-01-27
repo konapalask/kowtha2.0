@@ -9,7 +9,7 @@ export const loanTypeOptions = [
   { value: "Others", label: "Others" },
 ];
 
-export const bankOptions = [
+export const  bankOptions = [
   { value: "TATA CAPITAL LIMITED", label: "TATA CAPITAL LIMITED" },
   {
     value: "TATA CAPITAL HOUSING FINANCE LIMITED",
