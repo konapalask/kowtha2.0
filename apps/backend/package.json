@@ -17,7 +17,8 @@
     "server": "npx prisma migrate deploy && npx prisma generate && npm run build",
     "migrate-user": "npx ts-node --project tsconfig.json src/scripts/migration/export-user.ts",
     "load-data": "npx ts-node --project tsconfig.json src/scripts/deployment/load_data.ts",
-    "add-users-pd": "npx ts-node --project tsconfig.json src/scripts/add-users-pd.ts"
+    "add-users-pd": "npx ts-node --project tsconfig.json src/scripts/add-users-pd.ts",
+    "convert-csv": "npx ts-node --project tsconfig.json src/scripts/convert_csv_to_json.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.810.0",
