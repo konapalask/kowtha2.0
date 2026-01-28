@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button, Checkbox, Input, Popover, Radio, Select, Space, Tag } from 'antd';
 import { FilterOutlined } from '@ant-design/icons';
 import { UserFilters } from '@/services/users.services';
+import { getCurrentDepartment } from '@/utils/utility';
 
 interface FilterOption {
   key: string;
@@ -15,13 +16,22 @@ const filterOptions: FilterOption[] = [
   { key: 'role', label: 'Role', type: 'role' },
 ];
 
-const roleOptions = [
+const allRoleOptions = [
   { label: 'Admin', value: 'Admin' },
   { label: 'Operations Executive', value: 'OperationsExecutive' },
   { label: 'Field Executive', value: 'FieldExecutive' },
   { label: 'Verifier', value: 'Verifier' },
   { label: 'Verification Executive', value: 'VerificationExecutive' },
 ];
+
+
+const getRoleOptions = (): Array<{ label: string; value: string }> => {
+  const currentDepartment = getCurrentDepartment();
+  if (currentDepartment === 'FI') {
+    return allRoleOptions.filter(role => role.value !== 'VerificationExecutive');
+  }
+  return allRoleOptions;
+};
 
 interface FilterOverlayProps {
   filters: UserFilters;
@@ -90,7 +100,7 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({ filters, onFilterChange }
       case 'role':
         return (
           <Space direction="vertical">
-            {/* {roleOptions.map(role => (
+            {/* {getRoleOptions().map(role => (
               <Radio
                 key={role.value}
                 checked={filters.role === role.value}
@@ -99,7 +109,7 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({ filters, onFilterChange }
                 {role.label}
               </Radio>
             ))} */}
-            <Select style={{minWidth:200}} options={roleOptions} value={filters.role} onSelect={(value:string) => handleFilterValueChange('role', value)} placeholder="Select Role" />
+            <Select style={{minWidth:200}} options={getRoleOptions()} value={filters.role} onSelect={(value:string) => handleFilterValueChange('role', value)} placeholder="Select Role" />
           </Space>
         );
       default:
