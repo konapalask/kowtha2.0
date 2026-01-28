@@ -298,19 +298,6 @@ const json_data = [
     "Role": "ASSISTANT VERIFIER"
   }
 ]
-interface Payload {
-    name: string;
-    mobile: string;
-    email: string;
-    employeeCode: string;
-    departmentRoles: {
-        department: string;
-        role: string;
-        officeId: number;
-    }[];
-    status: string;
-    locality: string;
-}
 
 
 async function main() {
@@ -347,6 +334,21 @@ async function main() {
         },
       });
       if (checkExists) {
+        console.log("User exists", checkExists.name);
+
+        const checkDepartmentRole = await prisma.departmentRole.findUnique({
+          where: {
+            userId_department: {
+              userId: checkExists.id,
+              department: "PD",
+            },
+          },
+        });
+
+        if (checkDepartmentRole) {
+          continue
+        }
+
         const updateUser = await prisma.departmentRole.create({
           data: {
             department: "PD",
