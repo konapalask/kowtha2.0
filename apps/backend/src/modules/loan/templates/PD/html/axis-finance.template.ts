@@ -1,5 +1,5 @@
 import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.template";
-
+import { getFooterNameFromTemplate } from "src/modules/loan/forms-schema";
 type KeyValueRow = {
   label: string;
   value: any;
@@ -689,9 +689,7 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
       </p>
       <p style="${paragraphStyle}">
         <strong>Disclaimer:</strong>The Report (Including any attachments) has been prepared on the basis of verbal information provided by the person contacted.
-      </p>
-      <p style="${paragraphStyle}">
-        Axis Finance will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions, efficient services will not be liable in any case..
+        ${getFooterNameFromTemplate(html_data.bankName || "") || ""} will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions, efficient services will not be liable in any case..
       </p>
     </div>
   `;
