@@ -1,5 +1,6 @@
 import { format, toZonedTime } from "date-fns-tz";
 import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.template";
+import { getFooterNameFromTemplate } from "src/modules/loan/forms-schema";
 
 export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
   // Extract sections using constants
@@ -839,7 +840,7 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
             </table>
                     
         <p style="margin:8px 0;line-height:1.5"><strong>Disclaimer Clause:</strong></p>
-        <p style="margin:8px 0;line-height:1.5">This report (including any attachments) has been prepared based on verbal information provided by the person contacted. ARKA FINCAP LIMITED will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. <strong>M/s. KOWTHA & CO</strong> will not be held liable in any case.</p>
+        <p style="margin:8px 0;line-height:1.5">This report (including any attachments) has been prepared based on verbal information provided by the person contacted. ${getFooterNameFromTemplate(html_data?.bankName) || "Arka Fincap Limited"} will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. <strong>M/s. KOWTHA & CO</strong> will not be held liable in any case.</p>
      ${pdBaseTemplateFooter(html_data)}
   `;
 };
