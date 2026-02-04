@@ -976,7 +976,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}>
       <BackButton
         navigation={navigation}
-        title={`PD - ${bankName}`}
+        title={`PD - ${userData?.displayName}`}
         hide={false}
         noBorder={false}
       />
