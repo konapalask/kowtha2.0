@@ -26,6 +26,7 @@ import { VerificationData } from "./templates/FI/address.interface";
 import { WorkVerificationData } from "./templates/FI/work.interface";
 import { BusinessVerificationData } from "./templates/FI/business.interface";
 import { FieldExecutiveAssignedDto } from "./dto/field-executive-assigned.dto";
+import { getFooterNameFromTemplate } from "./forms-schema";
 import {
   Prisma,
   LoanStatus,
@@ -1266,6 +1267,13 @@ export class LoanService {
       });
       // console.log(verifications[0].loan.applicantMobile, "verifications");
 
+      for (const verification of verifications) {
+        const templateName = verification.loan?.templateName;
+        (verification as Record<string, unknown>).displayName = templateName
+          ? getFooterNameFromTemplate(templateName)
+          : null;
+      }
+
       const now = new Date();
       const startOfToday = new Date(
         now.getFullYear(),
@@ -1300,7 +1308,7 @@ export class LoanService {
           excludedRetriesForToday: true,
         }
       );
-
+      
       return {
         isAvailableToday,
         data: {
