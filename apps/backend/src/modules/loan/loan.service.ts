@@ -59,7 +59,7 @@ export class LoanService {
     private logger: Logger,
     private s3Service: S3Service,
     private moduleRef: ModuleRef
-  ) {}
+  ) { }
 
   // Lazy load PDTemplateService to avoid circular dependency
   private async getPDTemplateService() {
@@ -545,7 +545,7 @@ export class LoanService {
 
         if (createData.assistantVerifierId) {
           console.log("assistantVerifierId", createData.assistantVerifierId);
-          
+
           verificationData = await prisma.verification.update({
             where: { id: verificationData.id },
             data: { assistantVerifier: { connect: { id: createData.assistantVerifierId } } },
@@ -2122,24 +2122,35 @@ export class LoanService {
         ) {
           delete editVerificationDto.verificationData?.financialAnalysis;
 
-          const createEditRequest = await this.prisma.editRequest.create({
-            data: {
-              loan: {
-                connect: { id: loanId },
-              },
-              verification: {
-                connect: { id: verification.id },
-              },
-              requester: {
-                connect: { id: userId },
-              },
-              status: EditRequestStatus.Pending,
+          const checkAlreadyExists = await this.prisma.editRequest.findFirst({
+            where: {
+              loanId,
+              verificationId: verification.id,
               type: EditRequestType.LoanData,
-              changes: financialAnalysis,
+              status: EditRequestStatus.Approved,
             },
           });
 
-          return verification;
+          if (!checkAlreadyExists) {
+            const createEditRequest = await this.prisma.editRequest.create({
+              data: {
+                loan: {
+                  connect: { id: loanId },
+                },
+                verification: {
+                  connect: { id: verification.id },
+                },
+                requester: {
+                  connect: { id: userId },
+                },
+                status: EditRequestStatus.Pending,
+                type: EditRequestType.LoanData,
+                changes: financialAnalysis,
+              },
+            });
+
+            return verification;
+          }
         }
       } catch (error) {
         await this.loggingService.error("Failed to edit verification data", {
@@ -3558,10 +3569,10 @@ export class LoanService {
 
           throw new BadRequestException(
             `Failed to access message in mailbox ${userEmail}. ` +
-              `Error Code: ${errorCodeStr}. ` +
-              `Error: ${detailedError}. ` +
-              `Please verify: 1) The app has Mail.Read permission, 2) Admin consent is granted, ` +
-              `3) The mailbox ${userEmail} exists and is accessible, 4) The message ID is correct.`
+            `Error Code: ${errorCodeStr}. ` +
+            `Error: ${detailedError}. ` +
+            `Please verify: 1) The app has Mail.Read permission, 2) Admin consent is granted, ` +
+            `3) The mailbox ${userEmail} exists and is accessible, 4) The message ID is correct.`
           );
         }
       }
@@ -3578,8 +3589,8 @@ export class LoanService {
           ccRecipients:
             pdEmailLog.ccEmail && pdEmailLog.ccEmail.length > 0
               ? pdEmailLog.ccEmail.map((email) => ({
-                  emailAddress: { address: email },
-                }))
+                emailAddress: { address: email },
+              }))
               : [],
         },
       };
@@ -3611,11 +3622,11 @@ export class LoanService {
 
         throw new BadRequestException(
           `Failed to create reply message. ` +
-            `Error Code: ${errorCode}. ` +
-            `Error: ${errorMessage}. ` +
-            `Please verify: 1) Mail.Send permission is granted with admin consent, ` +
-            `2) The app can access mailbox ${userEmail}, ` +
-            `3) There are no conditional access policies blocking the request.`
+          `Error Code: ${errorCode}. ` +
+          `Error: ${errorMessage}. ` +
+          `Please verify: 1) Mail.Send permission is granted with admin consent, ` +
+          `2) The app can access mailbox ${userEmail}, ` +
+          `3) There are no conditional access policies blocking the request.`
         );
       }
 
