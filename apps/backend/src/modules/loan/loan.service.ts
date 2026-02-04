@@ -381,111 +381,7 @@ export class LoanService {
     }
   }
 
-  // Create a QA test loan for testing purposes
-  async createQALoan(bankName: string, fieldExecutiveId: number, qaData?: any) {
-    try {
-      // Find an admin user who will initiate the loan
-      const adminDepartmentRole = await this.prisma.departmentRole.findFirst({
-        where: {
-          role: UserRole.Admin,
-        },
-        include: {
-          user: true,
-        },
-      });
 
-      if (!adminDepartmentRole) {
-        throw new Error(
-          "No admin user found in system. Cannot create QA loan."
-        );
-      }
-
-      const adminUser = adminDepartmentRole.user;
-
-      // Verify the field executive exists
-      const fieldExecutive = await this.prisma.user.findUnique({
-        where: { id: fieldExecutiveId },
-      });
-
-      if (!fieldExecutive) {
-        throw new Error(
-          `Field executive with ID ${fieldExecutiveId} not found`
-        );
-      }
-
-      // Get first office in the system
-      const office = await this.prisma.office.findFirst();
-      if (!office) {
-        throw new Error("No office found in system");
-      }
-
-      // Generate QA test data
-      const timestamp = Date.now();
-      const applicationNumber = `QA-${bankName.substring(0, 3).toUpperCase()}-${timestamp}`;
-      const businessName =
-        qaData?.businessName || `QA Test Business ${timestamp}`;
-
-      return await this.prisma.$transaction(async (prisma) => {
-        // Create the QA loan (initiated by admin, assigned to field executive)
-        const loan = await prisma.loan.create({
-          data: {
-            applicationNumber,
-            applicantName:
-              qaData?.applicantName || `QA Test Applicant ${timestamp}`,
-            applicantMobile: qaData?.applicantMobile || "9999999999",
-            applicantAddress:
-              qaData?.applicantAddress || "QA Test Address, Mumbai - 400001",
-            loanType: qaData?.loanType || "Business Loan",
-            bankName: bankName,
-            loanAmount: qaData?.loanAmount || 1000000,
-            office: { connect: { id: office.id } },
-            operationsExecutive: { connect: { id: adminUser.id } }, // Admin initiates
-            status: LoanStatus.Assigned,
-            department: Department.PD,
-          },
-          include: {
-            operationsExecutive: true,
-            office: true,
-          },
-        });
-
-        // Create a PD verification assigned to the field executive
-        const verification = await prisma.verification.create({
-          data: {
-            loan: { connect: { id: loan.id } },
-            type: VerificationType.Business,
-            addressType: AddressType.Business,
-            fieldExecutive: { connect: { id: fieldExecutiveId } },
-            status: VerificationStatus.Pending,
-            businessName: businessName,
-          },
-        });
-
-        await this.loggingService.info("QA test loan created successfully", {
-          loanId: loan.id,
-          applicationNumber: loan.applicationNumber,
-          bankName: bankName,
-          initiatedBy: adminUser.id,
-          assignedTo: fieldExecutiveId,
-          verificationId: verification.id,
-        });
-
-        return {
-          loan,
-          verification,
-          message: "QA test loan created successfully",
-        };
-      });
-    } catch (error) {
-      await this.loggingService.error("Failed to create QA loan", {
-        bankName,
-        fieldExecutiveId,
-        error: error.message,
-        stack: error.stack,
-      });
-      throw error;
-    }
-  }
 
   // Assign a field executive to a verification for a loan
   async assignVerification(
@@ -2087,7 +1983,8 @@ export class LoanService {
     loanId: number,
     verificationType: VerificationType,
     editVerificationDto: EditVerificationDto,
-    userId: number
+    userId: number,
+    department: Department
   ) {
     try {
       const verification = await this.prisma.verification.findFirst({
@@ -2135,6 +2032,7 @@ export class LoanService {
                 status: EditRequestStatus.Pending,
                 type: EditRequestType.LoanData,
                 changes: financialAnalysis,
+                department: department,
               },
             });
 
@@ -3712,3 +3610,138 @@ export class LoanService {
     }
   }
 }
+
+
+// @Post("qa-test-loan")
+// @Public()
+// @ApiOperation({
+//   summary: "Create a QA test loan for mobile app testing",
+//   description:
+//     "Creates a test loan and verification for QA purposes. Only for development/testing.",
+// })
+// @ApiResponse({
+//   status: 201,
+//   description: "QA test loan created successfully",
+// })
+// async createQATestLoan(
+//   @Body("bankName") bankName: string,
+//   @Body("fieldExecutiveId") fieldExecutiveId: number,
+//   @Body("qaData") qaData?: any
+// ) {
+//   const result = await this.loanService.createQALoan(
+//     bankName,
+//     fieldExecutiveId,
+//     qaData
+//   );
+//   return {
+//     status: 201,
+//     message: "QA test loan created successfully",
+//     data: result,
+//   };
+// }
+
+  // Create a QA test loan for testing purposes
+  // async createQALoan(bankName: string, fieldExecutiveId: number, qaData?: any) {
+  //   try {
+  //     // Find an admin user who will initiate the loan
+  //     const adminDepartmentRole = await this.prisma.departmentRole.findFirst({
+  //       where: {
+  //         role: UserRole.Admin,
+  //       },
+  //       include: {
+  //         user: true,
+  //       },
+  //     });
+
+  //     if (!adminDepartmentRole) {
+  //       throw new Error(
+  //         "No admin user found in system. Cannot create QA loan."
+  //       );
+  //     }
+
+  //     const adminUser = adminDepartmentRole.user;
+
+  //     // Verify the field executive exists
+  //     const fieldExecutive = await this.prisma.user.findUnique({
+  //       where: { id: fieldExecutiveId },
+  //     });
+
+  //     if (!fieldExecutive) {
+  //       throw new Error(
+  //         `Field executive with ID ${fieldExecutiveId} not found`
+  //       );
+  //     }
+
+  //     // Get first office in the system
+  //     const office = await this.prisma.office.findFirst();
+  //     if (!office) {
+  //       throw new Error("No office found in system");
+  //     }
+
+  //     // Generate QA test data
+  //     const timestamp = Date.now();
+  //     const applicationNumber = `QA-${bankName.substring(0, 3).toUpperCase()}-${timestamp}`;
+  //     const businessName =
+  //       qaData?.businessName || `QA Test Business ${timestamp}`;
+
+  //     return await this.prisma.$transaction(async (prisma) => {
+  //       // Create the QA loan (initiated by admin, assigned to field executive)
+  //       const loan = await prisma.loan.create({
+  //         data: {
+  //           applicationNumber,
+  //           applicantName:
+  //             qaData?.applicantName || `QA Test Applicant ${timestamp}`,
+  //           applicantMobile: qaData?.applicantMobile || "9999999999",
+  //           applicantAddress:
+  //             qaData?.applicantAddress || "QA Test Address, Mumbai - 400001",
+  //           loanType: qaData?.loanType || "Business Loan",
+  //           bankName: bankName,
+  //           loanAmount: qaData?.loanAmount || 1000000,
+  //           office: { connect: { id: office.id } },
+  //           operationsExecutive: { connect: { id: adminUser.id } }, // Admin initiates
+  //           status: LoanStatus.Assigned,
+  //           department: Department.PD,
+  //         },
+  //         include: {
+  //           operationsExecutive: true,
+  //           office: true,
+  //         },
+  //       });
+
+  //       // Create a PD verification assigned to the field executive
+  //       const verification = await prisma.verification.create({
+  //         data: {
+  //           loan: { connect: { id: loan.id } },
+  //           type: VerificationType.Business,
+  //           addressType: AddressType.Business,
+  //           fieldExecutive: { connect: { id: fieldExecutiveId } },
+  //           status: VerificationStatus.Pending,
+  //           businessName: businessName,
+  //         },
+  //       });
+
+  //       await this.loggingService.info("QA test loan created successfully", {
+  //         loanId: loan.id,
+  //         applicationNumber: loan.applicationNumber,
+  //         bankName: bankName,
+  //         initiatedBy: adminUser.id,
+  //         assignedTo: fieldExecutiveId,
+  //         verificationId: verification.id,
+  //       });
+
+  //       return {
+  //         loan,
+  //         verification,
+  //         message: "QA test loan created successfully",
+  //       };
+  //     });
+  //   } catch (error) {
+  //     await this.loggingService.error("Failed to create QA loan", {
+  //       bankName,
+  //       fieldExecutiveId,
+  //       error: error.message,
+  //       stack: error.stack,
+  //     });
+  //     throw error;
+  //   }
+  // }
