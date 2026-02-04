@@ -452,6 +452,29 @@ export const BusinessVerificationDetails: React.FC<
       const db = event.target.result;
 
       try {
+        if (hasEditRequest) {
+          const transaction = db.transaction("logs", "readwrite");
+          const store = transaction.objectStore("logs");
+          const deleteRequest = store.delete(`${id}_${activeTab}`);
+
+          deleteRequest.onsuccess = () => {
+            console.log("Cleared IndexedDB record due to edit request");
+            setChangedData({});
+            db.close();
+          };
+
+          deleteRequest.onerror = () => {
+            console.error("Error deleting from IndexedDB:", deleteRequest.error);
+            db.close();
+          };
+
+          transaction.oncomplete = () => {
+            db.close();
+          };
+          return;
+        }
+
+        // Otherwise, load the data normally
         const transaction = db.transaction("logs", "readonly");
         const store = transaction.objectStore("logs");
         const getRequest = store.get(`${id}_${activeTab}`);
@@ -475,7 +498,7 @@ export const BusinessVerificationDetails: React.FC<
         db.close();
       }
     };
-  }, [id, activeTab, editLogsUpdated, localEditLogsUpdated]);
+  }, [id, activeTab, editLogsUpdated, localEditLogsUpdated, hasEditRequest]);
 
   useEffect(() => {
     const loadDynamicSchema = async () => {
