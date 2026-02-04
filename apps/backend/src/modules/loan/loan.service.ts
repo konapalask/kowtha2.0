@@ -1371,14 +1371,11 @@ export class LoanService {
       });
       // console.log(verifications[0].loan.applicantMobile, "verifications");
 
-      const banksNeedingDisplayName = new Set(["Axis Finance", "Arka Fincap"]);
       for (const verification of verifications) {
-        const bankName = verification.loan?.bankName;
         const templateName = verification.loan?.templateName;
-        if (bankName && banksNeedingDisplayName.has(bankName) && templateName) {
-          (verification as Record<string, unknown>).displayName =
-            getFooterNameFromTemplate(templateName);
-        }
+        (verification as Record<string, unknown>).displayName = templateName
+          ? getFooterNameFromTemplate(templateName)
+          : null;
       }
 
       const now = new Date();
