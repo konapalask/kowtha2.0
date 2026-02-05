@@ -168,10 +168,10 @@ export class LoanService {
       </div>
     `;
 
-    console.log("Footer template HTML:", footerTemplate);
+    // console.log("Footer template HTML:", footerTemplate);
 
     // Generate PDF
-    console.log("Starting PDF generation with header/footer...");
+    // console.log("Starting PDF generation with header/footer...");
     const pdfArray = await page.pdf({
       format: "a4",
       margin: {
@@ -197,7 +197,7 @@ export class LoanService {
       footerTemplate: footerTemplate,
     });
 
-    console.log("PDF generation completed. Buffer size:", pdfArray.length);
+    // console.log("PDF generation completed. Buffer size:", pdfArray.length);
     const pdfBuffer: Buffer = Buffer.from(pdfArray);
 
     // Close the browser
@@ -422,7 +422,6 @@ export class LoanService {
         );
       }
 
-
       return await this.prisma.$transaction(async (prisma) => {
         let verificationData = await prisma.verification.create({
           data: {
@@ -440,7 +439,7 @@ export class LoanService {
         });
 
         if (createData.assistantVerifierId) {
-          console.log("assistantVerifierId", createData.assistantVerifierId);
+          // console.log("assistantVerifierId", createData.assistantVerifierId);
 
           verificationData = await prisma.verification.update({
             where: { id: verificationData.id },
@@ -461,10 +460,7 @@ export class LoanService {
         return verificationData;
       });
     } catch (error) {
-      if (
-        error instanceof NotFoundException ||
-        error instanceof BadRequestException
-      ) {
+      if ( error instanceof NotFoundException || error instanceof BadRequestException ) {
         throw error;
       }
       await this.loggingService.error("Failed to assign verification", {
@@ -1105,6 +1101,7 @@ export class LoanService {
         throw new NotFoundException("Loan not found");
       }
 
+
       // // If field executive is provided, address is mandatory
       if (
         !updateData.fieldExecutiveId &&
@@ -1144,7 +1141,7 @@ export class LoanService {
             ...(updateData.assistantVerifierId && {
               assistantVerifierId: updateData.assistantVerifierId,
             }),
-            status: "Pending", // Reset status when assignment is updated
+            status: loan.status == "FVCompleted" ? VerificationStatus.Completed : VerificationStatus.Pending,
           },
         });
 
@@ -2021,8 +2018,12 @@ export class LoanService {
               loanId,
               verificationId: verification.id,
               type: EditRequestType.LoanData,
-              status: EditRequestStatus.Approved,
+              status: EditRequestStatus.Pending,
+              department: department,
             },
+            orderBy: {
+              createdAt: "desc",
+            }
           });
 
           if (!checkAlreadyExists) {
