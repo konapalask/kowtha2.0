@@ -1202,8 +1202,8 @@ export class LoanService {
         OR: [
           {
             postponedDate: {
-              gte: today,
-              lt: tomorrow,
+              // gte: today,
+              lte: today,
             },
           },
           {
@@ -2026,7 +2026,7 @@ export class LoanService {
             }
           });
 
-          if (!checkAlreadyExists) {
+          if (checkAlreadyExists && checkAlreadyExists.changes !== financialAnalysis) {
             const createEditRequest = await this.prisma.editRequest.create({
               data: {
                 loan: {
@@ -2754,7 +2754,7 @@ export class LoanService {
                 ...(v.assistantVerifierId && {
                   assistantVerifier: { connect: { id: v.assistantVerifierId } },
                 }),
-                status: VerificationStatus.Pending,
+                status: v.status as VerificationStatus,
                 locationType: v.locationType,
                 isPostponed: false,
                 postponedDate: null,
