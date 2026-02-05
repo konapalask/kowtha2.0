@@ -900,6 +900,52 @@ export const BusinessVerificationDetails: React.FC<
     }
   };
 
+  const handleFeedbackSubmit = async () => {
+    try {
+      setLoading(true);
+      if (!verdict) {
+        message.error("Please select a verdict (Positive/Negative/Credit Refer)");
+        return;
+      }
+      const synopsis = editorContent || "";
+      let approvedStatus: "Positive" | "Negative" | "CreditRefer" | null = null;
+      if (verdict === "positive") {
+        approvedStatus = "Positive";
+      } else if (verdict === "negative") {
+        approvedStatus = "Negative";
+      } else if (verdict === "credit_refer") {
+        approvedStatus = "CreditRefer";
+      }
+
+      const payload: any = {
+        approvedStatus: approvedStatus,
+      };
+
+      if (synopsis && synopsis.trim() !== "" && synopsis !== "<ul><li><br></li></ul>") {
+        try {
+          await updateSynopsis(id as string, synopsis);
+        } catch (error) {
+          console.error("Error updating synopsis:", error);
+        }
+      }
+
+      await verifierEditApi(id as string, "Business", payload);
+
+      message.success("Feedback submitted successfully!");
+
+      if (fetchVerificationData) {
+        fetchVerificationData();
+      }
+    } catch (error: any) {
+      console.error("Error submitting feedback:", error);
+      message.error(
+        error?.response?.data?.message || "Failed to submit feedback"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleVerificationExecutiveSubmit = async () => {
     try {
       setLoading(true);
@@ -5407,6 +5453,8 @@ export const BusinessVerificationDetails: React.FC<
                   completeVerificationData?.synopsis ||
                   verificationData?.synopsis,
               }}
+              onVerificationExecutiveSubmit={handleFeedbackSubmit}
+              verificationExecutiveLoading={loading}
               currentDepartment={currentDepartment}
               hasEditRequest={hasEditRequest}
             />
