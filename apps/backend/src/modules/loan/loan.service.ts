@@ -1191,7 +1191,7 @@ export class LoanService {
 
       // Calculate today's date range
       const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      today.setHours(23, 59, 59, 999);
 
       const tomorrow = new Date(today);
       tomorrow.setDate(today.getDate() + 1);
