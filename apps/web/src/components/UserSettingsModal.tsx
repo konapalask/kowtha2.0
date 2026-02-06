@@ -296,10 +296,10 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
                 </Space>
               }
               name="email"
-              rules={[
-                { required: true, message: 'Please enter your email' },
-                { type: 'email', message: 'Please enter a valid email' }
-              ]}
+              // rules={[
+              //   { required: true, message: 'Please enter your email' },
+              //   { type: 'email', message: 'Please enter a valid email' }
+              // ]}
             >
               <Input placeholder="Enter your email" />
             </Form.Item>
