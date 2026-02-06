@@ -118,7 +118,7 @@ export class AccountsService {
       // Block OTP generation if user has FieldExecutive in both FI and PD (no login allowed)
       if (hasFieldExecutiveInPD && hasFieldExecutiveInFI) {
         throw new BadRequestException(
-          'Access denied: You cannot login when assigned as Field Executive in both FI and PD. Please contact admin.'
+          'Field Executive cannot login here. Please contact admin.'
         );
       }
 
