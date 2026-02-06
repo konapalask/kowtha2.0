@@ -1,4 +1,5 @@
-import { IsString, IsEmail, IsEnum, IsNumber, IsOptional, MaxLength, MinLength } from 'class-validator';
+import { IsString, IsEmail, IsEnum, IsOptional, MaxLength, MinLength } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { Department, UserRole, UserStatus } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -18,6 +19,9 @@ export class UpdateUserDto {
   mobile?: string;
 
   @ApiProperty({ description: 'User\'s email address', required: false })
+  // Allow clearing email from UI by sending "" (empty string).
+  // Convert "" -> null so validation is skipped and DB value is cleared.
+  @Transform(({ value }) => (value === '' ? null : value))
   @IsEmail()
   @IsOptional()
   email?: string;
