@@ -2249,22 +2249,31 @@ export const BusinessVerificationDetails: React.FC<
             {};
           const combinedData = { ...financialAnalysisData, ...sectionData };
           
+          const sectionSchema = schema?.sections?.find((s: any) => s.id === sectionId);
+          const sectionLabel = sectionSchema?.label?.toLowerCase() || "";
+          
           const isStatement3 = 
+            sectionLabel.includes("comprehensive actuals vs estimated") ||
             combinedData.hasOwnProperty("netProfitEstimated") ||
             combinedData.hasOwnProperty("openingStockEstimated") ||
             combinedData.hasOwnProperty("purchasesEstimated") ||
             combinedData.hasOwnProperty("salesEstimated");
           
           const isStatement4 = 
-            (combinedData.hasOwnProperty("netProfit") && 
+            sectionLabel.includes("detailed financial analysis with balance sheet") ||
+            (combinedData.hasOwnProperty("grossProfitAssessed") && 
+             combinedData.hasOwnProperty("netProfit") &&
+             !combinedData.hasOwnProperty("netProfitAfterTax") &&
              (combinedData.hasOwnProperty("openingStockAudited") ||
               combinedData.hasOwnProperty("openingStockAssessed") ||
               combinedData.hasOwnProperty("salesAudited") ||
               combinedData.hasOwnProperty("salesEstimated"))) ||
             (combinedData.hasOwnProperty("netProfit") && 
+             combinedData.hasOwnProperty("grossProfitAssessed") &&
              !combinedData.hasOwnProperty("netProfitAfterTax"));
           
           const isStatement2 = 
+            sectionLabel.includes("gp/pbdit") ||
             combinedData.hasOwnProperty("netProfitAfterTax") ||
             (combinedData.hasOwnProperty("grossReceipts") &&
              combinedData.hasOwnProperty("otherIncome"));
@@ -2277,9 +2286,7 @@ export const BusinessVerificationDetails: React.FC<
               null;
           } else if (isStatement4) {
             netProfit =
-              sectionData?.netProfitEstimated ||
               sectionData?.netProfit ||
-              combinedData?.netProfitEstimated ||
               combinedData?.netProfit ||
               null;
           } else if (isStatement2) {
@@ -3089,6 +3096,15 @@ export const BusinessVerificationDetails: React.FC<
       const isStatement3 = 
         section.id === "financialAnalysisComprehensive" ||
         section.id === "financialAnalysis" && section.label?.toLowerCase().includes("comprehensive actuals vs estimated");
+      const isStatement4 = 
+        section.label?.toLowerCase().includes("detailed financial analysis with balance sheet") ||
+        (mergedData.hasOwnProperty("grossProfitAssessed") && 
+         mergedData.hasOwnProperty("netProfit") &&
+         !mergedData.hasOwnProperty("netProfitAfterTax") &&
+         (mergedData.hasOwnProperty("openingStockAudited") ||
+          mergedData.hasOwnProperty("openingStockAssessed") ||
+          mergedData.hasOwnProperty("salesAudited") ||
+          mergedData.hasOwnProperty("salesEstimated")));
 
       if (section.fields && Array.isArray(section.fields)) {
         section.fields.forEach((field: any) => {
@@ -3221,6 +3237,21 @@ export const BusinessVerificationDetails: React.FC<
             totalNetProfit = parseNum(netProfitField);
           } else {
             totalNetProfit = netProfitEstimatedValue !== null ? netProfitEstimatedValue : 0;
+          }
+        } else if (isStatement4) {
+          const grossProfitAssessedField = mergedData["grossProfitAssessed"];
+          const netProfitField = mergedData["netProfit"];
+          
+          if (grossProfitAssessedField !== null && grossProfitAssessedField !== undefined && grossProfitAssessedField !== "") {
+            totalGrossProfit = parseNum(grossProfitAssessedField);
+          } else {
+            totalGrossProfit = grossProfitAssessedValue !== null ? grossProfitAssessedValue : 0;
+          }
+          
+          if (netProfitField !== null && netProfitField !== undefined && netProfitField !== "") {
+            totalNetProfit = parseNum(netProfitField);
+          } else {
+            totalNetProfit = netProfitAssessedValue !== null ? netProfitAssessedValue : 0;
           }
         } else {
           totalGrossProfit =
