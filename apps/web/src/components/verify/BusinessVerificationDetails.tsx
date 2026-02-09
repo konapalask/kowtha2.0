@@ -3026,8 +3026,14 @@ export const BusinessVerificationDetails: React.FC<
       let totalNetProfit = 0;
       let grossProfitAssessedValue: number | null = null;
       let netProfitAssessedValue: number | null = null;
+      let grossProfitEstimatedValue: number | null = null;
+      let netProfitEstimatedValue: number | null = null;
       let grossProfitFallbackValue: number | null = null;
       let netProfitFallbackValue: number | null = null;
+
+      const isStatement3 = 
+        section.id === "financialAnalysisComprehensive" ||
+        section.id === "financialAnalysis" && section.label?.toLowerCase().includes("comprehensive actuals vs estimated");
 
       if (section.fields && Array.isArray(section.fields)) {
         section.fields.forEach((field: any) => {
@@ -3065,16 +3071,24 @@ export const BusinessVerificationDetails: React.FC<
               fieldIdLower.includes("estimated") ||
               fieldLabel.includes("estimated");
 
-            if (value !== 0) {
-              if (isAssessed && !isAudited && !isEstimated) {
-                grossProfitAssessedValue = value;
-              } else if (
-                !isAudited &&
-                !isEstimated &&
-                grossProfitAssessedValue === null
-              ) {
-                if (grossProfitFallbackValue === null) {
-                  grossProfitFallbackValue = value;
+            // For statement-3, ONLY use Estimated fields, ignore all others
+            if (isStatement3) {
+              if (isEstimated || fieldIdLower === "grossprofitestimated" || fieldId === "grossProfitEstimated") {
+                grossProfitEstimatedValue = value;
+              }
+            } else {
+              if (value !== 0) {
+                if (isAssessed && !isAudited && !isEstimated) {
+                  grossProfitAssessedValue = value;
+                } else if (
+                  !isAudited &&
+                  !isEstimated &&
+                  grossProfitAssessedValue === null &&
+                  grossProfitEstimatedValue === null
+                ) {
+                  if (grossProfitFallbackValue === null) {
+                    grossProfitFallbackValue = value;
+                  }
                 }
               }
             }
@@ -3099,16 +3113,25 @@ export const BusinessVerificationDetails: React.FC<
               fieldIdLower.includes("estimated") ||
               fieldLabel.includes("estimated");
 
-            if (value !== 0) {
-              if (isAssessed && !isAudited && !isEstimated) {
-                netProfitAssessedValue = value;
-              } else if (
-                !isAudited &&
-                !isEstimated &&
-                netProfitAssessedValue === null
-              ) {
-                if (netProfitFallbackValue === null) {
-                  netProfitFallbackValue = value;
+            // For statement-3, ONLY use Estimated fields, ignore all others
+            if (isStatement3) {
+
+              if (isEstimated || fieldIdLower === "netprofitestimated" || fieldId === "netProfitEstimated") {
+                netProfitEstimatedValue = value;
+              }
+            } else {
+              if (value !== 0) {
+                if (isAssessed && !isAudited && !isEstimated) {
+                  netProfitAssessedValue = value;
+                } else if (
+                  !isAudited &&
+                  !isEstimated &&
+                  netProfitAssessedValue === null &&
+                  netProfitEstimatedValue === null
+                ) {
+                  if (netProfitFallbackValue === null) {
+                    netProfitFallbackValue = value;
+                  }
                 }
               }
             }
@@ -3122,6 +3145,7 @@ export const BusinessVerificationDetails: React.FC<
             if (
               value !== 0 &&
               netProfitAssessedValue === null &&
+              netProfitEstimatedValue === null &&
               netProfitFallbackValue === null
             ) {
               netProfitFallbackValue = value;
@@ -3129,14 +3153,30 @@ export const BusinessVerificationDetails: React.FC<
           }
         });
 
-        totalGrossProfit =
-          grossProfitAssessedValue !== null
-            ? grossProfitAssessedValue
-            : grossProfitFallbackValue || 0;
-        totalNetProfit =
-          netProfitAssessedValue !== null
-            ? netProfitAssessedValue
-            : netProfitFallbackValue || 0;
+        if (isStatement3) {
+          const grossProfitField = mergedData["grossProfitEstimated"];
+          const netProfitField = mergedData["netProfitEstimated"];
+          if (grossProfitField !== null && grossProfitField !== undefined && grossProfitField !== "") {
+            totalGrossProfit = parseNum(grossProfitField);
+          } else {
+            totalGrossProfit = grossProfitEstimatedValue !== null ? grossProfitEstimatedValue : 0;
+          }
+          
+          if (netProfitField !== null && netProfitField !== undefined && netProfitField !== "") {
+            totalNetProfit = parseNum(netProfitField);
+          } else {
+            totalNetProfit = netProfitEstimatedValue !== null ? netProfitEstimatedValue : 0;
+          }
+        } else {
+          totalGrossProfit =
+            grossProfitAssessedValue !== null
+              ? grossProfitAssessedValue
+              : grossProfitFallbackValue || 0;
+          totalNetProfit =
+            netProfitAssessedValue !== null
+              ? netProfitAssessedValue
+              : netProfitFallbackValue || 0;
+        }
       }
 
       return { totalGrossProfit, totalNetProfit };
