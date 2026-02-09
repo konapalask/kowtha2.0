@@ -2251,32 +2251,38 @@ export const BusinessVerificationDetails: React.FC<
           
           const sectionSchema = schema?.sections?.find((s: any) => s.id === sectionId);
           const sectionLabel = sectionSchema?.label?.toLowerCase() || "";
+          const hasStatement4Fields = 
+            combinedData.hasOwnProperty("openingStockAudited") ||
+            combinedData.hasOwnProperty("openingStockAssessed") ||
+            combinedData.hasOwnProperty("salesAudited") ||
+            combinedData.hasOwnProperty("grossProfitAssessed");
           
           const isStatement3 = 
-            sectionLabel.includes("comprehensive actuals vs estimated") ||
-            combinedData.hasOwnProperty("netProfitEstimated") ||
-            combinedData.hasOwnProperty("openingStockEstimated") ||
-            combinedData.hasOwnProperty("purchasesEstimated") ||
-            combinedData.hasOwnProperty("salesEstimated");
+            !hasStatement4Fields &&
+            (sectionLabel.includes("comprehensive actuals vs estimated") ||
+             combinedData.hasOwnProperty("netProfitEstimated") ||
+             combinedData.hasOwnProperty("openingStockEstimated") ||
+             combinedData.hasOwnProperty("purchasesEstimated"));
           
           const isStatement4 = 
+            hasStatement4Fields ||
             sectionLabel.includes("detailed financial analysis with balance sheet") ||
+            sectionLabel.includes("statement 4") ||
+            sectionLabel.includes("statement4") ||
             (combinedData.hasOwnProperty("grossProfitAssessed") && 
              combinedData.hasOwnProperty("netProfit") &&
-             !combinedData.hasOwnProperty("netProfitAfterTax") &&
-             (combinedData.hasOwnProperty("openingStockAudited") ||
-              combinedData.hasOwnProperty("openingStockAssessed") ||
-              combinedData.hasOwnProperty("salesAudited") ||
-              combinedData.hasOwnProperty("salesEstimated"))) ||
+             !combinedData.hasOwnProperty("netProfitAfterTax")) ||
             (combinedData.hasOwnProperty("netProfit") && 
-             combinedData.hasOwnProperty("grossProfitAssessed") &&
-             !combinedData.hasOwnProperty("netProfitAfterTax"));
+             !combinedData.hasOwnProperty("netProfitAfterTax") &&
+             !combinedData.hasOwnProperty("netProfitEstimated"));
           
           const isStatement2 = 
-            sectionLabel.includes("gp/pbdit") ||
-            combinedData.hasOwnProperty("netProfitAfterTax") ||
-            (combinedData.hasOwnProperty("grossReceipts") &&
-             combinedData.hasOwnProperty("otherIncome"));
+            !hasStatement4Fields &&
+            !isStatement3 &&
+            (sectionLabel.includes("gp/pbdit") ||
+             combinedData.hasOwnProperty("netProfitAfterTax") ||
+             (combinedData.hasOwnProperty("grossReceipts") &&
+              combinedData.hasOwnProperty("otherIncome")));
 
           let netProfit = null;
           if (isStatement3) {
@@ -2312,11 +2318,19 @@ export const BusinessVerificationDetails: React.FC<
                 : Number(netProfit)
               : null;
 
+          const isStatement4ByNetProfit = 
+            !isStatement2 &&
+            !isStatement3 &&
+            sectionId === "financialAnalysis" &&
+            combinedData.hasOwnProperty("netProfit") &&
+            !combinedData.hasOwnProperty("netProfitAfterTax") &&
+            !combinedData.hasOwnProperty("netProfitEstimated");
+
           if (
             sectionId === "financialAnalysis" &&
             netProfitNum !== null && 
             netProfitNum > 1000000 &&
-            (isStatement2 || isStatement3 || isStatement4)
+            (isStatement2 || isStatement3 || isStatement4 || isStatement4ByNetProfit)
           ) {
             await fetchVerificationData?.();           
             window.location.reload();
@@ -3093,18 +3107,27 @@ export const BusinessVerificationDetails: React.FC<
       let grossProfitFallbackValue: number | null = null;
       let netProfitFallbackValue: number | null = null;
 
+      const hasStatement4Fields = 
+        mergedData.hasOwnProperty("openingStockAudited") ||
+        mergedData.hasOwnProperty("openingStockAssessed") ||
+        mergedData.hasOwnProperty("salesAudited") ||
+        mergedData.hasOwnProperty("grossProfitAssessed");
+      
       const isStatement3 = 
-        section.id === "financialAnalysisComprehensive" ||
-        section.id === "financialAnalysis" && section.label?.toLowerCase().includes("comprehensive actuals vs estimated");
+        !hasStatement4Fields &&
+        (section.id === "financialAnalysisComprehensive" ||
+         section.id === "financialAnalysis" && section.label?.toLowerCase().includes("comprehensive actuals vs estimated") ||
+         mergedData.hasOwnProperty("netProfitEstimated") ||
+         mergedData.hasOwnProperty("openingStockEstimated"));
+         
       const isStatement4 = 
+        hasStatement4Fields ||
         section.label?.toLowerCase().includes("detailed financial analysis with balance sheet") ||
-        (mergedData.hasOwnProperty("grossProfitAssessed") && 
-         mergedData.hasOwnProperty("netProfit") &&
+        section.label?.toLowerCase().includes("statement 4") ||
+        section.label?.toLowerCase().includes("statement4") ||
+        (mergedData.hasOwnProperty("netProfit") && 
          !mergedData.hasOwnProperty("netProfitAfterTax") &&
-         (mergedData.hasOwnProperty("openingStockAudited") ||
-          mergedData.hasOwnProperty("openingStockAssessed") ||
-          mergedData.hasOwnProperty("salesAudited") ||
-          mergedData.hasOwnProperty("salesEstimated")));
+         !mergedData.hasOwnProperty("netProfitEstimated"));
 
       if (section.fields && Array.isArray(section.fields)) {
         section.fields.forEach((field: any) => {
