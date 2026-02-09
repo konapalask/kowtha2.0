@@ -251,62 +251,149 @@ const PDRequestLogs: React.FC<PDRequestLogsProps> = (_props) => {
         </div>
       )}
 
-      {/* PD-specific diff display */}
-      {Object.keys(changedData).map((sectionKey) => {
-        const currentSection = currentData?.[sectionKey];
-        const editSection = changedData?.[sectionKey];
-        const mergedEditSection =
-          editSection && currentSection
-            ? { ...currentSection, ...editSection }
-            : editSection || currentSection || {};
+      {(() => {
+        const financialAnalysisFieldNames = [
+          "grossReceipts", "otherIncome", "incomeSubtotal",
+          "costOfMaterialConsumed", "wages", "hamaliCharges", 
+          "manufacturingExpenses", "packingCharges", "expenditureSubtotal",
+          "grossProfitAsPerAssumption", "grossProfitRatio", "gpRatio",
+          "financeExpenses", "depreciation", "incomeTax",
+          "netProfitBeforeInterestTaxDepreciation", "netProfitBeforeTaxDepreciation",
+          "netProfitBeforeTax", "netProfitAfterTax",
+          "pbditMargin", "netProfitMargin", "totalExpensesInclCostOfSales"
+        ];
 
-        const changedKeys = getChangedKeys(currentSection, editSection);
-        if (changedKeys.length === 0) return null; // Don't show sections with no changes
-
-        // Get dynamic section schema
-        const dynamicSectionSchema = dynamicSchema?.sections?.find(
-          (s: any) => s.id === sectionKey
+        const rootLevelFinancialFields = Object.keys(changedData).filter(key => 
+          financialAnalysisFieldNames.includes(key) ||
+          (key.toLowerCase().includes("gross") && !key.toLowerCase().includes("details")) ||
+          (key.toLowerCase().includes("profit") && !key.toLowerCase().includes("details")) ||
+          (key.toLowerCase().includes("income") && key !== "otherIncome" && !key.toLowerCase().includes("details")) ||
+          key.toLowerCase().includes("expenditure") ||
+          key.toLowerCase().includes("expense") ||
+          key.toLowerCase().includes("pbdit") ||
+          key.toLowerCase().includes("margin")
         );
 
-        if (!dynamicSectionSchema && dynamicSchema !== null) {
-          const isFinancialAnalysis = 
-            sectionKey === "financialAnalysis" ||
-            sectionKey === "financialAnalysisComprehensive" ||
-            sectionKey === "financialAnalysisDetailed" ||
-            sectionKey.toLowerCase().includes("financial");
+        let processedChangedData = { ...changedData };
+        let processedCurrentData = { ...currentData };
+        
+        if (rootLevelFinancialFields.length > 0 && !changedData.financialAnalysis) {
+          const financialAnalysisData: any = {};
+          const financialAnalysisCurrentData: any = {};
           
-          if (isFinancialAnalysis) {
-            return (
-              <Card key={sectionKey} style={{ marginBottom: 32 }}>
-                <Text type="warning">
-                  Financial Analysis section found but schema not loaded. 
-                  Please ensure the bank schema is properly configured.
-                </Text>
-                <Row gutter={24} style={{ marginTop: 16 }}>
-                  <Col span={12}>
-                    <Card size="small" title="Current Values">
-                      <pre style={{ fontSize: 12, maxHeight: 400, overflow: "auto" }}>
-                        {JSON.stringify(currentSection || {}, null, 2)}
-                      </pre>
-                    </Card>
-                  </Col>
-                  <Col span={12}>
-                    <Card size="small" title="New Values">
-                      <pre style={{ fontSize: 12, maxHeight: 400, overflow: "auto" }}>
-                        {JSON.stringify(editSection || {}, null, 2)}
-                      </pre>
-                    </Card>
-                  </Col>
-                </Row>
-              </Card>
-            );
+          rootLevelFinancialFields.forEach(key => {
+            if (changedData[key] !== undefined) {
+              financialAnalysisData[key] = changedData[key];
+            }
+            if (currentData?.[key] !== undefined) {
+              financialAnalysisCurrentData[key] = currentData[key];
+            }
+          });
+
+          if (Object.keys(financialAnalysisData).length > 0) {
+            processedChangedData = {
+              ...Object.fromEntries(
+                Object.keys(changedData)
+                  .filter(k => !rootLevelFinancialFields.includes(k))
+                  .map(k => [k, changedData[k]])
+              ),
+              financialAnalysis: financialAnalysisData
+            };
+            
+            if (Object.keys(financialAnalysisCurrentData).length > 0) {
+              processedCurrentData = {
+                ...currentData,
+                financialAnalysis: {
+                  ...(currentData?.financialAnalysis || {}),
+                  ...financialAnalysisCurrentData
+                }
+              };
+            }
           }
-          
-          return null;
         }
-        if (!dynamicSectionSchema && dynamicSchema === null) {
-          return null;
-        }
+
+        return Object.keys(processedChangedData).map((sectionKey) => {
+          const currentSection = processedCurrentData?.[sectionKey];
+          const editSection = processedChangedData?.[sectionKey];
+          const mergedEditSection =
+            editSection && currentSection
+              ? { ...currentSection, ...editSection }
+              : editSection || currentSection || {};
+
+          const changedKeys = getChangedKeys(currentSection, editSection);
+          if (changedKeys.length === 0) return null;
+
+          let dynamicSectionSchema = dynamicSchema?.sections?.find(
+            (s: any) => s.id === sectionKey
+          );
+
+          if (!dynamicSectionSchema && dynamicSchema !== null) {
+            const isFinancialAnalysis = 
+              sectionKey === "financialAnalysis" ||
+              sectionKey === "financialAnalysisComprehensive" ||
+              sectionKey === "financialAnalysisDetailed" ||
+              sectionKey.toLowerCase().includes("financial");
+            
+            if (isFinancialAnalysis) {
+              dynamicSectionSchema = dynamicSchema?.sections?.find(
+                (s: any) => 
+                  s.id === "financialAnalysis" ||
+                  s.id === "financialAnalysisComprehensive" ||
+                  s.id === "financialAnalysisDetailed" ||
+                  s.label?.toLowerCase().includes("financial") ||
+                  s.label?.toLowerCase().includes("gp/pbdit") ||
+                  s.label?.toLowerCase().includes("gppbdit")
+              );
+
+              if (!dynamicSectionSchema) {
+                const allFieldKeys = new Set([
+                  ...Object.keys(currentSection || {}),
+                  ...Object.keys(editSection || {})
+                ]);
+                
+                const basicFields = Array.from(allFieldKeys).map((key) => ({
+                  id: key,
+                  label: key
+                    .replace(/([A-Z])/g, " $1")
+                    .replace(/^./, (str) => str.toUpperCase())
+                    .trim(),
+                  type: "string"
+                }));
+
+                dynamicSectionSchema = {
+                  id: sectionKey,
+                  label: "GP/PBDIT Financial Analysis",
+                  fields: basicFields
+                };
+              }
+            } else {
+
+              const isFinancialField = financialAnalysisFieldNames.includes(sectionKey) ||
+                sectionKey.toLowerCase().includes("gross") ||
+                sectionKey.toLowerCase().includes("profit") ||
+                sectionKey.toLowerCase().includes("income") ||
+                sectionKey.toLowerCase().includes("expenditure") ||
+                sectionKey.toLowerCase().includes("expense");
+              
+              if (isFinancialField) {
+                return null;
+              }
+              
+              const matchingSchema = dynamicSchema?.sections?.find((s: any) => {
+                const fieldIds = (s.fields || []).map((f: any) => f.id);
+                return fieldIds.includes(sectionKey);
+              });
+              
+              if (matchingSchema) {
+                dynamicSectionSchema = matchingSchema;
+              } else {
+                return null;
+              }
+            }
+          }
+          if (!dynamicSectionSchema && dynamicSchema === null) {
+            return null;
+          }
 
         const sectionLabel =
           dynamicSectionSchema?.title ||
@@ -316,7 +403,6 @@ const PDRequestLogs: React.FC<PDRequestLogsProps> = (_props) => {
             .replace(/^./, (str) => str.toUpperCase())
             .trim();
 
-        // Check if this section contains array fields
         const arrayFields =
           dynamicSectionSchema.fields?.filter(
             (field: any) => field.type === "array"
@@ -329,7 +415,6 @@ const PDRequestLogs: React.FC<PDRequestLogsProps> = (_props) => {
               📋 {sectionLabel}
             </Title>
 
-            {/* Render array fields with special diff display */}
             {hasArrayFields && (
               <div style={{ marginBottom: 24 }}>
                 {arrayFields.map((arrayField: any) => {
@@ -337,7 +422,6 @@ const PDRequestLogs: React.FC<PDRequestLogsProps> = (_props) => {
                   const changedArray =
                     mergedEditSection?.[arrayField.id] || editSection?.[arrayField.id] || [];
 
-                  // Only show if there are actual changes in this array
                   if (
                     JSON.stringify(currentArray) ===
                     JSON.stringify(changedArray)
@@ -370,7 +454,6 @@ const PDRequestLogs: React.FC<PDRequestLogsProps> = (_props) => {
               </div>
             )}
 
-            {/* Render non-array fields in side-by-side view */}
             {dynamicSectionSchema.fields?.some(
               (field: any) => field.type !== "array"
             ) && (
@@ -438,7 +521,6 @@ const PDRequestLogs: React.FC<PDRequestLogsProps> = (_props) => {
               </Row>
             )}
 
-            {/* Summary of changes
             <div
               style={{
                 padding: "12px 16px",
@@ -471,12 +553,13 @@ const PDRequestLogs: React.FC<PDRequestLogsProps> = (_props) => {
                   );
                 })}
               </div>
-            </div> */}
+            </div>
 
             <Divider />
           </div>
         );
-      })}
+        });
+      })()}
     </Card>
   );
 };
