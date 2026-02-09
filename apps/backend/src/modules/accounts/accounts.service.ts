@@ -106,13 +106,23 @@ export class AccountsService {
 
       const userRoles = await getUserWithDepartmentRoles(this.prisma, user.id);
 
-      // Check if user has FieldExecutive role in PD or FI departments
-      const hasFieldExecutiveRole = userRoles.departmentRoles.some(
-        r => r.role === UserRole.FieldExecutive && 
-        (r.department === Department.PD || r.department === Department.FI)
+      // Check if user has FieldExecutive role in PD and FI (both)
+      const hasFieldExecutiveInPD = userRoles.departmentRoles.some(
+        r => r.role === UserRole.FieldExecutive && r.department === Department.PD
       );
+      const hasFieldExecutiveInFI = userRoles.departmentRoles.some(
+        r => r.role === UserRole.FieldExecutive && r.department === Department.FI
+      );
+      const hasFieldExecutiveRole = hasFieldExecutiveInPD || hasFieldExecutiveInFI;
 
-      // If mobile login is requested, user must be FieldExecutive in PD or FI
+      // Block OTP generation if user has FieldExecutive in both FI and PD (no login allowed)
+      if (hasFieldExecutiveInPD && hasFieldExecutiveInFI) {
+        throw new BadRequestException(
+          'Field Executive cannot login here. Please contact admin.'
+        );
+      }
+
+      // If mobile login is requested, user must be FieldExecutive in PD or FI (but not both)
       if (isMobile && !hasFieldExecutiveRole) {
         throw new BadRequestException('Access denied: You are not authorized to login via mobile app');
       }

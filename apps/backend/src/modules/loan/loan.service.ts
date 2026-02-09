@@ -911,6 +911,7 @@ export class LoanService {
           where.verifications = {
             some: {
               isPostponed: true,
+              status: VerificationStatus.Pending,
             },
           };
         }
@@ -1190,7 +1191,7 @@ export class LoanService {
 
       // Calculate today's date range
       const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      today.setHours(23, 59, 59, 999);
 
       const tomorrow = new Date(today);
       tomorrow.setDate(today.getDate() + 1);
@@ -1740,9 +1741,9 @@ export class LoanService {
       }
 
       // Format the verification data
-      console.error(
-        `🔍 getVerificationData called for loan ${loanId}, department: ${department}`
-      );
+      // console.error(
+      //   `🔍 getVerificationData called for loan ${loanId}, department: ${department}`
+      // );
 
       const verificationData = await Promise.all(
         loan.verifications.map(async (verification) => {
@@ -1757,7 +1758,7 @@ export class LoanService {
           let transformedVerificationData: Prisma.JsonValue =
             parsedVerificationData;
 
-          console.error(`🔍 Processing verification ${verification.id}`);
+          // console.error(`🔍 Processing verification ${verification.id}`);
 
           if (
             department === "PD" &&
@@ -1774,14 +1775,14 @@ export class LoanService {
               "applicantDetails",
             ].some((key) => verificationDataObject[key]);
 
-            await this.loggingService.info(
-              `PD verification ${verification.id}: legacyShape = ${hasLegacyShape}`,
-              {
-                verificationId: verification.id,
-                dataKeys: Object.keys(verificationDataObject),
-                legacyShapeDetected: hasLegacyShape,
-              }
-            );
+            // await this.loggingService.info(
+            //   `PD verification ${verification.id}: legacyShape = ${hasLegacyShape}`,
+            //   {
+            //     verificationId: verification.id,
+            //     dataKeys: Object.keys(verificationDataObject),
+            //     legacyShapeDetected: hasLegacyShape,
+            //   }
+            // );
           }
 
           return {
@@ -2006,19 +2007,26 @@ export class LoanService {
       try {
         let financialAnalysis =
           editVerificationDto.verificationData?.financialAnalysis;
+        
+        // console.log("financialAnalysis", financialAnalysis);
 
         if (
           financialAnalysis?.netProfit &&
           financialAnalysis?.netProfit > 1000000
         ) {
-          delete editVerificationDto.verificationData?.financialAnalysis;
+
+          await this.loggingService.info("Financial analysis is greater than 1000000", {
+            loanId,
+            verificationId: verification.id,
+            financialAnalysis,
+          });
 
           const checkAlreadyExists = await this.prisma.editRequest.findFirst({
             where: {
               loanId,
               verificationId: verification.id,
               type: EditRequestType.LoanData,
-              status: EditRequestStatus.Pending,
+              status: EditRequestStatus.Approved,
               department: department,
             },
             orderBy: {
@@ -2026,7 +2034,8 @@ export class LoanService {
             }
           });
 
-          if (checkAlreadyExists && checkAlreadyExists.changes !== financialAnalysis) {
+          if (!checkAlreadyExists || (checkAlreadyExists && JSON.stringify(checkAlreadyExists.changes) !== JSON.stringify(financialAnalysis))) {
+            delete editVerificationDto.verificationData?.financialAnalysis; // Remove financialAnalysis from editVerificationDto to avoid duplicate data
             const createEditRequest = await this.prisma.editRequest.create({
               data: {
                 loan: {
@@ -2042,6 +2051,7 @@ export class LoanService {
                 type: EditRequestType.LoanData,
                 changes: financialAnalysis,
                 department: department,
+                remarks: "Financial_Analysis",
               },
             });
 
@@ -2192,7 +2202,6 @@ export class LoanService {
     for (let i = 0; i < images.length; i++) {
       result.push(`<div style="width: 70%; margin: 1%; border: 1px solid #ddd; padding: 10px; text-align: center; display: inline-block; vertical-align: top; box-sizing: border-box; page-break-inside: avoid;">
                   <img src="${images[i]}" style="width: 100%; height: 300px; object-fit: contain; margin-bottom: 10px;" />
-                  <div style="font-size: 12px; color: #666;">Uploaded on: ${istDate}</div>
                   </div>`);
 
       count++;
