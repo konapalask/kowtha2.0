@@ -2010,10 +2010,9 @@ export class LoanService {
         
         // console.log("financialAnalysis", financialAnalysis);
 
-        if (
-          financialAnalysis?.netProfit &&
-          financialAnalysis?.netProfit > 1000000
-        ) {
+        let netProfit = financialAnalysis?.netProfit || financialAnalysis?.netProfitAfterTax || financialAnalysis?.netProfitEstimated;
+        console.log("netProfit", netProfit);
+        if ( netProfit && netProfit > 1000000) {
 
           await this.loggingService.info("Financial analysis is greater than 1000000", {
             loanId,
