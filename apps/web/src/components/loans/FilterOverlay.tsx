@@ -209,6 +209,7 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({
             }
             onChange={handleDateRangeChange}
             style={{ width: "100%" }}
+            allowClear={true}
           />
         );
       case "status":

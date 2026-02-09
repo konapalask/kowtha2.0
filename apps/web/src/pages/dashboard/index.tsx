@@ -75,6 +75,11 @@ export default function Dashboard() {
     if (dates && dates[0] && dates[1]) {
       setDateRange([dates[0], dates[1]]);
       fetchMetrics(dates[0], dates[1]);
+    } else {
+      const endDate = dayjs();
+      const startDate = dayjs().startOf("month");
+      setDateRange([startDate, endDate]);
+      fetchMetrics(startDate, endDate);
     }
   };
 
@@ -188,7 +193,7 @@ export default function Dashboard() {
           value={dateRange}
           onChange={handleDateRangeChange}
           format="DD/MM/YYYY"
-          allowClear={false}
+          allowClear={true}
           ranges={{
             "Last 7 Days": [dayjs().subtract(7, "day"), dayjs()],
             "Last 30 Days": [dayjs().subtract(30, "day"), dayjs()],
