@@ -115,14 +115,14 @@ export class AccountsService {
       );
       const hasFieldExecutiveRole = hasFieldExecutiveInPD || hasFieldExecutiveInFI;
 
-      // Block OTP generation if user has FieldExecutive in both FI and PD (no login allowed)
-      if (hasFieldExecutiveInPD && hasFieldExecutiveInFI) {
+      // Block OTP for web only if user has FieldExecutive in both FI and PD (mobile login is allowed)
+      if (!isMobile && hasFieldExecutiveInPD && hasFieldExecutiveInFI) {
         throw new BadRequestException(
           'Field Executive cannot login here. Please contact admin.'
         );
       }
 
-      // If mobile login is requested, user must be FieldExecutive in PD or FI (but not both)
+      // If mobile login is requested, user must be FieldExecutive in PD or FI
       if (isMobile && !hasFieldExecutiveRole) {
         throw new BadRequestException('Access denied: You are not authorized to login via mobile app');
       }
