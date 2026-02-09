@@ -2242,11 +2242,61 @@ export const BusinessVerificationDetails: React.FC<
           const mergedData = mergedVerificationData as any;
           const completeData = completeVerificationData?.verificationData as any;
           const verifyData = verificationData?.verificationData as any;
-          const netProfit =
-            mergedData?.financialAnalysis?.netProfit ||
-            completeData?.financialAnalysis?.netProfit ||
-            verifyData?.financialAnalysis?.netProfit ||
-            null;
+          const financialAnalysisData = 
+            mergedData?.financialAnalysis ||
+            completeData?.financialAnalysis ||
+            verifyData?.financialAnalysis ||
+            {};
+          const combinedData = { ...financialAnalysisData, ...sectionData };
+          
+          const isStatement3 = 
+            combinedData.hasOwnProperty("netProfitEstimated") ||
+            combinedData.hasOwnProperty("openingStockEstimated") ||
+            combinedData.hasOwnProperty("purchasesEstimated") ||
+            combinedData.hasOwnProperty("salesEstimated");
+          
+          const isStatement4 = 
+            (combinedData.hasOwnProperty("netProfit") && 
+             (combinedData.hasOwnProperty("openingStockAudited") ||
+              combinedData.hasOwnProperty("openingStockAssessed") ||
+              combinedData.hasOwnProperty("salesAudited") ||
+              combinedData.hasOwnProperty("salesEstimated"))) ||
+            (combinedData.hasOwnProperty("netProfit") && 
+             !combinedData.hasOwnProperty("netProfitAfterTax"));
+          
+          const isStatement2 = 
+            combinedData.hasOwnProperty("netProfitAfterTax") ||
+            (combinedData.hasOwnProperty("grossReceipts") &&
+             combinedData.hasOwnProperty("otherIncome"));
+
+          let netProfit = null;
+          if (isStatement3) {
+            netProfit =
+              sectionData?.netProfitEstimated ||
+              combinedData?.netProfitEstimated ||
+              null;
+          } else if (isStatement4) {
+            netProfit =
+              sectionData?.netProfitEstimated ||
+              sectionData?.netProfit ||
+              combinedData?.netProfitEstimated ||
+              combinedData?.netProfit ||
+              null;
+          } else if (isStatement2) {
+            netProfit =
+              sectionData?.netProfitAfterTax ||
+              combinedData?.netProfitAfterTax ||
+              null;
+          } else {
+            netProfit =
+              sectionData?.netProfitEstimated ||
+              sectionData?.netProfitAfterTax ||
+              sectionData?.netProfit ||
+              combinedData?.netProfitEstimated ||
+              combinedData?.netProfitAfterTax ||
+              combinedData?.netProfit ||
+              null;
+          }
 
           const netProfitNum =
             netProfit !== null && netProfit !== undefined
@@ -2255,8 +2305,13 @@ export const BusinessVerificationDetails: React.FC<
                 : Number(netProfit)
               : null;
 
-          if (netProfitNum !== null && netProfitNum > 1000000) {
-            await fetchVerificationData?.();
+          if (
+            sectionId === "financialAnalysis" &&
+            netProfitNum !== null && 
+            netProfitNum > 1000000 &&
+            (isStatement2 || isStatement3 || isStatement4)
+          ) {
+            await fetchVerificationData?.();           
             window.location.reload();
             return;
           }
