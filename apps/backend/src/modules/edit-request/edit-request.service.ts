@@ -212,14 +212,17 @@ export class EditRequestService {
           }
 
           // Fix any array data issues
-          const fixedChanges =
-            this.arrayValidationService.fixArrayData(actualChanges);
+          const fixedChanges = this.arrayValidationService.fixArrayData(actualChanges);
 
           // Apply the changes to the verification data
           const updatedVerificationData = {
             ...currentVerificationData,
             ...fixedChanges,
           };
+
+          if (editRequest.remarks === "Financial_Analysis") {
+            updatedVerificationData.financialAnalysis = fixedChanges;
+          }
 
           // Update the verification record
           await this.prisma.verification.update({

@@ -452,6 +452,29 @@ export const BusinessVerificationDetails: React.FC<
       const db = event.target.result;
 
       try {
+        if (hasEditRequest) {
+          const transaction = db.transaction("logs", "readwrite");
+          const store = transaction.objectStore("logs");
+          const deleteRequest = store.delete(`${id}_${activeTab}`);
+
+          deleteRequest.onsuccess = () => {
+            console.log("Cleared IndexedDB record due to edit request");
+            setChangedData({});
+            db.close();
+          };
+
+          deleteRequest.onerror = () => {
+            console.error("Error deleting from IndexedDB:", deleteRequest.error);
+            db.close();
+          };
+
+          transaction.oncomplete = () => {
+            db.close();
+          };
+          return;
+        }
+
+        // Otherwise, load the data normally
         const transaction = db.transaction("logs", "readonly");
         const store = transaction.objectStore("logs");
         const getRequest = store.get(`${id}_${activeTab}`);
@@ -475,7 +498,7 @@ export const BusinessVerificationDetails: React.FC<
         db.close();
       }
     };
-  }, [id, activeTab, editLogsUpdated, localEditLogsUpdated]);
+  }, [id, activeTab, editLogsUpdated, localEditLogsUpdated, hasEditRequest]);
 
   useEffect(() => {
     const loadDynamicSchema = async () => {
@@ -874,6 +897,52 @@ export const BusinessVerificationDetails: React.FC<
         error?.message ||
         "Failed to save PD form data";
       throw new Error(errorMessage);
+    }
+  };
+
+  const handleFeedbackSubmit = async () => {
+    try {
+      setLoading(true);
+      if (!verdict) {
+        message.error("Please select a verdict (Positive/Negative/Credit Refer)");
+        return;
+      }
+      const synopsis = editorContent || "";
+      let approvedStatus: "Positive" | "Negative" | "CreditRefer" | null = null;
+      if (verdict === "positive") {
+        approvedStatus = "Positive";
+      } else if (verdict === "negative") {
+        approvedStatus = "Negative";
+      } else if (verdict === "credit_refer") {
+        approvedStatus = "CreditRefer";
+      }
+
+      const payload: any = {
+        approvedStatus: approvedStatus,
+      };
+
+      if (synopsis && synopsis.trim() !== "" && synopsis !== "<ul><li><br></li></ul>") {
+        try {
+          await updateSynopsis(id as string, synopsis);
+        } catch (error) {
+          console.error("Error updating synopsis:", error);
+        }
+      }
+
+      await verifierEditApi(id as string, "Business", payload);
+
+      message.success("Feedback submitted successfully!");
+
+      if (fetchVerificationData) {
+        fetchVerificationData();
+      }
+    } catch (error: any) {
+      console.error("Error submitting feedback:", error);
+      message.error(
+        error?.response?.data?.message || "Failed to submit feedback"
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -2173,11 +2242,74 @@ export const BusinessVerificationDetails: React.FC<
           const mergedData = mergedVerificationData as any;
           const completeData = completeVerificationData?.verificationData as any;
           const verifyData = verificationData?.verificationData as any;
-          const netProfit =
-            mergedData?.financialAnalysis?.netProfit ||
-            completeData?.financialAnalysis?.netProfit ||
-            verifyData?.financialAnalysis?.netProfit ||
-            null;
+          const financialAnalysisData = 
+            mergedData?.financialAnalysis ||
+            completeData?.financialAnalysis ||
+            verifyData?.financialAnalysis ||
+            {};
+          const combinedData = { ...financialAnalysisData, ...sectionData };
+          
+          const sectionSchema = schema?.sections?.find((s: any) => s.id === sectionId);
+          const sectionLabel = sectionSchema?.label?.toLowerCase() || "";
+          const hasStatement4Fields = 
+            combinedData.hasOwnProperty("openingStockAudited") ||
+            combinedData.hasOwnProperty("openingStockAssessed") ||
+            combinedData.hasOwnProperty("salesAudited") ||
+            combinedData.hasOwnProperty("grossProfitAssessed");
+          
+          const isStatement3 = 
+            !hasStatement4Fields &&
+            (sectionLabel.includes("comprehensive actuals vs estimated") ||
+             combinedData.hasOwnProperty("netProfitEstimated") ||
+             combinedData.hasOwnProperty("openingStockEstimated") ||
+             combinedData.hasOwnProperty("purchasesEstimated"));
+          
+          const isStatement4 = 
+            hasStatement4Fields ||
+            sectionLabel.includes("detailed financial analysis with balance sheet") ||
+            sectionLabel.includes("statement 4") ||
+            sectionLabel.includes("statement4") ||
+            (combinedData.hasOwnProperty("grossProfitAssessed") && 
+             combinedData.hasOwnProperty("netProfit") &&
+             !combinedData.hasOwnProperty("netProfitAfterTax")) ||
+            (combinedData.hasOwnProperty("netProfit") && 
+             !combinedData.hasOwnProperty("netProfitAfterTax") &&
+             !combinedData.hasOwnProperty("netProfitEstimated"));
+          
+          const isStatement2 = 
+            !hasStatement4Fields &&
+            !isStatement3 &&
+            (sectionLabel.includes("gp/pbdit") ||
+             combinedData.hasOwnProperty("netProfitAfterTax") ||
+             (combinedData.hasOwnProperty("grossReceipts") &&
+              combinedData.hasOwnProperty("otherIncome")));
+
+          let netProfit = null;
+          if (isStatement3) {
+            netProfit =
+              sectionData?.netProfitEstimated ||
+              combinedData?.netProfitEstimated ||
+              null;
+          } else if (isStatement4) {
+            netProfit =
+              sectionData?.netProfit ||
+              combinedData?.netProfit ||
+              null;
+          } else if (isStatement2) {
+            netProfit =
+              sectionData?.netProfitAfterTax ||
+              combinedData?.netProfitAfterTax ||
+              null;
+          } else {
+            netProfit =
+              sectionData?.netProfitEstimated ||
+              sectionData?.netProfitAfterTax ||
+              sectionData?.netProfit ||
+              combinedData?.netProfitEstimated ||
+              combinedData?.netProfitAfterTax ||
+              combinedData?.netProfit ||
+              null;
+          }
 
           const netProfitNum =
             netProfit !== null && netProfit !== undefined
@@ -2186,8 +2318,21 @@ export const BusinessVerificationDetails: React.FC<
                 : Number(netProfit)
               : null;
 
-          if (netProfitNum !== null && netProfitNum > 1000000) {
-            await fetchVerificationData?.();
+          const isStatement4ByNetProfit = 
+            !isStatement2 &&
+            !isStatement3 &&
+            sectionId === "financialAnalysis" &&
+            combinedData.hasOwnProperty("netProfit") &&
+            !combinedData.hasOwnProperty("netProfitAfterTax") &&
+            !combinedData.hasOwnProperty("netProfitEstimated");
+
+          if (
+            sectionId === "financialAnalysis" &&
+            netProfitNum !== null && 
+            netProfitNum > 1000000 &&
+            (isStatement2 || isStatement3 || isStatement4 || isStatement4ByNetProfit)
+          ) {
+            await fetchVerificationData?.();           
             window.location.reload();
             return;
           }
@@ -2957,8 +3102,32 @@ export const BusinessVerificationDetails: React.FC<
       let totalNetProfit = 0;
       let grossProfitAssessedValue: number | null = null;
       let netProfitAssessedValue: number | null = null;
+      let grossProfitEstimatedValue: number | null = null;
+      let netProfitEstimatedValue: number | null = null;
       let grossProfitFallbackValue: number | null = null;
       let netProfitFallbackValue: number | null = null;
+
+      const hasStatement4Fields = 
+        mergedData.hasOwnProperty("openingStockAudited") ||
+        mergedData.hasOwnProperty("openingStockAssessed") ||
+        mergedData.hasOwnProperty("salesAudited") ||
+        mergedData.hasOwnProperty("grossProfitAssessed");
+      
+      const isStatement3 = 
+        !hasStatement4Fields &&
+        (section.id === "financialAnalysisComprehensive" ||
+         section.id === "financialAnalysis" && section.label?.toLowerCase().includes("comprehensive actuals vs estimated") ||
+         mergedData.hasOwnProperty("netProfitEstimated") ||
+         mergedData.hasOwnProperty("openingStockEstimated"));
+         
+      const isStatement4 = 
+        hasStatement4Fields ||
+        section.label?.toLowerCase().includes("detailed financial analysis with balance sheet") ||
+        section.label?.toLowerCase().includes("statement 4") ||
+        section.label?.toLowerCase().includes("statement4") ||
+        (mergedData.hasOwnProperty("netProfit") && 
+         !mergedData.hasOwnProperty("netProfitAfterTax") &&
+         !mergedData.hasOwnProperty("netProfitEstimated"));
 
       if (section.fields && Array.isArray(section.fields)) {
         section.fields.forEach((field: any) => {
@@ -2996,16 +3165,24 @@ export const BusinessVerificationDetails: React.FC<
               fieldIdLower.includes("estimated") ||
               fieldLabel.includes("estimated");
 
-            if (value !== 0) {
-              if (isAssessed && !isAudited && !isEstimated) {
-                grossProfitAssessedValue = value;
-              } else if (
-                !isAudited &&
-                !isEstimated &&
-                grossProfitAssessedValue === null
-              ) {
-                if (grossProfitFallbackValue === null) {
-                  grossProfitFallbackValue = value;
+            // For statement-3, ONLY use Estimated fields, ignore all others
+            if (isStatement3) {
+              if (isEstimated || fieldIdLower === "grossprofitestimated" || fieldId === "grossProfitEstimated") {
+                grossProfitEstimatedValue = value;
+              }
+            } else {
+              if (value !== 0) {
+                if (isAssessed && !isAudited && !isEstimated) {
+                  grossProfitAssessedValue = value;
+                } else if (
+                  !isAudited &&
+                  !isEstimated &&
+                  grossProfitAssessedValue === null &&
+                  grossProfitEstimatedValue === null
+                ) {
+                  if (grossProfitFallbackValue === null) {
+                    grossProfitFallbackValue = value;
+                  }
                 }
               }
             }
@@ -3030,16 +3207,25 @@ export const BusinessVerificationDetails: React.FC<
               fieldIdLower.includes("estimated") ||
               fieldLabel.includes("estimated");
 
-            if (value !== 0) {
-              if (isAssessed && !isAudited && !isEstimated) {
-                netProfitAssessedValue = value;
-              } else if (
-                !isAudited &&
-                !isEstimated &&
-                netProfitAssessedValue === null
-              ) {
-                if (netProfitFallbackValue === null) {
-                  netProfitFallbackValue = value;
+            // For statement-3, ONLY use Estimated fields, ignore all others
+            if (isStatement3) {
+
+              if (isEstimated || fieldIdLower === "netprofitestimated" || fieldId === "netProfitEstimated") {
+                netProfitEstimatedValue = value;
+              }
+            } else {
+              if (value !== 0) {
+                if (isAssessed && !isAudited && !isEstimated) {
+                  netProfitAssessedValue = value;
+                } else if (
+                  !isAudited &&
+                  !isEstimated &&
+                  netProfitAssessedValue === null &&
+                  netProfitEstimatedValue === null
+                ) {
+                  if (netProfitFallbackValue === null) {
+                    netProfitFallbackValue = value;
+                  }
                 }
               }
             }
@@ -3053,6 +3239,7 @@ export const BusinessVerificationDetails: React.FC<
             if (
               value !== 0 &&
               netProfitAssessedValue === null &&
+              netProfitEstimatedValue === null &&
               netProfitFallbackValue === null
             ) {
               netProfitFallbackValue = value;
@@ -3060,14 +3247,45 @@ export const BusinessVerificationDetails: React.FC<
           }
         });
 
-        totalGrossProfit =
-          grossProfitAssessedValue !== null
-            ? grossProfitAssessedValue
-            : grossProfitFallbackValue || 0;
-        totalNetProfit =
-          netProfitAssessedValue !== null
-            ? netProfitAssessedValue
-            : netProfitFallbackValue || 0;
+        if (isStatement3) {
+          const grossProfitField = mergedData["grossProfitEstimated"];
+          const netProfitField = mergedData["netProfitEstimated"];
+          if (grossProfitField !== null && grossProfitField !== undefined && grossProfitField !== "") {
+            totalGrossProfit = parseNum(grossProfitField);
+          } else {
+            totalGrossProfit = grossProfitEstimatedValue !== null ? grossProfitEstimatedValue : 0;
+          }
+          
+          if (netProfitField !== null && netProfitField !== undefined && netProfitField !== "") {
+            totalNetProfit = parseNum(netProfitField);
+          } else {
+            totalNetProfit = netProfitEstimatedValue !== null ? netProfitEstimatedValue : 0;
+          }
+        } else if (isStatement4) {
+          const grossProfitAssessedField = mergedData["grossProfitAssessed"];
+          const netProfitField = mergedData["netProfit"];
+          
+          if (grossProfitAssessedField !== null && grossProfitAssessedField !== undefined && grossProfitAssessedField !== "") {
+            totalGrossProfit = parseNum(grossProfitAssessedField);
+          } else {
+            totalGrossProfit = grossProfitAssessedValue !== null ? grossProfitAssessedValue : 0;
+          }
+          
+          if (netProfitField !== null && netProfitField !== undefined && netProfitField !== "") {
+            totalNetProfit = parseNum(netProfitField);
+          } else {
+            totalNetProfit = netProfitAssessedValue !== null ? netProfitAssessedValue : 0;
+          }
+        } else {
+          totalGrossProfit =
+            grossProfitAssessedValue !== null
+              ? grossProfitAssessedValue
+              : grossProfitFallbackValue || 0;
+          totalNetProfit =
+            netProfitAssessedValue !== null
+              ? netProfitAssessedValue
+              : netProfitFallbackValue || 0;
+        }
       }
 
       return { totalGrossProfit, totalNetProfit };
@@ -5384,6 +5602,8 @@ export const BusinessVerificationDetails: React.FC<
                   completeVerificationData?.synopsis ||
                   verificationData?.synopsis,
               }}
+              onVerificationExecutiveSubmit={handleFeedbackSubmit}
+              verificationExecutiveLoading={loading}
               currentDepartment={currentDepartment}
               hasEditRequest={hasEditRequest}
             />

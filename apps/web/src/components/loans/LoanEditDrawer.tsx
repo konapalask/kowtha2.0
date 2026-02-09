@@ -502,7 +502,8 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                                   display: "flex",
                                 }}
                               >
-                                {verification?.status === "Pending" &&
+                                {((verification?.status === "Pending") ||
+                                  (currentDepartment === "PD" && verification)) &&
                                   (fieldExecutiveEdit[type] ? (
                                     <Button
                                       danger
@@ -660,6 +661,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                               setFieldExecutiveEdit={setFieldExecutiveEdit}
                               fetchExecutives={fetchExecutives}
                               verificationExecutives={verificationExecutives}
+                              isFVCompleted={loanDetails?.status === "FVCompleted"}
                             />
                           )}
                         </Card>

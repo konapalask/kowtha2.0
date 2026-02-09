@@ -1,13 +1,13 @@
 import fs from "fs/promises";
 import path from "path";
-import axios from "axios";
+import { PrismaClient } from "@prisma/client";
+import { UserRole } from "@prisma/client";
+const prisma = new PrismaClient();
 
 // -----------------------
 // Configuration
 // -----------------------
 
-const API_ENDPOINT = "https://api.cakowtha.co.in/api/accounts/users/?department=PD";
-const AUTH_TOKEN = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzY5NDkzMzc1LCJleHAiOjE3Njk1Nzk3NzV9.PH8cl20Ci37yKn4W7S3x--bQHlBAMyykPI60r01OBaY"; // optional
 const json_data = [
   {
     "Employee ID NO": "502025",
@@ -298,23 +298,12 @@ const json_data = [
     "Role": "ASSISTANT VERIFIER"
   }
 ]
-interface Payload {
-    name: string;
-    mobile: string;
-    email: string;
-    employeeCode: string;
-    departmentRoles: {
-        department: string;
-        role: string;
-        officeId: number;
-    }[];
-    status: string;
-    locality: string;
-}
 
 
 async function main() {
   try {
+    let updatedCount = 0;
+    let createdCount = 0;
     for (const item of json_data) {
       let role = ""
       if (item["Role"] === "VERIFIER HEAD") {
@@ -339,37 +328,63 @@ async function main() {
         continue;
       }
 
-      const payload: Payload = {
-        name: item["Name of the Employee"],
-        mobile: item["Mobile Number"],
-        email: item["Mail ID"],
-        employeeCode: item["Employee ID NO"],
-        departmentRoles: [{
-          department: "PD",
-          role: role,
-          officeId: 4
-        }],
-        status: "Active",
-        locality: item["Location"],
-      };
+      const checkExists = await prisma.user.findUnique({
+        where: {
+          mobile: item["Mobile Number"],
+        },
+      });
+      if (checkExists) {
+        console.log("User exists", checkExists.name);
 
-      // console.log(payload);
-    
+        const checkDepartmentRole = await prisma.departmentRole.findUnique({
+          where: {
+            userId_department: {
+              userId: checkExists.id,
+              department: "PD",
+            },
+          },
+        });
 
-    // 2. Send JSON to API
-    const response = await axios.post(API_ENDPOINT, payload, {
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `${AUTH_TOKEN}`
-      },
-      timeout: 10000
-    });
+        if (checkDepartmentRole) {
+          continue
+        }
 
-    // 3. Log response
-    console.log("Request successful");
-    console.log("Status:", response.status);
-    console.log("Response:", response.data);
+        const updateUser = await prisma.departmentRole.create({
+          data: {
+            department: "PD",
+            role: role as UserRole,
+            officeId: 4,
+            userId: checkExists.id,
+          },
+        });
+        updatedCount++;
+        console.log("User updated", checkExists.name);
+      } else {
+        const createUser = await prisma.user.create({
+          data: {
+            name: item["Name of the Employee"],
+            mobile: item["Mobile Number"],
+            email: item["Mail ID"],
+            employeeCode: item["Employee ID NO"],
+            status: "Active",
+            locality: item["Location"],
+          },
+        });
+        const createDepartmentRole = await prisma.departmentRole.create({
+          data: {
+            department: "PD",
+            role: role as UserRole,
+            officeId: 4,
+            userId: createUser.id,
+          },
+        });
+        createdCount++;
+        console.log("User created", createUser.name);
+      }
     }
+    console.log("Updated users: ", updatedCount);
+    console.log("Created users: ", createdCount);
+    console.log("Total users: ", updatedCount + createdCount);
   } catch (error: any) {
     console.error("Error sending JSON:", error.message);
 

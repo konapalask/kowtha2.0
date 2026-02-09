@@ -615,7 +615,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <Avatar
               onClick={handleSettingsClick}
               style={{
-                backgroundColor: avatarColor,
+                backgroundColor: "var(--primary-400)",
                 color: "#fff",
                 fontWeight: 700,
                 boxShadow: "0 2px 8px rgba(0,0,0,0.10)",

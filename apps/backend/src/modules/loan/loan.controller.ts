@@ -11,8 +11,8 @@ import { RolesGuard } from "../accounts/guards/roles.guard";
 import { EditVerificationDto } from "./dto/edit-verification.dto";
 import { UpdateAssignmentDto } from "./dto/update-assignment.dto";
 import { createAssignmentDto } from "./dto/assign-loan-executive";
-import { AuthenticatedRequest } from "../common/types/request.types";
 import { Roles, All } from "../accounts/decorators/roles.decorator";
+import { AuthenticatedRequest } from "../common/types/request.types";
 import { DeleteVerificationDto } from "./dto/delete-verification.dto";
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from "@nestjs/swagger";
 import { FieldExecutiveAssignedDto } from "./dto/field-executive-assigned.dto";
@@ -105,7 +105,7 @@ export class LoanController {
     if (!req.user.officeId) {
       throw new BadRequestException("User does not have an assigned office");
     }
-    console.log(filters);
+    
     const result = await this.loanService.getLoans(req.user.officeId, filters);
     return {
       status: 200,
@@ -157,34 +157,6 @@ export class LoanController {
     return {
       status: 201,
       message: "Loans created successfully",
-      data: result,
-    };
-  }
-
-  @Post("qa-test-loan")
-  @Public()
-  @ApiOperation({
-    summary: "Create a QA test loan for mobile app testing",
-    description:
-      "Creates a test loan and verification for QA purposes. Only for development/testing.",
-  })
-  @ApiResponse({
-    status: 201,
-    description: "QA test loan created successfully",
-  })
-  async createQATestLoan(
-    @Body("bankName") bankName: string,
-    @Body("fieldExecutiveId") fieldExecutiveId: number,
-    @Body("qaData") qaData?: any
-  ) {
-    const result = await this.loanService.createQALoan(
-      bankName,
-      fieldExecutiveId,
-      qaData
-    );
-    return {
-      status: 201,
-      message: "QA test loan created successfully",
       data: result,
     };
   }
@@ -624,6 +596,7 @@ export class LoanController {
   async editVerificationData(
     @Param("id") loanId: string,
     @Param("type") verificationType: VerificationType,
+    @Query("department") department: Department,
     @Body() editVerificationDto: EditVerificationDto,
     @Request() req: AuthenticatedRequest
   ) {
@@ -632,7 +605,8 @@ export class LoanController {
       Number(loanId),
       verificationType,
       editVerificationDto,
-      userId
+      userId,
+      department
     );
     return {
       status: 200,
@@ -667,7 +641,6 @@ export class LoanController {
     @Param("type") verificationType: VerificationType,
     @Body() body: { status: ApprovedStatus; path?: string }
   ) {
-    console.log("Update verification approval");
     const approvedStatus = body.status;
     const result = await this.loanService.updateVerificationApproval(
       Number(loanId),
@@ -682,63 +655,63 @@ export class LoanController {
     };
   }
 
-  @Patch("verification/:id/financial-analysis")
-  @Roles(UserRole.Admin, UserRole.Verifier)
-  @ApiOperation({
-    summary: "Update financial analysis data for a verification",
-    description:
-      "Bank-specific DTO should be used based on the loan's bank. The DTO structure varies by bank template format.",
-  })
-  @ApiResponse({
-    status: 200,
-    description: "Financial analysis updated successfully",
-    schema: {
-      type: "object",
-      properties: {
-        status: { type: "number", example: 200 },
-        message: {
-          type: "string",
-          example: "Financial analysis updated successfully",
-        },
-        data: {
-          type: "object",
-          properties: {
-            id: { type: "number" },
-            loanId: { type: "number" },
-            type: { type: "string", enum: Object.values(VerificationType) },
-            financialAnalysis: { type: "object" },
-            synopsis: { type: "string" },
-            updatedAt: { type: "string", format: "date-time" },
-          },
-        },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 400,
-    description: "Bad request - Invalid data provided",
-  })
-  @ApiResponse({
-    status: 404,
-    description: "Verification not found",
-  })
-  async updateFinancialAnalysis(
-    @Param("id") loanId: string,
-    @Body() updateFinancialAnalysisDto: any,
-    @Query("bankName") bankName?: string
-  ) {
-    const { synopsis, ...financialAnalysisData } = updateFinancialAnalysisDto;
-    const result = await this.loanService.updateFinancialAnalysis(
-      Number(loanId),
-      financialAnalysisData,
-      synopsis
-    );
-    return {
-      status: 200,
-      message: "Financial analysis updated successfully",
-      data: result,
-    };
-  }
+  // @Patch("verification/:id/financial-analysis")
+  // @Roles(UserRole.Admin, UserRole.Verifier)
+  // @ApiOperation({
+  //   summary: "Update financial analysis data for a verification",
+  //   description:
+  //     "Bank-specific DTO should be used based on the loan's bank. The DTO structure varies by bank template format.",
+  // })
+  // @ApiResponse({
+  //   status: 200,
+  //   description: "Financial analysis updated successfully",
+  //   schema: {
+  //     type: "object",
+  //     properties: {
+  //       status: { type: "number", example: 200 },
+  //       message: {
+  //         type: "string",
+  //         example: "Financial analysis updated successfully",
+  //       },
+  //       data: {
+  //         type: "object",
+  //         properties: {
+  //           id: { type: "number" },
+  //           loanId: { type: "number" },
+  //           type: { type: "string", enum: Object.values(VerificationType) },
+  //           financialAnalysis: { type: "object" },
+  //           synopsis: { type: "string" },
+  //           updatedAt: { type: "string", format: "date-time" },
+  //         },
+  //       },
+  //     },
+  //   },
+  // })
+  // @ApiResponse({
+  //   status: 400,
+  //   description: "Bad request - Invalid data provided",
+  // })
+  // @ApiResponse({
+  //   status: 404,
+  //   description: "Verification not found",
+  // })
+  // async updateFinancialAnalysis(
+  //   @Param("id") loanId: string,
+  //   @Body() updateFinancialAnalysisDto: any,
+  //   @Query("bankName") bankName?: string
+  // ) {
+  //   const { synopsis, ...financialAnalysisData } = updateFinancialAnalysisDto;
+  //   const result = await this.loanService.updateFinancialAnalysis(
+  //     Number(loanId),
+  //     financialAnalysisData,
+  //     synopsis
+  //   );
+  //   return {
+  //     status: 200,
+  //     message: "Financial analysis updated successfully",
+  //     data: result,
+  //   };
+  // }
 
   @Get(":id/export-financial-analysis")
   @Roles(UserRole.Admin, UserRole.Verifier)
@@ -1183,63 +1156,63 @@ export class LoanController {
     };
   }
 
-  @Post("verification/:id/financial-analysis")
-  @Roles(UserRole.Admin, UserRole.Verifier, UserRole.VerificationExecutive)
-  @ApiOperation({
-    summary: "Create financial analysis data for a verification",
-    description:
-      "Bank-specific DTO should be used based on the loan's bank. The DTO structure varies by bank template format.",
-  })
-  @ApiResponse({
-    status: 201,
-    description: "Financial analysis created successfully",
-    schema: {
-      type: "object",
-      properties: {
-        status: { type: "number", example: 201 },
-        message: {
-          type: "string",
-          example: "Financial analysis created successfully",
-        },
-        data: {
-          type: "object",
-          properties: {
-            id: { type: "number" },
-            loanId: { type: "number" },
-            type: { type: "string", enum: Object.values(VerificationType) },
-            financialAnalysis: { type: "object" },
-            synopsis: { type: "string" },
-            updatedAt: { type: "string", format: "date-time" },
-          },
-        },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 400,
-    description: "Bad request - Invalid data provided",
-  })
-  @ApiResponse({
-    status: 404,
-    description: "Verification not found",
-  })
-  async createFinancialAnalysis(
-    @Param("id") loanId: string,
-    @Body() createFinancialAnalysisDto: any,
-    @Query("bankName") bankName?: string
-  ) {
-    const { synopsis, ...financialAnalysisData } = createFinancialAnalysisDto;
-    const result = await this.loanService.createFinancialAnalysis(
-      Number(loanId),
-      financialAnalysisData,
-      synopsis
-    );
-    return {
-      status: 201,
-      message: "Financial analysis created successfully",
-      data: result,
-    };
-  }
+  // @Post("verification/:id/financial-analysis")
+  // @Roles(UserRole.Admin, UserRole.Verifier, UserRole.VerificationExecutive)
+  // @ApiOperation({
+  //   summary: "Create financial analysis data for a verification",
+  //   description:
+  //     "Bank-specific DTO should be used based on the loan's bank. The DTO structure varies by bank template format.",
+  // })
+  // @ApiResponse({
+  //   status: 201,
+  //   description: "Financial analysis created successfully",
+  //   schema: {
+  //     type: "object",
+  //     properties: {
+  //       status: { type: "number", example: 201 },
+  //       message: {
+  //         type: "string",
+  //         example: "Financial analysis created successfully",
+  //       },
+  //       data: {
+  //         type: "object",
+  //         properties: {
+  //           id: { type: "number" },
+  //           loanId: { type: "number" },
+  //           type: { type: "string", enum: Object.values(VerificationType) },
+  //           financialAnalysis: { type: "object" },
+  //           synopsis: { type: "string" },
+  //           updatedAt: { type: "string", format: "date-time" },
+  //         },
+  //       },
+  //     },
+  //   },
+  // })
+  // @ApiResponse({
+  //   status: 400,
+  //   description: "Bad request - Invalid data provided",
+  // })
+  // @ApiResponse({
+  //   status: 404,
+  //   description: "Verification not found",
+  // })
+  // async createFinancialAnalysis(
+  //   @Param("id") loanId: string,
+  //   @Body() createFinancialAnalysisDto: any,
+  //   @Query("bankName") bankName?: string
+  // ) {
+  //   const { synopsis, ...financialAnalysisData } = createFinancialAnalysisDto;
+  //   const result = await this.loanService.createFinancialAnalysis(
+  //     Number(loanId),
+  //     financialAnalysisData,
+  //     synopsis
+  //   );
+  //   return {
+  //     status: 201,
+  //     message: "Financial analysis created successfully",
+  //     data: result,
+  //   };
+  // }
 
   @Post(":id/submit-verification-executive")
   @Roles(UserRole.Admin, UserRole.VerificationExecutive)

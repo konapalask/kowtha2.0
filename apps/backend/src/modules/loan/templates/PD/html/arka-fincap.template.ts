@@ -1,5 +1,6 @@
 import { format, toZonedTime } from "date-fns-tz";
 import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.template";
+import { getFooterNameFromTemplate } from "src/modules/loan/forms-schema";
 
 export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
   // Extract sections using constants
@@ -17,10 +18,10 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
   const documentsObserved = verificationData.documentsObserved || {};
   const gstRegistration = verificationData.gstRegistration || {};
   const itrDetails = verificationData.itrDetails || {};
-  const monthlyGrossReceipts = verificationData.IncomeDetails?.monthlyGrossReceipts || {};
-  const monthlyExpenses = verificationData.IncomeDetails?.monthlyExpenses || {};
-  const netProfit = verificationData.IncomeDetails?.netProfit || {};
-  const netMargin = verificationData.IncomeDetails?.netMargin || {};
+  const monthlyGrossReceipts = verificationData.IncomeDetails || {};
+  const monthlyExpenses = verificationData.IncomeDetails || {};
+  const netProfit = verificationData.IncomeDetails || {};
+  const netMargin = verificationData.IncomeDetails || {};
   const familyExpenses = verificationData.familyExpenses || {};
   const employees = verificationData.employees || {};
   const concerns = verificationData.concerns || {};
@@ -606,57 +607,57 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
         <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Application No</strong></p></td>
-                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${applicantDetails?.applicationNo}</p></td>
+                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${applicantDetails?.applicationNo ? applicantDetails?.applicationNo : "Not Provided"}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Name of Applicant</strong></p></td>
-                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${applicantDetails?.nameOfApplicant}</p></td>
+                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${applicantDetails?.nameOfApplicant ? applicantDetails?.nameOfApplicant : "Not Provided"}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Name of Co-Applicant</strong></p></td>
-                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${applicantDetails?.nameOfCoApplicant}</p></td>
+                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${applicantDetails?.nameOfCoApplicant ? applicantDetails?.nameOfCoApplicant : "Not Provided"}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Phone Number</strong></p></td>
-                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${applicantDetails?.applicantPhoneNumber}</p></td>
+                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${applicantDetails?.applicantPhoneNumber ? applicantDetails?.applicantPhoneNumber : "Not Provided"}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Name of Concern</strong></p></td>
-                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${nameOfConcern}</p></td>
+                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${nameOfConcern ? nameOfConcern : "Not Provided"}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Initiated Premises</strong></p></td>
-                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${initiatedPremises}</p></td>
+                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${initiatedPremises ? initiatedPremises : "Not Provided"}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Visited Premises</strong></p></td>
-                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${visitedPremises}</p></td>
+                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${visitedPremises ? visitedPremises : "Not Provided"}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Residential Premises</strong></p></td>
-                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${residentialPremises}</p></td>
+                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${residentialPremises ? residentialPremises : "Not Provided"}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Appointment Fixed</strong></p></td>
-                <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${appointmentFixed}</p></td>
+                <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${appointmentFixed ? appointmentFixed : "Not Provided"}</p></td>
                 <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Date of Visit</strong>: </p></td>
                 <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${applicantDetails?.dateOfVisit || istDate.split(" ")[0]}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Person Met</strong></p></td>
-                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${applicantDetails?.personMet}</p></td>
+                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${applicantDetails?.personMet ? applicantDetails?.personMet : "Not Provided"}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Amount and Purpose of Loan</strong></p></td>
-                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Amount:</strong> ${formatCurrency(applicantDetails?.loanAmount)} <br> <strong>Purpose:</strong> ${applicantDetails?.purposeOfLoan || "Not Provided"}</p></td>
+                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Amount:</strong> ${formatCurrency(applicantDetails?.loanAmount) ? formatCurrency(applicantDetails?.loanAmount) : "Not Provided"} <br> <strong>Purpose:</strong> ${applicantDetails?.purposeOfLoan || "Not Provided"}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Type of collateral</strong></p></td>
-                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${applicantDetails?.typeOfCollateral} ${applicantDetails?.marketValueOfCollateral ? `<br><b>Market value of collateral security:</b> ${formatCurrency(applicantDetails?.marketValueOfCollateral)}` : ""}</p></td>
+                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${applicantDetails?.typeOfCollateral} ${applicantDetails?.marketValueOfCollateral ? `<br><b>Market value of collateral security:</b> ${formatCurrency(applicantDetails?.marketValueOfCollateral) ? formatCurrency(applicantDetails?.marketValueOfCollateral) : "Not Provided"}` : ""}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Collateral Property Address</strong></p></td>
-                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${collateralPropertyAddress}</p></td>
+                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${collateralPropertyAddress ? collateralPropertyAddress : "Not Provided"}</p></td>
             </tr>
           </table>
           <div style="page-break-before: always;"></div>
@@ -680,7 +681,7 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px;vertical-align:top"><p style="margin:8px 0;line-height:1.5"><strong>LIC/Mutual funds</strong></p></td>
-                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${getValue(licMutualFunds.licMutualFunds) || ""}</p></td>
+                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${getValue(licMutualFunds.licMutualFunds) ? getValue(licMutualFunds.licMutualFunds) : "Not Provided"}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px;vertical-align:top"><p style="margin:8px 0;line-height:1.5"><strong>Assets</strong></p></td>
@@ -735,7 +736,7 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Business Activity and stock level observed at the time of visit</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${
                   getValue(
-                    businessActivityObserved.businessActivityAndStockLevelObserved
+                    businessActivityObserved?.businessActivityAndStockLevelObserved ? businessActivityObserved?.businessActivityAndStockLevelObserved : "Not Provided"
                   ) || ""
                 }</p></td>
             </tr>
@@ -754,49 +755,49 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Whether Business Registered under GST?</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${
-                  gstRegistration?.gstRegistered
+                  gstRegistration?.gstRegistered ? gstRegistration?.gstRegistered : "Not Provided"
                 }</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>As per Audited individual ITR's</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${getValue(
-                  itrDetails.itrFiled
+                  itrDetails?.itrFiled ? itrDetails?.itrFiled : "Not Provided"
                 )}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Monthly Gross Receipts</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCurrency(
-                  monthlyGrossReceipts
+                  monthlyGrossReceipts?.monthlyGrossReceipts ? monthlyGrossReceipts?.monthlyGrossReceipts : "Not Provided"
                 )}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Monthly Expenses</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCurrency(
-                  monthlyExpenses
+                  monthlyExpenses?.monthlyExpenses ? monthlyExpenses?.monthlyExpenses : "Not Provided"
                 )}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Net Profit</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCurrency(
-                  netProfit
+                  netProfit?.netProfit ? netProfit?.netProfit : "Not Provided"
                 )}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Net Margin</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${
-                  getValue(netMargin) + "%"
+                  netMargin?.netMargin ? netMargin?.netMargin + "%" : "Not Provided"
                 }</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Family Expenses</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${getValue(
-                  familyExpenses.familyExpenses
+                  familyExpenses?.familyExpenses ? familyExpenses?.familyExpenses : "Not Provided"
                 )}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Employees</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${getValue(
-                  employees.numberOfEmployees
+                  employees?.numberOfEmployees ? employees?.numberOfEmployees : "Not Provided"
                 )}</p></td>
             </tr>
             </table>
@@ -839,7 +840,7 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
             </table>
                     
         <p style="margin:8px 0;line-height:1.5"><strong>Disclaimer Clause:</strong></p>
-        <p style="margin:8px 0;line-height:1.5">This report (including any attachments) has been prepared based on verbal information provided by the person contacted. ARKA FINCAP LIMITED will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. <strong>M/s. KOWTHA & CO</strong> will not be held liable in any case.</p>
+        <p style="margin:8px 0;line-height:1.5">This report (including any attachments) has been prepared based on verbal information provided by the person contacted. ${getFooterNameFromTemplate(html_data?.bankName) || "Arka Fincap Limited"} will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. <strong>M/s. KOWTHA & CO</strong> will not be held liable in any case.</p>
      ${pdBaseTemplateFooter(html_data)}
   `;
 };

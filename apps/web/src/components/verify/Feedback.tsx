@@ -51,6 +51,8 @@ interface FeedbackProps {
   verificationData?: any;
   currentDepartment?: string;
   hasEditRequest?: boolean;
+  onVerificationExecutiveSubmit?: () => void;
+  verificationExecutiveLoading?: boolean;
 }
 
 const Feedback: React.FC<FeedbackProps> = ({
@@ -63,6 +65,8 @@ const Feedback: React.FC<FeedbackProps> = ({
   verificationData,
   currentDepartment,
   hasEditRequest = false,
+  onVerificationExecutiveSubmit,
+  verificationExecutiveLoading = false,
 }) => {
   const userDetails = getItem(USER_DETAILS, true) as any;
   const role = userDetails?.departmentRoles?.find(
@@ -540,6 +544,22 @@ const Feedback: React.FC<FeedbackProps> = ({
                     onClick={handleSave}
                   >
                     Save
+                  </Button>
+                </div>
+              )}
+              
+              {role === "VerificationExecutive" && onVerificationExecutiveSubmit && (
+                <div style={{ textAlign: "right", marginTop: 16 }}>
+                  <Button
+                    disabled={!verdict || disabled || verificationExecutiveLoading}
+                    type="primary"
+                    loading={verificationExecutiveLoading}
+                    onClick={onVerificationExecutiveSubmit}
+                    style={{
+                      minWidth: "140px",
+                    }}
+                  >
+                    Save Feedback
                   </Button>
                 </div>
               )}

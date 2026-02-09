@@ -593,7 +593,7 @@ const VerificationListScreen = () => {
       )}
       {item?.loan?.bankName && (
         <Text style={[styles.details, styles.addressText]}>
-          {item?.loan?.bankName}
+          {item?.displayName}
         </Text>
       )}
       {item?.applicantAddress && (
