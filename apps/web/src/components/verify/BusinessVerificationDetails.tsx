@@ -3119,7 +3119,9 @@ export const BusinessVerificationDetails: React.FC<
          section.id === "financialAnalysis" && section.label?.toLowerCase().includes("comprehensive actuals vs estimated") ||
          mergedData.hasOwnProperty("netProfitEstimated") ||
          mergedData.hasOwnProperty("openingStockEstimated"));
-         
+
+      const hasGenericFields = mergedData.hasOwnProperty("grossProfitDebit");
+      
       const isStatement4 = 
         hasStatement4Fields ||
         section.label?.toLowerCase().includes("detailed financial analysis with balance sheet") ||
@@ -3127,7 +3129,8 @@ export const BusinessVerificationDetails: React.FC<
         section.label?.toLowerCase().includes("statement4") ||
         (mergedData.hasOwnProperty("netProfit") && 
          !mergedData.hasOwnProperty("netProfitAfterTax") &&
-         !mergedData.hasOwnProperty("netProfitEstimated"));
+         !mergedData.hasOwnProperty("netProfitEstimated") &&
+         !hasGenericFields); // Exclude generic schema from statement4
 
       if (section.fields && Array.isArray(section.fields)) {
         section.fields.forEach((field: any) => {
@@ -3277,14 +3280,48 @@ export const BusinessVerificationDetails: React.FC<
             totalNetProfit = netProfitAssessedValue !== null ? netProfitAssessedValue : 0;
           }
         } else {
-          totalGrossProfit =
-            grossProfitAssessedValue !== null
-              ? grossProfitAssessedValue
-              : grossProfitFallbackValue || 0;
-          totalNetProfit =
-            netProfitAssessedValue !== null
-              ? netProfitAssessedValue
-              : netProfitFallbackValue || 0;
+          let grossProfitValue = null;
+          if (mergedData.hasOwnProperty("grossProfitDebit")) {
+            const rawValue = mergedData["grossProfitDebit"];
+            if (rawValue !== null && rawValue !== undefined && rawValue !== "") {
+              grossProfitValue = parseNum(rawValue);
+            }
+          }
+          
+          if (grossProfitValue === null && formValues && formValues.hasOwnProperty("grossProfitDebit")) {
+            const rawValue = formValues["grossProfitDebit"];
+            if (rawValue !== null && rawValue !== undefined && rawValue !== "") {
+              grossProfitValue = parseNum(rawValue);
+            }
+          }
+          
+          totalGrossProfit = grossProfitValue !== null 
+            ? grossProfitValue 
+            : (grossProfitAssessedValue !== null
+                ? grossProfitAssessedValue
+                : grossProfitFallbackValue || 0);
+          
+          let netProfitValue = null;
+          
+          if (mergedData.hasOwnProperty("netProfit")) {
+            const rawValue = mergedData["netProfit"];
+            if (rawValue !== null && rawValue !== undefined && rawValue !== "") {
+              netProfitValue = parseNum(rawValue);
+            }
+          }
+          
+          if (netProfitValue === null && formValues && formValues.hasOwnProperty("netProfit")) {
+            const rawValue = formValues["netProfit"];
+            if (rawValue !== null && rawValue !== undefined && rawValue !== "") {
+              netProfitValue = parseNum(rawValue);
+            }
+          }
+          
+          totalNetProfit = netProfitValue !== null
+            ? netProfitValue
+            : (netProfitAssessedValue !== null
+                ? netProfitAssessedValue
+                : netProfitFallbackValue || 0);
         }
       }
 
