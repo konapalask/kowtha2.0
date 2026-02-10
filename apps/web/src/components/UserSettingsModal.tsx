@@ -212,20 +212,35 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
               Edit
             </Button>
           ) : (
-            <Space>
+            <Space size="middle">
               <Button
-                type="text"
+                type="primary"
                 icon={<SaveOutlined />}
                 onClick={handleSave}
-                style={{ color: 'var(--success-600)' }}
+                style={{
+                  borderRadius: '6px',
+                  fontWeight: 500,
+                  height: '32px',
+                  padding: '4px 16px',
+                  background: 'var(--primary-800)',
+                  borderColor: 'var(--primary-800)',
+                  boxShadow: '0 2px 4px rgba(0, 29, 58, 0.2)',
+                }}
               >
                 Save
               </Button>
               <Button
-                type="text"
+                type="default"
                 icon={<CloseOutlined />}
                 onClick={handleCancel}
-                style={{ color: 'var(--error-600)' }}
+                style={{
+                  borderRadius: '6px',
+                  fontWeight: 500,
+                  height: '32px',
+                  padding: '4px 16px',
+                  borderColor: 'var(--neutral-300)',
+                  color: 'var(--neutral-700)',
+                }}
               >
                 Cancel
               </Button>
