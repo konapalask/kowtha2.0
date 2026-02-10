@@ -955,7 +955,7 @@ export class PDTemplateService {
     }
   }
 
-  async generatePreviewPDF(loanId: number): Promise<Buffer> {
+  async generatePreviewPDF(loanId: number, generate: boolean): Promise<Buffer> {
     try {
       // Fetch loan details with verification data
       const loan = await this.prisma.loan.findUnique({
@@ -970,6 +970,7 @@ export class PDTemplateService {
           templateName: true,
           loanAmount: true,
           status: true,
+          closedAt: true,
           office: { select: { name: true, address: true } },
           operationsExecutive: { select: { name: true } },
           verifications: {
@@ -1092,6 +1093,13 @@ export class PDTemplateService {
           applicationNumber: loan.applicationNumber,
         }
       );
+      
+      if (generate && !loan.closedAt) {
+        await this.prisma.loan.update({
+          where: { id: loanId },
+          data: { closedAt: new Date() },
+        });
+      }
 
       return pdfBuffer;
     } catch (error) {

@@ -1,16 +1,18 @@
 import * as fs from "fs";
 import * as path from "path";
 import pLimit from "p-limit";
-import { Buffer } from "buffer"; // Import the Buffer type
+import { Buffer } from "buffer"; 
 import * as puppeteer from "puppeteer";
 import { Logger } from "@nestjs/common";
 import { Worker } from "worker_threads";
+import { ModuleRef } from "@nestjs/core";
 import { format, toZonedTime } from "date-fns-tz";
 import { GetLoansDto } from "./dto/get-loans.dto";
 import { EditLoanDto } from "./dto/edit-loan.dto";
 import { PrismaService } from "../../prisma.service";
 import { CreateLoanDto } from "./dto/create-loan.dto";
 import { S3Service } from "../common/s3utils/s3.service";
+import { getFooterNameFromTemplate } from "./forms-schema";
 import { baseTemplate } from "./templates/FI/base.template";
 import { workTemplate } from "./templates/FI/work.template";
 import { PaginatedResponse } from "../common/dto/pagination.dto";
@@ -26,7 +28,6 @@ import { VerificationData } from "./templates/FI/address.interface";
 import { WorkVerificationData } from "./templates/FI/work.interface";
 import { BusinessVerificationData } from "./templates/FI/business.interface";
 import { FieldExecutiveAssignedDto } from "./dto/field-executive-assigned.dto";
-import { getFooterNameFromTemplate } from "./forms-schema";
 import {
   Prisma,
   LoanStatus,
@@ -44,7 +45,6 @@ import {
   NotFoundException,
   BadRequestException,
 } from "@nestjs/common";
-import { ModuleRef } from "@nestjs/core";
 
 const limit = pLimit(3); // allow 3 workers at a time (tune this)
 
@@ -138,13 +138,11 @@ export class LoanService {
       minute: "2-digit",
     });
 
-    // Debug logging
     console.log("Footer template variables:", {
       bankName: bankName || "Kowtha",
       istDate: istDate,
     });
 
-    // Create footer template with proper string interpolation
     const footerTemplate = `
       <div style="
           font-size: 10px;
@@ -168,20 +166,16 @@ export class LoanService {
       </div>
     `;
 
-    // console.log("Footer template HTML:", footerTemplate);
-
-    // Generate PDF
-    // console.log("Starting PDF generation with header/footer...");
     const pdfArray = await page.pdf({
       format: "a4",
       margin: {
-        top: "60px", // Increased to accommodate header
+        top: "60px", 
         right: "20px",
-        bottom: "80px", // Increased further to prevent content overlap
+        bottom: "80px", 
         left: "20px",
       },
       printBackground: true,
-      preferCSSPageSize: false, // Changed to false to ensure consistent page sizing
+      preferCSSPageSize: false, 
       displayHeaderFooter: true,
       headerTemplate: `
         <div style="
@@ -197,10 +191,8 @@ export class LoanService {
       footerTemplate: footerTemplate,
     });
 
-    // console.log("PDF generation completed. Buffer size:", pdfArray.length);
     const pdfBuffer: Buffer = Buffer.from(pdfArray);
 
-    // Close the browser
     await browser.close();
     return pdfBuffer;
   }
@@ -1102,7 +1094,6 @@ export class LoanService {
         throw new NotFoundException("Loan not found");
       }
 
-
       // // If field executive is provided, address is mandatory
       if (
         !updateData.fieldExecutiveId &&
@@ -1486,9 +1477,7 @@ export class LoanService {
         }
       );
 
-      return {
-        verification: updatedVerification,
-      };
+      return { verification: updatedVerification };
     } catch (error) {
       this.logger.error(
         `Error updating verification report: ${error.message}`,
@@ -1775,14 +1764,14 @@ export class LoanService {
               "applicantDetails",
             ].some((key) => verificationDataObject[key]);
 
-            // await this.loggingService.info(
-            //   `PD verification ${verification.id}: legacyShape = ${hasLegacyShape}`,
-            //   {
-            //     verificationId: verification.id,
-            //     dataKeys: Object.keys(verificationDataObject),
-            //     legacyShapeDetected: hasLegacyShape,
-            //   }
-            // );
+            await this.loggingService.info(
+              `PD verification ${verification.id}: legacyShape = ${hasLegacyShape}`,
+              {
+                verificationId: verification.id,
+                dataKeys: Object.keys(verificationDataObject),
+                legacyShapeDetected: hasLegacyShape,
+              }
+            );
           }
 
           return {
