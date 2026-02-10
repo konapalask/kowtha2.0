@@ -4,7 +4,7 @@ import {
   BadRequestException,
 } from "@nestjs/common";
 import { PrismaService } from "../../prisma.service";
-import { EditRequestStatus, EditRequestType, Prisma } from "@prisma/client";
+import { Department, EditRequestStatus, EditRequestType, Prisma } from "@prisma/client";
 import { CreateEditRequestDto } from "./dto/create-edit-request.dto";
 import { UpdateEditRequestDto } from "./dto/update-edit-request.dto";
 import { LoggingService } from "../common/logging/logging.service";
@@ -327,6 +327,7 @@ export class EditRequestService {
     status?: EditRequestStatus;
     loanId?: number;
     type?: EditRequestType;
+    department?: Department;
   }) {
     try {
       const where: Prisma.EditRequestWhereInput = {};
@@ -341,6 +342,27 @@ export class EditRequestService {
 
       if (filters?.type) {
         where.type = filters.type;
+      }
+
+      if (filters?.department) {
+        // Include edit requests that either have this department set, or have null department
+        // but belong to a loan/verification with this department (e.g. FI requests often have null)
+        const departmentCondition: Prisma.EditRequestWhereInput = {
+          OR: [
+            { department: filters.department },
+            {
+              department: null,
+              loan: { department: filters.department },
+            },
+            {
+              department: null,
+              verification: { department: filters.department },
+            },
+          ],
+        };
+        where.AND = Array.isArray(where.AND)
+          ? [...where.AND, departmentCondition]
+          : [departmentCondition];
       }
 
       const editRequests = await this.prisma.editRequest.findMany({
