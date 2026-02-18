@@ -282,23 +282,28 @@ export const BusinessVerificationDetails: React.FC<
   const [pdfLoading, setPdfLoading] = useState(false);
   const processedFilesRef = useRef<Set<string>>(new Set());
   const [editorContent, setEditorContent] = useState(() => {
-    const synopsis = completeVerificationData?.synopsis;
-    if (synopsis) {
-      const isHtmlList = /<\s*ul[^>]*>/i.test(synopsis);
-      return isHtmlList ? synopsis : "<ul><li><br></li></ul>";
+    const content = currentDepartment === "FI" 
+      ? completeVerificationData?.path 
+      : completeVerificationData?.synopsis;
+    
+    if (content) {
+      const isHtmlList = /<\s*ul[^>]*>/i.test(content);
+      return isHtmlList ? content : "<ul><li><br></li></ul>";
     }
     return "<ul><li><br></li></ul>";
   });
 
   useEffect(() => {
-    if (completeVerificationData?.synopsis) {
-      const synopsis = completeVerificationData.synopsis;
-      // If it's already HTML (contains <ul>), use it directly
-      const isHtmlList = /<\s*ul[^>]*>/i.test(synopsis);
-      const contentToSet = isHtmlList ? synopsis : synopsis;
+    const content = currentDepartment === "FI" 
+      ? completeVerificationData?.path 
+      : completeVerificationData?.synopsis;
+    
+    if (content) {
+      const isHtmlList = /<\s*ul[^>]*>/i.test(content);
+      const contentToSet = isHtmlList ? content : content;
       setEditorContent(contentToSet);
     }
-  }, [completeVerificationData?.synopsis]);
+  }, [completeVerificationData?.path, completeVerificationData?.synopsis, currentDepartment]);
 
   // Sync verdict state when approvedStatus changes
   useEffect(() => {

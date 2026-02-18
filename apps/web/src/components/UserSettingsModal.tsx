@@ -204,10 +204,16 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
           </Space>
           {!isEditing ? (
             <Button
-              type="text"
+              type="primary"
               icon={<EditOutlined />}
               onClick={handleEdit}
-              style={{ color: 'var(--primary-600)' }}
+              size="large"
+              style={{
+                borderRadius: "8px",
+                boxShadow: "0 4px 12px rgba(255, 77, 79, 0.3)",
+                background: "var(--primary-800)",
+                borderColor: "var(--primary-800)"
+              }}
             >
               Edit
             </Button>
@@ -217,14 +223,12 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
                 type="primary"
                 icon={<SaveOutlined />}
                 onClick={handleSave}
+                size="large"
                 style={{
-                  borderRadius: '6px',
-                  fontWeight: 500,
-                  height: '32px',
-                  padding: '4px 16px',
-                  background: 'var(--primary-800)',
-                  borderColor: 'var(--primary-800)',
-                  boxShadow: '0 2px 4px rgba(0, 29, 58, 0.2)',
+                  borderRadius: "8px",
+                  boxShadow: "0 4px 12px rgba(255, 77, 79, 0.3)",
+                  background: "var(--primary-800)",
+                  borderColor: "var(--primary-800)"
                 }}
               >
                 Save
@@ -469,12 +473,13 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
           <Link href="/logout">
             <Button
               type="primary"
-              danger
               icon={<LogoutOutlined />}
               size="large"
               style={{
                 borderRadius: "8px",
-                boxShadow: "0 4px 12px rgba(255, 77, 79, 0.3)"
+                boxShadow: "0 4px 12px rgba(255, 77, 79, 0.3)",
+                background: "var(--primary-800)",
+                borderColor: "var(--primary-800)"
               }}
             >
               Logout
