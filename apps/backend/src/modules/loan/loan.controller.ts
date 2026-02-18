@@ -390,6 +390,7 @@ export class LoanController {
     @Param("id") id: string,
     @Query("type") type: AddressType,
     @Query("department") department: Department,
+    @Query("generate") generate: boolean,
     @Res() res: Response
   ) {
     try {
@@ -402,7 +403,7 @@ export class LoanController {
         );
       } else if (department === Department.PD) {
         console.log("Preview PD Verification PDF");
-        pdfBuffer = await this.pdTemplateService.generatePreviewPDF(Number(id));
+        pdfBuffer = await this.pdTemplateService.generatePreviewPDF(Number(id), generate);
       }
 
       res.set({
