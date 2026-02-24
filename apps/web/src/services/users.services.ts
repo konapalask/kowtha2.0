@@ -124,6 +124,13 @@ export const updateUserDepartmentRolesApi = async (userId: number, departmentRol
   );
 };
 
+export const updateUserDepartmentRoleStatusApi = async (userId: number, status: "Active" | "Inactive") => {
+  return patchWithDepartment(
+    `/accounts/users/${userId}/department-role-status`,
+    { status }
+  );
+};
+
 export const getAllFieldExecutivesApi = async () => {
   return getWithDepartment("/accounts/users", {
     params: {

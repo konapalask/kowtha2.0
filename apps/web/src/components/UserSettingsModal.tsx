@@ -204,28 +204,47 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
           </Space>
           {!isEditing ? (
             <Button
-              type="text"
+              type="primary"
               icon={<EditOutlined />}
               onClick={handleEdit}
-              style={{ color: 'var(--primary-600)' }}
+              size="large"
+              style={{
+                borderRadius: "8px",
+                boxShadow: "0 4px 12px rgba(255, 77, 79, 0.3)",
+                background: "var(--primary-800)",
+                borderColor: "var(--primary-800)"
+              }}
             >
               Edit
             </Button>
           ) : (
-            <Space>
+            <Space size="middle">
               <Button
-                type="text"
+                type="primary"
                 icon={<SaveOutlined />}
                 onClick={handleSave}
-                style={{ color: 'var(--success-600)' }}
+                size="large"
+                style={{
+                  borderRadius: "8px",
+                  boxShadow: "0 4px 12px rgba(255, 77, 79, 0.3)",
+                  background: "var(--primary-800)",
+                  borderColor: "var(--primary-800)"
+                }}
               >
                 Save
               </Button>
               <Button
-                type="text"
+                type="default"
                 icon={<CloseOutlined />}
                 onClick={handleCancel}
-                style={{ color: 'var(--error-600)' }}
+                style={{
+                  borderRadius: '6px',
+                  fontWeight: 500,
+                  height: '32px',
+                  padding: '4px 16px',
+                  borderColor: 'var(--neutral-300)',
+                  color: 'var(--neutral-700)',
+                }}
               >
                 Cancel
               </Button>
@@ -296,10 +315,10 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
                 </Space>
               }
               name="email"
-              rules={[
-                { required: true, message: 'Please enter your email' },
-                { type: 'email', message: 'Please enter a valid email' }
-              ]}
+              // rules={[
+              //   { required: true, message: 'Please enter your email' },
+              //   { type: 'email', message: 'Please enter a valid email' }
+              // ]}
             >
               <Input placeholder="Enter your email" />
             </Form.Item>
@@ -454,12 +473,13 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
           <Link href="/logout">
             <Button
               type="primary"
-              danger
               icon={<LogoutOutlined />}
               size="large"
               style={{
                 borderRadius: "8px",
-                boxShadow: "0 4px 12px rgba(255, 77, 79, 0.3)"
+                boxShadow: "0 4px 12px rgba(255, 77, 79, 0.3)",
+                background: "var(--primary-800)",
+                borderColor: "var(--primary-800)"
               }}
             >
               Logout

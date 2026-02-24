@@ -64,19 +64,55 @@ export const setCurrentDepartment = (department: string) => {
   localStorage.setItem('currentDepartment', department);
 };
 
+const normalizeStatus = (status: any): string => {
+  if (status === null || status === undefined) return "";
+  return String(status).trim().toLowerCase();
+};
+
+export const isDepartmentActiveForUser = (department: string): boolean => {
+  if (typeof window === "undefined") return false;
+  const userDetails = getUserDetails();
+  const deptRole = userDetails?.departmentRoles?.find(
+    (role: any) => role.department === department
+  );
+
+  // Backward-compatible: if status not present, assume active
+  const status = normalizeStatus(deptRole?.status);
+  if (!status) return true;
+  return status === "active";
+};
+
+export const getFirstActiveDepartmentForUser = (): string => {
+  if (typeof window === "undefined") return "";
+  const userDetails = getUserDetails();
+  const deptRoles: any[] = Array.isArray(userDetails?.departmentRoles)
+    ? userDetails.departmentRoles
+    : [];
+
+  const active = deptRoles.find((dr) => normalizeStatus(dr?.status) !== "inactive");
+  return active?.department || "";
+};
+
 export const initializeCurrentDepartment = () => {
   if (typeof window === "undefined") return "";
   
   const storedCurrentDept = getCurrentDepartment();
-  if (storedCurrentDept) {
+  if (storedCurrentDept && isDepartmentActiveForUser(storedCurrentDept)) {
     return storedCurrentDept;
   }
   
   // If no current department is stored, use default department
   const userDetails = getUserDetails();
-  if (userDetails?.defaultDepartment) {
+  if (userDetails?.defaultDepartment && isDepartmentActiveForUser(userDetails.defaultDepartment)) {
     setCurrentDepartment(userDetails.defaultDepartment);
     return userDetails.defaultDepartment;
+  }
+
+  // Fallback: first active department assigned to user
+  const firstActive = getFirstActiveDepartmentForUser();
+  if (firstActive) {
+    setCurrentDepartment(firstActive);
+    return firstActive;
   }
   
   return "";

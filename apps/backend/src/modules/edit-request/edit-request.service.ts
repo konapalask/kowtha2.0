@@ -4,7 +4,7 @@ import {
   BadRequestException,
 } from "@nestjs/common";
 import { PrismaService } from "../../prisma.service";
-import { EditRequestStatus, EditRequestType, Prisma } from "@prisma/client";
+import { Department, EditRequestStatus, EditRequestType, Prisma } from "@prisma/client";
 import { CreateEditRequestDto } from "./dto/create-edit-request.dto";
 import { UpdateEditRequestDto } from "./dto/update-edit-request.dto";
 import { LoggingService } from "../common/logging/logging.service";
@@ -212,14 +212,17 @@ export class EditRequestService {
           }
 
           // Fix any array data issues
-          const fixedChanges =
-            this.arrayValidationService.fixArrayData(actualChanges);
+          const fixedChanges = this.arrayValidationService.fixArrayData(actualChanges);
 
           // Apply the changes to the verification data
           const updatedVerificationData = {
             ...currentVerificationData,
             ...fixedChanges,
           };
+
+          if (editRequest.remarks === "Financial_Analysis") {
+            updatedVerificationData.financialAnalysis = fixedChanges;
+          }
 
           // Update the verification record
           await this.prisma.verification.update({
@@ -324,6 +327,7 @@ export class EditRequestService {
     status?: EditRequestStatus;
     loanId?: number;
     type?: EditRequestType;
+    department?: Department;
   }) {
     try {
       const where: Prisma.EditRequestWhereInput = {};
@@ -338,6 +342,35 @@ export class EditRequestService {
 
       if (filters?.type) {
         where.type = filters.type;
+      }
+
+      if (filters?.department) {
+        // Include edit requests that either have this department set, or have null department
+        // but belong to a loan/verification with this department (e.g. FI requests often have null)
+        // Also include Login-type (device change) requests which have no loan/verification.
+        const departmentCondition: Prisma.EditRequestWhereInput = {
+          OR: [
+            { department: filters.department },
+            {
+              department: null,
+              loan: { department: filters.department },
+            },
+            {
+              department: null,
+              verification: { department: filters.department },
+            },
+            {
+              type: EditRequestType.Login,
+              OR: [
+                { department: null },
+                { department: filters.department },
+              ],
+            },
+          ],
+        };
+        where.AND = Array.isArray(where.AND)
+          ? [...where.AND, departmentCondition]
+          : [departmentCondition];
       }
 
       const editRequests = await this.prisma.editRequest.findMany({

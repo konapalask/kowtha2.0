@@ -13,12 +13,13 @@ export const getVerificationData = async (id: string) => {
 export const generatePreviewReport = async (
   id: string,
   type: string,
-  status: string | null
+  status: string | null,
+  generate: boolean = true
 ) => {
   const response = await getWithDepartment(
     `/loans/${id}/preview-final-report`,
     {
-      params: { type, status },
+      params: { type, status, generate },
       responseType: "blob",
       headers: {
         Accept: "application/pdf",

@@ -1,16 +1,18 @@
 import * as fs from "fs";
 import * as path from "path";
 import pLimit from "p-limit";
-import { Buffer } from "buffer"; // Import the Buffer type
+import { Buffer } from "buffer"; 
 import * as puppeteer from "puppeteer";
 import { Logger } from "@nestjs/common";
 import { Worker } from "worker_threads";
+import { ModuleRef } from "@nestjs/core";
 import { format, toZonedTime } from "date-fns-tz";
 import { GetLoansDto } from "./dto/get-loans.dto";
 import { EditLoanDto } from "./dto/edit-loan.dto";
 import { PrismaService } from "../../prisma.service";
 import { CreateLoanDto } from "./dto/create-loan.dto";
 import { S3Service } from "../common/s3utils/s3.service";
+import { getFooterNameFromTemplate } from "./forms-schema";
 import { baseTemplate } from "./templates/FI/base.template";
 import { workTemplate } from "./templates/FI/work.template";
 import { PaginatedResponse } from "../common/dto/pagination.dto";
@@ -26,7 +28,6 @@ import { VerificationData } from "./templates/FI/address.interface";
 import { WorkVerificationData } from "./templates/FI/work.interface";
 import { BusinessVerificationData } from "./templates/FI/business.interface";
 import { FieldExecutiveAssignedDto } from "./dto/field-executive-assigned.dto";
-import { getFooterNameFromTemplate } from "./forms-schema";
 import {
   Prisma,
   LoanStatus,
@@ -44,7 +45,6 @@ import {
   NotFoundException,
   BadRequestException,
 } from "@nestjs/common";
-import { ModuleRef } from "@nestjs/core";
 
 const limit = pLimit(3); // allow 3 workers at a time (tune this)
 
@@ -138,13 +138,11 @@ export class LoanService {
       minute: "2-digit",
     });
 
-    // Debug logging
     console.log("Footer template variables:", {
       bankName: bankName || "Kowtha",
       istDate: istDate,
     });
 
-    // Create footer template with proper string interpolation
     const footerTemplate = `
       <div style="
           font-size: 10px;
@@ -168,20 +166,16 @@ export class LoanService {
       </div>
     `;
 
-    // console.log("Footer template HTML:", footerTemplate);
-
-    // Generate PDF
-    // console.log("Starting PDF generation with header/footer...");
     const pdfArray = await page.pdf({
       format: "a4",
       margin: {
-        top: "60px", // Increased to accommodate header
+        top: "60px", 
         right: "20px",
-        bottom: "80px", // Increased further to prevent content overlap
+        bottom: "80px", 
         left: "20px",
       },
       printBackground: true,
-      preferCSSPageSize: false, // Changed to false to ensure consistent page sizing
+      preferCSSPageSize: false, 
       displayHeaderFooter: true,
       headerTemplate: `
         <div style="
@@ -197,10 +191,8 @@ export class LoanService {
       footerTemplate: footerTemplate,
     });
 
-    // console.log("PDF generation completed. Buffer size:", pdfArray.length);
     const pdfBuffer: Buffer = Buffer.from(pdfArray);
 
-    // Close the browser
     await browser.close();
     return pdfBuffer;
   }
@@ -911,6 +903,7 @@ export class LoanService {
           where.verifications = {
             some: {
               isPostponed: true,
+              status: VerificationStatus.Pending,
             },
           };
         }
@@ -1101,7 +1094,6 @@ export class LoanService {
         throw new NotFoundException("Loan not found");
       }
 
-
       // // If field executive is provided, address is mandatory
       if (
         !updateData.fieldExecutiveId &&
@@ -1190,7 +1182,7 @@ export class LoanService {
 
       // Calculate today's date range
       const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      today.setHours(23, 59, 59, 999);
 
       const tomorrow = new Date(today);
       tomorrow.setDate(today.getDate() + 1);
@@ -1202,8 +1194,8 @@ export class LoanService {
         OR: [
           {
             postponedDate: {
-              gte: today,
-              lt: tomorrow,
+              // gte: today,
+              lte: today,
             },
           },
           {
@@ -1485,9 +1477,7 @@ export class LoanService {
         }
       );
 
-      return {
-        verification: updatedVerification,
-      };
+      return { verification: updatedVerification };
     } catch (error) {
       this.logger.error(
         `Error updating verification report: ${error.message}`,
@@ -1740,9 +1730,9 @@ export class LoanService {
       }
 
       // Format the verification data
-      console.error(
-        `🔍 getVerificationData called for loan ${loanId}, department: ${department}`
-      );
+      // console.error(
+      //   `🔍 getVerificationData called for loan ${loanId}, department: ${department}`
+      // );
 
       const verificationData = await Promise.all(
         loan.verifications.map(async (verification) => {
@@ -1757,7 +1747,7 @@ export class LoanService {
           let transformedVerificationData: Prisma.JsonValue =
             parsedVerificationData;
 
-          console.error(`🔍 Processing verification ${verification.id}`);
+          // console.error(`🔍 Processing verification ${verification.id}`);
 
           if (
             department === "PD" &&
@@ -2006,19 +1996,25 @@ export class LoanService {
       try {
         let financialAnalysis =
           editVerificationDto.verificationData?.financialAnalysis;
+        
+        // console.log("financialAnalysis", financialAnalysis);
 
-        if (
-          financialAnalysis?.netProfit &&
-          financialAnalysis?.netProfit > 1000000
-        ) {
-          delete editVerificationDto.verificationData?.financialAnalysis;
+        let netProfit = financialAnalysis?.netProfit || financialAnalysis?.netProfitAfterTax || financialAnalysis?.netProfitEstimated;
+        console.log("netProfit", netProfit);
+        if ( netProfit && netProfit > 1000000) {
+
+          await this.loggingService.info("Financial analysis is greater than 1000000", {
+            loanId,
+            verificationId: verification.id,
+            financialAnalysis,
+          });
 
           const checkAlreadyExists = await this.prisma.editRequest.findFirst({
             where: {
               loanId,
               verificationId: verification.id,
               type: EditRequestType.LoanData,
-              status: EditRequestStatus.Pending,
+              status: EditRequestStatus.Approved,
               department: department,
             },
             orderBy: {
@@ -2026,7 +2022,8 @@ export class LoanService {
             }
           });
 
-          if (!checkAlreadyExists) {
+          if (!checkAlreadyExists || (checkAlreadyExists && JSON.stringify(checkAlreadyExists.changes) !== JSON.stringify(financialAnalysis))) {
+            delete editVerificationDto.verificationData?.financialAnalysis; // Remove financialAnalysis from editVerificationDto to avoid duplicate data
             const createEditRequest = await this.prisma.editRequest.create({
               data: {
                 loan: {
@@ -2042,6 +2039,7 @@ export class LoanService {
                 type: EditRequestType.LoanData,
                 changes: financialAnalysis,
                 department: department,
+                remarks: "Financial_Analysis",
               },
             });
 
@@ -2192,7 +2190,6 @@ export class LoanService {
     for (let i = 0; i < images.length; i++) {
       result.push(`<div style="width: 70%; margin: 1%; border: 1px solid #ddd; padding: 10px; text-align: center; display: inline-block; vertical-align: top; box-sizing: border-box; page-break-inside: avoid;">
                   <img src="${images[i]}" style="width: 100%; height: 300px; object-fit: contain; margin-bottom: 10px;" />
-                  <div style="font-size: 12px; color: #666;">Uploaded on: ${istDate}</div>
                   </div>`);
 
       count++;
@@ -2754,7 +2751,7 @@ export class LoanService {
                 ...(v.assistantVerifierId && {
                   assistantVerifier: { connect: { id: v.assistantVerifierId } },
                 }),
-                status: VerificationStatus.Pending,
+                status: v.status as VerificationStatus,
                 locationType: v.locationType,
                 isPostponed: false,
                 postponedDate: null,
