@@ -38,6 +38,7 @@ model DepartmentRole {
   userId     Int
   department Department
   role       UserRole
+  status     UserStatus @default(Active)
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
   officeId   Int?

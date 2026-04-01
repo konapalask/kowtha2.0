@@ -229,11 +229,13 @@ export const axisBankSchema = {
           natureOfBusinessOther: {
             type: "string",
             title: "Nature of Business (Other)",
-            show: {
-              natureOfBusiness: "Others",
-            },
-            required: {
-              natureOfBusiness: "Others",
+            dependencies: {
+              show: {
+                natureOfBusiness: "Others",
+              },
+              required: {
+                natureOfBusiness: "Others",
+              },
             },
           },
           productServicesOffered: {

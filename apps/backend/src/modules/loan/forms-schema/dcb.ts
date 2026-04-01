@@ -726,6 +726,7 @@ export const dcbSchema = {
         properties: {
           detailsOfSalesAndPurchasesPeriodWise: {
             type: "array",
+            title: "Details of Sales and Purchases Period Wise",
             items: {
               type: "object",
               properties: {
