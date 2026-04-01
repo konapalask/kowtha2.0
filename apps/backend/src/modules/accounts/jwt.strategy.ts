@@ -17,9 +17,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(payload: any) {
     const userRoles = await getUserWithDepartmentRoles(this.prisma, payload.id);
-    if (!userRoles) {
-      return null;
-    }
 
     // Get officeId from the first department role that has an office
     const officeId = userRoles?.departmentRoles?.find(dr => dr.officeId)?.officeId || null;

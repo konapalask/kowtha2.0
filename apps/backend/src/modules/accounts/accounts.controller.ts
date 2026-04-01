@@ -7,7 +7,7 @@ import { AuthenticatedRequest } from '../common/types/request.types';
 import { ListUsersDto } from './dto/list-users.dto';
 import { ListAllUsersDto } from './dto/list-all-users.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
-import { UserRole, Department, UserStatus } from '@prisma/client';
+import { UserRole, Department } from '@prisma/client';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ParseIntPipe } from '@nestjs/common';
@@ -351,40 +351,6 @@ export class AccountsController {
     return {
       message: 'Department roles updated successfully',
       data: departmentRoles
-    };
-  }
-
-  @Patch('users/:id/department-role-status')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.Admin)
-  @ApiOperation({ summary: 'Activate/Deactivate a user for a department' })
-  @ApiQuery({
-    name: 'department',
-    enum: Department,
-    description: 'Department to update (FI or PD)',
-    example: 'FI'
-  })
-  async updateDepartmentRoleStatus(
-    @Param('id', ParseIntPipe) userId: number,
-    @Query('department') department: string,
-    @Body() body: { status: UserStatus },
-  ) {
-    if (!department || !Object.values(Department).includes(department as Department)) {
-      throw new BadRequestException('Valid department parameter is required (FI or PD)');
-    }
-    if (!body?.status || !Object.values(UserStatus).includes(body.status)) {
-      throw new BadRequestException('Valid status is required (Active or Inactive)');
-    }
-
-    const updated = await this.accountsService.updateDepartmentRoleStatus(
-      userId,
-      department as Department,
-      body.status
-    );
-
-    return {
-      message: 'Department role status updated successfully',
-      data: updated
     };
   }
    

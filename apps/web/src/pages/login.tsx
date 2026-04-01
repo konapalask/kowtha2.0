@@ -34,7 +34,7 @@ export default function Login() {
   // const { userDetails, setUserDetails } = useContext(UserContext);
   const [isNavigating, setIsNavigating] = useState(false);
   const [showDepartmentModal, setShowDepartmentModal] = useState(false);
-  const [userDepartmentRoles, setUserDepartmentRoles] = useState<{ department: string; role: string; status?: string }[]>([]);
+  const [userDepartmentRoles, setUserDepartmentRoles] = useState<{ department: string; role: string }[]>([]);
   const [userDetailsTemp, setUserDetailsTemp] = useState<any>(null);
   const userDetails = getUserDetails();
 

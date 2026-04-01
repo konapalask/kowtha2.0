@@ -347,7 +347,6 @@ export class EditRequestService {
       if (filters?.department) {
         // Include edit requests that either have this department set, or have null department
         // but belong to a loan/verification with this department (e.g. FI requests often have null)
-        // Also include Login-type (device change) requests which have no loan/verification.
         const departmentCondition: Prisma.EditRequestWhereInput = {
           OR: [
             { department: filters.department },
@@ -358,13 +357,6 @@ export class EditRequestService {
             {
               department: null,
               verification: { department: filters.department },
-            },
-            {
-              type: EditRequestType.Login,
-              OR: [
-                { department: null },
-                { department: filters.department },
-              ],
             },
           ],
         };

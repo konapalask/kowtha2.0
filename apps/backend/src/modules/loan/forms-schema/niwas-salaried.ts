@@ -803,7 +803,7 @@ export const niwasSalariedSchema = {
           },
           nameofInterviewer: {
             type: "string",
-            title: "Name of PD Officer",
+            title: "Name of Interviewer",
           },
           discussionDate: {
             type: "string",

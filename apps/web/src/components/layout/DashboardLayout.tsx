@@ -44,8 +44,6 @@ import {
   getUserDetailsUpdateCounter,
   getCurrentDepartmentRole,
   getFirstAvailableNavigationOption,
-  isDepartmentActiveForUser,
-  getFirstActiveDepartmentForUser,
 } from "@/utils/utility";
 import { getAllEditRequestsApi } from "@/services/verifier.services";
 import { updateUserDepartmentApi } from "@/services/auth.services";
@@ -95,7 +93,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
   const [showDepartmentModal, setShowDepartmentModal] = useState(false);
   const [userDepartmentRoles, setUserDepartmentRoles] = useState<
-    { department: string; role: string; status?: string }[]
+    { department: string; role: string }[]
   >([]);
   const [modalUserData, setModalUserData] = useState(userDetails);
   const [isLoadingUserData, setIsLoadingUserData] = useState(false);
@@ -132,18 +130,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     const initialCurrentDept = initializeCurrentDepartment();
     setCurrentDept(initialCurrentDept);
   }, [userDetails?.defaultDepartment]);
-
-  // If user becomes inactive in current department, fallback to first active
-  useEffect(() => {
-    if (currentDept && !isDepartmentActiveForUser(currentDept)) {
-      const fallback = getFirstActiveDepartmentForUser();
-      if (fallback && fallback !== currentDept) {
-        setCurrentDept(fallback);
-        setCurrentDepartment(fallback);
-        message.info(`Switched to ${fallback} since ${currentDept} is inactive`);
-      }
-    }
-  }, [currentDept, userDetails?.departmentRoles]);
 
   useEffect(() => {
     getOfficesApi()
@@ -306,10 +292,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const handleCurrentDepartmentChange = (newCurrentDepartment: string) => {
     console.log("Changing current department to:", newCurrentDepartment);
-    if (!isDepartmentActiveForUser(newCurrentDepartment)) {
-      message.error(`${newCurrentDepartment} (Not supported for Inactive)`);
-      return;
-    }
     setCurrentDept(newCurrentDepartment);
     setCurrentDepartment(newCurrentDepartment);
     message.success(`Current department changed to ${newCurrentDepartment}`);

@@ -105,17 +105,13 @@ export class AccountsService {
       }
 
       const userRoles = await getUserWithDepartmentRoles(this.prisma, user.id);
-      const hasAnyActiveDepartment = userRoles?.departmentRoles?.some(r => r.status === UserStatus.Active);
-      if (!hasAnyActiveDepartment) {
-        throw new BadRequestException('Your account is not active in any department. Please contact administrator.');
-      }
 
       // Check if user has FieldExecutive role in PD and FI (both)
       const hasFieldExecutiveInPD = userRoles.departmentRoles.some(
-        r => r.role === UserRole.FieldExecutive && r.department === Department.PD && r.status === UserStatus.Active
+        r => r.role === UserRole.FieldExecutive && r.department === Department.PD
       );
       const hasFieldExecutiveInFI = userRoles.departmentRoles.some(
-        r => r.role === UserRole.FieldExecutive && r.department === Department.FI && r.status === UserStatus.Active
+        r => r.role === UserRole.FieldExecutive && r.department === Department.FI
       );
       const hasFieldExecutiveRole = hasFieldExecutiveInPD || hasFieldExecutiveInFI;
 
@@ -177,10 +173,6 @@ export class AccountsService {
       }
 
       const userRoles = await getUserWithDepartmentRoles(this.prisma, user.id);
-      const hasAnyActiveDepartment = userRoles?.departmentRoles?.some(r => r.status === UserStatus.Active);
-      if (!hasAnyActiveDepartment) {
-        throw new UnauthorizedException('Access denied: Your account is not active in any department');
-      }
 
       await this.loggingService.info('User found', {
         user: user,
@@ -192,8 +184,7 @@ export class AccountsService {
       // Check if user has FieldExecutive role in PD or FI departments
       const fieldExecutiveRoles = userRoles.departmentRoles.filter(
         r => r.role === UserRole.FieldExecutive && 
-        (r.department === Department.PD || r.department === Department.FI) &&
-        r.status === UserStatus.Active
+        (r.department === Department.PD || r.department === Department.FI)
       );
       const hasFieldExecutiveRole = fieldExecutiveRoles.length > 0;
 
@@ -368,34 +359,6 @@ export class AccountsService {
       if (user.status !== 'Active') {
         throw new BadRequestException('Your account is not active. Please contact administrator.');
       }
-      const hasAnyActiveDepartment = user.departmentRoles?.some(r => r.status === UserStatus.Active);
-      if (!hasAnyActiveDepartment) {
-        throw new BadRequestException('Your account is not active in any department. Please contact administrator.');
-      }
-
-      // If defaultDepartment is inactive/missing, auto-switch to an active department
-      if (user.defaultDepartment) {
-        const defaultDeptRole = user.departmentRoles.find(r => r.department === user.defaultDepartment);
-        if (!defaultDeptRole || defaultDeptRole.status !== UserStatus.Active) {
-          const nextActive = user.departmentRoles.find(r => r.status === UserStatus.Active);
-          if (nextActive) {
-            await this.prisma.user.update({
-              where: { id: user.id },
-              data: { defaultDepartment: nextActive.department },
-            });
-            user.defaultDepartment = nextActive.department;
-          }
-        }
-      } else {
-        const nextActive = user.departmentRoles.find(r => r.status === UserStatus.Active);
-        if (nextActive) {
-          await this.prisma.user.update({
-            where: { id: user.id },
-            data: { defaultDepartment: nextActive.department },
-          });
-          user.defaultDepartment = nextActive.department;
-        }
-      }
 
       await this.loggingService.debug('User validated successfully', { userId: id });
       
@@ -428,22 +391,20 @@ export class AccountsService {
   async listUsers(filters?: ListUsersDto): Promise<{ items: any[] }> {
     try {
       const where: any = {
-        status: UserStatus.Active
+        status: filters?.status || 'Active'
       };
 
       if (filters?.role) {
         where.departmentRoles = {
           some: {
             ...(filters.department && { department: filters.department }),
-            ...(filters.role && { role: filters.role }),
-            status: filters?.status || UserStatus.Active
+            ...(filters.role && { role: filters.role })
           }
         };
       } else {
         where.departmentRoles = {
           some: {
-            department: filters.department,
-            status: filters?.status || UserStatus.Active
+            department: filters.department
           }
         };
       }
@@ -491,7 +452,6 @@ export class AccountsService {
             select: {
               department: true,
               role: true,
-              status: true,
               officeId: true
             }
           }
@@ -526,15 +486,13 @@ export class AccountsService {
           if (filteredDepartmentRole) {
             departmentRole = {
               department: filteredDepartmentRole.department,
-              role: filteredDepartmentRole.role,
-              status: filteredDepartmentRole.status
+              role: filteredDepartmentRole.role
             };
           }
         }
 
         return {
           ...user,
-          status: departmentRole?.status || user.status,
           pendingVerifications: user._count.verifications,
           availabletoday: !!attendance,
           department: departmentRole?.department, // Single object instead of array
@@ -624,7 +582,6 @@ export class AccountsService {
             select: {
               department: true,
               role: true,
-              status: true,
               officeId: true
             }
           },
@@ -646,16 +603,7 @@ export class AccountsService {
       });
 
       return {
-        items: users.map((u) => {
-          const deptRole = filters?.department
-            ? u.departmentRoles.find((dr) => dr.department === filters.department)
-            : undefined;
-          return {
-            ...u,
-            role: deptRole?.role,
-            status: deptRole?.status || u.status,
-          };
-        }),
+        items: users,
         meta: {
           total,
           page,
@@ -1325,39 +1273,22 @@ export class AccountsService {
         throw new BadRequestException('Duplicate departments are not allowed');
       }
 
-      const nextDepartments = updateUserDepartmentRolesDto.departmentRoles.map(dr => dr.department);
-
       // Use transaction to update department roles atomically
       const result = await this.prisma.$transaction(async (prisma) => {
-        // Delete roles that were removed
+        // Delete existing department roles for this user
         await prisma.departmentRole.deleteMany({
-          where: {
-            userId,
-            department: { notIn: nextDepartments }
-          },
+          where: { userId },
         });
 
-        // Upsert each role (preserve status unless explicitly provided)
-        const upserted = await Promise.all(
+        // Create new department roles
+        const createdDepartmentRoles = await Promise.all(
           updateUserDepartmentRolesDto.departmentRoles.map(async (deptRole) => {
-            return await prisma.departmentRole.upsert({
-              where: {
-                userId_department: {
-                  userId,
-                  department: deptRole.department
-                }
-              },
-              create: {
-                userId,
+            return await prisma.departmentRole.create({
+              data: {
+                userId: userId,
                 department: deptRole.department,
                 role: deptRole.role,
                 officeId: deptRole.officeId,
-                status: deptRole.status || UserStatus.Active
-              },
-              update: {
-                role: deptRole.role,
-                officeId: deptRole.officeId,
-                ...(deptRole.status ? { status: deptRole.status } : {})
               },
               include: {
                 user: {
@@ -1373,7 +1304,7 @@ export class AccountsService {
           })
         );
 
-        return upserted;
+        return createdDepartmentRoles;
       });
 
       await this.loggingService.info('User department roles updated successfully', {
@@ -1390,62 +1321,6 @@ export class AccountsService {
       await this.loggingService.error('Failed to update user department roles', {
         userId: userId,
         departmentRoles: updateUserDepartmentRolesDto.departmentRoles,
-        error: error.message,
-        stack: error.stack,
-      });
-      throw error;
-    }
-  }
-
-  async updateDepartmentRoleStatus(userId: number, department: Department, status: UserStatus) {
-    try {
-      const existing = await this.prisma.departmentRole.findUnique({
-        where: {
-          userId_department: {
-            userId,
-            department,
-          },
-        },
-      });
-
-      if (!existing) {
-        throw new NotFoundException(`Department role not found for user ${userId} in department ${department}`);
-      }
-
-      // Prevent deactivating the last active admin in this department
-      if (status === UserStatus.Inactive && existing.role === UserRole.Admin) {
-        const otherActiveAdmins = await this.prisma.departmentRole.count({
-          where: {
-            userId: { not: userId },
-            department,
-            role: UserRole.Admin,
-            status: UserStatus.Active,
-            user: { status: UserStatus.Active }
-          }
-        });
-
-        if (otherActiveAdmins === 0) {
-          throw new BadRequestException('At least one active admin is required');
-        }
-      }
-
-      return await this.prisma.departmentRole.update({
-        where: {
-          userId_department: {
-            userId,
-            department,
-          },
-        },
-        data: { status },
-      });
-    } catch (error) {
-      if (error instanceof NotFoundException || error instanceof BadRequestException) {
-        throw error;
-      }
-      await this.loggingService.error('Failed to update department role status', {
-        userId,
-        department,
-        status,
         error: error.message,
         stack: error.stack,
       });
