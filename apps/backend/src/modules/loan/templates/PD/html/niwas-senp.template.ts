@@ -273,7 +273,7 @@ export const niwasSenpTemplate = (verificationData: any, html_data: any) => {
           </td>
         </tr>
         <tr>
-          <td style="${labelCellStyle}">Do you consume Nicotine Products or Alcohol?</td>
+          <td style="${labelCellStyle}">Did you consume Nicotine Products or Alcohol?</td>
           <td style="${valueCellStyle}" colspan="5"> ${formatMultiline(assets.consumptionHabits) || "Not provided"}</td>
           </tr>
       </table>

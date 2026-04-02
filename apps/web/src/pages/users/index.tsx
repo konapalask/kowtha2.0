@@ -24,7 +24,6 @@ import {
   getUsersApi,
   updateUserApi,
   updateUserDepartmentRolesApi,
-  updateUserDepartmentRoleStatusApi,
   UserFilters,
 } from "@/services/users.services";
 import {
@@ -339,7 +338,7 @@ export default function Users() {
 
       if (editingUser) {
         // Split PATCH: main fields, then departmentRoles
-        const { departmentRoles, status: _status, ...mainFields } = trimmedValues;
+        const { departmentRoles, ...mainFields } = trimmedValues;
         await updateUserApi(editingUser?.id, mainFields);
         await updateUserDepartmentRolesApi(editingUser?.id, departmentRoles);
 
@@ -394,7 +393,6 @@ export default function Users() {
       locality: user.locality,
       officeId: user.office?.id || user.officeId,
       departmentRoles: user.departmentRoles,
-      status: user.status,
     });
     setIsModalVisible(true);
   };
@@ -413,26 +411,11 @@ export default function Users() {
   };
 
   const handleUserStatus = (status: string) => {
-    if (!editingUser) return;
-    setLoading(true);
-    updateUserDepartmentRoleStatusApi(editingUser.id, status as "Active" | "Inactive")
-      .then(() => {
-        message.success(
-          `User ${status === "Active" ? "activated" : "deactivated"} successfully`
-        );
-        // Close modal immediately to avoid stale form state
-        setIsModalVisible(false);
-        setEditingUser(null);
-        form.resetFields();
-        form.setFieldsValue({ departmentRoles: [] });
-
-        // Refresh list
-        fetchUsers(pagination.current, pagination.pageSize, filters);
-      })
-      .catch((error: any) => {
-        message.error(error?.response?.data?.message || "Failed to update user status");
-      })
-      .finally(() => setLoading(false));
+    form.setFieldsValue({ status });
+    handleSubmit({
+      ...form.getFieldsValue(),
+      status: status,
+    });
   };
 
   const handleTableChange = (newPagination: any) => {

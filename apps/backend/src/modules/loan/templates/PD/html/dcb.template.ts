@@ -217,7 +217,7 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
     <tr>
       <td style="${labelCellStyle}">Bank</td>
       <td style="${labelCellStyle}">Type of Loan</td>
-      <td style="${labelCellStyle}">o/s Amount</td>
+      <td style="${labelCellStyle}">o/s Amount/</td>
       <td style="${labelCellStyle}">EMI</td>
     </tr>
     ${ensureArray(detailsOfAllLoansAsOn?.details)?.map((item: any) => `

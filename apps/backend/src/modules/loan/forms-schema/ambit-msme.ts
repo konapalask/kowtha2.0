@@ -589,7 +589,7 @@ export const ambitMsmeSchema = {
         properties: {
           endUse: {
             type: "string",
-            title: "End Use of Loan Purpose",
+            title: "End Use of Loan Purppose",
             ui: {
               widget: "textarea",
               rows: 3,

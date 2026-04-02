@@ -1,5 +1,5 @@
 import { IsArray, ValidateNested, IsEnum, IsNumber, IsOptional } from 'class-validator';
-import { UserRole, Department, UserStatus } from '@prisma/client';
+import { UserRole, Department } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
@@ -19,16 +19,6 @@ class DepartmentRoleUpdateDto {
   })
   @IsEnum(UserRole)
   role: UserRole;
-
-  @ApiProperty({
-    description: 'Status for this department role',
-    enum: UserStatus,
-    required: false,
-    example: 'Active',
-  })
-  @IsEnum(UserStatus)
-  @IsOptional()
-  status?: UserStatus;
 
   @ApiProperty({ 
     description: 'Office ID for this department',

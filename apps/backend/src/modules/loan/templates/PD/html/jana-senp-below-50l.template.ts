@@ -818,7 +818,7 @@ export const janaSenpBelow50lTemplate = (
               <td style="${labelCellStyle}">Loan Amount</td>
               <td style="${labelCellStyle}">O/S Balance (in Lakhs)</td>
               <td style="${labelCellStyle}">EMI (in Rs.)</td>
-              <td style="${labelCellStyle}">Tenure</td>
+              <td style="${labelCellStyle}">Tenor</td>
               <td style="${labelCellStyle}">MOB</td>
               <td style="${labelCellStyle}">EMI Paid Bank</td>
             </tr>

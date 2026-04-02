@@ -475,7 +475,7 @@ export const axisFinanceSchema = {
                 },
                 amount: {
                   type: "number",
-                  title: "O/S Amount",
+                  title: "Loan Amount",
                   formatter: {
                     useIndianFormat: true,
                     locale: "en-IN",
