@@ -1,5 +1,5 @@
 import { Request } from 'express';
-import { UserRole, Department } from '@prisma/client';
+import { UserRole, Department, UserStatus } from '@prisma/client';
 
 export interface AuthenticatedRequest extends Request {
   user: {
@@ -26,6 +26,7 @@ export interface UserWithDepartmentRoles {
   departmentRoles: Array<{
     department: Department;
     role: UserRole;
+    status: UserStatus;
     officeId?: number;
   }>;
 }
@@ -44,6 +45,7 @@ export async function getUserWithDepartmentRoles(
           select: {
             department: true,
             role: true,
+            status: true,
             officeId: true
           }
         }
