@@ -44,14 +44,16 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  OnApplicationShutdown,
 } from "@nestjs/common";
 
 const limit = pLimit(3); // allow 3 workers at a time (tune this)
 
 @Injectable()
-export class LoanService {
+export class LoanService implements OnApplicationShutdown {
   private financialAnalysisTemplatesService: any;
   private pdTemplateServiceInstance: any;
+  private browserPromise: Promise<puppeteer.Browser> | null = null;
 
   constructor(
     private prisma: PrismaService,
@@ -101,49 +103,66 @@ export class LoanService {
     });
   }
 
+  private getPdfBrowser(): Promise<puppeteer.Browser> {
+    if (!this.browserPromise) {
+      this.browserPromise = puppeteer.launch({
+        headless: true,
+        args: [
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--lang=en-IN",
+          "--intl.accept_languages=en-IN",
+          "--disable-web-security",
+          "--disable-features=VizDisplayCompositor",
+        ],
+      });
+    }
+    return this.browserPromise;
+  }
+
+  async onApplicationShutdown() {
+    if (!this.browserPromise) return;
+    try {
+      const browser = await this.browserPromise;
+      await browser.close();
+    } catch (error) {
+      this.logger.warn("Failed to close Puppeteer browser on shutdown");
+    } finally {
+      this.browserPromise = null;
+    }
+  }
+
   async PDFBufferGeneration(
     htmlTemplate: string,
     bankName?: string
   ): Promise<Buffer> {
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--lang=en-IN",
-        "--intl.accept_languages=en-IN",
-        "--disable-web-security",
-        "--disable-features=VizDisplayCompositor",
-      ],
-    });
-
-    // Create a new page
+    const browser = await this.getPdfBrowser();
     const page = await browser.newPage();
+    try {
+      // ßSet content to the HTML template
+      await page.setContent(htmlTemplate, {
+        waitUntil: "networkidle0",
+      });
 
-    // ßSet content to the HTML template
-    await page.setContent(htmlTemplate, {
-      waitUntil: "networkidle0",
-    });
+      // Wait a bit more to ensure content is fully loaded
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    // Wait a bit more to ensure content is fully loaded
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Generate current IST date
+      const istDate = new Date().toLocaleString("en-IN", {
+        timeZone: "Asia/Kolkata",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
 
-    // Generate current IST date
-    const istDate = new Date().toLocaleString("en-IN", {
-      timeZone: "Asia/Kolkata",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+      console.log("Footer template variables:", {
+        bankName: bankName || "Kowtha",
+        istDate: istDate,
+      });
 
-    console.log("Footer template variables:", {
-      bankName: bankName || "Kowtha",
-      istDate: istDate,
-    });
-
-    const footerTemplate = `
+      const footerTemplate = `
       <div style="
           font-size: 10px;
           width: 100%;
@@ -169,13 +188,13 @@ export class LoanService {
     const pdfArray = await page.pdf({
       format: "a4",
       margin: {
-        top: "60px", 
+        top: "60px",
         right: "20px",
-        bottom: "80px", 
+        bottom: "80px",
         left: "20px",
       },
       printBackground: true,
-      preferCSSPageSize: false, 
+      preferCSSPageSize: false,
       displayHeaderFooter: true,
       headerTemplate: `
         <div style="
@@ -191,10 +210,10 @@ export class LoanService {
       footerTemplate: footerTemplate,
     });
 
-    const pdfBuffer: Buffer = Buffer.from(pdfArray);
-
-    await browser.close();
-    return pdfBuffer;
+      return Buffer.from(pdfArray);
+    } finally {
+      await page.close().catch(() => undefined);
+    }
   }
 
   async findLoanByApplicationNumber(
@@ -2361,41 +2380,31 @@ export class LoanService {
       } else {
         throw new NotFoundException("Invalid address type");
       }
-      // Launch a new browser instance
-      const browser = await puppeteer.launch({
-        headless: true,
-        args: [
-          "--no-sandbox",
-          "--disable-setuid-sandbox",
-          "--lang=en-IN",
-          "--intl.accept_languages=en-IN",
-        ],
-      });
-
-      // Create a new page
+      const browser = await this.getPdfBrowser();
       const page = await browser.newPage();
+      let pdfBuffer: Buffer;
+      try {
+        // Set content to the HTML template
+        await page.setContent(htmlTemplate, {
+          waitUntil: "networkidle0",
+        });
 
-      // Set content to the HTML template
-      await page.setContent(htmlTemplate, {
-        waitUntil: "networkidle0",
-      });
-
-      // Generate PDF
-      const pdfArray = await page.pdf({
-        format: "a4",
-        margin: {
-          top: "20px",
-          right: "20px",
-          bottom: "20px",
-          left: "20px",
-        },
-        printBackground: true,
-        preferCSSPageSize: true,
-      });
-      const pdfBuffer: Buffer = Buffer.from(pdfArray);
-
-      // Close the browser
-      await browser.close();
+        // Generate PDF
+        const pdfArray = await page.pdf({
+          format: "a4",
+          margin: {
+            top: "20px",
+            right: "20px",
+            bottom: "20px",
+            left: "20px",
+          },
+          printBackground: true,
+          preferCSSPageSize: true,
+        });
+        pdfBuffer = Buffer.from(pdfArray);
+      } finally {
+        await page.close().catch(() => undefined);
+      }
 
       await this.loggingService.info(
         "Verification PDF generated successfully",

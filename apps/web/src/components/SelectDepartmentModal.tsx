@@ -6,6 +6,7 @@ import { CloseOutlined } from "@ant-design/icons";
 interface DepartmentRole {
   department: string;
   role: string;
+  status?: string;
 }
 
 interface SelectDepartmentModalProps {
@@ -145,8 +146,17 @@ const SelectDepartmentModal: React.FC<SelectDepartmentModalProps> = ({
         style={{ width: "100%" }}
         aria-labelledby="department-modal-description"
       >
-        {departmentRoles.map(({ department, role }) => {
-          const isDisabled = role === "FieldExecutive" && (department === "PD" || department === "FI");
+        {departmentRoles.map(({ department, role, status }) => {
+          const normalizedStatus = String(status || "").trim().toLowerCase();
+          const isInactive = normalizedStatus === "inactive";
+          const isFieldExecutiveDisabled =
+            role === "FieldExecutive" && (department === "PD" || department === "FI");
+          const isDisabled = isInactive || isFieldExecutiveDisabled;
+          const disabledReason = isInactive
+            ? "Not supported for Inactive"
+            : isFieldExecutiveDisabled
+              ? "Not supported for FieldExecutive"
+              : null;
           return (
             <Radio
               key={department}
@@ -170,9 +180,9 @@ const SelectDepartmentModal: React.FC<SelectDepartmentModalProps> = ({
               <div style={{ display: "flex", flexDirection: "column" }}>
                 <span style={{ fontWeight: 600, color: isDisabled ? "#94a3b8" : "#1e293b", fontSize: 16 }}>
                   {department}
-                  {isDisabled && (
+                  {disabledReason && (
                     <span style={{ marginLeft: 8, fontSize: 12, color: "#ef4444" }}>
-                      (Not supported for FieldExecutive)
+                      ({disabledReason})
                     </span>
                   )}
                 </span>
