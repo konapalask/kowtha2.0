@@ -52,6 +52,10 @@ const limit = pLimit(3); // allow 3 workers at a time (tune this)
 export class LoanService {
   private financialAnalysisTemplatesService: any;
   private pdTemplateServiceInstance: any;
+  private browserPromise: Promise<puppeteer.Browser> | null = null;
+  private pdfQueue: Promise<any> = Promise.resolve();
+  private pdfConcurrency = 0;
+  private readonly MAX_PDF_CONCURRENCY = 2;
 
   constructor(
     private prisma: PrismaService,
@@ -101,100 +105,130 @@ export class LoanService {
     });
   }
 
-  async PDFBufferGeneration(
-    htmlTemplate: string,
-    bankName?: string
-  ): Promise<Buffer> {
-    const browser = await puppeteer.launch({
+  private async getPdfBrowser(): Promise<puppeteer.Browser> {
+    if (this.browserPromise) {
+      const browser = await this.browserPromise.catch(() => null);
+      if (browser && browser.isConnected()) {
+        return browser;
+      }
+      this.browserPromise = null;
+    }
+    this.browserPromise = puppeteer.launch({
       headless: true,
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-gpu",
         "--lang=en-IN",
         "--intl.accept_languages=en-IN",
         "--disable-web-security",
         "--disable-features=VizDisplayCompositor",
       ],
     });
-
-    // Create a new page
-    const page = await browser.newPage();
-
-    // ßSet content to the HTML template
-    await page.setContent(htmlTemplate, {
-      waitUntil: "networkidle0",
+    const browser = await this.browserPromise;
+    browser.on("disconnected", () => {
+      this.logger.warn("Puppeteer browser disconnected, will re-launch on next request");
+      this.browserPromise = null;
     });
+    return browser;
+  }
 
-    // Wait a bit more to ensure content is fully loaded
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+  private async withPdfQueue<T>(fn: () => Promise<T>): Promise<T> {
+    while (this.pdfConcurrency >= this.MAX_PDF_CONCURRENCY) {
+      await this.pdfQueue;
+    }
+    this.pdfConcurrency++;
+    let resolve: () => void;
+    const slot = new Promise<void>((r) => (resolve = r));
+    this.pdfQueue = slot;
+    try {
+      return await fn();
+    } finally {
+      this.pdfConcurrency--;
+      resolve!();
+    }
+  }
 
-    // Generate current IST date
-    const istDate = new Date().toLocaleString("en-IN", {
-      timeZone: "Asia/Kolkata",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+  async PDFBufferGeneration(
+    htmlTemplate: string,
+    bankName?: string
+  ): Promise<Buffer> {
+    return this.withPdfQueue(async () => {
+      const browser = await this.getPdfBrowser();
+      const page = await browser.newPage();
+      try {
+        await page.setContent(htmlTemplate, {
+          waitUntil: "domcontentloaded",
+          timeout: 30000,
+        });
 
-    console.log("Footer template variables:", {
-      bankName: bankName || "Kowtha",
-      istDate: istDate,
-    });
+        // Wait a bit more to ensure content is fully loaded
+        await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    const footerTemplate = `
-      <div style="
-          font-size: 10px;
-          width: 100%;
-          padding: 6px 16px;
-          color: #7f8c8d;
-          border-top: 1px solid #eee;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          line-height: 1.4;
-          height: 50px;
-          box-sizing: border-box;
-        ">
-        <div style="color: rgb(8, 136, 36); font-weight: 600;">${bankName || "Kowtha"}</div>
-        <div>
-          Generated on ${istDate} —
-          Page <span class="pageNumber"></span> of <span class="totalPages"></span>
-        </div>
-      </div>
-    `;
+        // Generate current IST date
+        const istDate = new Date().toLocaleString("en-IN", {
+          timeZone: "Asia/Kolkata",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
 
-    const pdfArray = await page.pdf({
-      format: "a4",
-      margin: {
-        top: "60px", 
-        right: "20px",
-        bottom: "80px", 
-        left: "20px",
-      },
-      printBackground: true,
-      preferCSSPageSize: false, 
-      displayHeaderFooter: true,
-      headerTemplate: `
+        const footerTemplate = `
         <div style="
-            font-size: 8px;
+            font-size: 10px;
             width: 100%;
-            padding: 4px 16px;
-            color: #999;
-            text-align: center;
+            padding: 6px 16px;
+            color: #7f8c8d;
+            border-top: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.4;
+            height: 50px;
+            box-sizing: border-box;
           ">
-          <!-- ${bankName || "Kowtha"} - Verification Report -->
+          <div style="color: rgb(8, 136, 36); font-weight: 600;">${bankName || "Kowtha"}</div>
+          <div>
+            Generated on ${istDate} —
+            Page <span class="pageNumber"></span> of <span class="totalPages"></span>
+          </div>
         </div>
-      `,
-      footerTemplate: footerTemplate,
+      `;
+
+        const pdfArray = await page.pdf({
+          format: "a4",
+          margin: {
+            top: "60px",
+            right: "20px",
+            bottom: "80px",
+            left: "20px",
+          },
+          printBackground: true,
+          preferCSSPageSize: false,
+          displayHeaderFooter: true,
+          headerTemplate: `
+          <div style="
+              font-size: 8px;
+              width: 100%;
+              padding: 4px 16px;
+              color: #999;
+              text-align: center;
+            ">
+            <!-- ${bankName || "Kowtha"} - Verification Report -->
+          </div>
+        `,
+          footerTemplate: footerTemplate,
+        });
+
+        return Buffer.from(pdfArray);
+      } finally {
+        await page.close().catch(() => undefined);
+      }
     });
-
-    const pdfBuffer: Buffer = Buffer.from(pdfArray);
-
-    await browser.close();
-    return pdfBuffer;
   }
 
   async findLoanByApplicationNumber(
@@ -2361,41 +2395,31 @@ export class LoanService {
       } else {
         throw new NotFoundException("Invalid address type");
       }
-      // Launch a new browser instance
-      const browser = await puppeteer.launch({
-        headless: true,
-        args: [
-          "--no-sandbox",
-          "--disable-setuid-sandbox",
-          "--lang=en-IN",
-          "--intl.accept_languages=en-IN",
-        ],
+      const pdfBuffer = await this.withPdfQueue(async () => {
+        const browser = await this.getPdfBrowser();
+        const page = await browser.newPage();
+        try {
+          await page.setContent(htmlTemplate, {
+            waitUntil: "domcontentloaded",
+            timeout: 30000,
+          });
+
+          const pdfArray = await page.pdf({
+            format: "a4",
+            margin: {
+              top: "20px",
+              right: "20px",
+              bottom: "20px",
+              left: "20px",
+            },
+            printBackground: true,
+            preferCSSPageSize: true,
+          });
+          return Buffer.from(pdfArray);
+        } finally {
+          await page.close().catch(() => undefined);
+        }
       });
-
-      // Create a new page
-      const page = await browser.newPage();
-
-      // Set content to the HTML template
-      await page.setContent(htmlTemplate, {
-        waitUntil: "networkidle0",
-      });
-
-      // Generate PDF
-      const pdfArray = await page.pdf({
-        format: "a4",
-        margin: {
-          top: "20px",
-          right: "20px",
-          bottom: "20px",
-          left: "20px",
-        },
-        printBackground: true,
-        preferCSSPageSize: true,
-      });
-      const pdfBuffer: Buffer = Buffer.from(pdfArray);
-
-      // Close the browser
-      await browser.close();
 
       await this.loggingService.info(
         "Verification PDF generated successfully",
