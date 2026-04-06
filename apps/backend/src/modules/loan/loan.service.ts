@@ -105,31 +105,33 @@ export class LoanService {
     });
   }
 
-  private getPdfBrowser(): Promise<puppeteer.Browser> {
-    if (!this.browserPromise) {
-      this.browserPromise = puppeteer
-        .launch({
-          headless: true,
-          args: [
-            "--no-sandbox",
-            "--disable-setuid-sandbox",
-            "--disable-dev-shm-usage",
-            "--disable-gpu",
-            "--lang=en-IN",
-            "--intl.accept_languages=en-IN",
-            "--disable-web-security",
-            "--disable-features=VizDisplayCompositor",
-          ],
-        })
-        .then((browser) => {
-          browser.on("disconnected", () => {
-            this.logger.warn("Puppeteer browser disconnected, will re-launch on next request");
-            this.browserPromise = null;
-          });
-          return browser;
-        });
+  private async getPdfBrowser(): Promise<puppeteer.Browser> {
+    if (this.browserPromise) {
+      const browser = await this.browserPromise.catch(() => null);
+      if (browser && browser.isConnected()) {
+        return browser;
+      }
+      this.browserPromise = null;
     }
-    return this.browserPromise;
+    this.browserPromise = puppeteer.launch({
+      headless: true,
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-gpu",
+        "--lang=en-IN",
+        "--intl.accept_languages=en-IN",
+        "--disable-web-security",
+        "--disable-features=VizDisplayCompositor",
+      ],
+    });
+    const browser = await this.browserPromise;
+    browser.on("disconnected", () => {
+      this.logger.warn("Puppeteer browser disconnected, will re-launch on next request");
+      this.browserPromise = null;
+    });
+    return browser;
   }
 
   private async withPdfQueue<T>(fn: () => Promise<T>): Promise<T> {
@@ -172,11 +174,6 @@ export class LoanService {
           day: "numeric",
           hour: "2-digit",
           minute: "2-digit",
-        });
-
-        console.log("Footer template variables:", {
-          bankName: bankName || "Kowtha",
-          istDate: istDate,
         });
 
         const footerTemplate = `
