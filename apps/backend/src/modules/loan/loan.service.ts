@@ -159,7 +159,7 @@ export class LoanService {
       const page = await browser.newPage();
       try {
         await page.setContent(htmlTemplate, {
-          waitUntil: "domcontentloaded",
+          waitUntil: "networkidle2",
           timeout: 30000,
         });
 
@@ -2400,7 +2400,7 @@ export class LoanService {
         const page = await browser.newPage();
         try {
           await page.setContent(htmlTemplate, {
-            waitUntil: "domcontentloaded",
+            waitUntil: "networkidle2",
             timeout: 30000,
           });
 
