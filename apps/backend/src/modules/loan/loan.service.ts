@@ -44,16 +44,18 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
-  OnApplicationShutdown,
 } from "@nestjs/common";
 
 const limit = pLimit(3); // allow 3 workers at a time (tune this)
 
 @Injectable()
-export class LoanService implements OnApplicationShutdown {
+export class LoanService {
   private financialAnalysisTemplatesService: any;
   private pdTemplateServiceInstance: any;
   private browserPromise: Promise<puppeteer.Browser> | null = null;
+  private pdfQueue: Promise<any> = Promise.resolve();
+  private pdfConcurrency = 0;
+  private readonly MAX_PDF_CONCURRENCY = 2;
 
   constructor(
     private prisma: PrismaService,
@@ -105,30 +107,44 @@ export class LoanService implements OnApplicationShutdown {
 
   private getPdfBrowser(): Promise<puppeteer.Browser> {
     if (!this.browserPromise) {
-      this.browserPromise = puppeteer.launch({
-        headless: true,
-        args: [
-          "--no-sandbox",
-          "--disable-setuid-sandbox",
-          "--lang=en-IN",
-          "--intl.accept_languages=en-IN",
-          "--disable-web-security",
-          "--disable-features=VizDisplayCompositor",
-        ],
-      });
+      this.browserPromise = puppeteer
+        .launch({
+          headless: true,
+          args: [
+            "--no-sandbox",
+            "--disable-setuid-sandbox",
+            "--disable-dev-shm-usage",
+            "--disable-gpu",
+            "--lang=en-IN",
+            "--intl.accept_languages=en-IN",
+            "--disable-web-security",
+            "--disable-features=VizDisplayCompositor",
+          ],
+        })
+        .then((browser) => {
+          browser.on("disconnected", () => {
+            this.logger.warn("Puppeteer browser disconnected, will re-launch on next request");
+            this.browserPromise = null;
+          });
+          return browser;
+        });
     }
     return this.browserPromise;
   }
 
-  async onApplicationShutdown() {
-    if (!this.browserPromise) return;
+  private async withPdfQueue<T>(fn: () => Promise<T>): Promise<T> {
+    while (this.pdfConcurrency >= this.MAX_PDF_CONCURRENCY) {
+      await this.pdfQueue;
+    }
+    this.pdfConcurrency++;
+    let resolve: () => void;
+    const slot = new Promise<void>((r) => (resolve = r));
+    this.pdfQueue = slot;
     try {
-      const browser = await this.browserPromise;
-      await browser.close();
-    } catch (error) {
-      this.logger.warn("Failed to close Puppeteer browser on shutdown");
+      return await fn();
     } finally {
-      this.browserPromise = null;
+      this.pdfConcurrency--;
+      resolve!();
     }
   }
 
@@ -136,84 +152,86 @@ export class LoanService implements OnApplicationShutdown {
     htmlTemplate: string,
     bankName?: string
   ): Promise<Buffer> {
-    const browser = await this.getPdfBrowser();
-    const page = await browser.newPage();
-    try {
-      // ßSet content to the HTML template
-      await page.setContent(htmlTemplate, {
-        waitUntil: "networkidle0",
-      });
+    return this.withPdfQueue(async () => {
+      const browser = await this.getPdfBrowser();
+      const page = await browser.newPage();
+      try {
+        await page.setContent(htmlTemplate, {
+          waitUntil: "domcontentloaded",
+          timeout: 30000,
+        });
 
-      // Wait a bit more to ensure content is fully loaded
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+        // Wait a bit more to ensure content is fully loaded
+        await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // Generate current IST date
-      const istDate = new Date().toLocaleString("en-IN", {
-        timeZone: "Asia/Kolkata",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
+        // Generate current IST date
+        const istDate = new Date().toLocaleString("en-IN", {
+          timeZone: "Asia/Kolkata",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
 
-      console.log("Footer template variables:", {
-        bankName: bankName || "Kowtha",
-        istDate: istDate,
-      });
+        console.log("Footer template variables:", {
+          bankName: bankName || "Kowtha",
+          istDate: istDate,
+        });
 
-      const footerTemplate = `
-      <div style="
-          font-size: 10px;
-          width: 100%;
-          padding: 6px 16px;
-          color: #7f8c8d;
-          border-top: 1px solid #eee;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          line-height: 1.4;
-          height: 50px;
-          box-sizing: border-box;
-        ">
-        <div style="color: rgb(8, 136, 36); font-weight: 600;">${bankName || "Kowtha"}</div>
-        <div>
-          Generated on ${istDate} —
-          Page <span class="pageNumber"></span> of <span class="totalPages"></span>
-        </div>
-      </div>
-    `;
-
-    const pdfArray = await page.pdf({
-      format: "a4",
-      margin: {
-        top: "60px",
-        right: "20px",
-        bottom: "80px",
-        left: "20px",
-      },
-      printBackground: true,
-      preferCSSPageSize: false,
-      displayHeaderFooter: true,
-      headerTemplate: `
+        const footerTemplate = `
         <div style="
-            font-size: 8px;
+            font-size: 10px;
             width: 100%;
-            padding: 4px 16px;
-            color: #999;
-            text-align: center;
+            padding: 6px 16px;
+            color: #7f8c8d;
+            border-top: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.4;
+            height: 50px;
+            box-sizing: border-box;
           ">
-          <!-- ${bankName || "Kowtha"} - Verification Report -->
+          <div style="color: rgb(8, 136, 36); font-weight: 600;">${bankName || "Kowtha"}</div>
+          <div>
+            Generated on ${istDate} —
+            Page <span class="pageNumber"></span> of <span class="totalPages"></span>
+          </div>
         </div>
-      `,
-      footerTemplate: footerTemplate,
-    });
+      `;
 
-      return Buffer.from(pdfArray);
-    } finally {
-      await page.close().catch(() => undefined);
-    }
+        const pdfArray = await page.pdf({
+          format: "a4",
+          margin: {
+            top: "60px",
+            right: "20px",
+            bottom: "80px",
+            left: "20px",
+          },
+          printBackground: true,
+          preferCSSPageSize: false,
+          displayHeaderFooter: true,
+          headerTemplate: `
+          <div style="
+              font-size: 8px;
+              width: 100%;
+              padding: 4px 16px;
+              color: #999;
+              text-align: center;
+            ">
+            <!-- ${bankName || "Kowtha"} - Verification Report -->
+          </div>
+        `,
+          footerTemplate: footerTemplate,
+        });
+
+        return Buffer.from(pdfArray);
+      } finally {
+        await page.close().catch(() => undefined);
+      }
+    });
   }
 
   async findLoanByApplicationNumber(
@@ -2380,31 +2398,31 @@ export class LoanService implements OnApplicationShutdown {
       } else {
         throw new NotFoundException("Invalid address type");
       }
-      const browser = await this.getPdfBrowser();
-      const page = await browser.newPage();
-      let pdfBuffer: Buffer;
-      try {
-        // Set content to the HTML template
-        await page.setContent(htmlTemplate, {
-          waitUntil: "networkidle0",
-        });
+      const pdfBuffer = await this.withPdfQueue(async () => {
+        const browser = await this.getPdfBrowser();
+        const page = await browser.newPage();
+        try {
+          await page.setContent(htmlTemplate, {
+            waitUntil: "domcontentloaded",
+            timeout: 30000,
+          });
 
-        // Generate PDF
-        const pdfArray = await page.pdf({
-          format: "a4",
-          margin: {
-            top: "20px",
-            right: "20px",
-            bottom: "20px",
-            left: "20px",
-          },
-          printBackground: true,
-          preferCSSPageSize: true,
-        });
-        pdfBuffer = Buffer.from(pdfArray);
-      } finally {
-        await page.close().catch(() => undefined);
-      }
+          const pdfArray = await page.pdf({
+            format: "a4",
+            margin: {
+              top: "20px",
+              right: "20px",
+              bottom: "20px",
+              left: "20px",
+            },
+            printBackground: true,
+            preferCSSPageSize: true,
+          });
+          return Buffer.from(pdfArray);
+        } finally {
+          await page.close().catch(() => undefined);
+        }
+      });
 
       await this.loggingService.info(
         "Verification PDF generated successfully",
