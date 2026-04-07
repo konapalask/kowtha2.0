@@ -1,5 +1,5 @@
 import { useTabContext } from "@/pages/verify/[id]";
-import { getS3ImageUrl } from "@/utils/utility";
+import { getS3ImageUrl, compressImage } from "@/utils/utility";
 import {
   CloseCircleOutlined,
   EditOutlined,
@@ -1463,20 +1463,26 @@ export const BusinessVerificationDetails: React.FC<
           fileExtension = "jpg";
         }
 
+        let uploadFile: File = file;
+        if (isImage) {
+          uploadFile = await compressImage(file);
+          fileExtension = "jpg";
+        }
+
         const fileName = `verification/${id}/${timestamp}-${randomStr}.${fileExtension}`;
 
         const { url: presignedUrl } = await getPresignedUploadUrl(
           fileName,
-          file.type
+          uploadFile.type
         );
 
-        const fileBlob = await file.arrayBuffer();
+        const fileBlob = await uploadFile.arrayBuffer();
 
         const uploadResponse = await fetch(presignedUrl, {
           method: "PUT",
           body: fileBlob,
           headers: {
-            "Content-Type": file.type,
+            "Content-Type": uploadFile.type,
           },
         });
 
@@ -1490,7 +1496,7 @@ export const BusinessVerificationDetails: React.FC<
           id: `${timestamp}-${randomStr}`,
           s3ImageUrl: fileName,
           type: isPdf ? "document" : "photo",
-          fileType: isPdf ? "pdf" : isPng ? "png" : "jpg",
+          fileType: isPdf ? "pdf" : "jpg",
           fileName: file.name,
           timestamp: new Date().toISOString(),
           isCamera: false,
@@ -1586,20 +1592,26 @@ export const BusinessVerificationDetails: React.FC<
         fileExtension = "jpg";
       }
 
+      let uploadFile: File = file;
+      if (isImage) {
+        uploadFile = await compressImage(file);
+        fileExtension = "jpg";
+      }
+
       const fileName = `verification/${id}/${timestamp}-${randomStr}.${fileExtension}`;
 
       const { url: presignedUrl } = await getPresignedUploadUrl(
         fileName,
-        file.type
+        uploadFile.type
       );
 
-      const fileBlob = await file.arrayBuffer();
+      const fileBlob = await uploadFile.arrayBuffer();
 
       const uploadResponse = await fetch(presignedUrl, {
         method: "PUT",
         body: fileBlob,
         headers: {
-          "Content-Type": file.type,
+          "Content-Type": uploadFile.type,
         },
       });
 
@@ -1611,7 +1623,7 @@ export const BusinessVerificationDetails: React.FC<
         id: `${timestamp}-${randomStr}`,
         s3ImageUrl: fileName,
         type: isPdf ? "document" : "photo",
-        fileType: isPdf ? "pdf" : isPng ? "png" : "jpg",
+        fileType: isPdf ? "pdf" : "jpg",
         fileName: file.name,
         timestamp: new Date().toISOString(),
         isCamera: false,

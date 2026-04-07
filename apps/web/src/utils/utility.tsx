@@ -25,6 +25,47 @@ export const getS3ImageUrl = async (s3ImageUrl: string): Promise<any> => {
   }
 };
 
+export const compressImage = (file: File, maxWidth = 1280, quality = 0.8): Promise<File> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      let width = img.width;
+      let height = img.height;
+
+      if (width > maxWidth) {
+        height = Math.round((height * maxWidth) / width);
+        width = maxWidth;
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d")!;
+      ctx.drawImage(img, 0, 0, width, height);
+
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            const originalMB = (file.size / (1024 * 1024)).toFixed(2);
+            const compressedMB = (blob.size / (1024 * 1024)).toFixed(2);
+            console.log(`Image compression: ${originalMB} MB -> ${compressedMB} MB (${file.name})`);
+            const compressedFile = new File([blob], file.name.replace(/\.\w+$/, ".jpg"), {
+              type: "image/jpeg",
+            });
+            resolve(compressedFile);
+          } else {
+            resolve(file);
+          }
+        },
+        "image/jpeg",
+        quality
+      );
+    };
+    img.onerror = () => resolve(file);
+    img.src = URL.createObjectURL(file);
+  });
+};
+
 export const isEmpty = (obj: any): boolean => {
   if (obj === null || obj === undefined) return true;
 
