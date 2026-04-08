@@ -402,7 +402,6 @@ export class LoanController {
           type
         );
       } else if (department === Department.PD) {
-        console.log("Preview PD Verification PDF");
         pdfBuffer = await this.pdTemplateService.generatePreviewPDF(Number(id), generate);
       }
 

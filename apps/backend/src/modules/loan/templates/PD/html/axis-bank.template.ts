@@ -9,8 +9,6 @@ const valueCellStyle =
   "border:1px solid #c7cdd1;padding:8px;color:#333;vertical-align:top";
 const headingStyle = "margin:8px 0;line-height:1.5;font-size:16px;font-weight:bold;text-transform:uppercase;color:#222";
 export const axisBankTemplate = (verificationData: any, html_data: any) => {
-  console.log("=== AXIS BANK TEMPLATE FUNCTION CALLED ===");
-  console.log("Verification data sections:", Object.keys(verificationData));
   const date = new Date();
   const timeZone = "Asia/Kolkata";
   const zonedDate = toZonedTime(date, timeZone);
@@ -27,13 +25,6 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
   const familyMembersList =
     verificationData.familyBackground?.familyMembers || [];
 
-  console.log(
-    "In axis-bank template - familyBackground:",
-    verificationData.familyBackground
-  );
-  console.log("familyMembersList length:", familyMembersList.length);
-  console.log("familyMembersList contents:", familyMembersList);
-
   const formatSummaryValue = (value: any) => {
     if (value === null || value === undefined || value === "") {
       return "Not Provided";
@@ -44,8 +35,6 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
   const computedTotalFamilyMembers =
     verificationData.familyBackground?.totalFamilyMembers ||
     familyMembersList.length;
-
-  console.log("computedTotalFamilyMembers:", computedTotalFamilyMembers);
 
   const computedEarningMembers =
     verificationData.familyBackground?.noOfEarningMembers ||
@@ -67,8 +56,6 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
         occupation.includes(keyword)
       );
     }).length;
-
-  console.log("computedEarningMembers:", computedEarningMembers);
 
   // Helper function to render family members
   const renderFamilyMembers = () => {

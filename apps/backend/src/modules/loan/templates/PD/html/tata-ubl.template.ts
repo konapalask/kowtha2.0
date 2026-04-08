@@ -2,11 +2,6 @@ import { format, toZonedTime } from "date-fns-tz";
 import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.template";
 
 export const tataUblTemplate = (verificationData: any, html_data: any) => {
-  console.log("=== TATA UBL TEMPLATE FUNCTION CALLED ===");
-  console.log("verificationData keys:", Object.keys(verificationData));
-  console.log("otherDetails:", verificationData.otherDetails);
-  console.log("liabilities:", verificationData.otherDetails?.liabilities);
-
   const date = new Date();
   const timeZone = "Asia/Kolkata";
   const zonedDate = toZonedTime(date, timeZone);
@@ -49,9 +44,7 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
   // Helper function to render liabilities table
   const renderLiabilities = () => {
     const liabilities = verificationData.otherDetails?.liabilities || [];
-    console.log("Tata UBL - renderLiabilities called with:", liabilities);
     if (!liabilities || liabilities.length === 0) {
-      console.log("No liabilities found, returning fallback");
       return '<tr><td colspan="6" style="border:1px solid #ccc;padding:8px;text-align:center">No liabilities reported</td></tr>';
     }
     const result = liabilities
@@ -68,10 +61,6 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
     `
       )
       .join("");
-    console.log(
-      "Tata UBL - renderLiabilities result:",
-      result.substring(0, 200) + "..."
-    );
     return result;
   };
 
