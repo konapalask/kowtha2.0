@@ -621,7 +621,7 @@ export const cholaSchema = {
           netProfitExpenditure: {
             type: "number",
             title: "Net Profit",
-            formula: "totalNetProfitIncome - (salaries + rentExpenses + electricity + transportOrTravelling + generalExpenses + maintenanceExpenses + otherIndirectExpenses)",
+            formula: "grossProfitIncome - (salaries + rentExpenses + electricity + transportOrTravelling + generalExpenses + maintenanceExpenses + otherIndirectExpenses)",
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
@@ -633,7 +633,7 @@ export const cholaSchema = {
           totalNetProfitExpenditure: {
             type: "number",
             title: "Total",
-            formula:"totalNetProfitIncome",
+            formula: "salaries + rentExpenses + electricity + transportOrTravelling + generalExpenses + maintenanceExpenses + otherIndirectExpenses + netProfitExpenditure",
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
@@ -678,7 +678,7 @@ export const cholaSchema = {
           totalIncome: {
             type: "number",
             title: "Total Income",
-            formula: "grossReceipts + otherIncomes + closingStock",
+            formula: "grossReceipts + otherIncome + closingStock",
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
@@ -702,7 +702,7 @@ export const cholaSchema = {
           totalNetProfitIncome: {
             type: "number",
             title: "Total",
-            formula: "grossProfitIncome + otherIncomes + closingStock + grossReceipts",
+            formula: "grossProfitIncome",
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
