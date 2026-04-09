@@ -11,11 +11,18 @@ export class AttendanceService {
 
   async createAttendance(userId: number, department: Department, createAttendanceDto: CreateAttendanceDto) {
     const { status = AttendanceStatus.Available, date } = createAttendanceDto;
-    
+
     const attendanceDate = new Date(date);
-    
+
     if (attendanceDate.getDate() !== new Date(date).getDate() || attendanceDate.getMonth() !== new Date(date).getMonth() || attendanceDate.getFullYear() !== new Date(date).getFullYear()) {
       throw new BadRequestException('You can only record attendance for today');
+    }
+
+    // Attendance freeze: only allow between 6am and 11am IST
+    const now = new Date();
+    const istHour = new Date(now.getTime() + (5.5 * 60 * 60 * 1000)).getUTCHours();
+    if (istHour < 6 || istHour >= 11) {
+      throw new BadRequestException('Attendance can only be marked between 6:00 AM and 11:00 AM IST');
     }
 
     const user = await this.prisma.user.findUnique({

@@ -7,7 +7,8 @@ const labelCellStyle =
   "border:1px solid #c7cdd1;padding:8px;font-weight:600;color:#222;background:#f4f6fb;vertical-align:top;width:32%";
 const valueCellStyle =
   "border:1px solid #c7cdd1;padding:8px;color:#333;vertical-align:top";
-const headingStyle = "margin:8px 0;line-height:1.5;font-size:16px;font-weight:bold;text-transform:uppercase;color:#222";
+const headingStyle =
+  "margin:8px 0;line-height:1.5;font-size:16px;font-weight:bold;text-transform:uppercase;color:#222";
 export const axisBankTemplate = (verificationData: any, html_data: any) => {
   console.log("=== AXIS BANK TEMPLATE FUNCTION CALLED ===");
   console.log("Verification data sections:", Object.keys(verificationData));
@@ -29,7 +30,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
 
   console.log(
     "In axis-bank template - familyBackground:",
-    verificationData.familyBackground
+    verificationData.familyBackground,
   );
   console.log("familyMembersList length:", familyMembersList.length);
   console.log("familyMembersList contents:", familyMembersList);
@@ -64,7 +65,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
         "home maker",
       ];
       return !nonEarningKeywords.some((keyword) =>
-        occupation.includes(keyword)
+        occupation.includes(keyword),
       );
     }).length;
 
@@ -145,7 +146,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
             </tr>
             <tr>
                 <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>PD address type: - (Residence/Office/Factory/Godown)</strong></p></td>
-                <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${verificationData.applicantDetails?.pdAddress || ""}</p></td>
+                <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${verificationData.applicantDetails?.pdAddressType || ""}</p></td>
             </tr>
             <tr>
                 <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Contact Number (Mobile / Landline)</strong></p></td>
@@ -179,7 +180,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
                             <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${member.relationToApplicant || ""}</p></td>
                             <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${member.age || ""}</p></td>
                         </tr>
-                     `
+                     `,
                        )
                        .join("")}
                 </table>
@@ -302,7 +303,18 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
                 <td colspan="2" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Any other business or alternate source of income such as rentals, commission etc. (Provide details)</strong></p></td>
                 <td colspan="7" style="${valueCellStyle}">
                         <p style="font-size: 11px;"><strong><i>Other business interest / source of income / family income (Details of properties and tenants/ lessees in rental income):</i></strong></p> 
-                        ${verificationData.otherDetailsObserved?.otherBusinessIncomeSource ? verificationData.otherDetailsObserved?.otherBusinessIncomeSource.split("\n").map((line: string) => `<ul style="margin: 0 6px;"><li>${line}</li></ul>`).join("") : "Not provided"}
+                        ${
+                          verificationData.otherDetailsObserved
+                            ?.otherBusinessIncomeSource
+                            ? verificationData.otherDetailsObserved?.otherBusinessIncomeSource
+                                .split("\n")
+                                .map(
+                                  (line: string) =>
+                                    `<ul style="margin: 0 6px;"><li>${line}</li></ul>`,
+                                )
+                                .join("")
+                            : "Not provided"
+                        }
                 </td>
             </tr>
             <tr>
@@ -376,7 +388,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
                     <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${loan.balTenure || ""}</p></td>
                     <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${loan.bankName || ""}</p></td>
                 </tr>
-            `
+            `,
               )
               .join("")}
             </table>
@@ -422,7 +434,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
                     <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${bank.accountType || ""}</p></td>
                     <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${formatCurrency(bank.averageBalance || "") || ""}</p></td>
                 </tr>
-            `
+            `,
               )
               .join("")}
             </table>

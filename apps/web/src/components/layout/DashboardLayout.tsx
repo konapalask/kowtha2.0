@@ -239,7 +239,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       : []),
     ...(getCurrentDepartmentRole() === "Admin" ||
     getCurrentDepartmentRole() === "Verifier" ||
-    getCurrentDepartmentRole() === "VerificationExecutive"
+    getCurrentDepartmentRole() === "VerificationExecutive" ||
+    getCurrentDepartmentRole() === "OperationsExecutive"
       ? [
           {
             key: "verify",

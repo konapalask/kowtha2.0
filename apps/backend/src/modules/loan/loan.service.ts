@@ -22,6 +22,7 @@ import { createAssignmentDto } from "./dto/assign-loan-executive";
 import { UpdateAssignmentDto } from "./dto/update-assignment.dto";
 import { EditVerificationDto } from "./dto/edit-verification.dto";
 import { LoggingService } from "../common/logging/logging.service";
+import { SMSUtils } from "../common/smsutils";
 import { CreatePDEmailLogDto } from "./dto/create-pd-email-log.dto";
 import { businessTemplate } from "./templates/FI/business.template";
 import { VerificationData } from "./templates/FI/address.interface";
@@ -328,6 +329,8 @@ export class LoanService {
           loanType: data.loanType,
           bankName: data.bankName,
           loanAmount: data.loanAmount,
+          loanTag: data.loanTag,
+          branch: data.branch,
           office: { connect: { id: officeId } },
           operationsExecutive: { connect: { id: data.operationsExecutiveId } },
           status: data.status || LoanStatus.Unassigned,
@@ -835,6 +838,9 @@ export class LoanService {
         }
         where.initialSubmitted = false;
         where.assistantVerifierId = verifierId;
+      } else if (userRole.role === UserRole.OperationsExecutive) {
+        // OpsExec (follow-up) sees all pending cases for VE and Verifier
+        where.status = { not: VerificationStatus.Completed };
       }
 
       const verifications = await this.prisma.verification.findMany({
@@ -1113,6 +1119,151 @@ export class LoanService {
     }
   }
 
+  async exportLoansCsv(
+    officeId: number,
+    filters?: GetLoansDto
+  ): Promise<string> {
+    const where: Prisma.LoanWhereInput = {
+      department: filters.department,
+    };
+
+    if (filters?.status) {
+      where.status = filters.status;
+    }
+
+    if (filters?.bankName) {
+      where.bankName = {
+        contains: filters.bankName,
+        mode: "insensitive",
+      };
+    }
+
+    if (filters?.startDate || filters?.endDate) {
+      where.createdAt = {
+        ...(filters.startDate && {
+          gte: new Date(`${filters.startDate}T00:00:00.000Z`),
+        }),
+        ...(filters.endDate && {
+          lte: new Date(`${filters.endDate}T23:59:59.999Z`),
+        }),
+      };
+    }
+
+    const loans = await this.prisma.loan.findMany({
+      where,
+      include: {
+        operationsExecutive: {
+          select: { name: true, employeeCode: true },
+        },
+        verifications: {
+          include: {
+            fieldExecutive: {
+              select: { name: true, employeeCode: true },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const escCsv = (val: any) => {
+      if (val == null) return "";
+      const str = String(val);
+      if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+        return `"${str.replace(/"/g, '""')}"`;
+      }
+      return str;
+    };
+
+    const headers = [
+      "Application Number",
+      "Applicant Name",
+      "Mobile",
+      "Loan Type",
+      "Bank Name",
+      "Loan Amount",
+      "Applicant Type",
+      "Status",
+      "Loan Tag",
+      "Branch",
+      "Ops Executive",
+      "Created At",
+      "Closed At",
+    ];
+
+    const department = filters.department;
+
+    if (department === "FI") {
+      headers.push(
+        "Address1 FE",
+        "Address1 Status",
+        "Address2 FE",
+        "Address2 Status",
+        "Work FE",
+        "Work Status",
+        "Business FE",
+        "Business Status"
+      );
+    } else if (department === "PD") {
+      headers.push("Template Name", "Business FE", "Business Status");
+    }
+
+    const rows = loans.map((loan) => {
+      const getVer = (type: string) =>
+        loan.verifications?.find((v) => v.type === type);
+
+      const base = [
+        escCsv(loan.applicationNumber),
+        escCsv(loan.applicantName),
+        escCsv(loan.applicantMobile),
+        escCsv(loan.loanType),
+        escCsv(loan.bankName),
+        escCsv(loan.loanAmount),
+        escCsv(loan.applicantType),
+        escCsv(loan.status),
+        escCsv(loan.loanTag),
+        escCsv(loan.branch),
+        escCsv(loan.operationsExecutive?.name),
+        escCsv(
+          loan.createdAt
+            ? new Date(loan.createdAt).toISOString().slice(0, 10)
+            : ""
+        ),
+        escCsv(
+          loan.closedAt
+            ? new Date(loan.closedAt).toISOString().slice(0, 10)
+            : ""
+        ),
+      ];
+
+      if (department === "FI") {
+        for (const type of [
+          "AddressOne",
+          "AddressTwo",
+          "Work",
+          "Business",
+        ]) {
+          const v = getVer(type);
+          base.push(
+            escCsv(v?.fieldExecutive?.name),
+            escCsv(v?.status)
+          );
+        }
+      } else if (department === "PD") {
+        const biz = getVer("Business");
+        base.push(
+          escCsv(loan.templateName),
+          escCsv(biz?.fieldExecutive?.name),
+          escCsv(biz?.status)
+        );
+      }
+
+      return base.join(",");
+    });
+
+    return [headers.join(","), ...rows].join("\n");
+  }
+
   async updateVerificationAssignment(
     loanId: number,
     updateData: UpdateAssignmentDto
@@ -1264,6 +1415,10 @@ export class LoanService {
 
       const total = await this.prisma.verification.count({ where });
 
+      // Sort ascending (oldest first) for pending cases, desc for completed
+      const sortOrder =
+        filters?.status === VerificationStatus.Pending ? "asc" : "desc";
+
       const verifications = await this.prisma.verification.findMany({
         where,
         include: {
@@ -1283,12 +1438,11 @@ export class LoanService {
           },
         },
         orderBy: {
-          createdAt: "desc",
+          createdAt: sortOrder,
         },
         skip,
         take: Number(limit),
       });
-      // console.log(verifications[0].loan.applicantMobile, "verifications");
 
       for (const verification of verifications) {
         const templateName = verification.loan?.templateName;
@@ -1459,6 +1613,23 @@ export class LoanService {
         }
       }
 
+      // Sync FE-editable loan fields back to the loan record
+      if (verificationData?.basicDetails) {
+        const loanUpdateData: any = {};
+        if (verificationData.basicDetails.loanAmount) {
+          loanUpdateData.loanAmount = verificationData.basicDetails.loanAmount;
+        }
+        if (verificationData.basicDetails.purposeOfLoan) {
+          loanUpdateData.loanType = verificationData.basicDetails.purposeOfLoan;
+        }
+        if (Object.keys(loanUpdateData).length > 0) {
+          await this.prisma.loan.update({
+            where: { id: loanId },
+            data: loanUpdateData,
+          });
+        }
+      }
+
       // Update verification status
       const updatedVerification = await this.prisma.verification.update({
         where: {
@@ -1560,6 +1731,31 @@ export class LoanService {
           status,
         },
       });
+
+      // Send SMS to applicant when FE starts verification (InProgress)
+      if (status === VerificationStatus.InProgress) {
+        try {
+          const loan = await this.prisma.loan.findUnique({
+            where: { id: loanId },
+          });
+          const fieldExecutive = await this.prisma.user.findUnique({
+            where: { id: fieldExecutiveId },
+          });
+          if (loan?.applicantMobile && fieldExecutive?.name) {
+            const smsUtils = new SMSUtils(this.loggingService);
+            await smsUtils.sendVerificationAssigned(
+              loan.applicantMobile,
+              loan.applicationNumber || loanId.toString(),
+              fieldExecutive.name
+            );
+          }
+        } catch (smsError) {
+          await this.loggingService.error("Failed to send SMS to applicant", {
+            loanId,
+            error: smsError.message,
+          });
+        }
+      }
 
       // If status is Completed, check if all verifications are complete
       if (status === VerificationStatus.Completed) {
@@ -2588,6 +2784,26 @@ export class LoanService {
         }
       );
 
+      // Auto follow-up: Send SMS to applicant about postponement
+      try {
+        const loan = await this.prisma.loan.findUnique({
+          where: { id: verification.loan.id },
+        });
+        if (loan?.applicantMobile) {
+          const smsUtils = new SMSUtils(this.loggingService);
+          await smsUtils.sendVerificationStatus(
+            loan.applicantMobile,
+            "postponed and will be rescheduled",
+            loan.applicationNumber || loan.id.toString()
+          );
+        }
+      } catch (smsError) {
+        await this.loggingService.error(
+          "Failed to send postponement SMS to applicant",
+          { loanId: verification.loan.id, error: smsError.message }
+        );
+      }
+
       return verificationRetry;
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -2745,7 +2961,7 @@ export class LoanService {
             bankName: originalLoan.bankName,
             templateName: originalLoan.templateName,
             loanAmount: originalLoan.loanAmount,
-            status: originalLoan.status,
+            status: LoanStatus.Assigned,
             department: originalLoan.department,
             reassignCount: originalLoan.reassignCount + 1,
             office: { connect: { id: originalLoan.officeId } },
@@ -2775,7 +2991,7 @@ export class LoanService {
                 ...(v.assistantVerifierId && {
                   assistantVerifier: { connect: { id: v.assistantVerifierId } },
                 }),
-                status: v.status as VerificationStatus,
+                status: VerificationStatus.Pending,
                 locationType: v.locationType,
                 isPostponed: false,
                 postponedDate: null,
@@ -2784,7 +3000,7 @@ export class LoanService {
                 businessName: v.businessName,
                 currentOfficeName: null,
                 applicantAddress: v.applicantAddress,
-                verificationData: v.verificationData,
+                verificationData: null,
               },
             });
           }
@@ -3055,6 +3271,30 @@ export class LoanService {
         },
       });
 
+      // Check if all verifications for this loan have been submitted by VE
+      const allVerifications = await this.prisma.verification.findMany({
+        where: { loanId },
+      });
+
+      const allSubmitted = allVerifications.every(
+        (v) => v.initialSubmitted === true
+      );
+
+      if (allSubmitted) {
+        await this.prisma.loan.update({
+          where: { id: loanId },
+          data: { status: LoanStatus.BackendCompleted },
+        });
+
+        await this.loggingService.info(
+          "All verifications submitted by VE, loan status updated to BackendCompleted",
+          {
+            loanId,
+            newStatus: LoanStatus.BackendCompleted,
+          }
+        );
+      }
+
       await this.loggingService.info(
         "Verification executive submission completed successfully",
         {
@@ -3072,6 +3312,72 @@ export class LoanService {
       }
       await this.loggingService.error(
         "Failed to submit verification executive data",
+        {
+          loanId,
+          verificationType,
+          error: error.message,
+          stack: error.stack,
+        }
+      );
+      throw error;
+    }
+  }
+
+  async returnToVerificationExecutive(
+    loanId: number,
+    verificationType: VerificationType,
+    comments?: string
+  ) {
+    try {
+      const verification = await this.prisma.verification.findFirst({
+        where: {
+          loanId,
+          type: verificationType,
+        },
+      });
+
+      if (!verification) {
+        throw new NotFoundException("Verification not found");
+      }
+
+      // Reset initialSubmitted so VE sees it in their queue
+      const updatedVerification = await this.prisma.verification.update({
+        where: { id: verification.id },
+        data: {
+          initialSubmitted: false,
+          ...(comments && { synopsis: comments }),
+          updatedAt: new Date(),
+        },
+      });
+
+      // If loan was BackendCompleted, revert to FVCompleted
+      const loan = await this.prisma.loan.findUnique({
+        where: { id: loanId },
+      });
+
+      if (loan?.status === LoanStatus.BackendCompleted) {
+        await this.prisma.loan.update({
+          where: { id: loanId },
+          data: { status: LoanStatus.FVCompleted },
+        });
+      }
+
+      await this.loggingService.info(
+        "Verification returned to VerificationExecutive by Verifier",
+        {
+          loanId,
+          verificationId: verification.id,
+          verificationType,
+        }
+      );
+
+      return updatedVerification;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      await this.loggingService.error(
+        "Failed to return verification to VerificationExecutive",
         {
           loanId,
           verificationType,

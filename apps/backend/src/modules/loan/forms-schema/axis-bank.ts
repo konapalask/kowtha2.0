@@ -41,7 +41,7 @@ export const axisBankSchema = {
             title: "Customer Name",
             readOnly: true,
           },
-          pdAddress: {
+          pdAddressType: {
             type: "string",
             title: "PD Address Type",
             enum: ["Residence", "Office", "Factory", "Godown"],
@@ -535,7 +535,8 @@ export const axisBankSchema = {
           },
           pdStatus: {
             type: "string",
-            title: "Status of PD (Positive, Negative, Credit Manager visit needed) ",
+            title:
+              "Status of PD (Positive, Negative, Credit Manager visit needed) ",
             enum: ["Positive", "Negative", "Credit Manager visit needed"],
           },
         },
@@ -678,7 +679,8 @@ export const axisBankSchema = {
               incomeLeftForDomesticExpenses: {
                 type: "number",
                 title: "Income left for domestic expenses",
-                formula: "grossMonthlyIncomeTotal - lessDirectExpenses - lessRentalExpenses - lessStaffSalary - lessElectricity - lessAnyotherExpenses",
+                formula:
+                  "grossMonthlyIncomeTotal - lessDirectExpenses - lessRentalExpenses - lessStaffSalary - lessElectricity - lessAnyotherExpenses",
                 readOnly: true,
                 formatter: {
                   useIndianFormat: true,
@@ -740,7 +742,8 @@ export const axisBankSchema = {
               netmonthlyincomepostallexpenses: {
                 type: "number",
                 title: "Net monthly income post all expenses",
-                formula: "incomeLeftForDomesticExpenses - foodExpenses - childrenEducation - houseRent - medicalExpenses - otherHouseHoldExpenses",
+                formula:
+                  "incomeLeftForDomesticExpenses - foodExpenses - childrenEducation - houseRent - medicalExpenses - otherHouseHoldExpenses",
                 readOnly: true,
                 formatter: {
                   useIndianFormat: true,
@@ -782,7 +785,8 @@ export const axisBankSchema = {
               netSurplus: {
                 type: "number",
                 title: "Net Surplus income post all expenses & obligations",
-                formula: "netmonthlyincomepostallexpenses - lessSavingsInvestmentsInsurancePremium - lessExistingEmisObligations - emiAllocatedFoTheProposedLoan",
+                formula:
+                  "netmonthlyincomepostallexpenses - lessSavingsInvestmentsInsurancePremium - lessExistingEmisObligations - emiAllocatedFoTheProposedLoan",
                 readOnly: true,
                 formatter: {
                   useIndianFormat: true,

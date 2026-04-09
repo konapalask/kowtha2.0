@@ -278,11 +278,13 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                         ? "green"
                         : loanDetails.status === "Rejected"
                           ? "red"
-                          : loanDetails.status === "FieldVerificationComplete"
-                            ? "green"
-                            : loanDetails.status === "FieldVerificationStarted"
-                              ? "blue"
-                              : "default"
+                          : loanDetails.status === "BackendCompleted"
+                            ? "cyan"
+                            : loanDetails.status === "FieldVerificationComplete"
+                              ? "green"
+                              : loanDetails.status === "FieldVerificationStarted"
+                                ? "blue"
+                                : "default"
                   }
                   style={{ marginLeft: 8 }}
                 >
@@ -296,6 +298,8 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                         return "Under FV";
                       case "FieldVerificationComplete":
                         return "FV Completed";
+                      case "BackendCompleted":
+                        return "Backend Completed";
                       case "Approved":
                         return "Approved";
                       case "Rejected":
@@ -372,6 +376,8 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                             matchingLoanType?.value || loanDetails.loanType,
                           bankName: loanDetails.bankName,
                           applicantType: loanDetails.applicantType,
+                          loanTag: loanDetails.loanTag || undefined,
+                          branch: loanDetails.branch || undefined,
                         });
                       }
                     }}
@@ -426,6 +432,18 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                   {currentDepartment === "PD" && (
                     <Descriptions.Item label="Template Name">
                       {loanDetails?.templateName}
+                    </Descriptions.Item>
+                  )}
+                  {loanDetails?.loanTag && (
+                    <Descriptions.Item label="Loan Tag">
+                      <Tag color={loanDetails.loanTag === "PD" ? "blue" : "purple"}>
+                        {loanDetails.loanTag}
+                      </Tag>
+                    </Descriptions.Item>
+                  )}
+                  {loanDetails?.branch && (
+                    <Descriptions.Item label="Branch">
+                      {loanDetails.branch}
                     </Descriptions.Item>
                   )}
                 </Descriptions>
@@ -661,7 +679,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                               setFieldExecutiveEdit={setFieldExecutiveEdit}
                               fetchExecutives={fetchExecutives}
                               verificationExecutives={verificationExecutives}
-                              isFVCompleted={loanDetails?.status === "FVCompleted"}
+                              isFVCompleted={loanDetails?.status === "FVCompleted" || loanDetails?.status === "BackendCompleted"}
                             />
                           )}
                         </Card>

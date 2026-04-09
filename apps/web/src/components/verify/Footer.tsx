@@ -5,12 +5,12 @@ import {
   exportFinancialAnalysis,
   getVerificationData,
 } from "@/services/verifier.services";
-import { sendPdEmailReplyApi, updateLoanApi, getLoansByIdApi } from "@/services/loans.services";
-import { EyeOutlined, DownloadOutlined, MailOutlined } from "@ant-design/icons";
+import { sendPdEmailReplyApi, updateLoanApi, getLoansByIdApi, returnToVeApi } from "@/services/loans.services";
+import { EyeOutlined, DownloadOutlined, MailOutlined, RollbackOutlined } from "@ant-design/icons";
 import { Button, message, Modal, Popconfirm, Spin } from "antd";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
-import { getCurrentDepartment } from "@/utils/utility";
+import { getCurrentDepartment, getCurrentDepartmentRole } from "@/utils/utility";
 import DownloadAnimation from "./DownloadAnimation";
 
 const Footer: React.FC<{
@@ -49,6 +49,8 @@ const Footer: React.FC<{
   const [exportingExcel, setExportingExcel] = useState(false);
   const [showDownloadAnimation, setShowDownloadAnimation] = useState(false);
   const [downloadFileType, setDownloadFileType] = useState<"pdf" | "excel">("pdf");
+  const [returningToVe, setReturningToVe] = useState(false);
+  const currentRole = getCurrentDepartmentRole();
 
   // const handleApprove = async () => {
   //   try {
@@ -275,6 +277,26 @@ const Footer: React.FC<{
     }
   };
 
+  const handleReturnToVe = async () => {
+    if (!loanId) {
+      message.error("Loan ID not available");
+      return;
+    }
+    try {
+      setReturningToVe(true);
+      await returnToVeApi(loanId, verificationType);
+      message.success("Verification returned to Verification Executive");
+      router.push("/verify");
+    } catch (error: any) {
+      console.error("Error returning to VE:", error);
+      message.error(
+        error?.response?.data?.message || "Failed to return verification to VE"
+      );
+    } finally {
+      setReturningToVe(false);
+    }
+  };
+
   return (
     <>
       <DownloadAnimation
@@ -340,6 +362,25 @@ const Footer: React.FC<{
             >
               Export Excel
             </Button>
+            {currentRole === "Verifier" && loanId && (
+              <Popconfirm
+                title="Return this verification to Verification Executive for rework?"
+                onConfirm={handleReturnToVe}
+              >
+                <Button
+                  size="small"
+                  icon={<RollbackOutlined />}
+                  loading={returningToVe}
+                  disabled={returningToVe || disabled}
+                  style={{
+                    height: "32px",
+                    fontSize: "14px",
+                  }}
+                >
+                  Return to VE
+                </Button>
+              </Popconfirm>
+            )}
             {hasPdEmail && loanId && (
               <Button
                 size="small"

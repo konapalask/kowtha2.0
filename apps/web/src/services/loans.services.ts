@@ -170,8 +170,31 @@ export const deleteLoanApi = (id: number) => {
   return deleteWithDepartment(`/loans/${id}`);
 };
 
+export const exportLoansApi = (filters: {
+  startDate?: string;
+  endDate?: string;
+  status?: string;
+  bankName?: string;
+}) => {
+  return getWithDepartment("/loans/export", {
+    params: filters,
+    responseType: "blob",
+  });
+};
+
 export const reassignLoanApi = (loanId: number) => {
   return postWithDepartment(`/loans/${loanId}/reassign`);
+};
+
+export const returnToVeApi = (
+  loanId: number,
+  verificationType: string,
+  comments?: string
+) => {
+  return postWithDepartment(`/loans/${loanId}/return-to-ve`, {
+    verificationType,
+    comments,
+  });
 };
 
 export const sendPdEmailReplyApi = (loanId: number, department: string) => {

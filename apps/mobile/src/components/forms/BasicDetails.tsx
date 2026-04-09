@@ -174,10 +174,9 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Purpose of Loan</Text>
             <TextInput
-              style={[styles.input, styles.readOnlyInput]}
+              style={styles.input}
               value={value}
               onChangeText={onChange}
-              editable={false}
             />
             {errors.purposeOfLoan && (
               <Text style={styles.errorText}>

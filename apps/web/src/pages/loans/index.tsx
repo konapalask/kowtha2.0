@@ -13,8 +13,12 @@ import {
   Popconfirm,
   Divider,
   Tooltip,
+  Popover,
+  DatePicker,
+  Select,
+  Space,
 } from "antd";
-import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
+import { PlusOutlined, DeleteOutlined, DownloadOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 // import type { ColumnsType } from "antd/es/table";
@@ -24,6 +28,7 @@ import {
   getLoansApi,
   // updateLoanApi,
   importLoansApi,
+  exportLoansApi,
   type Loan,
   deleteLoanApi,
 } from "@/services/loans.services";
@@ -107,6 +112,14 @@ export default function Loans() {
   });
   const [pdBankOptions, setPdBankOptions] = useState<any[]>([]);
   const [templateOptions, setTemplateOptions] = useState<any[]>([]);
+  const [exportLoading, setExportLoading] = useState(false);
+  const [exportPopoverOpen, setExportPopoverOpen] = useState(false);
+  const [exportFilters, setExportFilters] = useState<{
+    startDate?: string;
+    endDate?: string;
+    status?: string;
+    bankName?: string;
+  }>({});
 
   // Update currentOffice when department changes
   useEffect(() => {
@@ -298,6 +311,26 @@ export default function Loans() {
     fetchLoans(pagination.current, pagination.pageSize);
   };
 
+  const handleExport = async () => {
+    try {
+      setExportLoading(true);
+      const response = await exportLoansApi(exportFilters);
+      const blob = new Blob([response.data], { type: "text/csv" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `loans_export_${dayjs().format("YYYY-MM-DD")}.csv`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      setExportPopoverOpen(false);
+      message.success("Loans exported successfully");
+    } catch (error) {
+      message.error("Failed to export loans");
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
   // Define columns based on department
   // console.log("Current department:", currentDepartment);
   const getColumns = () => {
@@ -335,12 +368,15 @@ export default function Loans() {
                 ? "geekblue"
                 : status === "Pending"
                   ? "orange"
-                  : status === "Approved"
-                    ? "green"
-                    : status === "Rejected"
-                      ? "red"
-                      : "blue";
-          return <Tag color={color}>{status}</Tag>;
+                  : status === "BackendCompleted"
+                    ? "cyan"
+                    : status === "Approved"
+                      ? "green"
+                      : status === "Rejected"
+                        ? "red"
+                        : "blue";
+          const displayStatus = status === "BackendCompleted" ? "Backend Completed" : status;
+          return <Tag color={color}>{displayStatus}</Tag>;
         },
       },
       {
@@ -835,16 +871,106 @@ export default function Loans() {
             getCurrentDepartmentRole() === "Verifier" ||
             getCurrentDepartmentRole() === "VerificationExecutive"
           ) && (
-            <Button
-              type="primary"
-              icon={<PlusOutlined style={{ fontSize: 16 }} />}
-              onClick={() => {
-                setSelectedLoan(null);
-                setIsDrawerVisible(true);
-              }}
-            >
-              New Loan
-            </Button>
+            <Space>
+              <Popover
+                title="Export Loans"
+                trigger="click"
+                open={exportPopoverOpen}
+                onOpenChange={setExportPopoverOpen}
+                content={
+                  <div style={{ width: 280 }}>
+                    <Space direction="vertical" style={{ width: "100%" }} size="middle">
+                      <div>
+                        <Typography.Text strong style={{ display: "block", marginBottom: 4 }}>
+                          Date Range
+                        </Typography.Text>
+                        <DatePicker.RangePicker
+                          style={{ width: "100%" }}
+                          onChange={(dates) => {
+                            setExportFilters((prev) => ({
+                              ...prev,
+                              startDate: dates?.[0]?.format("YYYY-MM-DD"),
+                              endDate: dates?.[1]?.format("YYYY-MM-DD"),
+                            }));
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <Typography.Text strong style={{ display: "block", marginBottom: 4 }}>
+                          Status
+                        </Typography.Text>
+                        <Select
+                          style={{ width: "100%" }}
+                          allowClear
+                          placeholder="All statuses"
+                          options={[
+                            { label: "Unassigned", value: "Unassigned" },
+                            { label: "Assigned", value: "Assigned" },
+                            { label: "FVCompleted", value: "FVCompleted" },
+                            ...(currentDepartment !== "FI"
+                              ? [{ label: "Backend Completed", value: "BackendCompleted" }]
+                              : []),
+                          ]}
+                          onChange={(value) =>
+                            setExportFilters((prev) => ({
+                              ...prev,
+                              status: value,
+                            }))
+                          }
+                        />
+                      </div>
+                      <div>
+                        <Typography.Text strong style={{ display: "block", marginBottom: 4 }}>
+                          Bank Name
+                        </Typography.Text>
+                        <Select
+                          style={{ width: "100%" }}
+                          allowClear
+                          showSearch
+                          placeholder="All banks"
+                          options={pdBankOptions}
+                          filterOption={(input, option) =>
+                            (option?.label ?? "")
+                              .toString()
+                              .toLowerCase()
+                              .includes(input.toLowerCase())
+                          }
+                          onChange={(value) =>
+                            setExportFilters((prev) => ({
+                              ...prev,
+                              bankName: value,
+                            }))
+                          }
+                        />
+                      </div>
+                      <Button
+                        type="primary"
+                        icon={<DownloadOutlined />}
+                        loading={exportLoading}
+                        onClick={handleExport}
+                        block
+                      >
+                        Export CSV
+                      </Button>
+                    </Space>
+                  </div>
+                }
+              >
+                <Button icon={<DownloadOutlined style={{ fontSize: 16 }} />}>
+                  Export
+                </Button>
+              </Popover>
+              <Button
+                type="primary"
+                icon={<PlusOutlined style={{ fontSize: 16 }} />}
+                onClick={() => {
+                  setSelectedLoan(null);
+                  setIsDrawerVisible(true);
+                }}
+              >
+                New Loan
+              </Button>
+            </Space>
           )}
           {/* <Button
             style={{
