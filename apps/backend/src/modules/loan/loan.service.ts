@@ -273,8 +273,9 @@ export class LoanService implements OnModuleDestroy {
           const browser = await this.getPdfBrowser();
           const page = await browser.newPage();
           try {
+            // Images are inlined as base64 data URIs upstream — no network fetches.
             await page.setContent(htmlTemplate, {
-              waitUntil: "networkidle2",
+              waitUntil: "domcontentloaded",
               timeout: 30000,
             });
 
@@ -2585,8 +2586,9 @@ export class LoanService implements OnModuleDestroy {
           const browser = await this.getPdfBrowser();
           const page = await browser.newPage();
           try {
+            // Images are inlined as base64 data URIs upstream — no network fetches.
             await page.setContent(htmlTemplate, {
-              waitUntil: "networkidle2",
+              waitUntil: "domcontentloaded",
               timeout: 30000,
             });
 
