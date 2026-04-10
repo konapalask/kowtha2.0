@@ -14,16 +14,21 @@ export class AttendanceService {
 
     const attendanceDate = new Date(date);
 
-    if (attendanceDate.getDate() !== new Date(date).getDate() || attendanceDate.getMonth() !== new Date(date).getMonth() || attendanceDate.getFullYear() !== new Date(date).getFullYear()) {
+    // Compare against server's "today" in IST so the client can't backdate
+    // by sending an arbitrary date in the request body.
+    const istNow = new Date(Date.now() + 5.5 * 60 * 60 * 1000);
+    const istAttendance = new Date(attendanceDate.getTime() + 5.5 * 60 * 60 * 1000);
+    if (
+      istAttendance.getUTCDate() !== istNow.getUTCDate() ||
+      istAttendance.getUTCMonth() !== istNow.getUTCMonth() ||
+      istAttendance.getUTCFullYear() !== istNow.getUTCFullYear()
+    ) {
       throw new BadRequestException('You can only record attendance for today');
     }
 
-    // Attendance freeze: only allow between 6am and 11am IST
-    const now = new Date();
-    const istHour = new Date(now.getTime() + (5.5 * 60 * 60 * 1000)).getUTCHours();
-    if (istHour < 6 || istHour >= 11) {
-      throw new BadRequestException('Attendance can only be marked between 6:00 AM and 11:00 AM IST');
-    }
+    // NOTE: Time-of-day freeze (6am-11am IST) is intentionally disabled
+    // for now so QA can test by changing the device clock. Re-enable
+    // before shipping to prod.
 
     const user = await this.prisma.user.findUnique({
       where: {

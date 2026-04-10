@@ -215,22 +215,23 @@ model AppDeployment {
 }
 
 model PDEmailLog {
-  id          Int       @id @default(autoincrement())
-  messageID   String
-  fromEmail   String[]
-  toEmail     String[]
-  ccEmail     String[]
-  bccEmail    String[]
-  subject     String
-  body        String
-  attachments String[]
-  receivedAt  DateTime?
-  parsedData  Json?
-  s3Path      String?
-  loanId      Int?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  loan        Loan?     @relation(fields: [loanId], references: [id])
+  id                Int       @id @default(autoincrement())
+  messageID         String
+  fromEmail         String[]
+  toEmail           String[]
+  ccEmail           String[]
+  bccEmail          String[]
+  subject           String
+  body              String
+  attachments       String[]
+  receivedAt        DateTime?
+  parsedData        Json?
+  s3Path            String?
+  loanId            Int?
+  receivedByMailbox String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  loan              Loan?     @relation(fields: [loanId], references: [id])
 }
 
 model Bank {

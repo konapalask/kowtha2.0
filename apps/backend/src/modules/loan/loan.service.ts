@@ -3034,6 +3034,26 @@ export class LoanService implements OnModuleDestroy {
         );
       }
 
+      // Auto follow-up: Reply to the original PD email thread notifying
+      // the bank that the verification has been postponed. No-ops for FI
+      // loans and PD loans without an originating email log.
+      this.sendPostponementEmailReply(
+        verification.loan.id,
+        new Date(createVerificationRetryDto.date),
+        createVerificationRetryDto.reason
+      ).catch((emailError) => {
+        // sendPostponementEmailReply already swallows errors internally,
+        // but we add this safety net so a thrown error never breaks the
+        // postponement flow.
+        this.loggingService.error(
+          "Unexpected error from sendPostponementEmailReply",
+          {
+            loanId: verification.loan.id,
+            error: emailError?.message,
+          }
+        );
+      });
+
       return verificationRetry;
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -3074,6 +3094,7 @@ export class LoanService implements OnModuleDestroy {
           receivedAt: data.receivedAt ? new Date(data.receivedAt) : null,
           parsedData: data.parsedData,
           s3Path: data.s3Path,
+          receivedByMailbox: data.receivedByMailbox,
           ...(data.loanId && { loan: { connect: { id: data.loanId } } }),
         },
         include: {
@@ -3717,7 +3738,10 @@ export class LoanService implements OnModuleDestroy {
       const clientId = process.env.AZURE_CLIENT_ID;
       const clientSecret = process.env.AZURE_CLIENT_SECRET;
       const tenantId = process.env.AZURE_TENANT_ID;
-      const userEmail = process.env.USER_EMAIL;
+      // Use the mailbox that originally received this email so the reply
+      // goes out from the same mailbox. Falls back to USER_EMAIL env for
+      // legacy rows that don't have receivedByMailbox stored.
+      const userEmail = pdEmailLog.receivedByMailbox || process.env.USER_EMAIL;
 
       if (!clientId || !clientSecret || !tenantId || !userEmail) {
         throw new BadRequestException(
@@ -4173,6 +4197,167 @@ export class LoanService implements OnModuleDestroy {
         : `Failed to send email reply: ${error.message}`;
 
       throw new BadRequestException(errorMessage);
+    }
+  }
+
+  /**
+   * Sends a templated reply email to the bank notifying them that the
+   * verification has been postponed by the applicant. The reply lands in
+   * the same Outlook thread as the original verification request because
+   * Microsoft Graph's createReply preserves conversationId.
+   *
+   * Silently no-ops if the loan has no PD email log (e.g. FI loans, or PD
+   * loans created manually without an originating email).
+   */
+  async sendPostponementEmailReply(
+    loanId: number,
+    postponedDate: Date,
+    reason: string
+  ): Promise<{ success: boolean; message: string }> {
+    try {
+      const axios = (await import("axios")).default;
+
+      const loan = await this.prisma.loan.findUnique({
+        where: { id: loanId, department: Department.PD },
+        include: {
+          pdEmailLogs: {
+            orderBy: { receivedAt: "desc" },
+            take: 1,
+          },
+        },
+      });
+
+      if (!loan || !loan.pdEmailLogs || loan.pdEmailLogs.length === 0) {
+        return {
+          success: false,
+          message: "No PD email log found for this loan; skipping reply",
+        };
+      }
+
+      const pdEmailLog = loan.pdEmailLogs[0];
+
+      const clientId = process.env.AZURE_CLIENT_ID;
+      const clientSecret = process.env.AZURE_CLIENT_SECRET;
+      const tenantId = process.env.AZURE_TENANT_ID;
+      const userEmail = pdEmailLog.receivedByMailbox || process.env.USER_EMAIL;
+
+      if (!clientId || !clientSecret || !tenantId || !userEmail) {
+        throw new BadRequestException(
+          "Microsoft Graph API credentials not configured"
+        );
+      }
+
+      const tokenResponse = await axios.post(
+        `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`,
+        new URLSearchParams({
+          client_id: clientId,
+          client_secret: clientSecret,
+          scope: "https://graph.microsoft.com/.default",
+          grant_type: "client_credentials",
+        }),
+        {
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        }
+      );
+
+      const accessToken = tokenResponse.data.access_token;
+      if (!accessToken) {
+        throw new Error("Failed to obtain Microsoft Graph access token");
+      }
+
+      // Resolve the message ID format (encoded vs raw) the same way
+      // sendPdEmailReply does — Graph IDs sometimes need URL encoding.
+      const messageId = pdEmailLog.messageID.trim();
+      const encodedMessageId = encodeURIComponent(messageId);
+      let validMessageId: string;
+      try {
+        await axios.get(
+          `https://graph.microsoft.com/v1.0/users/${userEmail}/messages/${encodedMessageId}`,
+          { headers: { Authorization: `Bearer ${accessToken}` } }
+        );
+        validMessageId = encodedMessageId;
+      } catch {
+        await axios.get(
+          `https://graph.microsoft.com/v1.0/users/${userEmail}/messages/${messageId}`,
+          { headers: { Authorization: `Bearer ${accessToken}` } }
+        );
+        validMessageId = messageId;
+      }
+
+      const formattedDate = postponedDate.toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      });
+
+      const replyBody =
+        `Dear Team,\n\n` +
+        `The verification for application ${loan.applicationNumber} (${loan.applicantName}) ` +
+        `has been postponed by the applicant and will be rescheduled.\n\n` +
+        `Rescheduled date: ${formattedDate}\n` +
+        `Reason: ${reason}\n\n` +
+        `We will share the verification report once completed.\n\n` +
+        `Regards,\nKowtha Team`;
+
+      const replyUrl = `https://graph.microsoft.com/v1.0/users/${userEmail}/messages/${validMessageId}/createReply`;
+      const createReplyResponse = await axios.post(
+        replyUrl,
+        {
+          message: {
+            body: { contentType: "Text", content: replyBody },
+            toRecipients: pdEmailLog.fromEmail.map((email) => ({
+              emailAddress: { address: email },
+            })),
+            ccRecipients:
+              pdEmailLog.ccEmail && pdEmailLog.ccEmail.length > 0
+                ? pdEmailLog.ccEmail.map((email) => ({
+                    emailAddress: { address: email },
+                  }))
+                : [],
+          },
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const replyMessageId = createReplyResponse.data.id;
+      if (!replyMessageId) {
+        throw new Error("Failed to create reply draft");
+      }
+
+      await axios.post(
+        `https://graph.microsoft.com/v1.0/users/${userEmail}/messages/${replyMessageId}/send`,
+        {},
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      );
+
+      await this.loggingService.info("Postponement email reply sent", {
+        loanId,
+        applicationNumber: loan.applicationNumber,
+        mailbox: userEmail,
+        postponedDate: postponedDate.toISOString(),
+      });
+
+      return {
+        success: true,
+        message: "Postponement email reply sent successfully",
+      };
+    } catch (error) {
+      await this.loggingService.error("Failed to send postponement email reply", {
+        loanId,
+        error: error.message,
+        stack: error.stack,
+        responseData: error.response?.data,
+      });
+      // Don't throw — postponement should not fail because of email issues
+      return {
+        success: false,
+        message: `Failed to send postponement email: ${error.message}`,
+      };
     }
   }
 }

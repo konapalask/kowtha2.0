@@ -1421,7 +1421,6 @@ export const BusinessVerificationDetails: React.FC<
       message.error(
         `You can only upload up to ${MAX_PHOTO_UPLOADS} photos. Currently ${existingPhotos.length} photo(s) uploaded.`
       );
-      processedFilesRef.current.clear();
       return;
     }
 
@@ -1569,8 +1568,6 @@ export const BusinessVerificationDetails: React.FC<
     if (failCount > 0 && successCount === 0) {
       message.error(`${failCount} file(s) failed to upload`);
     }
-
-    processedFilesRef.current.clear();
   };
 
   const handlePhotoUpload = async (file: File) => {
