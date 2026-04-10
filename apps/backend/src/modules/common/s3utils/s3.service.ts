@@ -9,6 +9,9 @@ import { format, toZonedTime } from 'date-fns-tz';
 
 @Injectable()
 export class S3Service {
+  private static readonly IMAGE_KEY_REGEX =
+    /\.(jpe?g|png|gif|webp|bmp|heic|heif|avif)$/i;
+
   private readonly s3Client: S3Client;
   private readonly bucketName: string;
 
@@ -363,6 +366,9 @@ export class S3Service {
     maxWidth = 600,
     quality = 0.65
   ): Promise<string | null> {
+    if (!S3Service.IMAGE_KEY_REGEX.test(s3Key)) {
+      return null;
+    }
     try {
       const obj = await this.s3Client.send(
         new GetObjectCommand({ Bucket: this.bucketName, Key: s3Key })
