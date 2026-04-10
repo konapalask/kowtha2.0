@@ -236,15 +236,15 @@ export class S3Service {
       // Load image from buffer
       const img = await loadImage(imageBuffer);
     
-      // Determine size
+      // Determine size (smaller canvas → smaller stored JPEG → smaller PDFs)
       let preferredWidth: number, preferredHeight: number;
 
       if (img.width > img.height) {
-        preferredWidth = 960;
-        preferredHeight = 650;
+        preferredWidth = 800;
+        preferredHeight = 540;
       } else {
-        preferredWidth = 650;
-        preferredHeight = 960;
+        preferredWidth = 540;
+        preferredHeight = 800;
       }
     
       // Create canvas and draw resized image
@@ -322,8 +322,12 @@ export class S3Service {
       }
       ctx.fillText(formattedTimestamp, x, currentY + 20);
     
-      // Convert canvas to buffer
-      const jpegBuffer = canvas.toBuffer('image/jpeg');
+      // Convert canvas to buffer (lower quality for smaller PDFs)
+      const jpegBuffer = canvas.toBuffer('image/jpeg', {
+        quality: 0.7,
+        progressive: true,
+        chromaSubsampling: true,
+      });
     
       // Upload back to S3 (overwrite)
       const putCommand = new PutObjectCommand({
@@ -345,6 +349,53 @@ export class S3Service {
         stack: error.stack,
       });
       throw error;
+    }
+  }
+
+  /**
+   * Fetch an S3 image, downscale it, JPEG-encode at given quality,
+   * and return as a base64 data URI ready to embed directly in HTML.
+   * This avoids Puppeteer making any network requests for images,
+   * which dramatically reduces both PDF generation memory and final PDF size.
+   */
+  async fetchImageAsDataUri(
+    s3Key: string,
+    maxWidth = 600,
+    quality = 0.65
+  ): Promise<string | null> {
+    try {
+      const obj = await this.s3Client.send(
+        new GetObjectCommand({ Bucket: this.bucketName, Key: s3Key })
+      );
+
+      const chunks: Buffer[] = [];
+      for await (const c of obj.Body as any) chunks.push(c);
+      const srcBuffer = Buffer.concat(chunks);
+
+      const img = await loadImage(srcBuffer);
+
+      // Downscale only if image is larger than target
+      const ratio = Math.min(1, maxWidth / img.width);
+      const w = Math.max(1, Math.round(img.width * ratio));
+      const h = Math.max(1, Math.round(img.height * ratio));
+
+      const canvas = createCanvas(w, h);
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+
+      const buf = canvas.toBuffer('image/jpeg', {
+        quality,
+        progressive: true,
+        chromaSubsampling: true,
+      });
+
+      return `data:image/jpeg;base64,${buf.toString('base64')}`;
+    } catch (error) {
+      await this.loggingService.error('Failed to fetch image as data URI', {
+        s3Key,
+        error: (error as Error).message,
+      });
+      return null;
     }
   }
 }

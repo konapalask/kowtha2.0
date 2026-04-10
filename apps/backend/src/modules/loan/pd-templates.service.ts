@@ -214,8 +214,10 @@ export class PDTemplateService {
         }
 
         try {
+          // Inline as downscaled base64 data URI so Puppeteer doesn't fetch
+          // images over the network — much smaller PDFs and lower memory.
           const presignedUrl =
-            await this.s3Service.generatePresignedDownloadUrl(possibleS3Key);
+            await this.s3Service.fetchImageAsDataUri(possibleS3Key, 600, 0.65);
           if (!presignedUrl) {
             continue;
           }
@@ -303,12 +305,15 @@ export class PDTemplateService {
             return null;
           }
           try {
-            return await this.s3Service.generatePresignedDownloadUrl(
-              item.s3ImageUrl
+            // Inline as downscaled base64 data URI (see grouped path above).
+            return await this.s3Service.fetchImageAsDataUri(
+              item.s3ImageUrl,
+              600,
+              0.65
             );
           } catch (error) {
             await this.loggingService.error(
-              "Failed to generate presigned URL for image",
+              "Failed to fetch image as data URI",
               {
                 s3ImageUrl: item.s3ImageUrl,
                 error: error.message,
