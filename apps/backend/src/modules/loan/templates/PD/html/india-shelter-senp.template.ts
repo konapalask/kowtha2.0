@@ -400,19 +400,19 @@ export const indiaShelterSenpTemplate = (
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}">Total area of plot</td>
-              <td style="${valueCellStyle}">${landRows[0][0] || "Not provided"}</td>
+              <td style="${valueCellStyle}">${landRows[0]?.[0] || "Not provided"}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Location</td>
-              <td style="${valueCellStyle}">${landRows[0][1] || "Not provided"}</td>
+              <td style="${valueCellStyle}">${landRows[0]?.[1] || "Not provided"}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Type</td>
-              <td style="${valueCellStyle}">${landRows[0][2] || "Not provided"}</td>
+              <td style="${valueCellStyle}">${landRows[0]?.[2] || "Not provided"}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Market value</td>
-              <td style="${valueCellStyle}">${landRows[0][3] || "Not provided"}</td>
+              <td style="${valueCellStyle}">${landRows[0]?.[3] || "Not provided"}</td>
             </tr>
           </table>
         </td>
@@ -429,23 +429,23 @@ export const indiaShelterSenpTemplate = (
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}">Built-up area</td>
-              <td style="${valueCellStyle}">${houseRows[0][0] || "Not provided"}</td>
+              <td style="${valueCellStyle}">${houseRows[0]?.[0] || "Not provided"}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Location</td>
-              <td style="${valueCellStyle}">${houseRows[0][1] || "Not provided"}</td>
+              <td style="${valueCellStyle}">${houseRows[0]?.[1] || "Not provided"}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Self-occupied or rented:</td>
-              <td style="${valueCellStyle}">${houseRows[0][2] || "Not provided"}</td>
+              <td style="${valueCellStyle}">${houseRows[0]?.[2] || "Not provided"}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Monthly income (if rented)</td>
-              <td style="${valueCellStyle}">${houseRows[0][3] || "Not provided"}</td>
+              <td style="${valueCellStyle}">${houseRows[0]?.[3] || "Not provided"}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Market value</td>
-              <td style="${valueCellStyle}">${houseRows[0][4] || "Not provided"}</td>
+              <td style="${valueCellStyle}">${houseRows[0]?.[4] || "Not provided"}</td>
             </tr>
           </table>
         </td>
@@ -457,23 +457,23 @@ export const indiaShelterSenpTemplate = (
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}">Area</td>
-              <td style="${valueCellStyle}">${shopRows[0][0] || "Not provided"}</td>
+              <td style="${valueCellStyle}">${shopRows[0]?.[0] || "Not provided"}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Location</td>
-              <td style="${valueCellStyle}">${shopRows[0][1] || "Not provided"}</td>
+              <td style="${valueCellStyle}">${shopRows[0]?.[1] || "Not provided"}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Self-occupied or rented:</td>
-              <td style="${valueCellStyle}">${shopRows[0][2] || "Not provided"}</td>
+              <td style="${valueCellStyle}">${shopRows[0]?.[2] || "Not provided"}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Monthly income (if rented)</td>
-              <td style="${valueCellStyle}">${shopRows[0][3] || "Not provided"}</td>
+              <td style="${valueCellStyle}">${shopRows[0]?.[3] || "Not provided"}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Market value</td>
-              <td style="${valueCellStyle}">${shopRows[0][4] || "Not provided"}</td>
+              <td style="${valueCellStyle}">${shopRows[0]?.[4] || "Not provided"}</td>
             </tr>
           </table>
         </td>
@@ -486,11 +486,11 @@ export const indiaShelterSenpTemplate = (
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}">Make and model</td>
-              <td style="${valueCellStyle}">${vehicleRows[0][0] || "Not provided"}</td>
+              <td style="${valueCellStyle}">${vehicleRows[0]?.[0] || "Not provided"}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Purpose</td>
-              <td style="${valueCellStyle}">${vehicleRows[0][1] || "Not provided"}</td>
+              <td style="${valueCellStyle}">${vehicleRows[0]?.[1] || "Not provided"}</td>
             </tr>
           </table>
         </td>
@@ -503,15 +503,15 @@ export const indiaShelterSenpTemplate = (
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}">Total quantity (grams)</td>
-              <td style="${valueCellStyle}">${preciousRows[0][0] || "Not provided"}</td>
+              <td style="${valueCellStyle}">${preciousRows[0]?.[0] || "Not provided"}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Form (jewellery/coins/bars)</td>
-              <td style="${valueCellStyle}">${preciousRows[0][1] || "Not provided"}</td>
+              <td style="${valueCellStyle}">${preciousRows[0]?.[1] || "Not provided"}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Current market value</td>
-              <td style="${valueCellStyle}">${preciousRows[0][2] || "Not provided"}</td>
+              <td style="${valueCellStyle}">${preciousRows[0]?.[2] || "Not provided"}</td>
             </tr>
           </table>
         </td>
@@ -524,27 +524,27 @@ export const indiaShelterSenpTemplate = (
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}">Types of animals</td>
-              <td style="${valueCellStyle}">${livestockRows[0][0] || "Not provided"}</td>
+              <td style="${valueCellStyle}">${livestockRows[0]?.[0] || "Not provided"}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Quantity of each type</td>
-              <td style="${valueCellStyle}">${livestockRows[0][1] || "Not provided"}</td>
+              <td style="${valueCellStyle}">${livestockRows[0]?.[1] || "Not provided"}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Purpose</td>
-              <td style="${valueCellStyle}">${livestockRows[0][2] || "Not provided"}</td>
+              <td style="${valueCellStyle}">${livestockRows[0]?.[2] || "Not provided"}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Total value</td>
-              <td style="${valueCellStyle}">${livestockRows[0][3] || "Not provided"}</td>
+              <td style="${valueCellStyle}">${livestockRows[0]?.[3] || "Not provided"}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Monthly income</td>
-              <td style="${valueCellStyle}">${livestockRows[0][4] || "Not provided"}</td>
+              <td style="${valueCellStyle}">${livestockRows[0]?.[4] || "Not provided"}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Maintenance costs</td>
-              <td style="${valueCellStyle}">${livestockRows[0][5] || "Not provided"}</td>
+              <td style="${valueCellStyle}">${livestockRows[0]?.[5] || "Not provided"}</td>
             </tr>
           </table>
         </td>

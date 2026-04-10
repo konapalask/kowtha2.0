@@ -94,6 +94,9 @@ local.properties
 # Testing
 /coverage
 
+# TypeScript build info
+*.tsbuildinfo
+
 # Turbo / Cache
 turbo/
 .cache/

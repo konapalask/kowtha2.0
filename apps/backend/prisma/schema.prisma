@@ -93,6 +93,8 @@ model Loan {
   department            Department?
   reassignCount         Int            @default(0)
   templateName          String?
+  loanTag               LoanTag?
+  branch                String?        @db.VarChar(30)
   editRequests          EditRequest[]
   office                Office         @relation(fields: [officeId], references: [id])
   closedBy              User?          @relation("UserClosedLoans", fields: [closedById], references: [id])
@@ -101,6 +103,9 @@ model Loan {
   verifications         Verification[]
 
   @@unique([applicationNumber, applicantType, department, reassignCount])
+  @@index([department, createdAt])
+  @@index([department, status])
+  @@index([department, bankName])
 }
 
 model Verification {
@@ -241,7 +246,6 @@ enum UserRole {
   Admin
   Verifier
   FieldExecutive
-  SupportExecutive
   OperationsExecutive
   VerificationExecutive
 }
@@ -294,6 +298,7 @@ enum LoanStatus {
   Assigned
   UnderFV
   FVCompleted
+  BackendCompleted
   Approved
   Rejected
 }
@@ -325,6 +330,11 @@ enum AttendanceStatus {
 enum LocationType {
   Local
   Remote
+}
+
+enum LoanTag {
+  PD
+  LIP
 }
 
 enum Department {

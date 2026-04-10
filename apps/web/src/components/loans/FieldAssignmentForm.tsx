@@ -21,7 +21,7 @@ import {
 import { getFieldExecutivesByOfficeIdApi } from "@/services/users.services";
 import styles from "./FieldAssignmentForm.module.css";
 import { UserOutlined } from "@ant-design/icons";
-import { getCurrentDepartmentOfficeId, getCurrentDepartment } from "@/utils/utility";
+import { getCurrentDepartmentOfficeId, getCurrentDepartment, getCurrentDepartmentRole } from "@/utils/utility";
 
 interface FieldAssignmentFormProps {
   verification: any;
@@ -68,6 +68,12 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
   
   const currentDepartmentOfficeId = getCurrentDepartmentOfficeId();
   const currentDepartment = getCurrentDepartment();
+  const currentRole = getCurrentDepartmentRole();
+  const isOpsExec = currentRole === "OperationsExecutive";
+  // For OpsExec: hide verifier/VE on initial assignment, show but optional on edit (follow-up)
+  const isInitialAssignment = !verification;
+  const hideVerifierFields = isOpsExec && isInitialAssignment;
+  const verifierFieldsRequired = !isOpsExec;
   console.log(currentDepartment)
   const remoteOffices = offices?.filter(
     (option: any) => Number(option?.value) !== Number(currentDepartmentOfficeId)
@@ -606,7 +612,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
             }}
           </Form.Item>
         )}
-        {currentDepartment === "PD" && (
+        {currentDepartment === "PD" && !hideVerifierFields && (
         <Form.Item
           noStyle
           shouldUpdate={(prevValues, currentValues) =>
@@ -628,7 +634,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                 style={{ marginBottom: 0 }}
                 rules={[
                   {
-                    required: true,
+                    required: verifierFieldsRequired,
                     message: "Please select a verification executive",
                   },
                 ]}
@@ -648,6 +654,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
             }}
           </Form.Item>
         )}
+        {!hideVerifierFields && (
         <Form.Item
           noStyle
           shouldUpdate={(prevValues, currentValues) =>
@@ -669,7 +676,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                 style={{ marginBottom: 0 }}
                 rules={[
                   {
-                    required: true,
+                    required: verifierFieldsRequired,
                     message: "Please select a verifier",
                   },
                 ]}
@@ -688,6 +695,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
             );
           }}
         </Form.Item>
+        )}
 
         <Form.Item>
           {(() => {

@@ -24,7 +24,8 @@ export interface SchemaField {
 export function validateVerificationData(
   data: any,
   schema: any,
-  bankName: string
+  bankName: string,
+  enableDebugLogs: boolean = false
 ): ValidationResult {
   const result: ValidationResult = {
     isValid: true,
@@ -42,9 +43,10 @@ export function validateVerificationData(
     return result;
   }
 
-  // Log the data structure for debugging
-  console.log(`\n🔍 [${bankName}] Validation Report:`);
-  console.log("━".repeat(60));
+  if (enableDebugLogs) {
+    console.log(`\n[${bankName}] Validation Report:`);
+    console.log("-".repeat(60));
+  }
 
   // Check for missing or empty required sections
   const requiredSections =
@@ -54,14 +56,18 @@ export function validateVerificationData(
     if (!data[sectionId]) {
       result.missingRequiredFields.push(sectionId);
       result.isValid = false;
-      console.log(`❌ Missing required section: ${sectionId}`);
+      if (enableDebugLogs) {
+        console.log(`Missing required section: ${sectionId}`);
+      }
     } else if (
       typeof data[sectionId] === "object" &&
       Object.keys(data[sectionId]).length === 0
     ) {
       result.emptyRequiredFields.push(sectionId);
       result.isValid = false;
-      console.log(`⚠️  Empty required section: ${sectionId}`);
+      if (enableDebugLogs) {
+        console.log(`Empty required section: ${sectionId}`);
+      }
     } else {
       // Check for missing required properties within the section
       const section = schema.sections.find((s: any) => s.id === sectionId);
@@ -73,16 +79,20 @@ export function validateVerificationData(
         if (missingProps.length > 0) {
           missingProps.forEach((prop: string) => {
             result.emptyRequiredFields.push(`${sectionId}.${prop}`);
-            console.log(`⚠️  Empty required field: ${sectionId}.${prop}`);
+            if (enableDebugLogs) {
+              console.log(`Empty required field: ${sectionId}.${prop}`);
+            }
           });
           result.isValid = false;
         }
       }
 
       // Log section presence
-      console.log(
-        `✅ Section present: ${sectionId} (${Object.keys(data[sectionId]).length} fields)`
-      );
+      if (enableDebugLogs) {
+        console.log(
+          `Section present: ${sectionId} (${Object.keys(data[sectionId]).length} fields)`
+        );
+      }
     }
   }
 
@@ -95,30 +105,34 @@ export function validateVerificationData(
   for (const sectionId of actualSections) {
     if (!expectedSections.includes(sectionId)) {
       result.unexpectedFields.push(sectionId);
-      console.log(
-        `ℹ️  Unexpected section in data: ${sectionId} (not in schema)`
-      );
+      if (enableDebugLogs) {
+        console.log(
+          `Unexpected section in data: ${sectionId} (not in schema)`
+        );
+      }
     }
   }
 
   // Summary
-  console.log("━".repeat(60));
-  if (result.isValid) {
-    console.log("✅ Validation PASSED - All required fields present");
-  } else {
-    console.log(`❌ Validation FAILED:`);
-    if (result.missingRequiredFields.length > 0) {
-      console.log(
-        `   - Missing sections: ${result.missingRequiredFields.join(", ")}`
-      );
+  if (enableDebugLogs) {
+    console.log("-".repeat(60));
+    if (result.isValid) {
+      console.log("Validation passed");
+    } else {
+      console.log("Validation failed");
+      if (result.missingRequiredFields.length > 0) {
+        console.log(
+          `Missing sections: ${result.missingRequiredFields.join(", ")}`
+        );
+      }
+      if (result.emptyRequiredFields.length > 0) {
+        console.log(
+          `Empty required fields: ${result.emptyRequiredFields.join(", ")}`
+        );
+      }
     }
-    if (result.emptyRequiredFields.length > 0) {
-      console.log(
-        `   - Empty required fields: ${result.emptyRequiredFields.join(", ")}`
-      );
-    }
+    console.log("-".repeat(60) + "\n");
   }
-  console.log("━".repeat(60) + "\n");
 
   return result;
 }
@@ -127,11 +141,11 @@ export function validateVerificationData(
  * Logs detailed data structure for debugging schema-template mismatches
  */
 export function logDataStructure(data: any, label: string = "Data"): void {
-  console.log(`\n📊 [${label}] Structure:`);
-  console.log("━".repeat(60));
+  console.log(`\n[${label}] Structure:`);
+  console.log("-".repeat(60));
 
   if (!data || typeof data !== "object") {
-    console.log("❌ Data is null or not an object");
+    console.log("Data is null or not an object");
     return;
   }
 
@@ -143,14 +157,14 @@ export function logDataStructure(data: any, label: string = "Data"): void {
         console.log(`${indent}${key}: Array[${value.length}]`);
         if (value.length > 0 && typeof value[0] === "object") {
           console.log(
-            `${indent}  ├─ Item structure: ${JSON.stringify(Object.keys(value[0]))}`
+            `${indent}  |- Item structure: ${JSON.stringify(Object.keys(value[0]))}`
           );
         }
       } else if (typeof value === "object") {
         console.log(
           `${indent}${key}: Object {${Object.keys(value).length} props}`
         );
-        printStructure(value, indent + "  ├─ ");
+        printStructure(value, indent + "  |- ");
       } else {
         const valueStr = String(value).substring(0, 50);
         console.log(
@@ -161,5 +175,5 @@ export function logDataStructure(data: any, label: string = "Data"): void {
   }
 
   printStructure(data);
-  console.log("━".repeat(60) + "\n");
+  console.log("-".repeat(60) + "\n");
 }

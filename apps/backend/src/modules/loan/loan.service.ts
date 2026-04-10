@@ -1,4 +1,5 @@
 import * as fs from "fs";
+import * as os from "os";
 import * as path from "path";
 import pLimit from "p-limit";
 import { Buffer } from "buffer"; 
@@ -22,6 +23,7 @@ import { createAssignmentDto } from "./dto/assign-loan-executive";
 import { UpdateAssignmentDto } from "./dto/update-assignment.dto";
 import { EditVerificationDto } from "./dto/edit-verification.dto";
 import { LoggingService } from "../common/logging/logging.service";
+import { SMSUtils } from "../common/smsutils";
 import { CreatePDEmailLogDto } from "./dto/create-pd-email-log.dto";
 import { businessTemplate } from "./templates/FI/business.template";
 import { VerificationData } from "./templates/FI/address.interface";
@@ -44,18 +46,23 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  OnModuleDestroy,
 } from "@nestjs/common";
 
-const limit = pLimit(3); // allow 3 workers at a time (tune this)
+const imageWorkerLimit = pLimit(2);
 
 @Injectable()
-export class LoanService {
+export class LoanService implements OnModuleDestroy {
   private financialAnalysisTemplatesService: any;
   private pdTemplateServiceInstance: any;
   private browserPromise: Promise<puppeteer.Browser> | null = null;
   private pdfQueue: Promise<any> = Promise.resolve();
   private pdfConcurrency = 0;
   private readonly MAX_PDF_CONCURRENCY = 2;
+  private readonly reportTelemetryEnabled =
+    process.env.ENABLE_REPORT_TELEMETRY !== "false";
+  private readonly reportTelemetryTag = "TEMP_REPORT_TELEMETRY";
+  private cachedSignatureDataUri: string | null = null;
 
   constructor(
     private prisma: PrismaService,
@@ -64,6 +71,76 @@ export class LoanService {
     private s3Service: S3Service,
     private moduleRef: ModuleRef
   ) { }
+
+  async onModuleDestroy() {
+    const browser = await this.browserPromise?.catch(() => null);
+    if (browser && browser.isConnected()) {
+      await browser.close().catch(() => undefined);
+    }
+    this.browserPromise = null;
+  }
+
+  private bytesToMb(value: number | undefined): number {
+    return Number(((value || 0) / 1024 / 1024).toFixed(2));
+  }
+
+  private getReportTelemetrySnapshot() {
+    const memory = process.memoryUsage();
+    return {
+      rssMb: this.bytesToMb(memory.rss),
+      heapUsedMb: this.bytesToMb(memory.heapUsed),
+      heapTotalMb: this.bytesToMb(memory.heapTotal),
+      externalMb: this.bytesToMb(memory.external),
+      arrayBuffersMb: this.bytesToMb(memory.arrayBuffers),
+      uptimeSec: Number(process.uptime().toFixed(1)),
+      loadAverage: os.loadavg().map((value) => Number(value.toFixed(2))),
+      activePdfConcurrency: this.pdfConcurrency,
+      maxPdfConcurrency: this.MAX_PDF_CONCURRENCY,
+    };
+  }
+
+  private getCpuUsageDelta(startUsage: NodeJS.CpuUsage) {
+    const delta = process.cpuUsage(startUsage);
+    return {
+      userMs: Number((delta.user / 1000).toFixed(2)),
+      systemMs: Number((delta.system / 1000).toFixed(2)),
+      totalMs: Number(((delta.user + delta.system) / 1000).toFixed(2)),
+    };
+  }
+
+  private getSignatureDataUri(): string {
+    if (this.cachedSignatureDataUri) {
+      return this.cachedSignatureDataUri;
+    }
+
+    const imagePath = path.resolve(
+      process.env.SIGNATURE_PATH || "/home/ubuntu/kowtha/new_sign.jpg"
+    );
+    const imageBase64 = fs.readFileSync(imagePath, "base64");
+    this.cachedSignatureDataUri = `data:image/jpeg;base64,${imageBase64}`;
+    return this.cachedSignatureDataUri;
+  }
+
+  private async logReportTelemetry(
+    event: string,
+    payload: Record<string, any>,
+    level: "info" | "warn" | "error" = "info"
+  ) {
+    if (!this.reportTelemetryEnabled) {
+      return;
+    }
+
+    const message = `[${this.reportTelemetryTag}] ${event}`;
+    if (level === "warn") {
+      await this.loggingService.warn(message, payload);
+      return;
+    }
+    if (level === "error") {
+      await this.loggingService.error(message, payload);
+      return;
+    }
+    await this.loggingService.info(message, payload);
+  }
 
   // Lazy load PDTemplateService to avoid circular dependency
   private async getPDTemplateService() {
@@ -109,10 +186,14 @@ export class LoanService {
     if (this.browserPromise) {
       const browser = await this.browserPromise.catch(() => null);
       if (browser && browser.isConnected()) {
+        await this.logReportTelemetry("pdf_browser_reused", {
+          ...this.getReportTelemetrySnapshot(),
+        });
         return browser;
       }
       this.browserPromise = null;
     }
+    const launchStartedAt = Date.now();
     this.browserPromise = puppeteer.launch({
       headless: true,
       args: [
@@ -127,6 +208,10 @@ export class LoanService {
       ],
     });
     const browser = await this.browserPromise;
+    await this.logReportTelemetry("pdf_browser_launched", {
+      launchDurationMs: Date.now() - launchStartedAt,
+      ...this.getReportTelemetrySnapshot(),
+    });
     browser.on("disconnected", () => {
       this.logger.warn("Puppeteer browser disconnected, will re-launch on next request");
       this.browserPromise = null;
@@ -134,16 +219,28 @@ export class LoanService {
     return browser;
   }
 
-  private async withPdfQueue<T>(fn: () => Promise<T>): Promise<T> {
+  private async withPdfQueue<T>(
+    reportType: string,
+    metadata: Record<string, any>,
+    fn: (queueWaitMs: number) => Promise<T>
+  ): Promise<T> {
+    const queuedAt = Date.now();
     while (this.pdfConcurrency >= this.MAX_PDF_CONCURRENCY) {
       await this.pdfQueue;
     }
+    const queueWaitMs = Date.now() - queuedAt;
     this.pdfConcurrency++;
     let resolve: () => void;
     const slot = new Promise<void>((r) => (resolve = r));
     this.pdfQueue = slot;
     try {
-      return await fn();
+      await this.logReportTelemetry("pdf_queue_acquired", {
+        reportType,
+        queueWaitMs,
+        ...metadata,
+        ...this.getReportTelemetrySnapshot(),
+      });
+      return await fn(queueWaitMs);
     } finally {
       this.pdfConcurrency--;
       resolve!();
@@ -154,29 +251,48 @@ export class LoanService {
     htmlTemplate: string,
     bankName?: string
   ): Promise<Buffer> {
-    return this.withPdfQueue(async () => {
-      const browser = await this.getPdfBrowser();
-      const page = await browser.newPage();
-      try {
-        await page.setContent(htmlTemplate, {
-          waitUntil: "networkidle2",
-          timeout: 30000,
-        });
+    const startedAt = Date.now();
+    const startCpuUsage = process.cpuUsage();
+    const startSnapshot = this.getReportTelemetrySnapshot();
+    const htmlSizeBytes = Buffer.byteLength(htmlTemplate || "", "utf8");
 
-        // Wait a bit more to ensure content is fully loaded
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+    await this.logReportTelemetry("pdf_buffer_generation_started", {
+      reportType: "pd-preview-pdf",
+      bankName: bankName || "Kowtha",
+      htmlSizeBytes,
+      ...startSnapshot,
+    });
 
-        // Generate current IST date
-        const istDate = new Date().toLocaleString("en-IN", {
-          timeZone: "Asia/Kolkata",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        });
+    try {
+      return await this.withPdfQueue(
+        "pd-preview-pdf",
+        {
+          bankName: bankName || "Kowtha",
+          htmlSizeBytes,
+        },
+        async (queueWaitMs) => {
+          const browser = await this.getPdfBrowser();
+          const page = await browser.newPage();
+          try {
+            await page.setContent(htmlTemplate, {
+              waitUntil: "networkidle2",
+              timeout: 30000,
+            });
 
-        const footerTemplate = `
+            // Wait a bit more to ensure content is fully loaded
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+
+            // Generate current IST date
+            const istDate = new Date().toLocaleString("en-IN", {
+              timeZone: "Asia/Kolkata",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+
+            const footerTemplate = `
         <div style="
             font-size: 10px;
             width: 100%;
@@ -199,18 +315,18 @@ export class LoanService {
         </div>
       `;
 
-        const pdfArray = await page.pdf({
-          format: "a4",
-          margin: {
-            top: "60px",
-            right: "20px",
-            bottom: "80px",
-            left: "20px",
-          },
-          printBackground: true,
-          preferCSSPageSize: false,
-          displayHeaderFooter: true,
-          headerTemplate: `
+            const pdfArray = await page.pdf({
+              format: "a4",
+              margin: {
+                top: "60px",
+                right: "20px",
+                bottom: "80px",
+                left: "20px",
+              },
+              printBackground: true,
+              preferCSSPageSize: false,
+              displayHeaderFooter: true,
+              headerTemplate: `
           <div style="
               font-size: 8px;
               width: 100%;
@@ -221,14 +337,45 @@ export class LoanService {
             <!-- ${bankName || "Kowtha"} - Verification Report -->
           </div>
         `,
-          footerTemplate: footerTemplate,
-        });
+              footerTemplate: footerTemplate,
+            });
 
-        return Buffer.from(pdfArray);
-      } finally {
-        await page.close().catch(() => undefined);
-      }
-    });
+            const pdfBuffer = Buffer.from(pdfArray);
+            await this.logReportTelemetry("pdf_buffer_generation_completed", {
+              reportType: "pd-preview-pdf",
+              bankName: bankName || "Kowtha",
+              durationMs: Date.now() - startedAt,
+              queueWaitMs,
+              htmlSizeBytes,
+              pdfSizeBytes: pdfBuffer.length,
+              cpuUsageMs: this.getCpuUsageDelta(startCpuUsage),
+              startSnapshot,
+              endSnapshot: this.getReportTelemetrySnapshot(),
+            });
+
+            return pdfBuffer;
+          } finally {
+            await page.close().catch(() => undefined);
+          }
+        }
+      );
+    } catch (error) {
+      await this.logReportTelemetry(
+        "pdf_buffer_generation_failed",
+        {
+          reportType: "pd-preview-pdf",
+          bankName: bankName || "Kowtha",
+          durationMs: Date.now() - startedAt,
+          htmlSizeBytes,
+          cpuUsageMs: this.getCpuUsageDelta(startCpuUsage),
+          startSnapshot,
+          endSnapshot: this.getReportTelemetrySnapshot(),
+          error: error.message,
+        },
+        "error"
+      );
+      throw error;
+    }
   }
 
   async findLoanByApplicationNumber(
@@ -328,6 +475,8 @@ export class LoanService {
           loanType: data.loanType,
           bankName: data.bankName,
           loanAmount: data.loanAmount,
+          loanTag: data.loanTag,
+          branch: data.branch,
           office: { connect: { id: officeId } },
           operationsExecutive: { connect: { id: data.operationsExecutiveId } },
           status: data.status || LoanStatus.Unassigned,
@@ -835,6 +984,9 @@ export class LoanService {
         }
         where.initialSubmitted = false;
         where.assistantVerifierId = verifierId;
+      } else if (userRole.role === UserRole.OperationsExecutive) {
+        // OpsExec (follow-up) sees all pending cases for VE and Verifier
+        where.status = { not: VerificationStatus.Completed };
       }
 
       const verifications = await this.prisma.verification.findMany({
@@ -1113,6 +1265,151 @@ export class LoanService {
     }
   }
 
+  async exportLoansCsv(
+    officeId: number,
+    filters?: GetLoansDto
+  ): Promise<string> {
+    const where: Prisma.LoanWhereInput = {
+      department: filters.department,
+    };
+
+    if (filters?.status) {
+      where.status = filters.status;
+    }
+
+    if (filters?.bankName) {
+      where.bankName = {
+        contains: filters.bankName,
+        mode: "insensitive",
+      };
+    }
+
+    if (filters?.startDate || filters?.endDate) {
+      where.createdAt = {
+        ...(filters.startDate && {
+          gte: new Date(`${filters.startDate}T00:00:00.000Z`),
+        }),
+        ...(filters.endDate && {
+          lte: new Date(`${filters.endDate}T23:59:59.999Z`),
+        }),
+      };
+    }
+
+    const loans = await this.prisma.loan.findMany({
+      where,
+      include: {
+        operationsExecutive: {
+          select: { name: true, employeeCode: true },
+        },
+        verifications: {
+          include: {
+            fieldExecutive: {
+              select: { name: true, employeeCode: true },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const escCsv = (val: any) => {
+      if (val == null) return "";
+      const str = String(val);
+      if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+        return `"${str.replace(/"/g, '""')}"`;
+      }
+      return str;
+    };
+
+    const headers = [
+      "Application Number",
+      "Applicant Name",
+      "Mobile",
+      "Loan Type",
+      "Bank Name",
+      "Loan Amount",
+      "Applicant Type",
+      "Status",
+      "Loan Tag",
+      "Branch",
+      "Ops Executive",
+      "Created At",
+      "Closed At",
+    ];
+
+    const department = filters.department;
+
+    if (department === "FI") {
+      headers.push(
+        "Address1 FE",
+        "Address1 Status",
+        "Address2 FE",
+        "Address2 Status",
+        "Work FE",
+        "Work Status",
+        "Business FE",
+        "Business Status"
+      );
+    } else if (department === "PD") {
+      headers.push("Template Name", "Business FE", "Business Status");
+    }
+
+    const rows = loans.map((loan) => {
+      const getVer = (type: string) =>
+        loan.verifications?.find((v) => v.type === type);
+
+      const base = [
+        escCsv(loan.applicationNumber),
+        escCsv(loan.applicantName),
+        escCsv(loan.applicantMobile),
+        escCsv(loan.loanType),
+        escCsv(loan.bankName),
+        escCsv(loan.loanAmount),
+        escCsv(loan.applicantType),
+        escCsv(loan.status),
+        escCsv(loan.loanTag),
+        escCsv(loan.branch),
+        escCsv(loan.operationsExecutive?.name),
+        escCsv(
+          loan.createdAt
+            ? new Date(loan.createdAt).toISOString().slice(0, 10)
+            : ""
+        ),
+        escCsv(
+          loan.closedAt
+            ? new Date(loan.closedAt).toISOString().slice(0, 10)
+            : ""
+        ),
+      ];
+
+      if (department === "FI") {
+        for (const type of [
+          "AddressOne",
+          "AddressTwo",
+          "Work",
+          "Business",
+        ]) {
+          const v = getVer(type);
+          base.push(
+            escCsv(v?.fieldExecutive?.name),
+            escCsv(v?.status)
+          );
+        }
+      } else if (department === "PD") {
+        const biz = getVer("Business");
+        base.push(
+          escCsv(loan.templateName),
+          escCsv(biz?.fieldExecutive?.name),
+          escCsv(biz?.status)
+        );
+      }
+
+      return base.join(",");
+    });
+
+    return [headers.join(","), ...rows].join("\n");
+  }
+
   async updateVerificationAssignment(
     loanId: number,
     updateData: UpdateAssignmentDto
@@ -1264,6 +1561,10 @@ export class LoanService {
 
       const total = await this.prisma.verification.count({ where });
 
+      // Sort ascending (oldest first) for pending cases, desc for completed
+      const sortOrder =
+        filters?.status === VerificationStatus.Pending ? "asc" : "desc";
+
       const verifications = await this.prisma.verification.findMany({
         where,
         include: {
@@ -1283,12 +1584,11 @@ export class LoanService {
           },
         },
         orderBy: {
-          createdAt: "desc",
+          createdAt: sortOrder,
         },
         skip,
         take: Number(limit),
       });
-      // console.log(verifications[0].loan.applicantMobile, "verifications");
 
       for (const verification of verifications) {
         const templateName = verification.loan?.templateName;
@@ -1446,7 +1746,7 @@ export class LoanService {
         if (itemsToProcess.length > 0) {
           await Promise.all(
             itemsToProcess.map((item: any) =>
-              limit(() =>
+              imageWorkerLimit(() =>
                 this.runWorker({
                   s3ImageUrl: item.s3ImageUrl,
                   latitude: parseFloat(item.latitude),
@@ -1456,6 +1756,23 @@ export class LoanService {
               )
             )
           );
+        }
+      }
+
+      // Sync FE-editable loan fields back to the loan record
+      if (verificationData?.basicDetails) {
+        const loanUpdateData: any = {};
+        if (verificationData.basicDetails.loanAmount) {
+          loanUpdateData.loanAmount = verificationData.basicDetails.loanAmount;
+        }
+        if (verificationData.basicDetails.purposeOfLoan) {
+          loanUpdateData.loanType = verificationData.basicDetails.purposeOfLoan;
+        }
+        if (Object.keys(loanUpdateData).length > 0) {
+          await this.prisma.loan.update({
+            where: { id: loanId },
+            data: loanUpdateData,
+          });
         }
       }
 
@@ -1560,6 +1877,31 @@ export class LoanService {
           status,
         },
       });
+
+      // Send SMS to applicant when FE starts verification (InProgress)
+      if (status === VerificationStatus.InProgress) {
+        try {
+          const loan = await this.prisma.loan.findUnique({
+            where: { id: loanId },
+          });
+          const fieldExecutive = await this.prisma.user.findUnique({
+            where: { id: fieldExecutiveId },
+          });
+          if (loan?.applicantMobile && fieldExecutive?.name) {
+            const smsUtils = new SMSUtils(this.loggingService);
+            await smsUtils.sendVerificationAssigned(
+              loan.applicantMobile,
+              loan.applicationNumber || loanId.toString(),
+              fieldExecutive.name
+            );
+          }
+        } catch (smsError) {
+          await this.loggingService.error("Failed to send SMS to applicant", {
+            loanId,
+            error: smsError.message,
+          });
+        }
+      }
 
       // If status is Completed, check if all verifications are complete
       if (status === VerificationStatus.Completed) {
@@ -2034,7 +2376,6 @@ export class LoanService {
         // console.log("financialAnalysis", financialAnalysis);
 
         let netProfit = financialAnalysis?.netProfit || financialAnalysis?.netProfitAfterTax || financialAnalysis?.netProfitEstimated;
-        console.log("netProfit", netProfit);
         if ( netProfit && netProfit > 1000000) {
 
           await this.loggingService.info("Financial analysis is greater than 1000000", {
@@ -2119,6 +2460,9 @@ export class LoanService {
     loanId: number,
     addressType: AddressType
   ): Promise<string> {
+    const startedAt = Date.now();
+    const startSnapshot = this.getReportTelemetrySnapshot();
+
     const loan = await this.prisma.loan.findUnique({
       where: { id: loanId },
       select: {
@@ -2170,6 +2514,15 @@ export class LoanService {
     if (finalReportPath) {
       finalReportPdfUrl =
         await this.s3Service.generatePresignedDownloadUrl(finalReportPath);
+      await this.logReportTelemetry("final_report_cache_hit", {
+        reportType: "verification-final-report",
+        loanId,
+        addressType,
+        finalReportPath,
+        durationMs: Date.now() - startedAt,
+        startSnapshot,
+        endSnapshot: this.getReportTelemetrySnapshot(),
+      });
       return finalReportPdfUrl;
     } else {
       const pdfBuffer = await this.generateVerificationPDF(loanId, addressType);
@@ -2179,6 +2532,17 @@ export class LoanService {
       const updatedVerification = await this.prisma.verification.update({
         where: { id: verification.id },
         data: { finalReportPath: s3_path },
+      });
+
+      await this.logReportTelemetry("final_report_generated_and_uploaded", {
+        reportType: "verification-final-report",
+        loanId,
+        addressType,
+        pdfSizeBytes: pdfBuffer.length,
+        s3Path: s3_path,
+        durationMs: Date.now() - startedAt,
+        startSnapshot,
+        endSnapshot: this.getReportTelemetrySnapshot(),
       });
 
       return pdfUrl;
@@ -2249,7 +2613,18 @@ export class LoanService {
     loanId: number,
     addressType: AddressType
   ): Promise<Buffer> {
+    const startedAt = Date.now();
+    const startCpuUsage = process.cpuUsage();
+    const startSnapshot = this.getReportTelemetrySnapshot();
+
     try {
+      await this.logReportTelemetry("verification_pdf_started", {
+        reportType: "verification-preview-pdf",
+        loanId,
+        addressType,
+        ...startSnapshot,
+      });
+
       // Fetch loan details with verification data
       const loan = await this.prisma.loan.findUnique({
         where: { id: loanId },
@@ -2321,11 +2696,7 @@ export class LoanService {
         throw new NotFoundException("Invalid address type");
       }
 
-      const imagePath = path.resolve(
-        process.env.SIGNATURE_PATH || "/home/ubuntu/kowtha/new_sign.jpg"
-      );
-      const imageBase64 = fs.readFileSync(imagePath, "base64");
-      const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
+      const imageDataUri = this.getSignatureDataUri();
 
       // Get uploaded items for this verification only
       const uploadedItems = verificationData?.uploadedItems || [];
@@ -2395,31 +2766,60 @@ export class LoanService {
       } else {
         throw new NotFoundException("Invalid address type");
       }
-      const pdfBuffer = await this.withPdfQueue(async () => {
-        const browser = await this.getPdfBrowser();
-        const page = await browser.newPage();
-        try {
-          await page.setContent(htmlTemplate, {
-            waitUntil: "networkidle2",
-            timeout: 30000,
-          });
+      const htmlSizeBytes = Buffer.byteLength(htmlTemplate || "", "utf8");
+      const pdfBuffer = await this.withPdfQueue(
+        "verification-preview-pdf",
+        {
+          loanId,
+          addressType,
+          applicationNumber: loan.applicationNumber,
+          uploadedItemsCount: uploadedItems.length,
+          validImageCount: validImageUrls.length,
+          htmlSizeBytes,
+        },
+        async (queueWaitMs) => {
+          const browser = await this.getPdfBrowser();
+          const page = await browser.newPage();
+          try {
+            await page.setContent(htmlTemplate, {
+              waitUntil: "networkidle2",
+              timeout: 30000,
+            });
 
-          const pdfArray = await page.pdf({
-            format: "a4",
-            margin: {
-              top: "20px",
-              right: "20px",
-              bottom: "20px",
-              left: "20px",
-            },
-            printBackground: true,
-            preferCSSPageSize: true,
-          });
-          return Buffer.from(pdfArray);
-        } finally {
-          await page.close().catch(() => undefined);
+            const pdfArray = await page.pdf({
+              format: "a4",
+              margin: {
+                top: "20px",
+                right: "20px",
+                bottom: "20px",
+                left: "20px",
+              },
+              printBackground: true,
+              preferCSSPageSize: true,
+            });
+
+            const renderedPdfBuffer = Buffer.from(pdfArray);
+            await this.logReportTelemetry("verification_pdf_render_completed", {
+              reportType: "verification-preview-pdf",
+              loanId,
+              addressType,
+              applicationNumber: loan.applicationNumber,
+              queueWaitMs,
+              htmlSizeBytes,
+              pdfSizeBytes: renderedPdfBuffer.length,
+              uploadedItemsCount: uploadedItems.length,
+              validImageCount: validImageUrls.length,
+              cpuUsageMs: this.getCpuUsageDelta(startCpuUsage),
+              startSnapshot,
+              endSnapshot: this.getReportTelemetrySnapshot(),
+            });
+
+            return renderedPdfBuffer;
+          } finally {
+            await page.close().catch(() => undefined);
+          }
         }
-      });
+      );
 
       await this.loggingService.info(
         "Verification PDF generated successfully",
@@ -2430,8 +2830,34 @@ export class LoanService {
         }
       );
 
+      await this.logReportTelemetry("verification_pdf_completed", {
+        reportType: "verification-preview-pdf",
+        loanId,
+        addressType,
+        applicationNumber: loan.applicationNumber,
+        durationMs: Date.now() - startedAt,
+        pdfSizeBytes: pdfBuffer.length,
+        cpuUsageMs: this.getCpuUsageDelta(startCpuUsage),
+        startSnapshot,
+        endSnapshot: this.getReportTelemetrySnapshot(),
+      });
+
       return pdfBuffer;
     } catch (error) {
+      await this.logReportTelemetry(
+        "verification_pdf_failed",
+        {
+          reportType: "verification-preview-pdf",
+          loanId,
+          addressType,
+          durationMs: Date.now() - startedAt,
+          cpuUsageMs: this.getCpuUsageDelta(startCpuUsage),
+          startSnapshot,
+          endSnapshot: this.getReportTelemetrySnapshot(),
+          error: error.message,
+        },
+        "error"
+      );
       await this.loggingService.error("Failed to generate verification PDF", {
         loanId,
         addressType,
@@ -2587,6 +3013,26 @@ export class LoanService {
           applicationNumber: verification.loan.applicationNumber,
         }
       );
+
+      // Auto follow-up: Send SMS to applicant about postponement
+      try {
+        const loan = await this.prisma.loan.findUnique({
+          where: { id: verification.loan.id },
+        });
+        if (loan?.applicantMobile) {
+          const smsUtils = new SMSUtils(this.loggingService);
+          await smsUtils.sendVerificationStatus(
+            loan.applicantMobile,
+            "postponed and will be rescheduled",
+            loan.applicationNumber || loan.id.toString()
+          );
+        }
+      } catch (smsError) {
+        await this.loggingService.error(
+          "Failed to send postponement SMS to applicant",
+          { loanId: verification.loan.id, error: smsError.message }
+        );
+      }
 
       return verificationRetry;
     } catch (error) {
@@ -2745,7 +3191,7 @@ export class LoanService {
             bankName: originalLoan.bankName,
             templateName: originalLoan.templateName,
             loanAmount: originalLoan.loanAmount,
-            status: originalLoan.status,
+            status: LoanStatus.Assigned,
             department: originalLoan.department,
             reassignCount: originalLoan.reassignCount + 1,
             office: { connect: { id: originalLoan.officeId } },
@@ -2775,7 +3221,7 @@ export class LoanService {
                 ...(v.assistantVerifierId && {
                   assistantVerifier: { connect: { id: v.assistantVerifierId } },
                 }),
-                status: v.status as VerificationStatus,
+                status: VerificationStatus.Pending,
                 locationType: v.locationType,
                 isPostponed: false,
                 postponedDate: null,
@@ -2784,7 +3230,7 @@ export class LoanService {
                 businessName: v.businessName,
                 currentOfficeName: null,
                 applicantAddress: v.applicantAddress,
-                verificationData: v.verificationData,
+                verificationData: null,
               },
             });
           }
@@ -3055,6 +3501,30 @@ export class LoanService {
         },
       });
 
+      // Check if all verifications for this loan have been submitted by VE
+      const allVerifications = await this.prisma.verification.findMany({
+        where: { loanId },
+      });
+
+      const allSubmitted = allVerifications.every(
+        (v) => v.initialSubmitted === true
+      );
+
+      if (allSubmitted) {
+        await this.prisma.loan.update({
+          where: { id: loanId },
+          data: { status: LoanStatus.BackendCompleted },
+        });
+
+        await this.loggingService.info(
+          "All verifications submitted by VE, loan status updated to BackendCompleted",
+          {
+            loanId,
+            newStatus: LoanStatus.BackendCompleted,
+          }
+        );
+      }
+
       await this.loggingService.info(
         "Verification executive submission completed successfully",
         {
@@ -3072,6 +3542,72 @@ export class LoanService {
       }
       await this.loggingService.error(
         "Failed to submit verification executive data",
+        {
+          loanId,
+          verificationType,
+          error: error.message,
+          stack: error.stack,
+        }
+      );
+      throw error;
+    }
+  }
+
+  async returnToVerificationExecutive(
+    loanId: number,
+    verificationType: VerificationType,
+    comments?: string
+  ) {
+    try {
+      const verification = await this.prisma.verification.findFirst({
+        where: {
+          loanId,
+          type: verificationType,
+        },
+      });
+
+      if (!verification) {
+        throw new NotFoundException("Verification not found");
+      }
+
+      // Reset initialSubmitted so VE sees it in their queue
+      const updatedVerification = await this.prisma.verification.update({
+        where: { id: verification.id },
+        data: {
+          initialSubmitted: false,
+          ...(comments && { synopsis: comments }),
+          updatedAt: new Date(),
+        },
+      });
+
+      // If loan was BackendCompleted, revert to FVCompleted
+      const loan = await this.prisma.loan.findUnique({
+        where: { id: loanId },
+      });
+
+      if (loan?.status === LoanStatus.BackendCompleted) {
+        await this.prisma.loan.update({
+          where: { id: loanId },
+          data: { status: LoanStatus.FVCompleted },
+        });
+      }
+
+      await this.loggingService.info(
+        "Verification returned to VerificationExecutive by Verifier",
+        {
+          loanId,
+          verificationId: verification.id,
+          verificationType,
+        }
+      );
+
+      return updatedVerification;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      await this.loggingService.error(
+        "Failed to return verification to VerificationExecutive",
         {
           loanId,
           verificationType,

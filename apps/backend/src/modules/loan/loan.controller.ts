@@ -114,6 +114,31 @@ export class LoanController {
     };
   }
 
+  @Get("export")
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
+  @ApiOperation({ summary: "Export loans as CSV" })
+  async exportLoans(
+    @Query() filters: GetLoansDto,
+    @Request() req: AuthenticatedRequest,
+    @Res() res: Response
+  ) {
+    if (!req.user.officeId) {
+      throw new BadRequestException("User does not have an assigned office");
+    }
+
+    const csv = await this.loanService.exportLoansCsv(
+      req.user.officeId,
+      filters
+    );
+
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=loans_export_${new Date().toISOString().slice(0, 10)}.csv`
+    );
+    res.send(csv);
+  }
+
   @Post()
   @Roles(UserRole.Admin, UserRole.OperationsExecutive)
   @ApiOperation({
@@ -244,6 +269,33 @@ export class LoanController {
     };
   }
 
+  @Post(":id/return-to-ve")
+  @Roles(UserRole.Admin, UserRole.Verifier)
+  @ApiOperation({
+    summary:
+      "Verifier returns a verification back to VerificationExecutive for rework",
+  })
+  @ApiResponse({
+    status: 200,
+    description:
+      "Verification returned to VerificationExecutive successfully",
+  })
+  async returnToVerificationExecutive(
+    @Param("id") loanId: string,
+    @Body() body: { verificationType: string; comments?: string }
+  ) {
+    const result = await this.loanService.returnToVerificationExecutive(
+      Number(loanId),
+      body.verificationType as VerificationType,
+      body.comments
+    );
+    return {
+      status: 200,
+      message: "Verification returned to Verification Executive successfully",
+      data: result,
+    };
+  }
+
   @Patch(":id/update-executive")
   @Roles(UserRole.Admin, UserRole.OperationsExecutive)
   @ApiOperation({ summary: "Patch API to edit loan verification assignment" })
@@ -336,7 +388,8 @@ export class LoanController {
     UserRole.Admin,
     UserRole.Verifier,
     UserRole.FieldExecutive,
-    UserRole.VerificationExecutive
+    UserRole.VerificationExecutive,
+    UserRole.OperationsExecutive
   )
   @ApiOperation({ summary: "Get loans assigned to verifier (paginated, default 10 per page)", })
   @ApiResponse({
@@ -402,7 +455,6 @@ export class LoanController {
           type
         );
       } else if (department === Department.PD) {
-        console.log("Preview PD Verification PDF");
         pdfBuffer = await this.pdTemplateService.generatePreviewPDF(Number(id), generate);
       }
 
