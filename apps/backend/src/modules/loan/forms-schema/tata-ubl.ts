@@ -41,7 +41,6 @@ export const tataUblSchema = {
           loanAmount: {
             type: "number",
             title: "Amount",
-            readOnly: true,
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",

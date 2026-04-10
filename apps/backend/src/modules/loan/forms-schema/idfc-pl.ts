@@ -337,7 +337,6 @@ export const idfcPlSchema = {
               locale: "en-IN",
               maxDecimalPlaces: 2,
             },
-            readOnly: true,
           },
           endUse: {
             type: "string",

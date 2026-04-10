@@ -130,7 +130,7 @@ const Footer: React.FC<{
    
       const link = document.createElement("a");
       link.href = url;
-      link.download = `verification-report-${id}.pdf`;
+      link.download = `verification-report-${loanData?.applicationNumber || id}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -157,7 +157,7 @@ const Footer: React.FC<{
       setExportingExcel(true);
       setDownloadFileType("excel");
       setShowDownloadAnimation(true);
-      
+
       const excelResponse = await exportFinancialAnalysis(id as string);
 
       // Check if we have valid data
@@ -165,16 +165,32 @@ const Footer: React.FC<{
         throw new Error("No Excel data received");
       }
 
+      // Fetch loan to get the application number for the file name
+      let applicationNumber: string | undefined;
+      if (loanId) {
+        try {
+          const loanResponse = await getLoansByIdApi(loanId.toString());
+          const loanData =
+            loanResponse?.data?.data?.items?.[0] ||
+            loanResponse?.data?.data?.items ||
+            loanResponse?.data?.data ||
+            loanResponse?.data;
+          applicationNumber = loanData?.applicationNumber;
+        } catch (lookupError) {
+          console.error("Error fetching loan for filename:", lookupError);
+        }
+      }
+
       // Create a blob URL for Excel file
-      const blob = new Blob([excelResponse], { 
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" 
+      const blob = new Blob([excelResponse], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
       });
       const url = window.URL.createObjectURL(blob);
-      
+
       // Create a temporary link element to trigger download
       const link = document.createElement("a");
       link.href = url;
-      link.download = `financial-analysis-${id}.xlsx`;
+      link.download = `financial-analysis-${applicationNumber || id}.xlsx`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

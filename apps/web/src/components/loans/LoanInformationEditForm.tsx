@@ -492,31 +492,35 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
               </Form.Item>
             </Col>
           )}
-          <Col xs={24} sm={6} style={{ padding: 4 }}>
-            <Form.Item
-              labelCol={{ span: 24, style: { marginBottom: 0 } }}
-              label="Loan Tag"
-              name="loanTag"
-            >
-              <Select
-                allowClear
-                placeholder="Select Loan Tag"
-                options={[
-                  { value: "PD", label: "PD" },
-                  { value: "LIP", label: "LIP" },
-                ]}
-              />
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={6} style={{ padding: 4 }}>
-            <Form.Item
-              labelCol={{ span: 24, style: { marginBottom: 0 } }}
-              label="Branch"
-              name="branch"
-            >
-              <Input maxLength={30} placeholder="Enter branch" />
-            </Form.Item>
-          </Col>
+          {currentDepartment === "PD" && (
+            <>
+              <Col xs={24} sm={6} style={{ padding: 4 }}>
+                <Form.Item
+                  labelCol={{ span: 24, style: { marginBottom: 0 } }}
+                  label="Loan Tag"
+                  name="loanTag"
+                >
+                  <Select
+                    allowClear
+                    placeholder="Select Loan Tag"
+                    options={[
+                      { value: "PD", label: "PD" },
+                      { value: "LIP", label: "LIP" },
+                    ]}
+                  />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={6} style={{ padding: 4 }}>
+                <Form.Item
+                  labelCol={{ span: 24, style: { marginBottom: 0 } }}
+                  label="Branch"
+                  name="branch"
+                >
+                  <Input maxLength={30} placeholder="Enter branch" />
+                </Form.Item>
+              </Col>
+            </>
+          )}
         </Row>
         <Form.Item>
           <Space>

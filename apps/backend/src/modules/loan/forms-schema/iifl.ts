@@ -176,12 +176,10 @@ export const iiflSchema = {
           loanAmountRequired: {
             type: "string",
             title: "Loan Amount Required",
-            readOnly: true,
           },
           purposeOfLoan: {
             type: "string",
             title: "Purpose of Loan",
-            readOnly: true,
           },
           profileInitiated: {
             type: "string",

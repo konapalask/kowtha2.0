@@ -70,9 +70,9 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
   const currentDepartment = getCurrentDepartment();
   const currentRole = getCurrentDepartmentRole();
   const isOpsExec = currentRole === "OperationsExecutive";
-  // For OpsExec: hide verifier/VE on initial assignment, show but optional on edit (follow-up)
-  const isInitialAssignment = !verification;
-  const hideVerifierFields = isOpsExec && isInitialAssignment;
+  // OpsExec covers both Initiator and Follow-up. We can't tell them apart
+  // by role, so the verifier/VE fields are always visible but never required
+  // — they can assign FE today and verifier/VE later.
   const verifierFieldsRequired = !isOpsExec;
   console.log(currentDepartment)
   const remoteOffices = offices?.filter(
@@ -612,7 +612,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
             }}
           </Form.Item>
         )}
-        {currentDepartment === "PD" && !hideVerifierFields && (
+        {currentDepartment === "PD" && (
         <Form.Item
           noStyle
           shouldUpdate={(prevValues, currentValues) =>
@@ -654,7 +654,6 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
             }}
           </Form.Item>
         )}
-        {!hideVerifierFields && (
         <Form.Item
           noStyle
           shouldUpdate={(prevValues, currentValues) =>
@@ -695,7 +694,6 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
             );
           }}
         </Form.Item>
-        )}
 
         <Form.Item>
           {(() => {

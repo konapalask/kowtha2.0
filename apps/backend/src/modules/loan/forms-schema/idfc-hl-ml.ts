@@ -503,12 +503,10 @@ export const idfcHlMlSchema = {
           loanAmountApplied: {
             type: "string",
             title: "Amount of loan applied",
-            readOnly: true,
           },
           purposeOfLoan: {
             type: "string",
             title: "Purpose of loan",
-            readOnly: true,
           },
           collateralOffered: {
             type: "string",

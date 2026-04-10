@@ -666,7 +666,6 @@ export const dcbSchema = {
               maxDecimalPlaces: 2,
               minDecimalPlaces: 0,
             },
-            readOnly: true,
           },
           emiComfortableWith: {
             type: "number",

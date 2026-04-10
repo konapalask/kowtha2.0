@@ -582,16 +582,13 @@ export class LoanService implements OnModuleDestroy {
         );
       }
 
-      if (!createData.fieldExecutiveId || !createData.verifierId) {
+      if (!createData.fieldExecutiveId) {
         throw new BadRequestException(
-          "Field Executive ID or Verifier ID is required when assigning a field executive"
+          "Field Executive ID is required when assigning a field executive"
         );
       }
 
-      if (
-        createData.fieldExecutiveId &&
-        (!createData.address || !createData.verificationType)
-      ) {
+      if (!createData.address || !createData.verificationType) {
         throw new BadRequestException(
           "Address and Verification Type is required when assigning a field executive"
         );
@@ -602,7 +599,9 @@ export class LoanService implements OnModuleDestroy {
           data: {
             loan: { connect: { id: loan.id } },
             type: createData.verificationType || "AddressOne",
-            verifier: { connect: { id: createData.verifierId } },
+            ...(createData.verifierId && {
+              verifier: { connect: { id: createData.verifierId } },
+            }),
             fieldExecutive: { connect: { id: createData.fieldExecutiveId } },
             status: "Pending",
             applicantAddress: createData.address || null,
@@ -1081,7 +1080,12 @@ export class LoanService implements OnModuleDestroy {
       };
 
       if (filters?.status) {
-        where.status = filters.status;
+        if (filters.status === "Completed") {
+          // "Completed" is a virtual filter that matches both terminal statuses
+          where.status = { in: [LoanStatus.Approved, LoanStatus.Rejected] };
+        } else {
+          where.status = filters.status as LoanStatus;
+        }
       }
 
       if (filters?.postponed) {
@@ -1274,7 +1278,11 @@ export class LoanService implements OnModuleDestroy {
     };
 
     if (filters?.status) {
-      where.status = filters.status;
+      if (filters.status === "Completed") {
+        where.status = { in: [LoanStatus.Approved, LoanStatus.Rejected] };
+      } else {
+        where.status = filters.status as LoanStatus;
+      }
     }
 
     if (filters?.bankName) {

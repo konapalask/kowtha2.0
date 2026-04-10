@@ -53,9 +53,8 @@ const statusOptions = [
   // { label: 'UnderFV', value: 'UnderFV' },
   { label: "FVCompleted", value: "FVCompleted" },
   { label: "Backend Completed", value: "BackendCompleted" },
+  { label: "Completed", value: "Completed" },
   { label: "Appointment Postponed", value: "Appointment Postponed" },
-  // { label: 'Approved', value: 'Approved' },
-  // { label: 'Rejected', value: 'Rejected' },
 ];
 
 const fiStatusOptions = statusOptions.filter(
