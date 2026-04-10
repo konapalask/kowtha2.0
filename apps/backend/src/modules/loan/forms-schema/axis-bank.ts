@@ -28,7 +28,6 @@ export const axisBankSchema = {
           loanAmount: {
             type: "number",
             title: "Loan Amount",
-            readOnly: true,
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",

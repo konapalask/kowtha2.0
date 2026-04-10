@@ -43,7 +43,6 @@ export const axisFinanceSchema = {
               maxDecimalPlaces: 2,
               minDecimalPlaces: 0,
             },
-            readOnly: true,
           },
           placeOfInterview: {
             type: "string",

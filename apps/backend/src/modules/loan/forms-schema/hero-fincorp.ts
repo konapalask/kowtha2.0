@@ -56,7 +56,6 @@ export const heroFincorpSchema = {
               maxDecimalPlaces: 2,
               minDecimalPlaces: 0,
             },
-            readOnly: true,
           },
           numberOfVisits: {
             type: "string",

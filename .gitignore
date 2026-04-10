@@ -97,6 +97,14 @@ local.properties
 # TypeScript build info
 *.tsbuildinfo
 
+# Lambda — local source mirrors and runner (deployed in AWS, not in this repo)
+docs/lambda-email-processor.py
+docs/lambda-subscription-manager.py
+docs/lambda-local/
+docs/__pycache__/
+**/__pycache__/
+*.pyc
+
 # Turbo / Cache
 turbo/
 .cache/

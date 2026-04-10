@@ -292,7 +292,6 @@ export const ambitSchema = {
           purposeOfLoan: {
             type: "string",
             title: "Purpose of Loan",
-            readOnly: true,
           },
           asPerAuditedIndividualItrS: {
             type: "string",

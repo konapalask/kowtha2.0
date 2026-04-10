@@ -18,7 +18,11 @@ import {
   Select,
   Space,
 } from "antd";
-import { PlusOutlined, DeleteOutlined, DownloadOutlined } from "@ant-design/icons";
+import {
+  PlusOutlined,
+  DeleteOutlined,
+  DownloadOutlined,
+} from "@ant-design/icons";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 // import type { ColumnsType } from "antd/es/table";
@@ -59,7 +63,7 @@ import {
 
 const DashboardLayout = dynamic(
   () => import("@/components/layout/DashboardLayout"),
-  { ssr: false }
+  { ssr: false },
 );
 
 dayjs.extend(relativeTime);
@@ -91,10 +95,12 @@ export default function Loans() {
   const [currentOffice, setCurrentOffice] = useState<string>(
     getCurrentDepartmentOfficeId()?.toString() ||
       userDetails?.officeId?.toString() ||
-      ""
+      "",
   );
   const [fieldExecutives, setFieldExecutives] = useState<FieldExecutive[]>([]);
-  const [verificationExecutives, setVerificationExecutives] = useState<any[]>([]);
+  const [verificationExecutives, setVerificationExecutives] = useState<any[]>(
+    [],
+  );
   const [offices, setOffices] = useState<Office[]>([]);
   const [editLoanInfo, setEditLoanInfo] = useState<boolean>(false);
   const [verifiers, setVerifiers] = useState<Verifiers[]>([]);
@@ -135,7 +141,10 @@ export default function Loans() {
       const apiFilters: any = { ...filters };
       if (apiFilters.postponed === true) {
         apiFilters.postponed = "true";
-      } else if (apiFilters.postponed === false || apiFilters.postponed === undefined) {
+      } else if (
+        apiFilters.postponed === false ||
+        apiFilters.postponed === undefined
+      ) {
         delete apiFilters.postponed;
       }
       const result = await getLoansApi(page, limit, apiFilters);
@@ -323,6 +332,7 @@ export default function Loans() {
       a.click();
       window.URL.revokeObjectURL(url);
       setExportPopoverOpen(false);
+      setExportFilters({});
       message.success("Loans exported successfully");
     } catch (error) {
       message.error("Failed to export loans");
@@ -359,10 +369,13 @@ export default function Loans() {
         title: "Status",
         dataIndex: "status",
         key: "status",
-        width: 100,
+        width: 180,
         render: (status: string) => {
-          const color =
-            status === "Unassigned"
+          // Approved + Rejected are collapsed into a single "Completed" tag
+          const isTerminal = status === "Approved" || status === "Rejected";
+          const color = isTerminal
+            ? "green"
+            : status === "Unassigned"
               ? "magenta"
               : status === "Assigned"
                 ? "geekblue"
@@ -370,12 +383,12 @@ export default function Loans() {
                   ? "orange"
                   : status === "BackendCompleted"
                     ? "cyan"
-                    : status === "Approved"
-                      ? "green"
-                      : status === "Rejected"
-                        ? "red"
-                        : "blue";
-          const displayStatus = status === "BackendCompleted" ? "Backend Completed" : status;
+                    : "blue";
+          const displayStatus = isTerminal
+            ? "Completed"
+            : status === "BackendCompleted"
+              ? "Backend Completed"
+              : status;
           return <Tag color={color}>{displayStatus}</Tag>;
         },
       },
@@ -424,13 +437,13 @@ export default function Loans() {
           key: "businessAssignee",
           onFilter: (value: boolean | Key, record: Loan) => {
             const business = record?.verifications?.find(
-              (v: any) => v.type === "Business"
+              (v: any) => v.type === "Business",
             );
             return business?.fieldExecutive?.employeeCode === value.toString();
           },
           render: (_: any, record: Loan) => {
             const business = record?.verifications?.find(
-              (v: any) => v.type === "Business"
+              (v: any) => v.type === "Business",
             );
             return business ? (
               <div style={{ textAlign: "center" }}>
@@ -463,7 +476,7 @@ export default function Loans() {
           key: "businessStatus",
           render: (_: any, record: Loan) => {
             const business = record?.verifications?.find(
-              (v: any) => v.type === "Business"
+              (v: any) => v.type === "Business",
             );
             if (!business) return "-";
 
@@ -548,13 +561,13 @@ export default function Loans() {
             key: "pavAssignee",
             onFilter: (value: boolean | Key, record: Loan) => {
               const pav = record?.verifications?.find(
-                (v: any) => v.type === "AddressOne"
+                (v: any) => v.type === "AddressOne",
               );
               return pav?.fieldExecutive?.employeeCode === value.toString();
             },
             render: (_: any, record: Loan) => {
               const pav = record?.verifications?.find(
-                (v: any) => v.type === "AddressOne"
+                (v: any) => v.type === "AddressOne",
               );
               return pav ? (
                 <div
@@ -581,7 +594,7 @@ export default function Loans() {
             key: "pavStatus",
             render: (_: any, record: Loan) => {
               const pav = record?.verifications?.find(
-                (v: any) => v.type === "AddressOne"
+                (v: any) => v.type === "AddressOne",
               );
               if (!pav) return "-";
 
@@ -609,13 +622,13 @@ export default function Loans() {
             key: "cavAssignee",
             onFilter: (value: boolean | Key, record: Loan) => {
               const cav = record?.verifications?.find(
-                (v: any) => v.type === "AddressTwo"
+                (v: any) => v.type === "AddressTwo",
               );
               return cav?.fieldExecutive?.employeeCode === value.toString();
             },
             render: (_: any, record: Loan) => {
               const cav = record?.verifications?.find(
-                (v: any) => v.type === "AddressTwo"
+                (v: any) => v.type === "AddressTwo",
               );
               return cav ? (
                 <div
@@ -642,7 +655,7 @@ export default function Loans() {
             key: "cavStatus",
             render: (_: any, record: Loan) => {
               const cav = record?.verifications?.find(
-                (v: any) => v.type === "AddressTwo"
+                (v: any) => v.type === "AddressTwo",
               );
               if (!cav) return "-";
 
@@ -670,13 +683,13 @@ export default function Loans() {
             key: "wvAssignee",
             onFilter: (value: boolean | Key, record: Loan) => {
               const wv = record?.verifications?.find(
-                (v: any) => v.type === "Work"
+                (v: any) => v.type === "Work",
               );
               return wv?.fieldExecutive?.employeeCode === value.toString();
             },
             render: (_: any, record: Loan) => {
               const wv = record?.verifications?.find(
-                (v: any) => v.type === "Work"
+                (v: any) => v.type === "Work",
               );
               return wv ? (
                 <div
@@ -703,7 +716,7 @@ export default function Loans() {
             key: "wvStatus",
             render: (_: any, record: Loan) => {
               const wv = record?.verifications?.find(
-                (v: any) => v.type === "Work"
+                (v: any) => v.type === "Work",
               );
               if (!wv) return "-";
 
@@ -731,7 +744,7 @@ export default function Loans() {
             key: "businessAssignee",
             onFilter: (value: boolean | Key, record: Loan) => {
               const business = record?.verifications?.find(
-                (v: any) => v.type === "Business"
+                (v: any) => v.type === "Business",
               );
               return (
                 business?.fieldExecutive?.employeeCode === value.toString()
@@ -739,7 +752,7 @@ export default function Loans() {
             },
             render: (_: any, record: Loan) => {
               const business = record?.verifications?.find(
-                (v: any) => v.type === "Business"
+                (v: any) => v.type === "Business",
               );
               return business ? (
                 <div
@@ -768,7 +781,7 @@ export default function Loans() {
             key: "businessStatus",
             render: (_: any, record: Loan) => {
               const business = record?.verifications?.find(
-                (v: any) => v.type === "Business"
+                (v: any) => v.type === "Business",
               );
               if (!business) return "-";
 
@@ -879,13 +892,28 @@ export default function Loans() {
                 onOpenChange={setExportPopoverOpen}
                 content={
                   <div style={{ width: 280 }}>
-                    <Space direction="vertical" style={{ width: "100%" }} size="middle">
+                    <Space
+                      direction="vertical"
+                      style={{ width: "100%" }}
+                      size="middle"
+                    >
                       <div>
-                        <Typography.Text strong style={{ display: "block", marginBottom: 4 }}>
+                        <Typography.Text
+                          strong
+                          style={{ display: "block", marginBottom: 4 }}
+                        >
                           Date Range
                         </Typography.Text>
                         <DatePicker.RangePicker
                           style={{ width: "100%" }}
+                          value={
+                            exportFilters.startDate && exportFilters.endDate
+                              ? [
+                                  dayjs(exportFilters.startDate),
+                                  dayjs(exportFilters.endDate),
+                                ]
+                              : null
+                          }
                           onChange={(dates) => {
                             setExportFilters((prev) => ({
                               ...prev,
@@ -896,20 +924,30 @@ export default function Loans() {
                         />
                       </div>
                       <div>
-                        <Typography.Text strong style={{ display: "block", marginBottom: 4 }}>
+                        <Typography.Text
+                          strong
+                          style={{ display: "block", marginBottom: 4 }}
+                        >
                           Status
                         </Typography.Text>
                         <Select
                           style={{ width: "100%" }}
                           allowClear
                           placeholder="All statuses"
+                          value={exportFilters.status}
                           options={[
                             { label: "Unassigned", value: "Unassigned" },
                             { label: "Assigned", value: "Assigned" },
                             { label: "FVCompleted", value: "FVCompleted" },
                             ...(currentDepartment !== "FI"
-                              ? [{ label: "Backend Completed", value: "BackendCompleted" }]
+                              ? [
+                                  {
+                                    label: "Backend Completed",
+                                    value: "BackendCompleted",
+                                  },
+                                ]
                               : []),
+                            { label: "Completed", value: "Completed" },
                           ]}
                           onChange={(value) =>
                             setExportFilters((prev) => ({
@@ -920,7 +958,10 @@ export default function Loans() {
                         />
                       </div>
                       <div>
-                        <Typography.Text strong style={{ display: "block", marginBottom: 4 }}>
+                        <Typography.Text
+                          strong
+                          style={{ display: "block", marginBottom: 4 }}
+                        >
                           Bank Name
                         </Typography.Text>
                         <Select
@@ -928,6 +969,7 @@ export default function Loans() {
                           allowClear
                           showSearch
                           placeholder="All banks"
+                          value={exportFilters.bankName}
                           options={pdBankOptions}
                           filterOption={(input, option) =>
                             (option?.label ?? "")

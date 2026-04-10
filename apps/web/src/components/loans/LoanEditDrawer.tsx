@@ -274,17 +274,16 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                   color={
                     loanDetails.status === "Pending"
                       ? "orange"
-                      : loanDetails.status === "Approved"
+                      : loanDetails.status === "Approved" ||
+                          loanDetails.status === "Rejected"
                         ? "green"
-                        : loanDetails.status === "Rejected"
-                          ? "red"
-                          : loanDetails.status === "BackendCompleted"
-                            ? "cyan"
-                            : loanDetails.status === "FieldVerificationComplete"
-                              ? "green"
-                              : loanDetails.status === "FieldVerificationStarted"
-                                ? "blue"
-                                : "default"
+                        : loanDetails.status === "BackendCompleted"
+                          ? "cyan"
+                          : loanDetails.status === "FieldVerificationComplete"
+                            ? "green"
+                            : loanDetails.status === "FieldVerificationStarted"
+                              ? "blue"
+                              : "default"
                   }
                   style={{ marginLeft: 8 }}
                 >
@@ -301,9 +300,8 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                       case "BackendCompleted":
                         return "Backend Completed";
                       case "Approved":
-                        return "Approved";
                       case "Rejected":
-                        return "Rejected";
+                        return "Completed";
                       default:
                         return loanDetails.status;
                     }
@@ -434,14 +432,14 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                       {loanDetails?.templateName}
                     </Descriptions.Item>
                   )}
-                  {loanDetails?.loanTag && (
+                  {currentDepartment === "PD" && loanDetails?.loanTag && (
                     <Descriptions.Item label="Loan Tag">
                       <Tag color={loanDetails.loanTag === "PD" ? "blue" : "purple"}>
                         {loanDetails.loanTag}
                       </Tag>
                     </Descriptions.Item>
                   )}
-                  {loanDetails?.branch && (
+                  {currentDepartment === "PD" && loanDetails?.branch && (
                     <Descriptions.Item label="Branch">
                       {loanDetails.branch}
                     </Descriptions.Item>

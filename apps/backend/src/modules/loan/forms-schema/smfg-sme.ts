@@ -413,7 +413,6 @@ export const smfgSmeSchema = {
           loanAmountApplied: {
             type: "number",
             title: "Applied Loan Amount",
-            readOnly: true,
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
