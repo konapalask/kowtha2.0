@@ -57,4 +57,9 @@ export class CreatePDEmailLogDto {
   @IsNumber()
   @IsOptional()
   loanId?: number;
+
+  @ApiProperty({ description: 'Mailbox that received this email (e.g. appd@cakowtha.co.in)', required: false })
+  @IsString()
+  @IsOptional()
+  receivedByMailbox?: string;
 }

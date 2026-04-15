@@ -1131,7 +1131,6 @@ export const janaSenpBelow50lSchema = {
               maxDecimalPlaces: 2,
               minDecimalPlaces: 0,
             },
-            readOnly: true,
           },
           endUseDetailsOfLoan: {
             type: "string",

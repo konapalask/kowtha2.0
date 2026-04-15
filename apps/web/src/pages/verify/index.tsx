@@ -308,7 +308,7 @@ export default function Verify() {
       key: "actions",
       align: "center",
       render: (_, record) => {
-        const enabledStatuses = ["FVCompleted", "Approved", "Rejected"];
+        const enabledStatuses = ["FVCompleted", "BackendCompleted", "Approved", "Rejected"];
         const verifications = record?.verifications || [];
         const hasFeSubmission = verifications.some(
           (v: any) =>

@@ -363,12 +363,10 @@ export const adityaBirlaSchema = {
               maxDecimalPlaces: 2,
               minDecimalPlaces: 0,
             },
-            readOnly: true,
           },
           purposeOfLoan: {
             type: "string",
             title: "Purpose of loan",
-            readOnly: true,
           },
         },
       },

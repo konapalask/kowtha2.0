@@ -695,12 +695,6 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
   `;
 
   // Get business name from various sources
-  console.log(
-    "***************************************************************",
-    html_data,
-    employment,
-    company
-  );
   const businessName =
     html_data?.loanDetails?.businessName ||
     employment.businessName ||

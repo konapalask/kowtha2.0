@@ -21,7 +21,7 @@ import {
 import { getFieldExecutivesByOfficeIdApi } from "@/services/users.services";
 import styles from "./FieldAssignmentForm.module.css";
 import { UserOutlined } from "@ant-design/icons";
-import { getCurrentDepartmentOfficeId, getCurrentDepartment } from "@/utils/utility";
+import { getCurrentDepartmentOfficeId, getCurrentDepartment, getCurrentDepartmentRole } from "@/utils/utility";
 
 interface FieldAssignmentFormProps {
   verification: any;
@@ -68,6 +68,12 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
   
   const currentDepartmentOfficeId = getCurrentDepartmentOfficeId();
   const currentDepartment = getCurrentDepartment();
+  const currentRole = getCurrentDepartmentRole();
+  const isOpsExec = currentRole === "OperationsExecutive";
+  // OpsExec covers both Initiator and Follow-up. We can't tell them apart
+  // by role, so the verifier/VE fields are always visible but never required
+  // — they can assign FE today and verifier/VE later.
+  const verifierFieldsRequired = !isOpsExec;
   console.log(currentDepartment)
   const remoteOffices = offices?.filter(
     (option: any) => Number(option?.value) !== Number(currentDepartmentOfficeId)
@@ -628,7 +634,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                 style={{ marginBottom: 0 }}
                 rules={[
                   {
-                    required: true,
+                    required: verifierFieldsRequired,
                     message: "Please select a verification executive",
                   },
                 ]}
@@ -669,7 +675,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                 style={{ marginBottom: 0 }}
                 rules={[
                   {
-                    required: true,
+                    required: verifierFieldsRequired,
                     message: "Please select a verifier",
                   },
                 ]}

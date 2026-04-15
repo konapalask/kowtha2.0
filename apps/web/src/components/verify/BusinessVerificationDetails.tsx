@@ -1385,6 +1385,8 @@ export const BusinessVerificationDetails: React.FC<
     }
   };
 
+  const MAX_PHOTO_UPLOADS = 50;
+
   const handleMultipleFileUpload = async (info: any) => {
     const { fileList } = info;
 
@@ -1400,6 +1402,27 @@ export const BusinessVerificationDetails: React.FC<
       .filter((f: any) => f instanceof File);
 
     if (newFiles.length === 0) return;
+
+    const existingPhotos = (
+      completeVerificationData?.verificationData?.uploadedItems || []
+    ).filter((item: any) => item.type === "photo");
+    const newPhotoFiles = newFiles.filter((f: File) => {
+      const mime = (f.type || "").toLowerCase();
+      const name = f.name.toLowerCase();
+      return (
+        mime === "image/jpeg" ||
+        mime === "image/png" ||
+        name.endsWith(".jpg") ||
+        name.endsWith(".jpeg") ||
+        name.endsWith(".png")
+      );
+    });
+    if (existingPhotos.length + newPhotoFiles.length > MAX_PHOTO_UPLOADS) {
+      message.error(
+        `You can only upload up to ${MAX_PHOTO_UPLOADS} photos. Currently ${existingPhotos.length} photo(s) uploaded.`
+      );
+      return;
+    }
 
     let successCount = 0;
     let failCount = 0;
@@ -1545,8 +1568,6 @@ export const BusinessVerificationDetails: React.FC<
     if (failCount > 0 && successCount === 0) {
       message.error(`${failCount} file(s) failed to upload`);
     }
-
-    processedFilesRef.current.clear();
   };
 
   const handlePhotoUpload = async (file: File) => {
@@ -1561,6 +1582,18 @@ export const BusinessVerificationDetails: React.FC<
       const isImage = isJpeg || isPng;
       const isPdf =
         mimeType === "application/pdf" || fileNameLower.endsWith(".pdf");
+
+      if (isImage) {
+        const existingPhotos = (
+          completeVerificationData?.verificationData?.uploadedItems || []
+        ).filter((item: any) => item.type === "photo");
+        if (existingPhotos.length >= MAX_PHOTO_UPLOADS) {
+          message.error(
+            `You can only upload up to ${MAX_PHOTO_UPLOADS} photos. Currently ${existingPhotos.length} photo(s) uploaded.`
+          );
+          return false;
+        }
+      }
 
       const dept = currentDepartment || curDept;
       if (dept === "PD") {

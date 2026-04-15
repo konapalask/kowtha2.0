@@ -1,4 +1,5 @@
-import { IsString, IsNumber, IsOptional, IsBoolean, IsDateString } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsBoolean, IsDateString, IsEnum, MaxLength } from 'class-validator';
+import { LoanTag } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class EditLoanDto {
@@ -56,6 +57,17 @@ export class EditLoanDto {
   @IsString()
   @IsOptional()
   templateName?: string;
+
+  @ApiProperty({ description: 'Loan tag', enum: LoanTag, required: false })
+  @IsEnum(LoanTag)
+  @IsOptional()
+  loanTag?: LoanTag;
+
+  @ApiProperty({ description: 'Branch', required: false })
+  @IsString()
+  @IsOptional()
+  @MaxLength(30)
+  branch?: string;
 
   @ApiProperty({ description: 'Date and time when the loan was closed', required: false, type: 'string', format: 'date-time' })
   @IsDateString()

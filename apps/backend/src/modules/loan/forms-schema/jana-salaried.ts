@@ -387,12 +387,10 @@ export const janaSalariedSchema = {
               locale: "en-IN",
               maxDecimalPlaces: 2,
             },
-            readOnly: true,
           },
           purposeOfLoan: {
             type: "string",
             title: "Purpose of Loan",
-            readOnly: true,
           },
         },
       },

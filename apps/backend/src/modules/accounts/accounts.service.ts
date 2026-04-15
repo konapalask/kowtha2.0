@@ -260,6 +260,24 @@ export class AccountsService {
         }
       }
 
+      // Web login: block users whose ONLY active roles are FieldExecutive.
+      // Field Executives must use the mobile app. Users who are FE in one
+      // department but have a non-FE role in another (e.g. FE in PD + Admin
+      // in FI) are still allowed — the auto-switch block below moves them
+      // into their non-FE department.
+      if (!deviceId) {
+        const hasAnyNonFieldExecutiveRole = userRoles.departmentRoles.some(
+          (r) =>
+            r.role !== UserRole.FieldExecutive &&
+            r.status === UserStatus.Active
+        );
+        if (!hasAnyNonFieldExecutiveRole) {
+          throw new UnauthorizedException(
+            'Access denied: Field Executives can only login via the mobile app'
+          );
+        }
+      }
+
       // If FieldExecutive user logs in via web (no deviceId), automatically set defaultDepartment to opposite department
       if (!deviceId && hasFieldExecutiveRole && fieldExecutiveRoles.length > 0) {
         const fieldExecutiveInFI = fieldExecutiveRoles.some(r => r.department === Department.FI);

@@ -87,16 +87,6 @@ export const herohousingSalariedTemplate = (
   const zonedDate = toZonedTime(date, timeZone);
   const istDate = format(zonedDate, "dd-MM-yyyy hh:mm:ss a xxx", { timeZone });
 
-  // Debug: Log the structure to help identify data issues
-  console.log("🔍 [HeroHousing Salaried] Verification Data Structure:", {
-    hasLoanDetails: verificationData?.loanDetails,
-    loanDetailsKeys: verificationData?.loanDetails
-      ? Object.keys(verificationData.loanDetails)
-      : [],
-    loanDetailsValue: verificationData?.loanDetails,
-    allTopLevelKeys: verificationData ? Object.keys(verificationData) : [],
-  });
-
   const general = verificationData?.generalInfo || {};
   const borrowerDetails = verificationData?.borrowerProfile || {};
   const familyDetails = verificationData?.familyDetails || {};

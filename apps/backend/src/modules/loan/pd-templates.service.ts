@@ -20,12 +20,79 @@ import {
 
 @Injectable()
 export class PDTemplateService {
+  private readonly reportTelemetryEnabled =
+    process.env.ENABLE_REPORT_TELEMETRY !== "false";
+  private readonly reportTelemetryTag = "TEMP_REPORT_TELEMETRY";
+  private readonly validationDebugEnabled =
+    process.env.ENABLE_PD_VALIDATION_DEBUG === "true";
+  private cachedSignatureDataUri: string | null = null;
+
   constructor(
     private loggingService: LoggingService,
     private s3Service: S3Service,
     private prisma: PrismaService,
     private loanService: LoanService
   ) {}
+
+  private bytesToMb(value: number | undefined): number {
+    return Number(((value || 0) / 1024 / 1024).toFixed(2));
+  }
+
+  private getReportTelemetrySnapshot() {
+    const memory = process.memoryUsage();
+    return {
+      rssMb: this.bytesToMb(memory.rss),
+      heapUsedMb: this.bytesToMb(memory.heapUsed),
+      heapTotalMb: this.bytesToMb(memory.heapTotal),
+      externalMb: this.bytesToMb(memory.external),
+      arrayBuffersMb: this.bytesToMb(memory.arrayBuffers),
+      uptimeSec: Number(process.uptime().toFixed(1)),
+    };
+  }
+
+  private getCpuUsageDelta(startUsage: NodeJS.CpuUsage) {
+    const delta = process.cpuUsage(startUsage);
+    return {
+      userMs: Number((delta.user / 1000).toFixed(2)),
+      systemMs: Number((delta.system / 1000).toFixed(2)),
+      totalMs: Number(((delta.user + delta.system) / 1000).toFixed(2)),
+    };
+  }
+
+  private getSignatureDataUri(): string {
+    if (this.cachedSignatureDataUri) {
+      return this.cachedSignatureDataUri;
+    }
+
+    const signaturePath = path.resolve(
+      process.cwd(),
+      process.env.SIGNATURE_PATH
+    );
+    const imageBase64 = fs.readFileSync(signaturePath, "base64");
+    this.cachedSignatureDataUri = `data:image/jpeg;base64,${imageBase64}`;
+    return this.cachedSignatureDataUri;
+  }
+
+  private async logReportTelemetry(
+    event: string,
+    payload: Record<string, any>,
+    level: "info" | "warn" | "error" = "info"
+  ) {
+    if (!this.reportTelemetryEnabled) {
+      return;
+    }
+
+    const message = `[${this.reportTelemetryTag}] ${event}`;
+    if (level === "warn") {
+      await this.loggingService.warn(message, payload);
+      return;
+    }
+    if (level === "error") {
+      await this.loggingService.error(message, payload);
+      return;
+    }
+    await this.loggingService.info(message, payload);
+  }
 
   async FormatPDImages(
     verification: any,
@@ -38,12 +105,11 @@ export class PDTemplateService {
     loan?: any,
     fieldExecutiveName?: string
   ): Promise<any> {
-    const signaturePath = path.resolve(
-      process.cwd(),
-      process.env.SIGNATURE_PATH
-    );
-    const imageBase64 = fs.readFileSync(signaturePath, "base64");
-    const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
+    const startedAt = Date.now();
+    const startCpuUsage = process.cpuUsage();
+    const startSnapshot = this.getReportTelemetrySnapshot();
+
+    const imageDataUri = this.getSignatureDataUri();
 
     const status = verification?.approvedStatus || "";
 
@@ -148,8 +214,10 @@ export class PDTemplateService {
         }
 
         try {
+          // Inline as downscaled base64 data URI so Puppeteer doesn't fetch
+          // images over the network — much smaller PDFs and lower memory.
           const presignedUrl =
-            await this.s3Service.generatePresignedDownloadUrl(possibleS3Key);
+            await this.s3Service.fetchImageAsDataUri(possibleS3Key, 600, 0.65);
           if (!presignedUrl) {
             continue;
           }
@@ -237,12 +305,15 @@ export class PDTemplateService {
             return null;
           }
           try {
-            return await this.s3Service.generatePresignedDownloadUrl(
-              item.s3ImageUrl
+            // Inline as downscaled base64 data URI (see grouped path above).
+            return await this.s3Service.fetchImageAsDataUri(
+              item.s3ImageUrl,
+              600,
+              0.65
             );
           } catch (error) {
             await this.loggingService.error(
-              "Failed to generate presigned URL for image",
+              "Failed to fetch image as data URI",
               {
                 s3ImageUrl: item.s3ImageUrl,
                 error: error.message,
@@ -260,6 +331,18 @@ export class PDTemplateService {
         bankName,
         fieldExecutive
       );
+
+      await this.logReportTelemetry("pd_format_images_fallback_used", {
+        reportType: "pd-preview-pdf",
+        bankName,
+        applicationNumber,
+        uploadedItemsCount: uploadedItems.length,
+        validImageCount: validImageUrls.length,
+        durationMs: Date.now() - startedAt,
+        cpuUsageMs: this.getCpuUsageDelta(startCpuUsage),
+        startSnapshot,
+        endSnapshot: this.getReportTelemetrySnapshot(),
+      });
     }
 
     const loanDetails = loan
@@ -369,6 +452,24 @@ export class PDTemplateService {
       }
       return `<span style="color: ${color}; font-weight: ${fontWeight};">${status}</span>`;
     };
+
+    const groupedPhotoCount = photoGroups.reduce(
+      (total, group) => total + group.photos.length,
+      0
+    );
+    await this.logReportTelemetry("pd_format_images_completed", {
+      reportType: "pd-preview-pdf",
+      bankName,
+      applicationNumber,
+      uploadedItemsCount: uploadedItems.length,
+      photoGroupsCount: photoGroups.length,
+      groupedPhotoCount,
+      imagesMarkupSizeBytes: Buffer.byteLength(imagesData || "", "utf8"),
+      durationMs: Date.now() - startedAt,
+      cpuUsageMs: this.getCpuUsageDelta(startCpuUsage),
+      startSnapshot,
+      endSnapshot: this.getReportTelemetrySnapshot(),
+    });
 
     return {
       bankName: loan?.templateName || bankName,
@@ -799,7 +900,6 @@ export class PDTemplateService {
     }
 
     if (matchesTemplate("DCB BANK")) {
-      console.log("********");
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -956,7 +1056,18 @@ export class PDTemplateService {
   }
 
   async generatePreviewPDF(loanId: number, generate: boolean): Promise<Buffer> {
+    const startedAt = Date.now();
+    const startCpuUsage = process.cpuUsage();
+    const startSnapshot = this.getReportTelemetrySnapshot();
+
     try {
+      await this.logReportTelemetry("pd_preview_started", {
+        reportType: "pd-preview-pdf",
+        loanId,
+        generate,
+        ...startSnapshot,
+      });
+
       // Fetch loan details with verification data
       const loan = await this.prisma.loan.findUnique({
         where: { id: loanId, department: Department.PD },
@@ -1013,7 +1124,6 @@ export class PDTemplateService {
       let schemaBankName = bankName;
       let schema = null;
 
-      console.log("templateName", templateName);
       if (templateName) {
         const foundBankName = getBankNameFromTemplate(templateName);
         if (foundBankName) {
@@ -1030,14 +1140,17 @@ export class PDTemplateService {
         schema = formSchema[schemaBankName as keyof typeof formSchema];
       }
       if (schema) {
-        logDataStructure(
-          verificationData,
-          `${schemaBankName} Verification Data`
-        );
+        if (this.validationDebugEnabled) {
+          logDataStructure(
+            verificationData,
+            `${schemaBankName} Verification Data`
+          );
+        }
         const validationResult = validateVerificationData(
           verificationData,
           schema,
-          schemaBankName
+          schemaBankName,
+          this.validationDebugEnabled
         );
 
         // Log validation results but don't block PDF generation
@@ -1054,6 +1167,7 @@ export class PDTemplateService {
         }
       }
 
+      const htmlBuildStartedAt = Date.now();
       const htmlTemplate = await this.InterfaceMapping(
         bankName,
         templateName,
@@ -1066,6 +1180,18 @@ export class PDTemplateService {
         schema,
         verification.fieldExecutive?.name
       );
+      const htmlSizeBytes = Buffer.byteLength(htmlTemplate || "", "utf8");
+      await this.logReportTelemetry("pd_preview_html_built", {
+        reportType: "pd-preview-pdf",
+        loanId,
+        bankName,
+        templateName,
+        htmlBuildDurationMs: Date.now() - htmlBuildStartedAt,
+        htmlSizeBytes,
+        cpuUsageMs: this.getCpuUsageDelta(startCpuUsage),
+        startSnapshot,
+        endSnapshot: this.getReportTelemetrySnapshot(),
+      });
 
       // Get footer name from templatesAndFooters using templateName, fallback to templateName, then bankName
       const footerName =
@@ -1078,13 +1204,6 @@ export class PDTemplateService {
         htmlTemplate,
         footerName
       );
-      const footerNameFromTemplate = getFooterNameFromTemplate(templateName);
-      console.log("Footer name resolution: yes", {
-        templateName,
-        bankName,
-        footerNameFromTemplate,
-        finalFooterName: footerName,
-      });
 
       await this.loggingService.info(
         "Verification PDF generated successfully",
@@ -1093,6 +1212,19 @@ export class PDTemplateService {
           applicationNumber: loan.applicationNumber,
         }
       );
+
+      await this.logReportTelemetry("pd_preview_completed", {
+        reportType: "pd-preview-pdf",
+        loanId,
+        bankName,
+        templateName,
+        applicationNumber: loan.applicationNumber,
+        durationMs: Date.now() - startedAt,
+        pdfSizeBytes: pdfBuffer.length,
+        cpuUsageMs: this.getCpuUsageDelta(startCpuUsage),
+        startSnapshot,
+        endSnapshot: this.getReportTelemetrySnapshot(),
+      });
       
       if (generate && !loan.closedAt) {
         await this.prisma.loan.update({
@@ -1103,6 +1235,19 @@ export class PDTemplateService {
 
       return pdfBuffer;
     } catch (error) {
+      await this.logReportTelemetry(
+        "pd_preview_failed",
+        {
+          reportType: "pd-preview-pdf",
+          loanId,
+          durationMs: Date.now() - startedAt,
+          cpuUsageMs: this.getCpuUsageDelta(startCpuUsage),
+          startSnapshot,
+          endSnapshot: this.getReportTelemetrySnapshot(),
+          error: error.message,
+        },
+        "error"
+      );
       await this.loggingService.error("Failed to generate verification PDF", {
         loanId,
         error: error.message,

@@ -52,10 +52,14 @@ const statusOptions = [
   { label: "Assigned", value: "Assigned" },
   // { label: 'UnderFV', value: 'UnderFV' },
   { label: "FVCompleted", value: "FVCompleted" },
+  { label: "Backend Completed", value: "BackendCompleted" },
+  { label: "Completed", value: "Completed" },
   { label: "Appointment Postponed", value: "Appointment Postponed" },
-  // { label: 'Approved', value: 'Approved' },
-  // { label: 'Rejected', value: 'Rejected' },
 ];
+
+const fiStatusOptions = statusOptions.filter(
+  (opt) => opt.value !== "BackendCompleted"
+);
 
 export interface FilterValue {
   status?: string;
@@ -217,7 +221,7 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({
           <Space direction="vertical">
             <Select
               style={{ minWidth: 200 }}
-              options={statusOptions}
+              options={currentDepartment === "FI" ? fiStatusOptions : statusOptions}
               value={filters.status || (filters.postponed ? "Appointment Postponed" : undefined)}
               onChange={(value: string | null) => {
                 if (value === "Appointment Postponed") {

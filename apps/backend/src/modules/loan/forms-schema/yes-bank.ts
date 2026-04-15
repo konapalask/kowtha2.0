@@ -56,7 +56,6 @@ export const yesBankSchema = {
               locale: "en-IN",
               maxDecimalPlaces: 2,
             },
-            readOnly: true,
           },
           tenorRequired: {
             type: "string",

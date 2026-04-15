@@ -51,7 +51,6 @@ export const herohousingSalariedSchema = {
               locale: "en-IN",
               maxDecimalPlaces: 2,
             },
-            readOnly: true,
           },
         },
       },

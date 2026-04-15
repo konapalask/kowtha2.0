@@ -37,7 +37,6 @@ export const ambitMsmeSchema = {
               locale: "en-IN",
               maxDecimalPlaces: 2,
             },
-            readOnly: true,
           },
           emi: {
             type: "number",
