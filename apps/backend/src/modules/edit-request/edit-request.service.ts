@@ -63,6 +63,11 @@ export class EditRequestService {
           );
         }
 
+        // Fix any missing array IDs before validation
+        createEditRequestDto.changes = this.arrayValidationService.fixArrayData(
+          createEditRequestDto.changes
+        );
+
         // Validate array changes and generate metadata
         const validationResult =
           this.arrayValidationService.validateVerificationArrays(
@@ -79,11 +84,6 @@ export class EditRequestService {
         arrayChangesMetadata = this.detectArrayChanges(
           verification.verificationData as Record<string, any>,
           createEditRequestDto.changes as Record<string, any>
-        );
-
-        // Fix any missing array IDs
-        createEditRequestDto.changes = this.arrayValidationService.fixArrayData(
-          createEditRequestDto.changes
         );
 
         if (validationResult.warnings.length > 0) {
@@ -199,10 +199,13 @@ export class EditRequestService {
           const changes = editRequest.changes as Record<string, any>;
           const { _arrayChangesMetadata, ...actualChanges } = changes;
 
+          // Fix any missing array IDs before validation
+          const fixedChanges = this.arrayValidationService.fixArrayData(actualChanges);
+
           // Validate array changes before applying
           const validationResult =
             this.arrayValidationService.validateVerificationArrays(
-              actualChanges
+              fixedChanges
             );
 
           if (!validationResult.isValid) {
@@ -210,9 +213,6 @@ export class EditRequestService {
               `Cannot apply changes due to invalid array data: ${validationResult.errors.join(", ")}`
             );
           }
-
-          // Fix any array data issues
-          const fixedChanges = this.arrayValidationService.fixArrayData(actualChanges);
 
           // Apply the changes to the verification data
           const updatedVerificationData = {
