@@ -984,9 +984,6 @@ export class LoanService implements OnModuleDestroy {
         }
         where.initialSubmitted = false;
         where.assistantVerifierId = verifierId;
-      } else if (userRole.role === UserRole.OperationsExecutive) {
-        // OpsExec (follow-up) sees all pending cases for VE and Verifier
-        where.status = { not: VerificationStatus.Completed };
       }
 
       const verifications = await this.prisma.verification.findMany({
@@ -1690,7 +1687,8 @@ export class LoanService implements OnModuleDestroy {
     fieldExecutiveId: number,
     findings: string,
     verificationData?: any,
-    addressType?: AddressType
+    addressType?: AddressType,
+    department?: string
   ) {
     try {
       let updatedAddressType = addressType;
@@ -1768,11 +1766,13 @@ export class LoanService implements OnModuleDestroy {
         }
       }
 
-      // Sync FE-editable loan fields back to the loan record
-      if (verificationData?.basicDetails) {
+      // Sync FE-editable loan fields back to the loan record (PD only)
+      if (department === "PD" && verificationData?.basicDetails) {
         const loanUpdateData: any = {};
         if (verificationData.basicDetails.loanAmount) {
-          loanUpdateData.loanAmount = verificationData.basicDetails.loanAmount;
+          loanUpdateData.loanAmount = parseFloat(
+            verificationData.basicDetails.loanAmount
+          );
         }
         if (verificationData.basicDetails.purposeOfLoan) {
           loanUpdateData.loanType = verificationData.basicDetails.purposeOfLoan;
@@ -2710,16 +2710,14 @@ export class LoanService implements OnModuleDestroy {
       // Get uploaded items for this verification only
       const uploadedItems = verificationData?.uploadedItems || [];
 
-      // Generate presigned URLs for images
+      // Fetch images as base64 data URIs so Puppeteer needs no network access
       const imageUrls = await Promise.all(
         uploadedItems.map(async (item) => {
           try {
-            return await this.s3Service.generatePresignedDownloadUrl(
-              item.s3ImageUrl
-            );
+            return await this.s3Service.fetchImageAsDataUri(item.s3ImageUrl);
           } catch (error) {
             await this.loggingService.error(
-              "Failed to generate presigned URL for image",
+              "Failed to fetch image as data URI",
               {
                 s3ImageUrl: item.s3ImageUrl,
                 error: error.message,
@@ -2730,7 +2728,7 @@ export class LoanService implements OnModuleDestroy {
         })
       );
 
-      // Filter out any failed URL generations
+      // Filter out any failed fetches
       const validImageUrls = imageUrls.filter((url) => url !== null);
 
       let htmlTemplate = "";

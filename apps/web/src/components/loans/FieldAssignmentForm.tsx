@@ -431,7 +431,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
           handleVerificationAssign(selectedLoan.id, type, values)
         }
       >
-        {!isFVCompleted && type === "Business" && (
+        {(!isFVCompleted || !verification) && type === "Business" && (
           <Form.Item
             rules={[
               {
@@ -450,7 +450,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
             />
           </Form.Item>
         )}
-        {!isFVCompleted && type === "Work" && (
+        {(!isFVCompleted || !verification) && type === "Work" && (
           <Form.Item
             rules={[
               {
@@ -469,7 +469,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
             />
           </Form.Item>
         )}
-        {!isFVCompleted && (
+        {(!isFVCompleted || !verification) && (
           <Form.Item
             name="address"
             rules={[
@@ -486,7 +486,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
           </Form.Item>
         )}
 
-        {!isFVCompleted && (
+        {(!isFVCompleted || !verification) && (
           <Form.Item
             noStyle
             shouldUpdate={(prevValues, currentValues) =>
@@ -554,7 +554,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
           </Form.Item>
         )}
 
-        {!isFVCompleted && (
+        {(!isFVCompleted || !verification) && (
           <Form.Item
             noStyle
             shouldUpdate={(prevValues, currentValues) =>
@@ -616,7 +616,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
         <Form.Item
           noStyle
           shouldUpdate={(prevValues, currentValues) =>
-            isFVCompleted || (
+            (isFVCompleted && !!verification) || (
               prevValues?.assignmentMethod !== currentValues?.assignmentMethod ||
               prevValues?.office !== currentValues?.office ||
               !prevValues?.address
@@ -638,7 +638,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                     message: "Please select a verification executive",
                   },
                 ]}
-                hidden={!isFVCompleted && (!address || (assignmentMethod === "Remote" && !office))}
+                hidden={!(isFVCompleted && verification) && (!address || (assignmentMethod === "Remote" && !office))}
               >
                 <Select
                   placeholder="Select Verification Executive"
@@ -646,7 +646,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                   options={verificationExecutives}
                   style={{ width: "100%" }}
                   disabled={
-                    !isFVCompleted && (!address || (assignmentMethod === "Remote" && !office))
+                    !(isFVCompleted && verification) && (!address || (assignmentMethod === "Remote" && !office))
                   }
                 />
               </Form.Item>
@@ -657,7 +657,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
         <Form.Item
           noStyle
           shouldUpdate={(prevValues, currentValues) =>
-            isFVCompleted || (
+            (isFVCompleted && !!verification) || (
               prevValues?.assignmentMethod !== currentValues?.assignmentMethod ||
               prevValues?.office !== currentValues?.office ||
               !prevValues?.address
@@ -679,7 +679,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                     message: "Please select a verifier",
                   },
                 ]}
-                hidden={!isFVCompleted && (!address || (assignmentMethod === "Remote" && !office))}
+                hidden={!(isFVCompleted && verification) && (!address || (assignmentMethod === "Remote" && !office))}
               >
                 <Select
                   placeholder="Select Verifier"
@@ -687,7 +687,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                   options={verifiers}
                   style={{ width: "100%" }}
                   disabled={
-                    !isFVCompleted && (!address || (assignmentMethod === "Remote" && !office))
+                    !(isFVCompleted && verification) && (!address || (assignmentMethod === "Remote" && !office))
                   }
                 />
               </Form.Item>
