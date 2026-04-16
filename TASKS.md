@@ -12,7 +12,7 @@
 
 ### Knot 3 — Role-based UI/Permissions
 - [x] Hide the assistant verifier and verifier fields for OperationsExecutive, OperationsExecutive (follow-up) should see them but they shouldn't be mandatory
-- [x] Pending cases should be available for VerificationExecutive and Verifier for OperationsExecutive (follow-up)
+- [ ] Pending cases should be available for VerificationExecutive and Verifier for OperationsExecutive (follow-up)
 - [x] Reassign option for Verifier to be sent back to VerificationExecutive
 - [x] 6am to 11am attendance freeze
 
