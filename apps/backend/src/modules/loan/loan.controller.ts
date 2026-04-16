@@ -388,8 +388,7 @@ export class LoanController {
     UserRole.Admin,
     UserRole.Verifier,
     UserRole.FieldExecutive,
-    UserRole.VerificationExecutive,
-    UserRole.OperationsExecutive
+    UserRole.VerificationExecutive
   )
   @ApiOperation({ summary: "Get loans assigned to verifier (paginated, default 10 per page)", })
   @ApiResponse({
@@ -989,6 +988,7 @@ export class LoanController {
   })
   async editVerificationReport(
     @Param("id") loanId: string,
+    @Query("department") department: string,
     @Body()
     body: {
       verificationType: VerificationType;
@@ -1004,7 +1004,8 @@ export class LoanController {
       req.user.id,
       body.findings,
       body.verificationData,
-      body.addressType
+      body.addressType,
+      department
     );
     return {
       status: 200,

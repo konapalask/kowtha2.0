@@ -984,9 +984,6 @@ export class LoanService implements OnModuleDestroy {
         }
         where.initialSubmitted = false;
         where.assistantVerifierId = verifierId;
-      } else if (userRole.role === UserRole.OperationsExecutive) {
-        // OpsExec (follow-up) sees all pending cases for VE and Verifier
-        where.status = { not: VerificationStatus.Completed };
       }
 
       const verifications = await this.prisma.verification.findMany({
@@ -1690,7 +1687,8 @@ export class LoanService implements OnModuleDestroy {
     fieldExecutiveId: number,
     findings: string,
     verificationData?: any,
-    addressType?: AddressType
+    addressType?: AddressType,
+    department?: string
   ) {
     try {
       let updatedAddressType = addressType;
@@ -1768,11 +1766,13 @@ export class LoanService implements OnModuleDestroy {
         }
       }
 
-      // Sync FE-editable loan fields back to the loan record
-      if (verificationData?.basicDetails) {
+      // Sync FE-editable loan fields back to the loan record (PD only)
+      if (department === "PD" && verificationData?.basicDetails) {
         const loanUpdateData: any = {};
         if (verificationData.basicDetails.loanAmount) {
-          loanUpdateData.loanAmount = verificationData.basicDetails.loanAmount;
+          loanUpdateData.loanAmount = parseFloat(
+            verificationData.basicDetails.loanAmount
+          );
         }
         if (verificationData.basicDetails.purposeOfLoan) {
           loanUpdateData.loanType = verificationData.basicDetails.purposeOfLoan;
