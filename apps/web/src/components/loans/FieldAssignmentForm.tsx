@@ -431,7 +431,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
           handleVerificationAssign(selectedLoan.id, type, values)
         }
       >
-        {!isFVCompleted && type === "Business" && (
+        {(!isFVCompleted || !verification) && type === "Business" && (
           <Form.Item
             rules={[
               {
@@ -450,7 +450,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
             />
           </Form.Item>
         )}
-        {!isFVCompleted && type === "Work" && (
+        {(!isFVCompleted || !verification) && type === "Work" && (
           <Form.Item
             rules={[
               {
@@ -469,7 +469,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
             />
           </Form.Item>
         )}
-        {!isFVCompleted && (
+        {(!isFVCompleted || !verification) && (
           <Form.Item
             name="address"
             rules={[
@@ -486,7 +486,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
           </Form.Item>
         )}
 
-        {!isFVCompleted && (
+        {(!isFVCompleted || !verification) && (
           <Form.Item
             noStyle
             shouldUpdate={(prevValues, currentValues) =>
@@ -554,7 +554,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
           </Form.Item>
         )}
 
-        {!isFVCompleted && (
+        {(!isFVCompleted || !verification) && (
           <Form.Item
             noStyle
             shouldUpdate={(prevValues, currentValues) =>
