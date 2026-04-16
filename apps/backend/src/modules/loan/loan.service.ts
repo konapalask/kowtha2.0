@@ -2710,16 +2710,14 @@ export class LoanService implements OnModuleDestroy {
       // Get uploaded items for this verification only
       const uploadedItems = verificationData?.uploadedItems || [];
 
-      // Generate presigned URLs for images
+      // Fetch images as base64 data URIs so Puppeteer needs no network access
       const imageUrls = await Promise.all(
         uploadedItems.map(async (item) => {
           try {
-            return await this.s3Service.generatePresignedDownloadUrl(
-              item.s3ImageUrl
-            );
+            return await this.s3Service.fetchImageAsDataUri(item.s3ImageUrl);
           } catch (error) {
             await this.loggingService.error(
-              "Failed to generate presigned URL for image",
+              "Failed to fetch image as data URI",
               {
                 s3ImageUrl: item.s3ImageUrl,
                 error: error.message,
@@ -2730,7 +2728,7 @@ export class LoanService implements OnModuleDestroy {
         })
       );
 
-      // Filter out any failed URL generations
+      // Filter out any failed fetches
       const validImageUrls = imageUrls.filter((url) => url !== null);
 
       let htmlTemplate = "";
