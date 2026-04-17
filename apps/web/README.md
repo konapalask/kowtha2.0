@@ -2,7 +2,7 @@
 
 A modern web application built with Next.js, TypeScript, and Tailwind CSS for loan verification and management.
 
-## Tech Stack
+### Tech Stack
 
 - **Framework**: Next.js 13.2.0
 - **Language**: TypeScript
