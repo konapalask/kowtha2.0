@@ -1517,35 +1517,9 @@ export class LoanService implements OnModuleDestroy {
         throw new NotFoundException("Field executive not found");
       }
 
-      // Calculate today's date range
-      const today = new Date();
-      today.setHours(23, 59, 59, 999);
-
-      const tomorrow = new Date(today);
-      tomorrow.setDate(today.getDate() + 1);
-
       const where: Prisma.VerificationWhereInput = {
         fieldExecutiveId,
         department: filters.department,
-        // Exclude verifications that have retries not for today
-        OR: [
-          {
-            postponedDate: {
-              // gte: today,
-              lte: today,
-            },
-          },
-          {
-            OR: [
-              {
-                isPostponed: null,
-              },
-              {
-                isPostponed: false,
-              },
-            ],
-          },
-        ],
       };
 
       if (filters?.status) {
@@ -1567,9 +1541,14 @@ export class LoanService implements OnModuleDestroy {
 
       const total = await this.prisma.verification.count({ where });
 
-      // Sort ascending (oldest first) for pending cases, desc for completed
-      const sortOrder =
-        filters?.status === VerificationStatus.Pending ? "asc" : "desc";
+      const orderBy: Prisma.VerificationOrderByWithRelationInput[] =
+        filters?.status === VerificationStatus.Pending
+          ? [
+              { isPostponed: { sort: "asc", nulls: "first" } },
+              { postponedDate: { sort: "asc", nulls: "first" } },
+              { createdAt: "asc" },
+            ]
+          : [{ createdAt: "desc" }];
 
       const verifications = await this.prisma.verification.findMany({
         where,
@@ -1589,9 +1568,7 @@ export class LoanService implements OnModuleDestroy {
             },
           },
         },
-        orderBy: {
-          createdAt: sortOrder,
-        },
+        orderBy,
         skip,
         take: Number(limit),
       });

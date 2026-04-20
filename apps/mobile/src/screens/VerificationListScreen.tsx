@@ -532,6 +532,17 @@ const VerificationListScreen = () => {
           />
         </View>
       </View>
+      {item?.isPostponed && (
+        <View style={styles.postponedRow}>
+          <Icon name="schedule" size={14} color="#B91C1C" />
+          <Text style={styles.postponedText}>
+            Postponed
+            {item?.postponedDate
+              ? ` · ${dayjs(item.postponedDate).format('DD MMM')}`
+              : ''}
+          </Text>
+        </View>
+      )}
       <View style={styles.detailsRow}>
         <View
           style={[
@@ -1073,6 +1084,24 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: 'bold',
     marginTop: 2,
+  },
+  postponedRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    alignSelf: 'flex-start',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    marginBottom: 8,
+    backgroundColor: '#FEE2E2',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#FCA5A5',
+  },
+  postponedText: {
+    color: '#B91C1C',
+    fontSize: 12,
+    fontWeight: '600',
   },
 });
 
