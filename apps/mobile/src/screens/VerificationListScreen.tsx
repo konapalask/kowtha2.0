@@ -188,8 +188,8 @@ const VerificationListScreen = () => {
 
   const validTime = () => {
     const currentTime = dayjs();
-    const start = currentTime.clone().hour(9).minute(0).second(0);
-    const end = currentTime.clone().hour(12).minute(0).second(0);
+    const start = currentTime.clone().hour(6).minute(0).second(0);
+    const end = currentTime.clone().hour(11).minute(0).second(0);
 
     if (currentTime.isAfter(start) && currentTime.isBefore(end)) {
       return true;
