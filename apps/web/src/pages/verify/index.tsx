@@ -298,9 +298,12 @@ export default function Verify() {
     },
     {
       title: "Updated At",
-      dataIndex: "updatedAt",
       key: "updatedAt",
-      render: (date?: string) => (date ? dayjs(date).fromNow() : "-"),
+      render: (_, record) => {
+        const latest =
+          record?.verifications?.[0]?.updatedAt ?? record?.updatedAt;
+        return latest ? dayjs(latest).fromNow() : "-";
+      },
       width: 150,
     },
     {

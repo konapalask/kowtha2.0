@@ -27,9 +27,15 @@ import {
   assignExecutivesApi,
   deleteFieldAssignmentApi,
   getLoansByIdApi,
+  postponementFollowUpApplicantApi,
+  postponementFollowUpBankApi,
   reassignLoanApi,
 } from "@/services/loans.services";
-import { getUserDetails, getCurrentDepartment } from "@/utils/utility";
+import {
+  getCurrentDepartment,
+  getCurrentDepartmentRole,
+  getUserDetails,
+} from "@/utils/utility";
 import dayjs from "dayjs";
 
 interface LoanDetails {
@@ -253,6 +259,57 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
     handleClose();
   };
 
+  const [notifyBankLoading, setNotifyBankLoading] = useState(false);
+  const [notifyApplicantLoading, setNotifyApplicantLoading] = useState(false);
+
+  const isLoanPostponed = (loanDetails?.verifications ?? []).some(
+    (v: any) => v?.isPostponed === true && v?.status === "Pending"
+  );
+  const currentRole = getCurrentDepartmentRole();
+  const canFollowUp =
+    isLoanPostponed &&
+    (currentRole === "Admin" || currentRole === "OperationsExecutive");
+
+  const handleNotifyBank = async () => {
+    if (!loanDetails?.id) return;
+    setNotifyBankLoading(true);
+    try {
+      const res = await postponementFollowUpBankApi(loanDetails.id);
+      const { success, message: msg } = res?.data ?? {};
+      if (success) {
+        message.success(msg || "Follow-up email sent to bank");
+      } else {
+        message.error(msg || "Failed to send follow-up email");
+      }
+    } catch (error: any) {
+      message.error(
+        error?.response?.data?.message || "Failed to send follow-up email"
+      );
+    } finally {
+      setNotifyBankLoading(false);
+    }
+  };
+
+  const handleNotifyApplicant = async () => {
+    if (!loanDetails?.id) return;
+    setNotifyApplicantLoading(true);
+    try {
+      const res = await postponementFollowUpApplicantApi(loanDetails.id);
+      const { success, message: msg } = res?.data ?? {};
+      if (success) {
+        message.success(msg || "Follow-up SMS sent to applicant");
+      } else {
+        message.error(msg || "Failed to send follow-up SMS");
+      }
+    } catch (error: any) {
+      message.error(
+        error?.response?.data?.message || "Failed to send follow-up SMS"
+      );
+    } finally {
+      setNotifyApplicantLoading(false);
+    }
+  };
+
   return (
     <div>
       <Drawer
@@ -330,6 +387,24 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
         destroyOnClose
         footer={
           <div className="flex-end">
+            {canFollowUp && (
+              <>
+                <Button
+                  onClick={handleNotifyBank}
+                  loading={notifyBankLoading}
+                  style={{ marginRight: 8 }}
+                >
+                  Notify Bank
+                </Button>
+                <Button
+                  onClick={handleNotifyApplicant}
+                  loading={notifyApplicantLoading}
+                  style={{ marginRight: 8 }}
+                >
+                  Notify Applicant
+                </Button>
+              </>
+            )}
             <Button onClick={handleSaveAndClose} type="primary">
               Close
             </Button>

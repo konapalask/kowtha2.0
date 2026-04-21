@@ -1011,7 +1011,7 @@ export class LoanService implements OnModuleDestroy {
           },
         },
         orderBy: {
-          createdAt: "desc",
+          updatedAt: "desc",
         },
       });
 
@@ -2999,46 +2999,6 @@ export class LoanService implements OnModuleDestroy {
         }
       );
 
-      // Auto follow-up: Send SMS to applicant about postponement
-      try {
-        const loan = await this.prisma.loan.findUnique({
-          where: { id: verification.loan.id },
-        });
-        if (loan?.applicantMobile) {
-          const smsUtils = new SMSUtils(this.loggingService);
-          await smsUtils.sendVerificationStatus(
-            loan.applicantMobile,
-            "postponed and will be rescheduled",
-            loan.applicationNumber || loan.id.toString()
-          );
-        }
-      } catch (smsError) {
-        await this.loggingService.error(
-          "Failed to send postponement SMS to applicant",
-          { loanId: verification.loan.id, error: smsError.message }
-        );
-      }
-
-      // Auto follow-up: Reply to the original PD email thread notifying
-      // the bank that the verification has been postponed. No-ops for FI
-      // loans and PD loans without an originating email log.
-      this.sendPostponementEmailReply(
-        verification.loan.id,
-        new Date(createVerificationRetryDto.date),
-        createVerificationRetryDto.reason
-      ).catch((emailError) => {
-        // sendPostponementEmailReply already swallows errors internally,
-        // but we add this safety net so a thrown error never breaks the
-        // postponement flow.
-        this.loggingService.error(
-          "Unexpected error from sendPostponementEmailReply",
-          {
-            loanId: verification.loan.id,
-            error: emailError?.message,
-          }
-        );
-      });
-
       return verificationRetry;
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -3051,6 +3011,73 @@ export class LoanService implements OnModuleDestroy {
       });
       throw error;
     }
+  }
+
+  private async getPostponedPdLoan(loanId: number) {
+    const loan = await this.prisma.loan.findUnique({
+      where: { id: loanId, department: Department.PD },
+      include: {
+        verifications: {
+          where: {
+            isPostponed: true,
+            status: VerificationStatus.Pending,
+          },
+        },
+      },
+    });
+
+    if (!loan) {
+      throw new NotFoundException("Loan not found");
+    }
+    if (!loan.verifications || loan.verifications.length === 0) {
+      throw new BadRequestException("Loan is not in a postponed state");
+    }
+
+    return loan;
+  }
+
+  async sendPostponementFollowUpToBank(
+    loanId: number
+  ): Promise<{ success: boolean; message: string }> {
+    const loan = await this.getPostponedPdLoan(loanId);
+    const postponed = loan.verifications[0];
+
+    if (!postponed.postponedDate) {
+      return {
+        success: false,
+        message: "Postponed verification has no postpone date",
+      };
+    }
+
+    return await this.sendPostponementEmailReply(
+      loan.id,
+      postponed.postponedDate,
+      postponed.postponedReason ?? ""
+    );
+  }
+
+  async sendPostponementFollowUpToApplicant(
+    loanId: number
+  ): Promise<{ success: boolean; message: string }> {
+    const loan = await this.getPostponedPdLoan(loanId);
+
+    if (!loan.applicantMobile) {
+      return {
+        success: false,
+        message: "No mobile number on file for applicant",
+      };
+    }
+
+    const smsUtils = new SMSUtils(this.loggingService);
+    const ok = await smsUtils.sendVerificationStatus(
+      loan.applicantMobile,
+      "postponed and will be rescheduled",
+      loan.applicationNumber || String(loan.id)
+    );
+
+    return ok
+      ? { success: true, message: "Follow-up SMS sent to applicant" }
+      : { success: false, message: "Failed to send follow-up SMS" };
   }
 
   async createPDEmailLog(data: CreatePDEmailLogDto) {
