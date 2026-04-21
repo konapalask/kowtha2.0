@@ -1,5 +1,5 @@
 import { IsString, IsNumber, IsBoolean, IsOptional, IsEnum, MaxLength } from 'class-validator';
-import { LoanStatus, LoanTag } from '@prisma/client';
+import { LoanStatus } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateLoanDto {
@@ -66,10 +66,11 @@ export class CreateLoanDto {
   @IsOptional()
   status?: LoanStatus;
 
-  @ApiProperty({ description: 'Loan tag', enum: LoanTag, required: false })
-  @IsEnum(LoanTag)
+  @ApiProperty({ description: 'Loan tag (free text, max 20 chars)', required: false })
+  @IsString()
   @IsOptional()
-  loanTag?: LoanTag;
+  @MaxLength(20)
+  loanTag?: string;
 
   @ApiProperty({ description: 'Branch', required: false })
   @IsString()
