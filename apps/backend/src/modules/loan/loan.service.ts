@@ -1312,6 +1312,12 @@ export class LoanService implements OnModuleDestroy {
             fieldExecutive: {
               select: { name: true, employeeCode: true },
             },
+            verifier: {
+              select: { name: true, employeeCode: true },
+            },
+            assistantVerifier: {
+              select: { name: true, employeeCode: true },
+            },
           },
         },
       },
@@ -1357,7 +1363,13 @@ export class LoanService implements OnModuleDestroy {
         "Business Status"
       );
     } else if (department === "PD") {
-      headers.push("Template Name", "Business FE", "Business Status");
+      headers.push(
+        "Template Name",
+        "Business FE",
+        "Business Status",
+        "Verifier",
+        "Verification Executive"
+      );
     }
 
     const rows = loans.map((loan) => {
@@ -1406,7 +1418,9 @@ export class LoanService implements OnModuleDestroy {
         base.push(
           escCsv(loan.templateName),
           escCsv(biz?.fieldExecutive?.name),
-          escCsv(biz?.status)
+          escCsv(biz?.status),
+          escCsv(biz?.verifier?.name),
+          escCsv(biz?.assistantVerifier?.name)
         );
       }
 
