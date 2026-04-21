@@ -1079,8 +1079,16 @@ export class LoanService implements OnModuleDestroy {
 
       if (filters?.status) {
         if (filters.status === "Completed") {
-          // "Completed" is a virtual filter that matches both terminal statuses
-          where.status = { in: [LoanStatus.Approved, LoanStatus.Rejected] };
+          // "Completed" surfaces loans whose verifier has given a
+          // Positive or Negative verdict on at least one verification.
+          // CreditRefer is intentionally excluded until product asks.
+          where.verifications = {
+            some: {
+              approvedStatus: {
+                in: [ApprovedStatus.Positive, ApprovedStatus.Negative],
+              },
+            },
+          };
         } else {
           where.status = filters.status as LoanStatus;
         }
@@ -1277,7 +1285,15 @@ export class LoanService implements OnModuleDestroy {
 
     if (filters?.status) {
       if (filters.status === "Completed") {
-        where.status = { in: [LoanStatus.Approved, LoanStatus.Rejected] };
+        // Mirror of getLoans: Completed = at least one verification has a
+        // Positive or Negative verdict. CreditRefer excluded for now.
+        where.verifications = {
+          some: {
+            approvedStatus: {
+              in: [ApprovedStatus.Positive, ApprovedStatus.Negative],
+            },
+          },
+        };
       } else {
         where.status = filters.status as LoanStatus;
       }
