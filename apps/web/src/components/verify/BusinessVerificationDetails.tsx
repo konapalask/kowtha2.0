@@ -1058,21 +1058,34 @@ export const BusinessVerificationDetails: React.FC<
         }
       });
 
-      // Get uploadedItems from multiple sources, prioritizing savedSectionData for VerificationExecutive
-      const uploadedItemsFromSaved = savedSectionData?.uploadedItems;
-      const uploadedItems =
-        uploadedItemsFromSaved ||
-        existingVerificationData?.uploadedItems ||
-        verificationData?.verificationData?.uploadedItems ||
-        verificationData?.uploadedItems ||
-        [];
+      // Union uploadedItems from every known source so a partially-
+      // populated local state can't shadow server items. Dedupe by id
+      // (fallback to s3ImageUrl). First occurrence wins — server order
+      // preserved, any new local items land at the end.
+      const candidateSources = [
+        existingVerificationData?.uploadedItems,
+        verificationData?.verificationData?.uploadedItems,
+        verificationData?.uploadedItems,
+        savedSectionData?.uploadedItems,
+      ];
+      const seen = new Set<string>();
+      const uploadedItems: any[] = [];
+      for (const src of candidateSources) {
+        if (!Array.isArray(src)) continue;
+        for (const item of src) {
+          const key = item?.id ?? item?.s3ImageUrl;
+          if (key && seen.has(key)) continue;
+          if (key) seen.add(key);
+          uploadedItems.push(item);
+        }
+      }
 
       const { uploadedItems: _, ...sectionsWithoutUploadedItems } =
         allSectionsData;
 
       const verificationDataPayload = {
         ...sectionsWithoutUploadedItems,
-        uploadedItems: uploadedItems,
+        uploadedItems,
       };
 
       const synopsis =
