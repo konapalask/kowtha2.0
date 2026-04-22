@@ -1011,7 +1011,7 @@ export class LoanService implements OnModuleDestroy {
           },
         },
         orderBy: {
-          createdAt: "desc",
+          updatedAt: "desc",
         },
       });
 
@@ -1079,8 +1079,16 @@ export class LoanService implements OnModuleDestroy {
 
       if (filters?.status) {
         if (filters.status === "Completed") {
-          // "Completed" is a virtual filter that matches both terminal statuses
-          where.status = { in: [LoanStatus.Approved, LoanStatus.Rejected] };
+          // "Completed" surfaces loans whose verifier has given a
+          // Positive or Negative verdict on at least one verification.
+          // CreditRefer is intentionally excluded until product asks.
+          where.verifications = {
+            some: {
+              approvedStatus: {
+                in: [ApprovedStatus.Positive, ApprovedStatus.Negative],
+              },
+            },
+          };
         } else {
           where.status = filters.status as LoanStatus;
         }
@@ -1277,7 +1285,15 @@ export class LoanService implements OnModuleDestroy {
 
     if (filters?.status) {
       if (filters.status === "Completed") {
-        where.status = { in: [LoanStatus.Approved, LoanStatus.Rejected] };
+        // Mirror of getLoans: Completed = at least one verification has a
+        // Positive or Negative verdict. CreditRefer excluded for now.
+        where.verifications = {
+          some: {
+            approvedStatus: {
+              in: [ApprovedStatus.Positive, ApprovedStatus.Negative],
+            },
+          },
+        };
       } else {
         where.status = filters.status as LoanStatus;
       }
@@ -1310,6 +1326,12 @@ export class LoanService implements OnModuleDestroy {
         verifications: {
           include: {
             fieldExecutive: {
+              select: { name: true, employeeCode: true },
+            },
+            verifier: {
+              select: { name: true, employeeCode: true },
+            },
+            assistantVerifier: {
               select: { name: true, employeeCode: true },
             },
           },
@@ -1357,7 +1379,13 @@ export class LoanService implements OnModuleDestroy {
         "Business Status"
       );
     } else if (department === "PD") {
-      headers.push("Template Name", "Business FE", "Business Status");
+      headers.push(
+        "Template Name",
+        "Business FE",
+        "Business Status",
+        "Verifier",
+        "Verification Executive"
+      );
     }
 
     const rows = loans.map((loan) => {
@@ -1406,7 +1434,9 @@ export class LoanService implements OnModuleDestroy {
         base.push(
           escCsv(loan.templateName),
           escCsv(biz?.fieldExecutive?.name),
-          escCsv(biz?.status)
+          escCsv(biz?.status),
+          escCsv(biz?.verifier?.name),
+          escCsv(biz?.assistantVerifier?.name)
         );
       }
 
@@ -1517,35 +1547,9 @@ export class LoanService implements OnModuleDestroy {
         throw new NotFoundException("Field executive not found");
       }
 
-      // Calculate today's date range
-      const today = new Date();
-      today.setHours(23, 59, 59, 999);
-
-      const tomorrow = new Date(today);
-      tomorrow.setDate(today.getDate() + 1);
-
       const where: Prisma.VerificationWhereInput = {
         fieldExecutiveId,
         department: filters.department,
-        // Exclude verifications that have retries not for today
-        OR: [
-          {
-            postponedDate: {
-              // gte: today,
-              lte: today,
-            },
-          },
-          {
-            OR: [
-              {
-                isPostponed: null,
-              },
-              {
-                isPostponed: false,
-              },
-            ],
-          },
-        ],
       };
 
       if (filters?.status) {
@@ -1567,9 +1571,14 @@ export class LoanService implements OnModuleDestroy {
 
       const total = await this.prisma.verification.count({ where });
 
-      // Sort ascending (oldest first) for pending cases, desc for completed
-      const sortOrder =
-        filters?.status === VerificationStatus.Pending ? "asc" : "desc";
+      const orderBy: Prisma.VerificationOrderByWithRelationInput[] =
+        filters?.status === VerificationStatus.Pending
+          ? [
+              { isPostponed: { sort: "asc", nulls: "first" } },
+              { postponedDate: { sort: "asc", nulls: "first" } },
+              { createdAt: "asc" },
+            ]
+          : [{ createdAt: "desc" }];
 
       const verifications = await this.prisma.verification.findMany({
         where,
@@ -1589,9 +1598,7 @@ export class LoanService implements OnModuleDestroy {
             },
           },
         },
-        orderBy: {
-          createdAt: sortOrder,
-        },
+        orderBy,
         skip,
         take: Number(limit),
       });
@@ -3022,46 +3029,6 @@ export class LoanService implements OnModuleDestroy {
         }
       );
 
-      // Auto follow-up: Send SMS to applicant about postponement
-      try {
-        const loan = await this.prisma.loan.findUnique({
-          where: { id: verification.loan.id },
-        });
-        if (loan?.applicantMobile) {
-          const smsUtils = new SMSUtils(this.loggingService);
-          await smsUtils.sendVerificationStatus(
-            loan.applicantMobile,
-            "postponed and will be rescheduled",
-            loan.applicationNumber || loan.id.toString()
-          );
-        }
-      } catch (smsError) {
-        await this.loggingService.error(
-          "Failed to send postponement SMS to applicant",
-          { loanId: verification.loan.id, error: smsError.message }
-        );
-      }
-
-      // Auto follow-up: Reply to the original PD email thread notifying
-      // the bank that the verification has been postponed. No-ops for FI
-      // loans and PD loans without an originating email log.
-      this.sendPostponementEmailReply(
-        verification.loan.id,
-        new Date(createVerificationRetryDto.date),
-        createVerificationRetryDto.reason
-      ).catch((emailError) => {
-        // sendPostponementEmailReply already swallows errors internally,
-        // but we add this safety net so a thrown error never breaks the
-        // postponement flow.
-        this.loggingService.error(
-          "Unexpected error from sendPostponementEmailReply",
-          {
-            loanId: verification.loan.id,
-            error: emailError?.message,
-          }
-        );
-      });
-
       return verificationRetry;
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -3074,6 +3041,73 @@ export class LoanService implements OnModuleDestroy {
       });
       throw error;
     }
+  }
+
+  private async getPostponedPdLoan(loanId: number) {
+    const loan = await this.prisma.loan.findUnique({
+      where: { id: loanId, department: Department.PD },
+      include: {
+        verifications: {
+          where: {
+            isPostponed: true,
+            status: VerificationStatus.Pending,
+          },
+        },
+      },
+    });
+
+    if (!loan) {
+      throw new NotFoundException("Loan not found");
+    }
+    if (!loan.verifications || loan.verifications.length === 0) {
+      throw new BadRequestException("Loan is not in a postponed state");
+    }
+
+    return loan;
+  }
+
+  async sendPostponementFollowUpToBank(
+    loanId: number
+  ): Promise<{ success: boolean; message: string }> {
+    const loan = await this.getPostponedPdLoan(loanId);
+    const postponed = loan.verifications[0];
+
+    if (!postponed.postponedDate) {
+      return {
+        success: false,
+        message: "Postponed verification has no postpone date",
+      };
+    }
+
+    return await this.sendPostponementEmailReply(
+      loan.id,
+      postponed.postponedDate,
+      postponed.postponedReason ?? ""
+    );
+  }
+
+  async sendPostponementFollowUpToApplicant(
+    loanId: number
+  ): Promise<{ success: boolean; message: string }> {
+    const loan = await this.getPostponedPdLoan(loanId);
+
+    if (!loan.applicantMobile) {
+      return {
+        success: false,
+        message: "No mobile number on file for applicant",
+      };
+    }
+
+    const smsUtils = new SMSUtils(this.loggingService);
+    const ok = await smsUtils.sendVerificationStatus(
+      loan.applicantMobile,
+      "postponed and will be rescheduled",
+      loan.applicationNumber || String(loan.id)
+    );
+
+    return ok
+      ? { success: true, message: "Follow-up SMS sent to applicant" }
+      : { success: false, message: "Failed to send follow-up SMS" };
   }
 
   async createPDEmailLog(data: CreatePDEmailLogDto) {

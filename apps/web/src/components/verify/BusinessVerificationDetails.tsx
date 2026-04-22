@@ -1,6 +1,11 @@
 import { useTabContext } from "@/pages/verify/[id]";
 import { getS3ImageUrl, compressImage } from "@/utils/utility";
 import {
+  deleteDraft,
+  loadDraft,
+  saveDraftSection,
+} from "@/utils/draftStore";
+import {
   CloseCircleOutlined,
   EditOutlined,
   ClockCircleOutlined,
@@ -447,6 +452,27 @@ export const BusinessVerificationDetails: React.FC<
   ]);
 
   useEffect(() => {
+    // PD: reconcile drafts against server updatedAt via draftStore helper
+    // so stale drafts saved before a VE re-submit on another device are
+    // dropped silently. FI continues to use the inline logic below.
+    if (currentDepartment === "PD") {
+      (async () => {
+        try {
+          if (hasEditRequest) {
+            await deleteDraft(String(id), activeTab);
+            setChangedData({});
+            return;
+          }
+          const serverUpdatedAt = verificationData?.updatedAt;
+          const draft = await loadDraft(String(id), activeTab, serverUpdatedAt);
+          setChangedData(draft ?? {});
+        } catch (err) {
+          console.error("PD draft load error:", err);
+        }
+      })();
+      return;
+    }
+
     const request = indexedDB.open("editLogs", 1);
 
     request.onerror = (event) => {
@@ -503,7 +529,15 @@ export const BusinessVerificationDetails: React.FC<
         db.close();
       }
     };
-  }, [id, activeTab, editLogsUpdated, localEditLogsUpdated, hasEditRequest]);
+  }, [
+    id,
+    activeTab,
+    editLogsUpdated,
+    localEditLogsUpdated,
+    hasEditRequest,
+    currentDepartment,
+    verificationData?.updatedAt,
+  ]);
 
   useEffect(() => {
     const loadDynamicSchema = async () => {
@@ -763,6 +797,33 @@ export const BusinessVerificationDetails: React.FC<
 
   // Save dynamic section edits to IndexedDB
   const handleSaveDynamicEdit = async (sectionId: string, data: any) => {
+    // PD: go through draftStore so baseUpdatedAt is stamped for later
+    // stale-reconcile. FI keeps the inline IndexedDB write below.
+    if (currentDepartment === "PD") {
+      const validation = validateSectionData(data, currentSectionSchema);
+      if (!validation.isValid) {
+        message.error(validation.errors.join(", "));
+        throw new Error("Validation failed");
+      }
+      try {
+        await saveDraftSection(
+          String(id),
+          activeTab,
+          sectionId,
+          data,
+          verificationData?.updatedAt
+        );
+        setEditModalVisible(false);
+        setLocalEditLogsUpdated((prev) => prev + 1);
+        fetchVerificationData();
+        return;
+      } catch (err) {
+        console.error("PD draft save error:", err);
+        message.error("Failed to save changes");
+        throw err;
+      }
+    }
+
     return new Promise<void>((resolve, reject) => {
       // Validate data before saving
       const validation = validateSectionData(data, currentSectionSchema);
@@ -997,21 +1058,34 @@ export const BusinessVerificationDetails: React.FC<
         }
       });
 
-      // Get uploadedItems from multiple sources, prioritizing savedSectionData for VerificationExecutive
-      const uploadedItemsFromSaved = savedSectionData?.uploadedItems;
-      const uploadedItems =
-        uploadedItemsFromSaved ||
-        existingVerificationData?.uploadedItems ||
-        verificationData?.verificationData?.uploadedItems ||
-        verificationData?.uploadedItems ||
-        [];
+      // Union uploadedItems from every known source so a partially-
+      // populated local state can't shadow server items. Dedupe by id
+      // (fallback to s3ImageUrl). First occurrence wins — server order
+      // preserved, any new local items land at the end.
+      const candidateSources = [
+        existingVerificationData?.uploadedItems,
+        verificationData?.verificationData?.uploadedItems,
+        verificationData?.uploadedItems,
+        savedSectionData?.uploadedItems,
+      ];
+      const seen = new Set<string>();
+      const uploadedItems: any[] = [];
+      for (const src of candidateSources) {
+        if (!Array.isArray(src)) continue;
+        for (const item of src) {
+          const key = item?.id ?? item?.s3ImageUrl;
+          if (key && seen.has(key)) continue;
+          if (key) seen.add(key);
+          uploadedItems.push(item);
+        }
+      }
 
       const { uploadedItems: _, ...sectionsWithoutUploadedItems } =
         allSectionsData;
 
       const verificationDataPayload = {
         ...sectionsWithoutUploadedItems,
-        uploadedItems: uploadedItems,
+        uploadedItems,
       };
 
       const synopsis =
@@ -1387,6 +1461,32 @@ export const BusinessVerificationDetails: React.FC<
 
   const MAX_PHOTO_UPLOADS = 50;
 
+  // Build the "current" uploadedItems list by unioning every known
+  // source and deduping by id (fallback to s3ImageUrl). Must be used
+  // in upload handlers so a stale completeVerificationData (after
+  // fetchVerificationData refetch) can't shadow the VE's in-progress
+  // batch stored in savedSectionData.
+  const unionUploaded = (): any[] => {
+    const sources = [
+      savedSectionData?.uploadedItems,
+      completeVerificationData?.verificationData?.uploadedItems,
+      verificationData?.verificationData?.uploadedItems,
+      verificationData?.uploadedItems,
+    ];
+    const seen = new Set<string>();
+    const out: any[] = [];
+    for (const src of sources) {
+      if (!Array.isArray(src)) continue;
+      for (const item of src) {
+        const key = item?.id ?? item?.s3ImageUrl;
+        if (key && seen.has(key)) continue;
+        if (key) seen.add(key);
+        out.push(item);
+      }
+    }
+    return out;
+  };
+
   const handleMultipleFileUpload = async (info: any) => {
     const { fileList } = info;
 
@@ -1403,9 +1503,10 @@ export const BusinessVerificationDetails: React.FC<
 
     if (newFiles.length === 0) return;
 
-    const existingPhotos = (
-      completeVerificationData?.verificationData?.uploadedItems || []
-    ).filter((item: any) => item.type === "photo");
+    const fullExistingItems = unionUploaded();
+    const existingPhotos = fullExistingItems.filter(
+      (item: any) => item.type === "photo"
+    );
     const newPhotoFiles = newFiles.filter((f: File) => {
       const mime = (f.type || "").toLowerCase();
       const name = f.name.toLowerCase();
@@ -1427,8 +1528,7 @@ export const BusinessVerificationDetails: React.FC<
     let successCount = 0;
     let failCount = 0;
     let allNewItems: any[] = [];
-    const existingItems =
-      completeVerificationData?.verificationData?.uploadedItems || [];
+    const existingItems = fullExistingItems;
 
     const scrollPosition = window.scrollY || window.pageYOffset;
     savedSectionRef.current = "photoCapture";
@@ -1584,9 +1684,9 @@ export const BusinessVerificationDetails: React.FC<
         mimeType === "application/pdf" || fileNameLower.endsWith(".pdf");
 
       if (isImage) {
-        const existingPhotos = (
-          completeVerificationData?.verificationData?.uploadedItems || []
-        ).filter((item: any) => item.type === "photo");
+        const existingPhotos = unionUploaded().filter(
+          (item: any) => item.type === "photo"
+        );
         if (existingPhotos.length >= MAX_PHOTO_UPLOADS) {
           message.error(
             `You can only upload up to ${MAX_PHOTO_UPLOADS} photos. Currently ${existingPhotos.length} photo(s) uploaded.`
@@ -1663,8 +1763,7 @@ export const BusinessVerificationDetails: React.FC<
         documentType: "Other",
       };
 
-      const existingItems =
-        completeVerificationData?.verificationData?.uploadedItems || [];
+      const existingItems = unionUploaded();
 
       const scrollPosition = window.scrollY || window.pageYOffset;
       savedSectionRef.current = "photoCapture";
@@ -2217,73 +2316,99 @@ export const BusinessVerificationDetails: React.FC<
             // approvedStatus,
           });
 
-          // Also save to IndexedDB for local tracking
-          const request = indexedDB.open("editLogs", 1);
-
-          request.onerror = (event: any) => {
-            console.error("Database error:", request.error);
-          };
-
-          request.onsuccess = (event: any) => {
-            const db = event.target.result;
-
+          // Also save to IndexedDB for local tracking.
+          // PD uses the draftStore helper to stamp baseUpdatedAt; FI
+          // keeps the inline IndexedDB write.
+          if (currentDepartment === "PD") {
             try {
-              const transaction = db.transaction("logs", "readwrite");
-              const store = transaction.objectStore("logs");
-
-              const getRequest = store.get(`${id}_${activeTab}`);
-
-              getRequest.onsuccess = () => {
-                const existingData = getRequest.result || {};
-
-                const logEntry = {
-                  id: `${id}_${activeTab}`,
-                  ...existingData,
-                  [sectionId]: sectionData,
-                  timestamp: new Date().toISOString(),
-                };
-
-                const putRequest = store.put(logEntry);
-
-                putRequest.onsuccess = () => {
-                  // Move uncommitted changes to committed changes
-                  setChangedData((prev: any) => ({
-                    ...prev,
-                    [sectionId]: sectionData,
-                  }));
-
-                  // Clear section uncommitted changes
-                  setSectionUncommittedChanges((prev: any) => {
-                    const newChanges = { ...prev };
-                    delete newChanges[sectionId];
-                    return newChanges;
-                  });
-
-                  setLocalEditLogsUpdated((prev) => prev + 1); // Trigger refresh
-                };
-
-                putRequest.onerror = () => {
-                  console.error("Error saving to IndexedDB:", putRequest.error);
-                };
-              };
-
-              getRequest.onerror = () => {
-                console.error("Error fetching existing log:", getRequest.error);
-              };
-
-              transaction.oncomplete = () => {
-                db.close();
-              };
-
-              transaction.onerror = () => {
-                console.error("Transaction error:", transaction.error);
-                db.close();
-              };
-            } catch (error) {
-              console.error("Error in transaction:", error);
-              db.close();
+              await saveDraftSection(
+                String(id),
+                activeTab,
+                sectionId,
+                sectionData,
+                verificationData?.updatedAt
+              );
+              setChangedData((prev: any) => ({
+                ...prev,
+                [sectionId]: sectionData,
+              }));
+              setSectionUncommittedChanges((prev: any) => {
+                const newChanges = { ...prev };
+                delete newChanges[sectionId];
+                return newChanges;
+              });
+              setLocalEditLogsUpdated((prev) => prev + 1);
+            } catch (err) {
+              console.error("PD draft save error:", err);
             }
-          };
+          } else {
+            const request = indexedDB.open("editLogs", 1);
+
+            request.onerror = (event: any) => {
+              console.error("Database error:", request.error);
+            };
+
+            request.onsuccess = (event: any) => {
+              const db = event.target.result;
+
+              try {
+                const transaction = db.transaction("logs", "readwrite");
+                const store = transaction.objectStore("logs");
+
+                const getRequest = store.get(`${id}_${activeTab}`);
+
+                getRequest.onsuccess = () => {
+                  const existingData = getRequest.result || {};
+
+                  const logEntry = {
+                    id: `${id}_${activeTab}`,
+                    ...existingData,
+                    [sectionId]: sectionData,
+                    timestamp: new Date().toISOString(),
+                  };
+
+                  const putRequest = store.put(logEntry);
+
+                  putRequest.onsuccess = () => {
+                    // Move uncommitted changes to committed changes
+                    setChangedData((prev: any) => ({
+                      ...prev,
+                      [sectionId]: sectionData,
+                    }));
+
+                    // Clear section uncommitted changes
+                    setSectionUncommittedChanges((prev: any) => {
+                      const newChanges = { ...prev };
+                      delete newChanges[sectionId];
+                      return newChanges;
+                    });
+
+                    setLocalEditLogsUpdated((prev) => prev + 1); // Trigger refresh
+                  };
+
+                  putRequest.onerror = () => {
+                    console.error("Error saving to IndexedDB:", putRequest.error);
+                  };
+                };
+
+                getRequest.onerror = () => {
+                  console.error("Error fetching existing log:", getRequest.error);
+                };
+
+                transaction.oncomplete = () => {
+                  db.close();
+                };
+
+                transaction.onerror = () => {
+                  console.error("Transaction error:", transaction.error);
+                  db.close();
+                };
+              } catch (error) {
+                console.error("Error in transaction:", error);
+                db.close();
+              }
+            };
+          }
 
           message.success(
             `Section "${schema?.sections?.find((s: any) => s.id === sectionId)?.label}" saved successfully`

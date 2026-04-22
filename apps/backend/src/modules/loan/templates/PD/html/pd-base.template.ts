@@ -1,4 +1,24 @@
+const resolveHeaderBranch = (mailbox?: string | null) => {
+  if (mailbox === "tspd@cakowtha.co.in") {
+    return {
+      address:
+        "Flat No. 502, 5th Floor, AB Heights, Prem Nagar Colony, Khairatabad, Hyderabad-500004.",
+      email: "tspd@cakowtha.co.in",
+    };
+  }
+  // Default = AP / Vijayawada. Covers appd@cakowtha.co.in and the
+  // no-email-log fallback per product requirement.
+  return {
+    address:
+      "26-22-21, Mudunurivari Street, Gandhi Nagar, VIJAYAWADA – 520 003.",
+    email: "appd@cakowtha.co.in",
+  };
+};
+
 export const pdBaseTemplate = (html_data?: any) => {
+  const { address: branchAddress, email: branchEmail } = resolveHeaderBranch(
+    html_data?.receivedByMailbox
+  );
   return `
     <!DOCTYPE html>
       <html>
@@ -267,11 +287,11 @@ export const pdBaseTemplate = (html_data?: any) => {
         <div>
           <div class="firm">KOWTHA & CO.</div>
           <div class="subtitle">CHARTERED ACCOUNTANTS</div>
-          <div class="address">26-22-21, Mudunurivari Street, Gandhi Nagar, VIJAYAWADA – 520 003.</div>
+          <div class="address">${branchAddress}</div>
         </div>
         <div class="contact">
-          Mobile no: 9490008968 (AP), 8330961359 (TS)<br>
-          Mail ID: opspd@gmail.com
+          Mobile no: 9494525451<br>
+          Mail ID: ${branchEmail}
         </div>
       </div>
       

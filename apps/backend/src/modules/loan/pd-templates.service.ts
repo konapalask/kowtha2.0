@@ -488,6 +488,8 @@ export class PDTemplateService {
       pdVerifiedBy,
       pdVerifiedDate,
       geoCoordinates,
+      receivedByMailbox:
+        (loan as any)?.pdEmailLogs?.[0]?.receivedByMailbox ?? null,
     };
   }
 
@@ -1099,6 +1101,11 @@ export class PDTemplateService {
               fieldExecutive: { select: { name: true } },
               verifier: { select: { name: true } },
             },
+          },
+          pdEmailLogs: {
+            orderBy: { receivedAt: "desc" },
+            take: 1,
+            select: { receivedByMailbox: true },
           },
         },
       });

@@ -499,15 +499,9 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
                   labelCol={{ span: 24, style: { marginBottom: 0 } }}
                   label="Loan Tag"
                   name="loanTag"
+                  rules={[{ max: 20, message: "Max 20 characters" }]}
                 >
-                  <Select
-                    allowClear
-                    placeholder="Select Loan Tag"
-                    options={[
-                      { value: "PD", label: "PD" },
-                      { value: "LIP", label: "LIP" },
-                    ]}
-                  />
+                  <Input maxLength={20} placeholder="Enter loan tag" />
                 </Form.Item>
               </Col>
               <Col xs={24} sm={6} style={{ padding: 4 }}>

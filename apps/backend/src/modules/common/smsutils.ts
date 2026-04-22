@@ -3,7 +3,7 @@ import { LoggingService } from './logging/logging.service';
 
 export class SMSUtils {
   private readonly FAST2SMS_API_KEY = process.env.FAST2SMS_API_KEY;
-  private readonly FAST2SMS_URL = process.env.FAST2SMS_URL;
+  private readonly FAST2SMS_URL = process.env.SMS_API_ENDPOINT;
   private readonly logger: LoggingService;
 
   constructor(logger: LoggingService) {

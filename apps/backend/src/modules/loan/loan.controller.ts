@@ -269,6 +269,40 @@ export class LoanController {
     };
   }
 
+  @Post(":id/follow-up/bank")
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
+  @ApiOperation({
+    summary:
+      "Send a postponement follow-up email reply on the bank's PD email thread (manual)",
+  })
+  async postponementFollowUpBank(@Param("id") loanId: string) {
+    const result = await this.loanService.sendPostponementFollowUpToBank(
+      Number(loanId)
+    );
+    return {
+      status: 200,
+      success: result.success,
+      message: result.message,
+    };
+  }
+
+  @Post(":id/follow-up/applicant")
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
+  @ApiOperation({
+    summary:
+      "Send a postponement follow-up SMS to the applicant (manual)",
+  })
+  async postponementFollowUpApplicant(@Param("id") loanId: string) {
+    const result = await this.loanService.sendPostponementFollowUpToApplicant(
+      Number(loanId)
+    );
+    return {
+      status: 200,
+      success: result.success,
+      message: result.message,
+    };
+  }
+
   @Post(":id/return-to-ve")
   @Roles(UserRole.Admin, UserRole.Verifier)
   @ApiOperation({

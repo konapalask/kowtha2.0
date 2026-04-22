@@ -1,0 +1,21 @@
+name: Deploy to Vercel
+
+on:
+  push:
+    branches:
+      - main
+      - development
+    paths:
+      - 'apps/web/**'
+      
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Vercel (prod)
+        if: github.ref == 'refs/heads/prod'
+        run: curl -X POST "${{ secrets.VERCEL_PROD_HOOK }}"
+
+      - name: Deploy to Vercel (development)
+        if: github.ref == 'refs/heads/development'
+        run: curl -X POST "${{ secrets.VERCEL_DEV_HOOK }}"

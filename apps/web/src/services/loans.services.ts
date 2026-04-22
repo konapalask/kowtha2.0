@@ -186,6 +186,14 @@ export const reassignLoanApi = (loanId: number) => {
   return postWithDepartment(`/loans/${loanId}/reassign`);
 };
 
+export const postponementFollowUpBankApi = (loanId: number) => {
+  return postWithDepartment(`/loans/${loanId}/follow-up/bank`);
+};
+
+export const postponementFollowUpApplicantApi = (loanId: number) => {
+  return postWithDepartment(`/loans/${loanId}/follow-up/applicant`);
+};
+
 export const returnToVeApi = (
   loanId: number,
   verificationType: string,

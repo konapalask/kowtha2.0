@@ -93,7 +93,7 @@ model Loan {
   department            Department?
   reassignCount         Int            @default(0)
   templateName          String?
-  loanTag               LoanTag?
+  loanTag               String?        @db.VarChar(20)
   branch                String?        @db.VarChar(30)
   editRequests          EditRequest[]
   office                Office         @relation(fields: [officeId], references: [id])
@@ -331,11 +331,6 @@ enum AttendanceStatus {
 enum LocationType {
   Local
   Remote
-}
-
-enum LoanTag {
-  PD
-  LIP
 }
 
 enum Department {

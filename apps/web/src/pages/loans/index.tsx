@@ -25,6 +25,7 @@ import {
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import utc from "dayjs/plugin/utc";
 // import type { ColumnsType } from "antd/es/table";
 import type { Key } from "react";
 // import { UserContext } from "@/components/layout/UserContextProvider";
@@ -67,6 +68,7 @@ const DashboardLayout = dynamic(
 );
 
 dayjs.extend(relativeTime);
+dayjs.extend(utc);
 
 interface FieldExecutive {
   id: number;
@@ -396,7 +398,7 @@ export default function Loans() {
         title: "Created At",
         dataIndex: "createdAt",
         key: "createdAt",
-        render: (date: string) => dayjs(date).format("DD-MM-YYYY"),
+        render: (date: string) => dayjs.utc(date).format("DD-MM-YYYY"),
         width: 120,
       },
       ...(currentDepartment !== "FI"
@@ -406,7 +408,7 @@ export default function Loans() {
               dataIndex: "closedAt",
               key: "closedAt",
               render: (date: string) =>
-                date ? dayjs(date).format("DD-MM-YYYY") : "-",
+                date ? dayjs.utc(date).format("DD-MM-YYYY") : "-",
               width: 120,
             },
           ]
