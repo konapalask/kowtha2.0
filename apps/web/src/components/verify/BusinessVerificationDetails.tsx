@@ -1245,50 +1245,34 @@ export const BusinessVerificationDetails: React.FC<
       document.getElementById("section-photoCapture")?.getBoundingClientRect()
         .top ?? null;
 
-    if (role === "VerificationExecutive") {
-      const currentItems =
-        savedSectionData?.uploadedItems ||
-        completeVerificationData?.verificationData?.uploadedItems ||
-        verificationData?.verificationData?.uploadedItems ||
-        [];
+    const currentItems =
+      (role === "VerificationExecutive" && savedSectionData?.uploadedItems) ||
+      completeVerificationData?.verificationData?.uploadedItems ||
+      verificationData?.verificationData?.uploadedItems ||
+      [];
 
-      const updatedItems = currentItems.filter(
-        (photo: any) => photo?.id !== pid
-      );
+    const updatedItems = currentItems.filter(
+      (photo: any) => photo?.id !== pid
+    );
 
-      // Update savedSectionData
-      setSavedSectionData((prev: any) => ({
-        ...prev,
-        uploadedItems: updatedItems,
-      }));
+    setSavedSectionData((prev: any) => ({
+      ...prev,
+      uploadedItems: updatedItems,
+    }));
 
-      // Also update the completeVerificationData state locally for immediate UI update
-      if (completeVerificationData?.verificationData) {
-        completeVerificationData.verificationData.uploadedItems = updatedItems;
-      }
-
-      message.success("Photo deleted successfully!");
-      return;
+    if (completeVerificationData?.verificationData) {
+      completeVerificationData.verificationData.uploadedItems = updatedItems;
     }
 
-    // For Verifier/Admin: Update via API
-    const updatedItems =
-      completeVerificationData?.verificationData?.uploadedItems?.filter(
-        (photo: any) => photo?.id !== pid
-      );
-
     const updatedData = {
-      // findings: "",
       verificationData: {
-        ...completeVerificationData.verificationData,
+        ...completeVerificationData?.verificationData,
         uploadedItems: updatedItems,
       },
-      // path: "",
-      approvedStatus: "Positive",
     };
-    // console.log(updatedData);
+
     verifierEditApi(id as string, "Business", updatedData)
-      .then((res) => {
+      .then(() => {
         message.success("Photo deleted successfully!");
         fetchVerificationData();
       })
@@ -1640,25 +1624,22 @@ export const BusinessVerificationDetails: React.FC<
     if (allNewItems.length > 0) {
       const updatedItems = [...existingItems, ...allNewItems];
 
-      if (role === "VerificationExecutive") {
-        setSavedSectionData((prev: any) => ({
-          ...prev,
-          uploadedItems: updatedItems,
-        }));
+      setSavedSectionData((prev: any) => ({
+        ...prev,
+        uploadedItems: updatedItems,
+      }));
 
-        if (completeVerificationData?.verificationData) {
-          completeVerificationData.verificationData.uploadedItems =
-            updatedItems;
-        }
-      } else {
-        const updatedData = {
-          verificationData: {
-            ...completeVerificationData?.verificationData,
-            uploadedItems: updatedItems,
-          },
-        };
-        await verifierEditApi(id as string, "Business", updatedData);
+      if (completeVerificationData?.verificationData) {
+        completeVerificationData.verificationData.uploadedItems = updatedItems;
       }
+
+      const updatedData = {
+        verificationData: {
+          ...completeVerificationData?.verificationData,
+          uploadedItems: updatedItems,
+        },
+      };
+      await verifierEditApi(id as string, "Business", updatedData);
     }
 
     if (successCount > 0) {
@@ -1772,25 +1753,21 @@ export const BusinessVerificationDetails: React.FC<
         document.getElementById("section-photoCapture")?.getBoundingClientRect()
           .top ?? null;
 
-      if (role === "VerificationExecutive") {
-        const updatedItems = [...existingItems, newItem];
-        setSavedSectionData((prev: any) => ({
-          ...prev,
-          uploadedItems: updatedItems,
-        }));
+      const updatedItems = [...existingItems, newItem];
 
-        if (completeVerificationData?.verificationData) {
-          completeVerificationData.verificationData.uploadedItems =
-            updatedItems;
-        }
+      setSavedSectionData((prev: any) => ({
+        ...prev,
+        uploadedItems: updatedItems,
+      }));
 
-        return;
+      if (completeVerificationData?.verificationData) {
+        completeVerificationData.verificationData.uploadedItems = updatedItems;
       }
 
       const updatedData = {
         verificationData: {
           ...completeVerificationData?.verificationData,
-          uploadedItems: [...existingItems, newItem],
+          uploadedItems: updatedItems,
         },
       };
 
