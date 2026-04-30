@@ -330,6 +330,20 @@ export class LoanController {
     };
   }
 
+  @Post(":id/close")
+  @Roles(UserRole.Admin, UserRole.Verifier)
+  @ApiOperation({ summary: "Mark a PD loan as closed (sets closedAt to now)" })
+  @ApiResponse({ status: 200, description: "Loan closed successfully" })
+  @ApiResponse({ status: 404, description: "Loan not found" })
+  async closeLoan(@Param("id") loanId: string) {
+    const result = await this.loanService.closeLoan(Number(loanId));
+    return {
+      status: 200,
+      message: "Loan closed successfully",
+      data: result,
+    };
+  }
+
   @Patch(":id/update-executive")
   @Roles(UserRole.Admin, UserRole.OperationsExecutive)
   @ApiOperation({ summary: "Patch API to edit loan verification assignment" })
@@ -476,7 +490,6 @@ export class LoanController {
     @Param("id") id: string,
     @Query("type") type: AddressType,
     @Query("department") department: Department,
-    @Query("generate") generate: boolean,
     @Res() res: Response
   ) {
     try {
@@ -488,7 +501,7 @@ export class LoanController {
           type
         );
       } else if (department === Department.PD) {
-        pdfBuffer = await this.pdTemplateService.generatePreviewPDF(Number(id), generate);
+        pdfBuffer = await this.pdTemplateService.generatePreviewPDF(Number(id));
       }
 
       res.set({

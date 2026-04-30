@@ -210,3 +210,7 @@ export const sendPdEmailReplyApi = (loanId: number, department: string) => {
     params: { department },
   });
 };
+
+export const closeLoanApi = (loanId: number) => {
+  return postWithDepartment(`/loans/${loanId}/close`);
+};

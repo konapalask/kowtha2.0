@@ -3616,6 +3616,52 @@ export class LoanService implements OnModuleDestroy {
     }
   }
 
+  async closeLoan(loanId: number) {
+    try {
+      const loan = await this.prisma.loan.findUnique({
+        where: { id: loanId },
+        select: { id: true, department: true, closedAt: true },
+      });
+
+      if (!loan) {
+        throw new NotFoundException("Loan not found");
+      }
+
+      if (loan.department !== Department.PD) {
+        throw new BadRequestException("Only PD loans can be closed");
+      }
+
+      if (loan.closedAt) {
+        return await this.prisma.loan.findUnique({ where: { id: loanId } });
+      }
+
+      const updatedLoan = await this.prisma.loan.update({
+        where: { id: loanId },
+        data: { closedAt: new Date() },
+      });
+
+      await this.loggingService.info("Loan closed", {
+        loanId,
+        closedAt: updatedLoan.closedAt,
+      });
+
+      return updatedLoan;
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+      await this.loggingService.error("Failed to close loan", {
+        loanId,
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
+    }
+  }
+
   async returnToVerificationExecutive(
     loanId: number,
     verificationType: VerificationType,

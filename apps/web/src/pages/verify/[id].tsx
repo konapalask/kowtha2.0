@@ -304,6 +304,8 @@ export default function LoanVerifyDetails() {
             loanId={verificationData?.loanId}
             pdEmailLogs={verificationData?.pdEmailLogs}
             loanTemplateName={loanDetails?.templateName}
+            loanClosedAt={loanDetails?.closedAt}
+            onLoanRefresh={fetchLoanDetails}
           />
         );
     }

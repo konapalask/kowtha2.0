@@ -629,18 +629,13 @@ export default function Users() {
           loading={loading}
           onChange={handleTableChange}
           sticky
-          pagination={
-            Object.values(filters).some((v) => v !== undefined && v !== "") &&
-            users.length <= 10
-              ? false
-              : {
-                  current: pagination.current,
-                  pageSize: pagination.pageSize,
-                  total: pagination.total,
-                  showTotal: (total) => `Total ${total} users`,
-                  position: ["bottomCenter"],
-                }
-          }
+          pagination={{
+            current: pagination.current,
+            pageSize: pagination.pageSize,
+            total: pagination.total,
+            showTotal: (total) => `Total ${total} users`,
+            position: ["bottomCenter"],
+          }}
           scroll={{ x: 1500 }}
           bordered
         />
