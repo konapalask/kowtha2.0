@@ -178,6 +178,70 @@ export default function Loans() {
     currentDepartment,
   ]); // Add currentDepartment as dependency
 
+  const fetchVerifiers = async () => {
+    try {
+      const res = await getVerifiersApi();
+      const options =
+        res?.data?.data?.map((item: any) => ({
+          label: (
+            <Row gutter={[0, 5]} style={{ width: "100%" }}>
+              <Col
+                xs={24}
+                sm={12}
+                md={9}
+                xl={11}
+                style={{ wordWrap: "break-word" }}
+              >
+                <Typography.Text>{item?.name}</Typography.Text>
+              </Col>
+              <Col xs={24} sm={6} md={6} xl={9}>
+                <Tag color="blue">{item?.employeeCode}</Tag>
+              </Col>
+              <Col xs={24} sm={6} md={9} xl={4}>
+                <Tag color="blue">P: {item?.pendingVerifications}</Tag>
+              </Col>
+            </Row>
+          ),
+          value: item?.id,
+        })) ?? [];
+      setVerifiers(options);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const fetchVerificationExecutives = async () => {
+    try {
+      const res = await getAllVerificationExecutivesApi();
+      const options =
+        res?.data?.data?.map((item: any) => ({
+          label: (
+            <Row gutter={[0, 5]} style={{ width: "100%" }}>
+              <Col
+                xs={24}
+                sm={12}
+                md={9}
+                xl={11}
+                style={{ wordWrap: "break-word" }}
+              >
+                <Typography.Text>{item?.name}</Typography.Text>
+              </Col>
+              <Col xs={24} sm={6} md={6} xl={9}>
+                <Tag color="blue">{item?.employeeCode}</Tag>
+              </Col>
+              <Col xs={24} sm={6} md={9} xl={4}>
+                <Tag color="blue">P: {item?.pendingVerifications}</Tag>
+              </Col>
+            </Row>
+          ),
+          value: item?.id,
+        })) ?? [];
+      setVerificationExecutives(options);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   useEffect(() => {
     getOfficesApi()
       .then((res) => {
@@ -191,37 +255,6 @@ export default function Loans() {
       .catch((err) => {
         // message.error("Failed to fetch offices");
         console.log(err);
-      });
-    getVerifiersApi()
-      .then((res) => {
-        const options =
-          res?.data?.data?.map((item: any) => ({
-            label: (
-              <Row gutter={[0, 5]} style={{ width: "100%" }}>
-                <Col
-                  xs={24}
-                  sm={12}
-                  md={9}
-                  xl={11}
-                  style={{ wordWrap: "break-word" }}
-                >
-                  <Typography.Text>{item?.name}</Typography.Text>
-                </Col>
-                <Col xs={24} sm={6} md={6} xl={9}>
-                  <Tag color="blue">{item?.employeeCode}</Tag>
-                </Col>
-                <Col xs={24} sm={6} md={9} xl={4}>
-                  <Tag color="blue">P: {item?.pendingVerifications}</Tag>
-                </Col>
-              </Row>
-            ),
-            value: item?.id,
-          })) ?? [];
-        setVerifiers(options);
-      })
-      .catch((err) => {
-        console.log(err);
-        // message.error("Failed to fetch verifiers");
       });
     // Commented out: Using static pdBankOptions from options.tsx instead of backend API
     getPdBanksApi()
@@ -245,37 +278,14 @@ export default function Loans() {
       .catch((err) => {
         console.log(err);
       });
-    getAllVerificationExecutivesApi()
-      .then((res) => {
-        const options =
-          res?.data?.data?.map((item: any) => ({
-            label: (
-              <Row gutter={[0, 5]} style={{ width: "100%" }}>
-                <Col
-                  xs={24}
-                  sm={12}
-                  md={9}
-                  xl={11}
-                  style={{ wordWrap: "break-word" }}
-                >
-                  <Typography.Text>{item?.name}</Typography.Text>
-                </Col>
-                <Col xs={24} sm={6} md={6} xl={9}>
-                  <Tag color="blue">{item?.employeeCode}</Tag>
-                </Col>
-                <Col xs={24} sm={6} md={9} xl={4}>
-                  <Tag color="blue">P: {item?.pendingVerifications}</Tag>
-                </Col>
-              </Row>
-            ),
-            value: item?.id,
-          })) ?? [];
-        setVerificationExecutives(options);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
   }, []);
+
+  useEffect(() => {
+    if (!isDrawerVisible) {
+      fetchVerifiers();
+      fetchVerificationExecutives();
+    }
+  }, [isDrawerVisible]);
 
   const fetchExecutives = async () => {
     try {
