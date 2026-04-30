@@ -5,9 +5,10 @@ import {
   exportFinancialAnalysis,
   getVerificationData,
 } from "@/services/verifier.services";
-import { sendPdEmailReplyApi, updateLoanApi, getLoansByIdApi, returnToVeApi } from "@/services/loans.services";
-import { EyeOutlined, DownloadOutlined, MailOutlined, RollbackOutlined } from "@ant-design/icons";
+import { sendPdEmailReplyApi, getLoansByIdApi, returnToVeApi, closeLoanApi } from "@/services/loans.services";
+import { EyeOutlined, DownloadOutlined, MailOutlined, RollbackOutlined, CheckCircleOutlined } from "@ant-design/icons";
 import { Button, message, Modal, Popconfirm, Spin } from "antd";
+import dayjs from "dayjs";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { getCurrentDepartment, getCurrentDepartmentRole } from "@/utils/utility";
@@ -24,6 +25,8 @@ const Footer: React.FC<{
   currentDepartment?: string;
   loanId?: number;
   hasPdEmail?: boolean;
+  loanClosedAt?: string | null;
+  onLoanRefresh?: () => void;
 }> = ({
   editorContent,
   disabled,
@@ -35,6 +38,8 @@ const Footer: React.FC<{
   currentDepartment,
   loanId,
   hasPdEmail,
+  loanClosedAt,
+  onLoanRefresh,
 }) => {
   const { activeTab } = useTabContext();
   const router = useRouter();
@@ -50,7 +55,9 @@ const Footer: React.FC<{
   const [showDownloadAnimation, setShowDownloadAnimation] = useState(false);
   const [downloadFileType, setDownloadFileType] = useState<"pdf" | "excel">("pdf");
   const [returningToVe, setReturningToVe] = useState(false);
+  const [closingLoan, setClosingLoan] = useState(false);
   const currentRole = getCurrentDepartmentRole();
+  const canCloseLoan = currentRole === "Verifier" || currentRole === "Admin";
 
   // const handleApprove = async () => {
   //   try {
@@ -105,16 +112,6 @@ const Footer: React.FC<{
       const loanResponse = await getLoansByIdApi(loanIdFromVerification.toString());
       const loanData = loanResponse?.data?.data?.items?.[0] || loanResponse?.data?.data?.items || loanResponse?.data?.data || loanResponse?.data;
 
-      if (loanData && loanData.closedAt === null) {
-        try {
-          await updateLoanApi(loanIdFromVerification, {
-            closedAt: new Date().toISOString(),
-          });
-        } catch (updateError: any) {
-          console.error("Error updating closedAt:", updateError);
-        }
-      }
-      
       const reportResponse = await generatePreviewReport(
         id as string,
         activeTab,
@@ -293,6 +290,26 @@ const Footer: React.FC<{
     }
   };
 
+  const handleCloseLoan = async () => {
+    if (!loanId) {
+      message.error("Loan ID not available");
+      return;
+    }
+    try {
+      setClosingLoan(true);
+      await closeLoanApi(loanId);
+      message.success("Loan marked as closed");
+      onLoanRefresh?.();
+    } catch (error: any) {
+      console.error("Error closing loan:", error);
+      message.error(
+        error?.response?.data?.message || "Failed to mark loan as closed"
+      );
+    } finally {
+      setClosingLoan(false);
+    }
+  };
+
   const handleReturnToVe = async () => {
     if (!loanId) {
       message.error("Loan ID not available");
@@ -365,6 +382,29 @@ const Footer: React.FC<{
             >
               Download Final Report
             </Button>
+            {canCloseLoan && loanId && (
+              <Popconfirm
+                title="Mark this loan as closed?"
+                description="This sets the closed date to now. It cannot be undone from this screen."
+                onConfirm={handleCloseLoan}
+                disabled={!!loanClosedAt}
+              >
+                <Button
+                  size="small"
+                  icon={<CheckCircleOutlined />}
+                  loading={closingLoan}
+                  disabled={closingLoan || !!loanClosedAt}
+                  style={{
+                    height: "32px",
+                    fontSize: "14px",
+                  }}
+                >
+                  {loanClosedAt
+                    ? `Closed ${dayjs(loanClosedAt).format("DD-MM-YYYY")}`
+                    : "Mark Loan Closed"}
+                </Button>
+              </Popconfirm>
+            )}
             <Button
               size="small"
               icon={<DownloadOutlined />}

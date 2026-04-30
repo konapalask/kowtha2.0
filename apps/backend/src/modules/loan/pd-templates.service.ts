@@ -1057,7 +1057,7 @@ export class PDTemplateService {
     }
   }
 
-  async generatePreviewPDF(loanId: number, generate: boolean): Promise<Buffer> {
+  async generatePreviewPDF(loanId: number): Promise<Buffer> {
     const startedAt = Date.now();
     const startCpuUsage = process.cpuUsage();
     const startSnapshot = this.getReportTelemetrySnapshot();
@@ -1066,7 +1066,6 @@ export class PDTemplateService {
       await this.logReportTelemetry("pd_preview_started", {
         reportType: "pd-preview-pdf",
         loanId,
-        generate,
         ...startSnapshot,
       });
 
@@ -1083,7 +1082,6 @@ export class PDTemplateService {
           templateName: true,
           loanAmount: true,
           status: true,
-          closedAt: true,
           office: { select: { name: true, address: true } },
           operationsExecutive: { select: { name: true } },
           verifications: {
@@ -1232,13 +1230,6 @@ export class PDTemplateService {
         startSnapshot,
         endSnapshot: this.getReportTelemetrySnapshot(),
       });
-      
-      if (generate && !loan.closedAt) {
-        await this.prisma.loan.update({
-          where: { id: loanId },
-          data: { closedAt: new Date() },
-        });
-      }
 
       return pdfBuffer;
     } catch (error) {

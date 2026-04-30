@@ -250,6 +250,8 @@ interface BusinessVerificationDetailsProps {
   loanId?: number;
   pdEmailLogs?: any[];
   loanTemplateName?: string;
+  loanClosedAt?: string | null;
+  onLoanRefresh?: () => void;
 }
 
 export const BusinessVerificationDetails: React.FC<
@@ -269,6 +271,8 @@ export const BusinessVerificationDetails: React.FC<
   loanId,
   pdEmailLogs,
   loanTemplateName,
+  loanClosedAt,
+  onLoanRefresh,
 }) => {
   console.log("verificationData", verificationData);
   const curDept = getItem("currentDepartment");
@@ -5934,6 +5938,8 @@ export const BusinessVerificationDetails: React.FC<
               pdEmailLogs &&
               pdEmailLogs.length > 0
             }
+            loanClosedAt={loanClosedAt}
+            onLoanRefresh={onLoanRefresh}
           />
         </>
       )}
