@@ -502,7 +502,6 @@ export class AccountsService {
                 where: {
                   status: { not: VerificationStatus.Completed },
                   department: Department.PD,
-                  initialSubmitted: true,
                 },
               },
             }
