@@ -196,8 +196,26 @@ export default function Loans() {
       .then((res) => {
         const options =
           res?.data?.data?.map((item: any) => ({
-            label: item.name,
-            value: item.id,
+            label: (
+              <Row gutter={[0, 5]} style={{ width: "100%" }}>
+                <Col
+                  xs={24}
+                  sm={12}
+                  md={9}
+                  xl={11}
+                  style={{ wordWrap: "break-word" }}
+                >
+                  <Typography.Text>{item?.name}</Typography.Text>
+                </Col>
+                <Col xs={24} sm={6} md={6} xl={9}>
+                  <Tag color="blue">{item?.employeeCode}</Tag>
+                </Col>
+                <Col xs={24} sm={6} md={9} xl={4}>
+                  <Tag color="blue">P: {item?.pendingVerifications}</Tag>
+                </Col>
+              </Row>
+            ),
+            value: item?.id,
           })) ?? [];
         setVerifiers(options);
       })
@@ -231,8 +249,26 @@ export default function Loans() {
       .then((res) => {
         const options =
           res?.data?.data?.map((item: any) => ({
-            label: item.name,
-            value: item.id,
+            label: (
+              <Row gutter={[0, 5]} style={{ width: "100%" }}>
+                <Col
+                  xs={24}
+                  sm={12}
+                  md={9}
+                  xl={11}
+                  style={{ wordWrap: "break-word" }}
+                >
+                  <Typography.Text>{item?.name}</Typography.Text>
+                </Col>
+                <Col xs={24} sm={6} md={6} xl={9}>
+                  <Tag color="blue">{item?.employeeCode}</Tag>
+                </Col>
+                <Col xs={24} sm={6} md={9} xl={4}>
+                  <Tag color="blue">P: {item?.pendingVerifications}</Tag>
+                </Col>
+              </Row>
+            ),
+            value: item?.id,
           })) ?? [];
         setVerificationExecutives(options);
       })

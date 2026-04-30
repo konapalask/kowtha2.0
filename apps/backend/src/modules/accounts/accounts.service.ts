@@ -14,7 +14,7 @@ import { CreateDepartmentRoleDto } from './dto/create-department-role.dto';
 import { UpdateDepartmentRoleDto } from './dto/update-department-role.dto';
 import { getUserWithDepartmentRoles } from '../common/types/request.types';
 import { UpdateUserDepartmentRolesDto } from './dto/update-user-department-roles.dto';
-import { EditRequestStatus, EditRequestType, UserRole, Department, UserStatus } from '@prisma/client';
+import { EditRequestStatus, EditRequestType, UserRole, Department, UserStatus, VerificationStatus } from '@prisma/client';
 import { Injectable, UnauthorizedException, BadRequestException, NotFoundException, ConflictException } from '@nestjs/common';
 
 @Injectable()
@@ -484,7 +484,33 @@ export class AccountsService {
       }
 
       console.log(where);
-      
+
+      const pendingCountSelect =
+        filters?.role === UserRole.VerificationExecutive
+          ? {
+              assistantVerifications: {
+                where: {
+                  status: { not: VerificationStatus.Completed },
+                  department: Department.PD,
+                  initialSubmitted: false,
+                },
+              },
+            }
+          : filters?.role === UserRole.Verifier
+          ? {
+              verificationsVerifier: {
+                where: {
+                  status: { not: VerificationStatus.Completed },
+                  department: Department.PD,
+                  initialSubmitted: true,
+                },
+              },
+            }
+          : {
+              verifications: {
+                where: { status: VerificationStatus.Pending },
+              },
+            };
 
       const users = await this.prisma.user.findMany({
         where,
@@ -496,13 +522,7 @@ export class AccountsService {
           status: true,
           createdAt: true,
           _count: {
-            select: {
-              verifications: {
-                where: {
-                  status: 'Pending'
-                }
-              }
-            }
+            select: pendingCountSelect
           },
           locality: true,
           departmentRoles: {
@@ -550,10 +570,17 @@ export class AccountsService {
           }
         }
 
+        const pendingVerifications =
+          filters?.role === UserRole.VerificationExecutive
+            ? (user._count as any).assistantVerifications
+            : filters?.role === UserRole.Verifier
+            ? (user._count as any).verificationsVerifier
+            : (user._count as any).verifications;
+
         return {
           ...user,
           status: departmentRole?.status || user.status,
-          pendingVerifications: user._count.verifications,
+          pendingVerifications,
           availabletoday: !!attendance,
           department: departmentRole?.department, // Single object instead of array
           role: departmentRole?.role, // Single object instead of array
