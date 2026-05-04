@@ -1477,6 +1477,24 @@ export class LoanService implements OnModuleDestroy {
 
       // Start a transaction to ensure all operations succeed or fail together
       return await this.prisma.$transaction(async (prisma) => {
+        const current = await prisma.verification.findUnique({
+          where: {
+            loanId_type: {
+              loanId,
+              type: updateData.verificationType,
+            },
+          },
+          select: { fieldExecutiveId: true },
+        });
+
+        if (!current) {
+          throw new NotFoundException("Verification not found");
+        }
+
+        const isReassigningFE =
+          updateData.fieldExecutiveId !== undefined &&
+          updateData.fieldExecutiveId !== current.fieldExecutiveId;
+
         // Update verification
         const verification = await prisma.verification.update({
           where: {
@@ -1500,7 +1518,16 @@ export class LoanService implements OnModuleDestroy {
             ...(updateData.assistantVerifierId && {
               assistantVerifierId: updateData.assistantVerifierId,
             }),
-            status: loan.status == "FVCompleted" ? VerificationStatus.Completed : VerificationStatus.Pending,
+            // Only reset verification.status when the FE is actually being
+            // swapped. Editing verifier / assistant verifier / address / etc.
+            // on a loan that has already moved past FVCompleted must not
+            // bounce the case back into the FE's pending queue.
+            ...(isReassigningFE && {
+              status:
+                loan.status === "FVCompleted"
+                  ? VerificationStatus.Completed
+                  : VerificationStatus.Pending,
+            }),
           },
         });
 
