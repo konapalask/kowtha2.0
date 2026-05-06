@@ -4,7 +4,6 @@ import { EditLoanDto } from "./dto/edit-loan.dto";
 import { GetLoansDto } from "./dto/get-loans.dto";
 import { NotFoundException } from "@nestjs/common";
 import { CreateLoanDto } from "./dto/create-loan.dto";
-import { VerifyLoanDto } from "./dto/verify-loan.dto";
 import { Public } from "../accounts/public.decorator";
 import { JwtAuthGuard } from "../accounts/jwt-auth.guard";
 import { RolesGuard } from "../accounts/guards/roles.guard";
@@ -631,34 +630,6 @@ export class LoanController {
     );
     return {
       status: 200,
-      data: result,
-    };
-  }
-
-  @Post(":id/verify")
-  @Roles(UserRole.Admin, UserRole.Verifier)
-  @ApiOperation({
-    summary: "Verifier will approve or reject a loan and add comments",
-  })
-  @ApiResponse({
-    status: 200,
-    description: "The loan has been successfully verified",
-  })
-  async verifyLoan(
-    @Param("id") loanId: string,
-    @Body() verifyLoanDto: VerifyLoanDto,
-    @Request() req: AuthenticatedRequest
-  ) {
-    const result = await this.loanService.verifyLoan(
-      Number(loanId),
-      req.user.id,
-      verifyLoanDto.status,
-      verifyLoanDto.approvedStatus,
-      verifyLoanDto.comments
-    );
-    return {
-      status: 200,
-      message: "Loan verified successfully",
       data: result,
     };
   }

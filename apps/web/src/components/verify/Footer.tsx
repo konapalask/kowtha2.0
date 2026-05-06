@@ -25,6 +25,7 @@ const Footer: React.FC<{
   currentDepartment?: string;
   loanId?: number;
   hasPdEmail?: boolean;
+  loanStatus?: string | null;
   loanClosedAt?: string | null;
   onLoanRefresh?: () => void;
 }> = ({
@@ -38,6 +39,7 @@ const Footer: React.FC<{
   currentDepartment,
   loanId,
   hasPdEmail,
+  loanStatus,
   loanClosedAt,
   onLoanRefresh,
 }) => {
@@ -224,28 +226,6 @@ const Footer: React.FC<{
   //   }
   // };
 
-  // const approveLoan = async () => {
-  //   try {
-  //     const response = await loanApproveRejectApi(id as string, {
-  //       status: "Approved",
-  //       comments: "",
-  //     });
-  //   } catch (error) {
-  //     console.error("Error approving loan:", error);
-  //   }
-  // };
-
-  // const rejectLoan = async () => {
-  //   try {
-  //     const response = await loanApproveRejectApi(id as string, {
-  //       status: "Rejected",
-  //       comments: "",
-  //     });
-  //   } catch (error) {
-  //     console.error("Error rejecting loan:", error);
-  //   }
-  // };
-
   // Clean up the blob URL when component unmounts
   useEffect(() => {
     return () => {
@@ -384,9 +364,23 @@ const Footer: React.FC<{
             </Button>
             {canCloseLoan && loanId && (
               <Popconfirm
-                title="Mark this loan as closed?"
-                description="This sets the closed date to now. It cannot be undone from this screen."
-                onConfirm={handleCloseLoan}
+                title={
+                  loanStatus === "BackendCompleted"
+                    ? "Mark this loan as closed?"
+                    : "Loan not yet submitted by Verification Executive"
+                }
+                description={
+                  loanStatus === "BackendCompleted"
+                    ? "This sets the closed date to now. It cannot be undone from this screen."
+                    : "The Verification Executive has not submitted this loan yet. The loan can be closed only after VE submission."
+                }
+                okText="OK"
+                showCancel={loanStatus === "BackendCompleted"}
+                onConfirm={
+                  loanStatus === "BackendCompleted"
+                    ? handleCloseLoan
+                    : () => {}
+                }
                 disabled={!!loanClosedAt}
               >
                 <Button

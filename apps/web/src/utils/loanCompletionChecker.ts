@@ -13,8 +13,7 @@ export const isLoanCompleted = (verificationData: any): boolean => {
       "FieldVerificationComplete",
       "FVCompleted",
       "BackendCompleted",
-      "Approved",
-      "Rejected"
+      "Completed"
     ];
     if (completedStatuses.includes(verificationData.status)) {
       return true;
@@ -82,8 +81,7 @@ export const isMobileVerificationCompleted = (loanData: any): boolean => {
     const completedStatuses = [
       "FVCompleted",
       "BackendCompleted",
-      "Approved",
-      "Rejected"
+      "Completed"
     ];
     if (completedStatuses.includes(loanData.status)) {
       return true;

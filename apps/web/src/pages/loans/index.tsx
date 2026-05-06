@@ -419,24 +419,20 @@ export default function Loans() {
         key: "status",
         width: 180,
         render: (status: string) => {
-          // Approved + Rejected are collapsed into a single "Completed" tag
-          const isTerminal = status === "Approved" || status === "Rejected";
-          const color = isTerminal
-            ? "green"
-            : status === "Unassigned"
-              ? "magenta"
-              : status === "Assigned"
-                ? "geekblue"
-                : status === "Pending"
-                  ? "orange"
-                  : status === "BackendCompleted"
-                    ? "cyan"
-                    : "blue";
-          const displayStatus = isTerminal
-            ? "Completed"
-            : status === "BackendCompleted"
-              ? "Backend Completed"
-              : status;
+          const color =
+            status === "Completed"
+              ? "green"
+              : status === "Unassigned"
+                ? "magenta"
+                : status === "Assigned"
+                  ? "geekblue"
+                  : status === "Pending"
+                    ? "orange"
+                    : status === "BackendCompleted"
+                      ? "cyan"
+                      : "blue";
+          const displayStatus =
+            status === "BackendCompleted" ? "Backend Completed" : status;
           return <Tag color={color}>{displayStatus}</Tag>;
         },
       },
