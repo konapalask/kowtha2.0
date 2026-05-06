@@ -1,16 +1,17 @@
-import { IsBoolean, IsEnum, IsIn, IsNumber, IsOptional, IsString, Matches } from 'class-validator';
+import { IsBoolean, IsEnum, IsNumber, IsOptional, IsString, Matches } from 'class-validator';
 import { Department, LoanStatus } from '@prisma/client';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class GetLoansDto extends PaginationDto {
   @ApiProperty({
-    description: 'Filter loans by status. Accepts a real LoanStatus value or the virtual "Completed" which matches Approved + Rejected.',
-    required: false
+    description: 'Filter loans by status',
+    required: false,
+    enum: LoanStatus
   })
   @IsOptional()
-  @IsIn([...Object.values(LoanStatus), 'Completed'])
-  status?: LoanStatus | 'Completed';
+  @IsEnum(LoanStatus)
+  status?: LoanStatus;
 
   @ApiProperty({
     description: 'Filter loans by application number',

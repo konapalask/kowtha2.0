@@ -136,8 +136,7 @@ export default function ManageLoans() {
       render: (status: string) => {
         let color = "blue";
         if (status === "Pending") color = "orange";
-        else if (status === "Approved") color = "green";
-        else if (status === "Rejected") color = "red";
+        else if (status === "Completed") color = "green";
         return <Tag color={color}>{status}</Tag>;
       },
     },

@@ -224,28 +224,6 @@ const Footer: React.FC<{
   //   }
   // };
 
-  // const approveLoan = async () => {
-  //   try {
-  //     const response = await loanApproveRejectApi(id as string, {
-  //       status: "Approved",
-  //       comments: "",
-  //     });
-  //   } catch (error) {
-  //     console.error("Error approving loan:", error);
-  //   }
-  // };
-
-  // const rejectLoan = async () => {
-  //   try {
-  //     const response = await loanApproveRejectApi(id as string, {
-  //       status: "Rejected",
-  //       comments: "",
-  //     });
-  //   } catch (error) {
-  //     console.error("Error rejecting loan:", error);
-  //   }
-  // };
-
   // Clean up the blob URL when component unmounts
   useEffect(() => {
     return () => {

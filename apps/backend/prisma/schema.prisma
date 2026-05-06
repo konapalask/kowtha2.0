@@ -300,8 +300,7 @@ enum LoanStatus {
   UnderFV
   FVCompleted
   BackendCompleted
-  Approved
-  Rejected
+  Completed
 }
 
 enum FieldExecutiveStatus {

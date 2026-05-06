@@ -722,56 +722,6 @@ export class LoanService implements OnModuleDestroy {
     }
   }
 
-  async verifyLoan(
-    loanId: number,
-    verifierId: number,
-    status: LoanStatus,
-    approvedStatus: ApprovedStatus,
-    comments?: string
-  ) {
-    try {
-      const loan = await this.prisma.loan.findUnique({
-        where: { id: loanId },
-      });
-
-      if (!loan) {
-        await this.loggingService.warn(
-          "Loan verification failed - Loan not found",
-          { loanId }
-        );
-        throw new NotFoundException("Loan not found");
-      }
-
-      const updatedLoan = await this.prisma.loan.update({
-        where: { id: loanId },
-        data: {
-          status,
-        },
-      });
-
-      await this.loggingService.info("Loan verified successfully", {
-        loanId,
-        verifierId,
-        status,
-        hasComments: !!comments,
-      });
-
-      return updatedLoan;
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      await this.loggingService.error("Failed to verify loan", {
-        loanId,
-        verifierId,
-        status,
-        error: error.message,
-        stack: error.stack,
-      });
-      throw error;
-    }
-  }
-
   async getLoansByOffice(officeId: number, department: Department) {
     try {
       const office = await this.prisma.office.findUnique({
@@ -1078,20 +1028,7 @@ export class LoanService implements OnModuleDestroy {
       };
 
       if (filters?.status) {
-        if (filters.status === "Completed") {
-          // "Completed" surfaces loans whose verifier has given a
-          // Positive or Negative verdict on at least one verification.
-          // CreditRefer is intentionally excluded until product asks.
-          where.verifications = {
-            some: {
-              approvedStatus: {
-                in: [ApprovedStatus.Positive, ApprovedStatus.Negative],
-              },
-            },
-          };
-        } else {
-          where.status = filters.status as LoanStatus;
-        }
+        where.status = filters.status as LoanStatus;
       }
 
       if (filters?.postponed) {
@@ -1284,19 +1221,7 @@ export class LoanService implements OnModuleDestroy {
     };
 
     if (filters?.status) {
-      if (filters.status === "Completed") {
-        // Mirror of getLoans: Completed = at least one verification has a
-        // Positive or Negative verdict. CreditRefer excluded for now.
-        where.verifications = {
-          some: {
-            approvedStatus: {
-              in: [ApprovedStatus.Positive, ApprovedStatus.Negative],
-            },
-          },
-        };
-      } else {
-        where.status = filters.status as LoanStatus;
-      }
+      where.status = filters.status as LoanStatus;
     }
 
     if (filters?.bankName) {
@@ -3647,7 +3572,7 @@ export class LoanService implements OnModuleDestroy {
     try {
       const loan = await this.prisma.loan.findUnique({
         where: { id: loanId },
-        select: { id: true, department: true, closedAt: true },
+        select: { id: true, department: true, status: true, closedAt: true },
       });
 
       if (!loan) {
@@ -3662,9 +3587,18 @@ export class LoanService implements OnModuleDestroy {
         return await this.prisma.loan.findUnique({ where: { id: loanId } });
       }
 
+      if (loan.status !== LoanStatus.BackendCompleted) {
+        throw new BadRequestException(
+          "Only loans in BackendCompleted state can be closed"
+        );
+      }
+
       const updatedLoan = await this.prisma.loan.update({
         where: { id: loanId },
-        data: { closedAt: new Date() },
+        data: {
+          closedAt: new Date(),
+          status: LoanStatus.Completed,
+        },
       });
 
       await this.loggingService.info("Loan closed", {
@@ -3716,12 +3650,19 @@ export class LoanService implements OnModuleDestroy {
         },
       });
 
-      // If loan was BackendCompleted, revert to FVCompleted
+      // Revert loan back to FVCompleted so VE picks it up again. If the loan
+      // had already been closed (status=Completed, closedAt set), reopen it
+      // by clearing closedAt as well.
       const loan = await this.prisma.loan.findUnique({
         where: { id: loanId },
       });
 
-      if (loan?.status === LoanStatus.BackendCompleted) {
+      if (loan?.status === LoanStatus.Completed) {
+        await this.prisma.loan.update({
+          where: { id: loanId },
+          data: { status: LoanStatus.FVCompleted, closedAt: null },
+        });
+      } else if (loan?.status === LoanStatus.BackendCompleted) {
         await this.prisma.loan.update({
           where: { id: loanId },
           data: { status: LoanStatus.FVCompleted },

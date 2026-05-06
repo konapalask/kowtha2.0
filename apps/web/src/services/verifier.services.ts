@@ -87,10 +87,6 @@ export const getAllEditRequestsApi = async () => {
 //   return await axiosInstance.patch(`/edit-requests/${id}/update`, payload);
 // };
 
-export const loanApproveRejectApi = async (id: string, payload: any) => {
-  return await postWithDepartment(`/loans/${id}/verify`, payload);
-};
-
 export const patchFinalVerdict = async (
   id: string,
   type: string,

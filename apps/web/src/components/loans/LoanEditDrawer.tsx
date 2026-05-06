@@ -331,8 +331,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                   color={
                     loanDetails.status === "Pending"
                       ? "orange"
-                      : loanDetails.status === "Approved" ||
-                          loanDetails.status === "Rejected"
+                      : loanDetails.status === "Completed"
                         ? "green"
                         : loanDetails.status === "BackendCompleted"
                           ? "cyan"
@@ -356,8 +355,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                         return "FV Completed";
                       case "BackendCompleted":
                         return "Backend Completed";
-                      case "Approved":
-                      case "Rejected":
+                      case "Completed":
                         return "Completed";
                       default:
                         return loanDetails.status;
