@@ -372,14 +372,15 @@ const Footer: React.FC<{
                 description={
                   loanStatus === "BackendCompleted"
                     ? "This sets the closed date to now. It cannot be undone from this screen."
-                    : "The Verification Executive has not submitted this loan yet. Are you sure you want to close it now?"
+                    : "The Verification Executive has not submitted this loan yet. The loan can be closed only after VE submission."
                 }
-                okText={
+                okText="OK"
+                showCancel={loanStatus === "BackendCompleted"}
+                onConfirm={
                   loanStatus === "BackendCompleted"
-                    ? "OK"
-                    : "Close anyway"
+                    ? handleCloseLoan
+                    : () => {}
                 }
-                onConfirm={handleCloseLoan}
                 disabled={!!loanClosedAt}
               >
                 <Button
