@@ -3587,9 +3587,12 @@ export class LoanService implements OnModuleDestroy {
         return await this.prisma.loan.findUnique({ where: { id: loanId } });
       }
 
-      if (loan.status !== LoanStatus.BackendCompleted) {
+      if (
+        loan.status !== LoanStatus.BackendCompleted &&
+        loan.status !== LoanStatus.FVCompleted
+      ) {
         throw new BadRequestException(
-          "Only loans in BackendCompleted state can be closed"
+          "Only loans in FVCompleted or BackendCompleted state can be closed"
         );
       }
 

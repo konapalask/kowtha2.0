@@ -25,6 +25,7 @@ const Footer: React.FC<{
   currentDepartment?: string;
   loanId?: number;
   hasPdEmail?: boolean;
+  loanStatus?: string | null;
   loanClosedAt?: string | null;
   onLoanRefresh?: () => void;
 }> = ({
@@ -38,6 +39,7 @@ const Footer: React.FC<{
   currentDepartment,
   loanId,
   hasPdEmail,
+  loanStatus,
   loanClosedAt,
   onLoanRefresh,
 }) => {
@@ -362,8 +364,21 @@ const Footer: React.FC<{
             </Button>
             {canCloseLoan && loanId && (
               <Popconfirm
-                title="Mark this loan as closed?"
-                description="This sets the closed date to now. It cannot be undone from this screen."
+                title={
+                  loanStatus === "BackendCompleted"
+                    ? "Mark this loan as closed?"
+                    : "Loan not yet submitted by Verification Executive"
+                }
+                description={
+                  loanStatus === "BackendCompleted"
+                    ? "This sets the closed date to now. It cannot be undone from this screen."
+                    : "The Verification Executive has not submitted this loan yet. Are you sure you want to close it now?"
+                }
+                okText={
+                  loanStatus === "BackendCompleted"
+                    ? "OK"
+                    : "Close anyway"
+                }
                 onConfirm={handleCloseLoan}
                 disabled={!!loanClosedAt}
               >
