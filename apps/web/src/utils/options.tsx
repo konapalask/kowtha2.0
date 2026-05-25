@@ -60,8 +60,8 @@ export const  bankOptions = [
   { value: "AHAM HOUSING FINANCE LTD", label: "AHAM HOUSING FINANCE LTD" },
   { value: "ICICI HOME FINANCE LTD", label: "ICICI HOME FINANCE LTD" },
   {
-    value: "PIRAMAL HOUSING FINANCE LTD",
-    label: "PIRAMAL HOUSING FINANCE LTD",
+    value: "PIRAMAL FINANCE LIMITED",
+    label: "PIRAMAL FINANCE LIMITED",
   },
   { value: "YES BANK LTD", label: "YES BANK LTD" },
   { value: "INCRED HOUSING FINANCE LTD", label: "INCRED HOUSING FINANCE LTD" },

@@ -204,8 +204,8 @@ const Feedback: React.FC<FeedbackProps> = ({
     { value: "AHAM_HOUSING_FINANCE_LTD", label: "AHAM HOUSING FINANCE LTD" },
     { value: "ICICI_HOME_FINANCE_LTD", label: "ICICI HOME FINANCE LTD" },
     {
-      value: "PIRAMAL_HOUSING_FINANCE_LTD",
-      label: "PIRAMAL HOUSING FINANCE LTD",
+      value: "PIRAMAL_FINANCE_LIMITED",
+      label: "PIRAMAL FINANCE LIMITED",
     },
     { value: "YES_BANK_LTD", label: "YES BANK LTD" },
     {
