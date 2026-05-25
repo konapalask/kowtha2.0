@@ -63,6 +63,7 @@ export class LoanService implements OnModuleDestroy {
     process.env.ENABLE_REPORT_TELEMETRY !== "false";
   private readonly reportTelemetryTag = "TEMP_REPORT_TELEMETRY";
   private cachedSignatureDataUri: string | null = null;
+  private cachedFISignatureDataUri: string | null = null;
 
   constructor(
     private prisma: PrismaService,
@@ -119,6 +120,20 @@ export class LoanService implements OnModuleDestroy {
     const imageBase64 = fs.readFileSync(imagePath, "base64");
     this.cachedSignatureDataUri = `data:image/jpeg;base64,${imageBase64}`;
     return this.cachedSignatureDataUri;
+  }
+
+  private getFISignatureDataUri(): string {
+    if (this.cachedFISignatureDataUri) {
+      return this.cachedFISignatureDataUri;
+    }
+
+    const imagePath = path.resolve(
+      process.env.FI_SIGNATURE_PATH ||
+        path.join(__dirname, "..", "..", "images", "anifdat_sign.jpg")
+    );
+    const imageBase64 = fs.readFileSync(imagePath, "base64");
+    this.cachedFISignatureDataUri = `data:image/jpeg;base64,${imageBase64}`;
+    return this.cachedFISignatureDataUri;
   }
 
   private async logReportTelemetry(
@@ -1557,9 +1572,11 @@ export class LoanService implements OnModuleDestroy {
 
       for (const verification of verifications) {
         const templateName = verification.loan?.templateName;
-        (verification as Record<string, unknown>).displayName = templateName
+        const footerFromTemplate = templateName
           ? getFooterNameFromTemplate(templateName)
           : null;
+        (verification as Record<string, unknown>).displayName =
+          footerFromTemplate ?? verification.loan?.bankName ?? null;
       }
 
       const now = new Date();
@@ -2664,7 +2681,7 @@ export class LoanService implements OnModuleDestroy {
         throw new NotFoundException("Invalid address type");
       }
 
-      const imageDataUri = this.getSignatureDataUri();
+      const imageDataUri = this.getFISignatureDataUri();
 
       // Get uploaded items for this verification only
       const uploadedItems = verificationData?.uploadedItems || [];
@@ -2835,16 +2852,8 @@ export class LoanService implements OnModuleDestroy {
     }
   }
 
-  private generateBaseHTMLTemplate(loan: any, address: string): string {
-    let mailId = "";
-
-    if (address.includes("vijayawada")) {
-      mailId = "apfi@cakowtha.co.in";
-    } else {
-      mailId = "tsfi@cakowtha.co.in";
-    }
-
-    return baseTemplate(address, mailId, loan);
+  private generateBaseHTMLTemplate(loan: any, _address: string): string {
+    return baseTemplate(loan);
   }
 
   async updateVerificationApproval(

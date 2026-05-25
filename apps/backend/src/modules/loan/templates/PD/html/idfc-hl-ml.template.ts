@@ -1,4 +1,3 @@
-import { baseTemplate } from "../../FI/base.template";
 import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.template";
 
 const tableStyle =

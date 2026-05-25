@@ -1,4 +1,4 @@
-export const baseTemplate = (address: string, mailId: string, loan: any) => {
+export const baseTemplate = (loan: any) => {
     return `
       <!DOCTYPE html>
       <html>
@@ -18,29 +18,25 @@ export const baseTemplate = (address: string, mailId: string, loan: any) => {
               text-align: left;
               padding: 24px 40px 8px 40px;
               border-bottom: 2px solid #2c3e50;
-              display: flex;
-              justify-content: space-between;
-              align-items: flex-start;
             }
             .header .firm {
-              font-size: 28px;
+              font-size: 26px;
               font-weight: bold;
               color: #1a237e;
               letter-spacing: 1px;
-            }
-            .header .subtitle {
-              color: #1976d2;
-              font-style: italic;
-              font-size: 18px;
               margin-bottom: 8px;
             }
-            .header .address {
+            .header .addr-row {
+              display: flex;
+              justify-content: space-between;
+              align-items: baseline;
               font-size: 14px;
               margin-bottom: 4px;
             }
-            .header .contact {
-              font-size: 14px;
+            .header .addr-row .contact {
               text-align: right;
+              white-space: nowrap;
+              padding-left: 24px;
             }
             .logo {
               display: block;
@@ -119,7 +115,7 @@ export const baseTemplate = (address: string, mailId: string, loan: any) => {
             .section-table th {
               background: #f5f5f5;
               font-weight: bold;
-              text-align: center; 
+              text-align: center;
               width: 220px;
             }
             .highlight {
@@ -156,14 +152,14 @@ export const baseTemplate = (address: string, mailId: string, loan: any) => {
       </head>
       <body>
         <div class="header">
-          <div>
-            <div class="firm">KOWTHA & CO.</div>
-            <div class="subtitle">CHARTERED ACCOUNTANTS</div>
-            <div class="address">${address}</div>
+          <div class="firm">Anifdat Solutions Private Limited</div>
+          <div class="addr-row">
+            <span>24-2-1, Ground Floor, Varun Enclave, NRP Road,</span>
+            <span class="contact">(M) 8332037517</span>
           </div>
-          <div class="contact">
-            Mobile no: 8332037517<br>
-            Mail ID: ${mailId}
+          <div class="addr-row">
+            <span>Gandhinagar, VIJAYAWADA &ndash; 3.</span>
+            <span class="contact">Mail ID: marketing@anifdat.co.in</span>
           </div>
         </div>
 
