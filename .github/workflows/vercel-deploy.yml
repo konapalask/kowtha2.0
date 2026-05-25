@@ -1,5 +1,4 @@
 name: Deploy to Vercel
-
 on:
   push:
     branches:
@@ -7,15 +6,39 @@ on:
       - development
     paths:
       - 'apps/web/**'
-      
+
 jobs:
   deploy:
+    name: Deploy to Vercel
     runs-on: ubuntu-latest
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     steps:
-      - name: Deploy to Vercel (prod)
-        if: github.ref == 'refs/heads/main'
-        run: curl -X POST "${{ secrets.VERCEL_PROD_HOOK }}"
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      - name: Deploy to Vercel (development)
+      - name: Override git author
+        run: |
+          git config user.email "admin@beyondscale.tech"
+          git config user.name "BeyondScale Admin"
+          git commit --amend --reset-author --no-edit
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+
+      - name: Pull Vercel config (production)
+        if: github.ref == 'refs/heads/main'
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Pull Vercel config (preview)
         if: github.ref == 'refs/heads/development'
-        run: curl -X POST "${{ secrets.VERCEL_DEV_HOOK }}"
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to Vercel (production)
+        if: github.ref == 'refs/heads/main'
+        run: vercel deploy --yes --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to Vercel (preview)
+        if: github.ref == 'refs/heads/development'
+        run: vercel deploy --yes --token=${{ secrets.VERCEL_TOKEN }}
