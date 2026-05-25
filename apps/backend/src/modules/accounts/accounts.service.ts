@@ -49,19 +49,35 @@ export class AccountsService {
   private async sendOTPViaSMS(mobile: string, otp: string): Promise<void> {
     try {
       const fast2smsApiKey = process.env.FAST2SMS_API_KEY;
+      const smsEndpoint = process.env.SMS_API_ENDPOINT;
+      const smsRoute = process.env.SMS_ROUTE;
+      const smsSenderId = process.env.SMS_DLT_SENDER_ID;
+      const smsMessageId = process.env.SMS_DLT_MESSAGE_ID;
 
-      if (!fast2smsApiKey) {
-        throw new Error('FAST2SMS_API_KEY is not configured');
+      const missing = [
+        ['FAST2SMS_API_KEY', fast2smsApiKey],
+        ['SMS_API_ENDPOINT', smsEndpoint],
+        ['SMS_ROUTE', smsRoute],
+        ['SMS_DLT_SENDER_ID', smsSenderId],
+        ['SMS_DLT_MESSAGE_ID', smsMessageId],
+      ]
+        .filter(([, v]) => !v)
+        .map(([k]) => k);
+
+      if (missing.length > 0) {
+        throw new Error(
+          `SMS configuration missing: ${missing.join(', ')}`
+        );
       }
 
       const org_name = 'Kowtha';
 
       const response = await axios.post(
-        'https://www.fast2sms.com/dev/bulkV2',
+        smsEndpoint,
         {
-          route: 'dlt',
-          sender_id: 'BYNSCL',
-          message: '166906',
+          route: smsRoute,
+          sender_id: smsSenderId,
+          message: smsMessageId,
           language: 'english',
           variables_values: `${org_name}|${otp}`,
           flash: 0,
@@ -144,8 +160,8 @@ export class AccountsService {
         },
       });
 
-      // Send OTP via Fast2SMS
-      if(process.env.NODE_ENV === 'production'){
+      // Send OTP via Fast2SMS (production only)
+      if (process.env.NODE_ENV === 'production') {
         await this.sendOTPViaSMS(mobile, otp);
       }
 
