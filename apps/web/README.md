@@ -71,7 +71,7 @@ apps/web/
 - Excel file handling
 - Toast notifications
 
-## Development
+### Development
 
 The application uses:
 - ESLint for code linting
