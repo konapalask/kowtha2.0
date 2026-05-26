@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { LoggingService } from '../logging/logging.service';
+import { CloudFrontService } from './cloudfront.service';
 import { createCanvas, loadImage, Canvas, Image as CanvasImage, CanvasRenderingContext2D } from 'canvas';
 import fetch from 'node-fetch';
 import fs from 'fs';
@@ -15,7 +16,10 @@ export class S3Service {
   private readonly s3Client: S3Client;
   private readonly bucketName: string;
 
-  constructor(private loggingService: LoggingService) {
+  constructor(
+    private loggingService: LoggingService,
+    private cloudFrontService: CloudFrontService,
+  ) {
     this.s3Client = new S3Client({
       region: process.env.AWS_REGION || 'us-east-1',
       credentials: {
@@ -62,15 +66,10 @@ export class S3Service {
   
     try {
       await this.s3Client.send(command);
-  
-      const getCommand = new GetObjectCommand({
-        Bucket: this.bucketName,
-        Key: fileName,
-      });
 
-      const signedUrl = await getSignedUrl(this.s3Client, getCommand, { expiresIn: 3600 }); // URL expires in 1 hour
+      const signedUrl = this.cloudFrontService.getSignedImageUrl(fileName, 3600);
 
-      await this.loggingService.info('Generated presigned download URL', {
+      await this.loggingService.info('Generated CloudFront signed download URL for PDF', {
         fileName,
       });
 
@@ -86,20 +85,15 @@ export class S3Service {
 
   async generatePresignedDownloadUrl(path: string): Promise<string> {
     try {
-      const command = new GetObjectCommand({
-        Bucket: this.bucketName,
-        Key: path,
-      });
+      const signedUrl = this.cloudFrontService.getSignedImageUrl(path, 3600);
 
-      const signedUrl = await getSignedUrl(this.s3Client, command, { expiresIn: 3600 }); // URL expires in 1 hour
-
-      await this.loggingService.info('Generated presigned download URL', {
+      await this.loggingService.info('Generated CloudFront signed download URL', {
         path,
       });
 
       return signedUrl;
     } catch (error) {
-      await this.loggingService.error('Failed to generate presigned download URL', {
+      await this.loggingService.error('Failed to generate CloudFront signed download URL', {
         path,
         error: error.message,
       });
@@ -341,9 +335,8 @@ export class S3Service {
       });
     
       await this.s3Client.send(putCommand);
-    
-      // Return the same URL
-      return `https://${this.bucketName}.s3.amazonaws.com/${s3ImageUrl}`;
+
+      return this.cloudFrontService.getSignedImageUrl(s3ImageUrl, 3600);
     }
      catch (error) {
       await this.loggingService.error('Failed to process and upload image', {
@@ -408,6 +401,8 @@ export class S3Service {
 
 // Export standalone function for worker threads
 export async function processAndUploadImage(s3ImageUrl: string, latitude: number, longitude: number, timestamp: string): Promise<string> {
-  const s3Service = new S3Service(new LoggingService());
+  const loggingService = new LoggingService();
+  const cloudFrontService = new CloudFrontService();
+  const s3Service = new S3Service(loggingService, cloudFrontService);
   return s3Service.processAndUploadImage(s3ImageUrl, latitude, longitude, timestamp);
-} 
+}

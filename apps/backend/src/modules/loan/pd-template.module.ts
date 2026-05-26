@@ -6,11 +6,10 @@ import { LoanModule } from './loan.module';
 import { PrismaService } from 'src/prisma.service';
 import { LoggingService } from '../common/logging/logging.service';
 import { LoanService } from './loan.service';
-import { S3Service } from '../common/s3utils/s3.service';
 
 @Module({
   imports: [LoggingModule, S3Module, forwardRef(() => LoanModule)],
-  providers: [PDTemplateService, PrismaService, LoggingService, LoanService, S3Service, Logger],
+  providers: [PDTemplateService, PrismaService, LoggingService, LoanService, Logger],
   exports: [PDTemplateService],
 })
 export class PDTemplateModule {} 
