@@ -194,6 +194,10 @@ export const postponementFollowUpApplicantApi = (loanId: number) => {
   return postWithDepartment(`/loans/${loanId}/follow-up/applicant`);
 };
 
+export const notifyFeVisitTodayApi = (loanId: number) => {
+  return postWithDepartment(`/loans/${loanId}/notify-fe-visit-today`);
+};
+
 export const returnToVeApi = (
   loanId: number,
   verificationType: string,

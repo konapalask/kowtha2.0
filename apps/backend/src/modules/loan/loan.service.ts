@@ -610,7 +610,12 @@ export class LoanService implements OnModuleDestroy {
         );
       }
 
-      return await this.prisma.$transaction(async (prisma) => {
+      const existingVerificationCount = await this.prisma.verification.count({
+        where: { loanId },
+      });
+      const isFirstFeAssignmentForLoan = existingVerificationCount === 0;
+
+      const result = await this.prisma.$transaction(async (prisma) => {
         let verificationData = await prisma.verification.create({
           data: {
             loan: { connect: { id: loan.id } },
@@ -649,6 +654,27 @@ export class LoanService implements OnModuleDestroy {
 
         return verificationData;
       });
+
+      if (
+        isFirstFeAssignmentForLoan &&
+        loan.department === Department.PD &&
+        loan.applicantMobile
+      ) {
+        try {
+          await this.dispatchFeVisitTodaySms(
+            loanId,
+            loan.applicantMobile,
+            "auto_on_assignment"
+          );
+        } catch (smsError) {
+          await this.loggingService.error(
+            "Auto FE-visit-today SMS failed (assignment still succeeded)",
+            { loanId, error: smsError?.message }
+          );
+        }
+      }
+
+      return result;
     } catch (error) {
       if ( error instanceof NotFoundException || error instanceof BadRequestException ) {
         throw error;
@@ -3069,6 +3095,73 @@ export class LoanService implements OnModuleDestroy {
     return ok
       ? { success: true, message: "Follow-up SMS sent to applicant" }
       : { success: false, message: "Failed to send follow-up SMS" };
+  }
+
+  private async dispatchFeVisitTodaySms(
+    loanId: number,
+    mobile: string,
+    trigger: "manual" | "auto_on_assignment"
+  ): Promise<boolean> {
+    const templateId = process.env.SMS_DLT_FE_VISIT_TODAY_MESSAGE_ID;
+    if (!templateId) {
+      await this.loggingService.warn(
+        "FE-visit-today template id not configured; skipping SMS",
+        { loanId, trigger }
+      );
+      return false;
+    }
+    const smsUtils = new SMSUtils(this.loggingService);
+    return smsUtils.sendDltTemplate(mobile, templateId, "Kowtha & Co.", {
+      loanId,
+      purpose: "fe_visit_today",
+      trigger,
+    });
+  }
+
+  async sendFeVisitTodayNotificationToApplicant(
+    loanId: number
+  ): Promise<{ success: boolean; message: string }> {
+    const loan = await this.prisma.loan.findUnique({
+      where: { id: loanId, department: Department.PD },
+      include: {
+        verifications: {
+          where: { status: VerificationStatus.Pending },
+        },
+      },
+    });
+
+    if (!loan) {
+      throw new NotFoundException("Loan not found");
+    }
+    if (!loan.verifications || loan.verifications.length === 0) {
+      throw new BadRequestException(
+        "No pending verification on this loan"
+      );
+    }
+    if (!loan.applicantMobile) {
+      return {
+        success: false,
+        message: "No mobile number on file for applicant",
+      };
+    }
+
+    if (!process.env.SMS_DLT_FE_VISIT_TODAY_MESSAGE_ID) {
+      return {
+        success: false,
+        message:
+          "FE-visit-today SMS template is not configured (SMS_DLT_FE_VISIT_TODAY_MESSAGE_ID)",
+      };
+    }
+
+    const ok = await this.dispatchFeVisitTodaySms(
+      loanId,
+      loan.applicantMobile,
+      "manual"
+    );
+
+    return ok
+      ? { success: true, message: "FE-visit-today SMS sent to applicant" }
+      : { success: false, message: "Failed to send FE-visit-today SMS" };
   }
 
   async createPDEmailLog(data: CreatePDEmailLogDto) {

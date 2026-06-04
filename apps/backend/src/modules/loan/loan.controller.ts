@@ -302,6 +302,24 @@ export class LoanController {
     };
   }
 
+  @Post(":id/notify-fe-visit-today")
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
+  @ApiOperation({
+    summary:
+      "Send a 'field executive will visit today' SMS to the applicant",
+  })
+  async notifyFeVisitToday(@Param("id") loanId: string) {
+    const result =
+      await this.loanService.sendFeVisitTodayNotificationToApplicant(
+        Number(loanId)
+      );
+    return {
+      status: 200,
+      success: result.success,
+      message: result.message,
+    };
+  }
+
   @Post(":id/return-to-ve")
   @Roles(UserRole.Admin, UserRole.Verifier)
   @ApiOperation({

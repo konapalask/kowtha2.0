@@ -27,6 +27,7 @@ import {
   assignExecutivesApi,
   deleteFieldAssignmentApi,
   getLoansByIdApi,
+  notifyFeVisitTodayApi,
   postponementFollowUpApplicantApi,
   postponementFollowUpBankApi,
   reassignLoanApi,
@@ -261,14 +262,23 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
 
   const [notifyBankLoading, setNotifyBankLoading] = useState(false);
   const [notifyApplicantLoading, setNotifyApplicantLoading] = useState(false);
+  const [feVisitTodayLoading, setFeVisitTodayLoading] = useState(false);
 
   const isLoanPostponed = (loanDetails?.verifications ?? []).some(
     (v: any) => v?.isPostponed === true && v?.status === "Pending"
   );
+  const hasPendingAssignedFe = (loanDetails?.verifications ?? []).some(
+    (v: any) =>
+      v?.status === "Pending" &&
+      (v?.fieldExecutiveId ?? v?.fieldExecutive?.id) != null
+  );
   const currentRole = getCurrentDepartmentRole();
-  const canFollowUp =
-    isLoanPostponed &&
-    (currentRole === "Admin" || currentRole === "OperationsExecutive");
+  const isAdminOrOps =
+    currentRole === "Admin" || currentRole === "OperationsExecutive";
+  const isPdContext = currentDepartment === "PD";
+  const canFollowUp = isPdContext && isLoanPostponed && isAdminOrOps;
+  const canNotifyFeVisitToday =
+    isPdContext && hasPendingAssignedFe && isAdminOrOps;
 
   const handleNotifyBank = async () => {
     if (!loanDetails?.id) return;
@@ -287,6 +297,26 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
       );
     } finally {
       setNotifyBankLoading(false);
+    }
+  };
+
+  const handleNotifyFeVisitToday = async () => {
+    if (!loanDetails?.id) return;
+    setFeVisitTodayLoading(true);
+    try {
+      const res = await notifyFeVisitTodayApi(loanDetails.id);
+      const { success, message: msg } = res?.data ?? {};
+      if (success) {
+        message.success(msg || "FE-visit-today SMS sent to applicant");
+      } else {
+        message.error(msg || "Failed to send FE-visit-today SMS");
+      }
+    } catch (error: any) {
+      message.error(
+        error?.response?.data?.message || "Failed to send FE-visit-today SMS"
+      );
+    } finally {
+      setFeVisitTodayLoading(false);
     }
   };
 
@@ -385,6 +415,15 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
         destroyOnClose
         footer={
           <div className="flex-end">
+            {canNotifyFeVisitToday && (
+              <Button
+                onClick={handleNotifyFeVisitToday}
+                loading={feVisitTodayLoading}
+                style={{ marginRight: 8 }}
+              >
+                Notify Applicant (FE Visit Today)
+              </Button>
+            )}
             {canFollowUp && (
               <>
                 <Button
@@ -392,14 +431,14 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                   loading={notifyBankLoading}
                   style={{ marginRight: 8 }}
                 >
-                  Notify Bank
+                  Notify Bank (Postponed)
                 </Button>
                 <Button
                   onClick={handleNotifyApplicant}
                   loading={notifyApplicantLoading}
                   style={{ marginRight: 8 }}
                 >
-                  Notify Applicant
+                  Notify Applicant (Postponed)
                 </Button>
               </>
             )}
