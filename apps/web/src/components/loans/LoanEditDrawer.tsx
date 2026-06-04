@@ -435,6 +435,9 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                 >
                   Notify Bank (Postponed)
                 </Button>
+                {/* Notify Applicant (Postponed) disabled until the DLT
+                    template is registered with Fast2SMS. Re-enable by
+                    uncommenting once SMSUtils sends via the DLT route.
                 <Button
                   onClick={handleNotifyApplicant}
                   loading={notifyApplicantLoading}
@@ -442,6 +445,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                 >
                   Notify Applicant (Postponed)
                 </Button>
+                */}
               </>
             )}
             <Button onClick={handleSaveAndClose} type="primary">
