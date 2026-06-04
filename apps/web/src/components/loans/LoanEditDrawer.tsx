@@ -272,11 +272,13 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
       v?.status === "Pending" &&
       (v?.fieldExecutiveId ?? v?.fieldExecutive?.id) != null
   );
+  const hasPdEmailLogs = (loanDetails?.pdEmailLogs ?? []).length > 0;
   const currentRole = getCurrentDepartmentRole();
   const isAdminOrOps =
     currentRole === "Admin" || currentRole === "OperationsExecutive";
   const isPdContext = currentDepartment === "PD";
-  const canFollowUp = isPdContext && isLoanPostponed && isAdminOrOps;
+  const canFollowUp =
+    isPdContext && isLoanPostponed && hasPdEmailLogs && isAdminOrOps;
   const canNotifyFeVisitToday =
     isPdContext && hasPendingAssignedFe && isAdminOrOps;
 
