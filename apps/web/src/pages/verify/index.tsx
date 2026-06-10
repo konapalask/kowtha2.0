@@ -409,6 +409,20 @@ export default function Verify() {
               <CheckOutlined style={{ color: "red" }} /> Completed - Negative
             </div>
 
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                backgroundColor: "#f6ffed",
+                borderLeft: "3px solid #52c41a",
+                padding: "4px 10px",
+                borderRadius: 2,
+              }}
+            >
+              Closed Loan
+            </div>
+
             {/* <Badge color="green" text="Investigations completed" /> */}
             {/* <Tag color="green">Investigations Completed</Tag> */}
             {/* <Badge color="orange" text="In Progress" />
@@ -422,6 +436,9 @@ export default function Verify() {
           dataSource={loans}
           rowKey={(record) =>
             record?.id?.toString() ?? Math.random().toString()
+          }
+          rowClassName={(record) =>
+            record?.closedAt ? "closed-loan-row" : ""
           }
           loading={loading}
           pagination={paginationConfig}

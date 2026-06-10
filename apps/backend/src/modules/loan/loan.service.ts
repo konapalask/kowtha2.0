@@ -1372,12 +1372,18 @@ export class LoanService implements OnModuleDestroy {
         escCsv(loan.operationsExecutive?.name),
         escCsv(
           loan.createdAt
-            ? new Date(loan.createdAt).toISOString().slice(0, 10)
+            ? new Date(loan.createdAt)
+                .toISOString()
+                .slice(0, 16)
+                .replace("T", " ")
             : ""
         ),
         escCsv(
           loan.closedAt
-            ? new Date(loan.closedAt).toISOString().slice(0, 10)
+            ? new Date(loan.closedAt)
+                .toISOString()
+                .slice(0, 16)
+                .replace("T", " ")
             : ""
         ),
       ];

@@ -336,6 +336,15 @@ body {
   background-color: #f6fafc;
 }
 
+/* Highlight loans that have been closed (final report generated) */
+.striped-table .ant-table-tbody > tr.closed-loan-row > td {
+  background-color: #f6ffed;
+}
+
+.striped-table .ant-table-tbody > tr.closed-loan-row > td:first-child {
+  border-left: 3px solid #52c41a;
+}
+
 /* .striped-table thead {
   background-color: #f1f1f1;
 } */

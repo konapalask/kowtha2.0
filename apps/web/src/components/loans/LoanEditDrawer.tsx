@@ -38,6 +38,9 @@ import {
   getUserDetails,
 } from "@/utils/utility";
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+
+dayjs.extend(utc);
 
 interface LoanDetails {
   id: number;
@@ -560,6 +563,16 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                   {currentDepartment === "PD" && loanDetails?.branch && (
                     <Descriptions.Item label="Branch">
                       {loanDetails.branch}
+                    </Descriptions.Item>
+                  )}
+                  {loanDetails?.createdAt && (
+                    <Descriptions.Item label="Case Initiated">
+                      {dayjs.utc(loanDetails.createdAt).format("DD-MM-YYYY HH:mm")}
+                    </Descriptions.Item>
+                  )}
+                  {loanDetails?.closedAt && (
+                    <Descriptions.Item label="Closed">
+                      {dayjs.utc(loanDetails.closedAt).format("DD-MM-YYYY HH:mm")}
                     </Descriptions.Item>
                   )}
                 </Descriptions>
