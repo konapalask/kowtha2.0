@@ -933,7 +933,12 @@ export default function Loans() {
                 title="Export Loans"
                 trigger="click"
                 open={exportPopoverOpen}
-                onOpenChange={setExportPopoverOpen}
+                onOpenChange={(open) => {
+                  setExportPopoverOpen(open);
+                  if (!open) {
+                    setExportFilters({});
+                  }
+                }}
                 content={
                   <div style={{ width: 280 }}>
                     <Space
@@ -950,6 +955,7 @@ export default function Loans() {
                         </Typography.Text>
                         <DatePicker.RangePicker
                           style={{ width: "100%" }}
+                          format="DD-MM-YYYY"
                           value={
                             exportFilters.startDate && exportFilters.endDate
                               ? [
