@@ -2,7 +2,7 @@ import { Controller, Post, Get, Body, Param, UseGuards, Query } from '@nestjs/co
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { S3Service } from './s3.service';
 import { JwtAuthGuard } from '../../accounts/jwt-auth.guard';
-import { PutBucketInventoryConfigurationRequestFilterSensitiveLog } from '@aws-sdk/client-s3';
+//import { PutBucketInventoryConfigurationRequestFilterSensitiveLog } from '@aws-sdk/client-s3';
 
 @ApiTags('s3')
 @Controller('s3')
