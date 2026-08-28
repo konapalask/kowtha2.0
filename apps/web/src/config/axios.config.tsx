@@ -5,19 +5,16 @@ import {
   extractDomainFromUrl,
   getCookie,
   setCookie,
-  setItem,
 } from "../helpers/localStorage";
 import {
   ACCESS_TOKEN,
-  ACTIVEDOMAIN,
   REFRESH_TOKEN,
 } from "../constants/defaultKeys";
-// import { getTokenIfNotExpired } from "../helpers/utility";
-// import { redirectToDashboard } from "../components/Auth/helper";
 import customToast from "../blocks/CustomToast";
+import { API_BASE_URL, DOMAIN_BASE_URL, DOMAIN } from "./env";
 
 const axiosConfig = {
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+  baseURL: API_BASE_URL,
   headers: {
     Accept: "application/json",
     "Content-Type": "application/json",
@@ -41,7 +38,7 @@ axiosInstance.interceptors.request.use((config) => {
 const handleLogout = () => {
   clear();
   clearAllCookies();
-  window.location.replace(`${process.env.NEXT_PUBLIC_DOMAIN_BASE_URL}/logout`);
+  window.location.replace(`/login`);
 };
 
 axiosInstance.interceptors.response.use(
@@ -57,10 +54,10 @@ axiosInstance.interceptors.response.use(
     const tokenInvalid = "Unauthorized";
     const accountNotFound = "UNAUTHORIZED_USER";
 
-    console.log(error)
+    console.log(error);
 
     // Prevent infinite loops
-    if (errorStatusCode === 401 && originalRequest.url === refreshTokenApi) {
+    if (errorStatusCode === 401 && originalRequest?.url?.includes(refreshTokenApi)) {
       handleLogout();
       return Promise.reject(error);
     }
@@ -74,14 +71,10 @@ axiosInstance.interceptors.response.use(
     // Triggers when user session is expired
     if (errorMessage === tokenInvalid && errorStatusCode === 401) {
       const refreshToken = getCookie(REFRESH_TOKEN);
-      if(!refreshToken){
-        console.log("whooo")
-        handleLogout()
+      if (!refreshToken) {
+        handleLogout();
+        return Promise.reject(error);
       }
-      const mainDomainUrl = process.env.NEXT_PUBLIC_DOMAIN_BASE_URL;
-      const mainDomain = mainDomainUrl
-        ? extractDomainFromUrl(mainDomainUrl)
-        : "";
 
       if (refreshToken) {
         const regex = new RegExp(
@@ -89,49 +82,42 @@ axiosInstance.interceptors.response.use(
         );
 
         if (regex.test(refreshToken)) {
-          const tokenParts = JSON.parse(atob(refreshToken.split(".")[1]));
-          const now = Math.ceil(Date.now() / 1000);
+          try {
+            const tokenParts = JSON.parse(atob(refreshToken.split(".")[1]));
+            const now = Math.ceil(Date.now() / 1000);
 
-          // Triggers if refresh token is not expired
-          if (tokenParts.exp > now) {
-            try {
+            // Triggers if refresh token is not expired
+            if (tokenParts.exp > now) {
               const response = await axios.post(
-                `${process.env.NEXT_PUBLIC_API_BASE_URL}${refreshTokenApi}`,
+                `${API_BASE_URL}${refreshTokenApi.replace(/^\//, '')}`,
                 { refresh_token: refreshToken }
               );
 
               setCookie(
                 ACCESS_TOKEN,
                 response?.data?.accessToken,
-                `.${process.env.NEXT_PUBLIC_DOMAIN}`,
+                `.${DOMAIN}`,
                 "/"
               );
 
               return axiosInstance(originalRequest);
-            } catch (refreshError) {
-              console.error("Token refresh failed:", refreshError);
+            } else {
               handleLogout();
-              return Promise.reject(refreshError);
+              customToast({
+                type: "error",
+                message: "Your session has expired, please login again",
+              });
+              return Promise.reject(error);
             }
-          } else {
+          } catch (refreshError) {
+            console.error("Token refresh failed:", refreshError);
             handleLogout();
-            customToast({
-              type: "error",
-              message: "Your session has been expired, please login again",
-            });
-            return Promise.reject(error);
+            return Promise.reject(refreshError);
           }
         } else {
           handleLogout();
           return Promise.reject(error);
         }
-      } else {
-        handleLogout();
-        customToast({
-          type: "error",
-          message: "Your session has been expired, please login again",
-        });
-        return Promise.reject(error);
       }
     }
 

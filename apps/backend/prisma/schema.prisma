@@ -20,6 +20,9 @@ model User {
   deviceId                 String?
   locality                 String?
   defaultDepartment        Department?
+  password                 String?
+  isPasswordChanged        Boolean               @default(false)
+  passwordChangedAt        DateTime?
   attendances              Attendance[]          @relation("UserAttendance")
   departmentRoles          DepartmentRole[]      @relation("UserDepartmentRole")
   editRequestsApproved     EditRequest[]         @relation("EditRequestApprover")

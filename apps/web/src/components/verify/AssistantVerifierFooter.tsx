@@ -1,7 +1,7 @@
 import { Button, message, Modal } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
 import React, { useEffect, useState } from "react";
-import { useRouter } from "next/router";
+import { useRouter } from "@/utils/router";
 import { useTabContext } from "@/pages/verify/[id]";
 import { generatePreviewReport } from "@/services/verifier.services";
 

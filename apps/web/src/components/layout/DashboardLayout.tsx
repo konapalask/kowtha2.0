@@ -12,7 +12,6 @@ import {
   message,
   Tooltip,
 } from "antd";
-import { useRouter } from "next/router";
 import {
   DashboardOutlined,
   FileOutlined,
@@ -26,12 +25,10 @@ import {
   UserOutlined,
   SwapOutlined,
 } from "@ant-design/icons";
-import Link from "next/link";
 import { useState, useEffect } from "react";
-import Image from "next/image";
-import logo from "../../../public/images/appLogos/KowthaDarkIcon.png";
-import smallLogo from "../../../public/images/appLogos/kowthaSmallLogo.png";
-// import attendanceIcon from "../../../public/images/svgIcons/attendance.svg";
+import { useRouter, Link, Image } from "@/utils/router";
+const logo = "/images/appLogos/KowthaDarkIcon.png";
+const smallLogo = "/images/appLogos/kowthaSmallLogo.png";
 import { getOfficesApi } from "@/services/settings.services";
 import {
   getUserDetails,
@@ -430,25 +427,31 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   // Removed dropdown menu - profile avatar will directly open modal
 
   return (
-    <Layout style={{ minHeight: "100vh", fontFamily: "Noto Sans, sans-serif" }}>
+    <Layout style={{ minHeight: "100vh" }}>
       <Sider
-        theme="light"
         collapsible
         collapsed={collapsed}
         onCollapse={setCollapsed}
+        width={250}
+        collapsedWidth={80}
+        theme="light"
         style={{
-          boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-          background: "var(--background-primary)",
+          background: "#ffffff",
+          borderRight: "1px solid #eef2f6",
+          position: "sticky",
+          top: 0,
+          height: "100vh",
+          zIndex: 100,
         }}
       >
         <div
           style={{
-            height: "64px",
+            height: "70px",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            borderBottom: "1px solid var(--neutral-200)",
-            fontFamily: "Noto Sans, sans-serif",
+            borderBottom: "1px solid #f1f5f9",
+            padding: "0 16px",
           }}
         >
           {collapsed ? (
@@ -456,8 +459,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               loading="lazy"
               src={smallLogo}
               alt="Kowtha Logo"
-              width={120}
-              height={60}
+              width={42}
+              height={42}
               style={{ objectFit: "contain" }}
             />
           ) : (
@@ -465,69 +468,83 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               loading="lazy"
               src={logo}
               alt="Kowtha Logo"
-              width={120}
-              height={60}
+              width={160}
+              height={42}
               style={{ objectFit: "contain" }}
             />
           )}
         </div>
-        <Menu
-          mode="inline"
-          selectedKeys={[router.pathname.split("/")[1] || "dashboard"]}
-          items={menuItems}
-          style={{ fontFamily: "Noto Sans, sans-serif", fontWeight: 500 }}
-        />
+        <div style={{ padding: "12px 8px" }}>
+          <Menu
+            mode="inline"
+            selectedKeys={[router.pathname.split("/")[1] || "dashboard"]}
+            items={menuItems}
+            style={{
+              background: "transparent",
+              borderRight: 0,
+              fontWeight: 500,
+              fontSize: 13.5,
+            }}
+          />
+        </div>
       </Sider>
-      <Layout>
+      <Layout style={{ background: "#f8fafc" }}>
         <Header
           style={{
-            background: "var(--background-primary)",
-            padding: "0 24px",
+            background: "rgba(255, 255, 255, 0.92)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+            padding: "0 28px",
+            height: "70px",
             display: "flex",
-            justifyContent: "flex-end", // align items to the left
+            justifyContent: "flex-end",
             alignItems: "center",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-            fontFamily: "Noto Sans, sans-serif",
+            borderBottom: "1px solid #eef2f6",
+            boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.02)",
+            position: "sticky",
+            top: 0,
+            zIndex: 90,
           }}
         >
-          {/* <Button
-            type="text"
-            icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-            onClick={() => setCollapsed(!collapsed)}
-            style={{ fontSize: "16px", color: "var(--primary-800)" }}
-          /> */}
-          <Space>
-            {/* Current Department and Branch Display */}
+          <Space size={20}>
+            {/* Current Department and Branch Badge */}
             {currentDept && (
-              <Space>
-                <Text style={{ fontWeight: 600, color: "var(--primary-800)" }}>
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                  background: "#f0f7ff",
+                  border: "1px solid #d2e2f1",
+                  padding: "5px 14px",
+                  borderRadius: "9999px",
+                }}
+              >
+                <Badge color="#0B2545" />
+                <Text style={{ fontWeight: 700, color: "#0B2545", fontSize: 13 }}>
                   {currentDept}
                 </Text>
                 {currentBranchName && (
-                  <Text
-                    style={{ fontWeight: 500, color: "var(--neutral-600)" }}
-                  >
-                    - {currentBranchName}
+                  <Text style={{ fontWeight: 500, color: "#64748B", fontSize: 12.5 }}>
+                    • {currentBranchName}
                   </Text>
                 )}
-                {userDetails?.departmentRoles &&
-                  userDetails.departmentRoles.length > 1 && (
-                    <Tooltip title="Change Current Department">
-                      <Button
-                        type="text"
-                        icon={<SwapOutlined />}
-                        onClick={handleChangeDepartment}
-                        style={{
-                          color: "var(--primary-800)",
-                          fontSize: "16px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      />
-                    </Tooltip>
-                  )}
-              </Space>
+                {userDetails?.departmentRoles && userDetails.departmentRoles.length > 1 && (
+                  <Tooltip title="Switch Department">
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<SwapOutlined style={{ fontSize: 13, color: "#0B2545" }} />}
+                      onClick={handleChangeDepartment}
+                      style={{
+                        padding: "0 4px",
+                        height: 20,
+                        marginLeft: 4,
+                      }}
+                    />
+                  </Tooltip>
+                )}
+              </div>
             )}
 
             {getCurrentDepartmentRole() === "Admin" && (
@@ -542,36 +559,36 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                           <div
                             key={req.id}
                             style={{
-                              border: "1px solid #eee",
+                              border: "1px solid #f1f5f9",
                               borderRadius: 8,
                               marginBottom: 10,
-                              padding: 10,
-                              background: "#fff",
-                              boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+                              padding: 12,
+                              background: "#ffffff",
+                              boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
                             }}
                           >
-                            <div style={{ fontWeight: 600, marginBottom: 4 }}>
+                            <div style={{ fontWeight: 600, marginBottom: 4, fontSize: 13 }}>
                               {req.type || "Edit Request"} -{" "}
                               <span
                                 style={{
                                   color:
                                     req.status === "Pending"
-                                      ? "#faad14"
+                                      ? "#d97706"
                                       : req.status === "Approved"
-                                        ? "#52c41a"
-                                        : "#ff4d4f",
+                                      ? "#059669"
+                                      : "#dc2626",
                                 }}
                               >
                                 {req.status}
                               </span>
                             </div>
-                            <div style={{ fontSize: 13, color: "#555" }}>
+                            <div style={{ fontSize: 12.5, color: "#475569" }}>
                               {req.applicantName ||
                                 req.requester?.name ||
                                 req.requester?.employeeCode ||
                                 "-"}
                             </div>
-                            <div style={{ fontSize: 12, color: "#888" }}>
+                            <div style={{ fontSize: 11.5, color: "#94a3b8", marginTop: 2 }}>
                               {new Date(
                                 req.createdAt || req.requestedAt
                               ).toLocaleString()}
@@ -582,17 +599,18 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     ) : (
                       <div
                         style={{
-                          color: "#888",
+                          color: "#94a3b8",
                           textAlign: "center",
                           padding: 16,
+                          fontSize: 13,
                         }}
                       >
-                        No requests
+                        No pending requests
                       </div>
                     )}
                     <div
                       style={{
-                        borderTop: "1px solid #eee",
+                        borderTop: "1px solid #f1f5f9",
                         marginTop: 8,
                         paddingTop: 8,
                         textAlign: "center",
@@ -600,9 +618,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     >
                       <a
                         href="/edit-requests"
-                        style={{ color: "#1677ff", fontWeight: 500 }}
+                        style={{ color: "#0B2545", fontWeight: 600, fontSize: 13 }}
                       >
-                        View all requests
+                        View all requests →
                       </a>
                     </div>
                   </div>
@@ -610,96 +628,85 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               >
                 <Badge
                   count={requestData?.length || 0}
-                  style={{ marginRight: 20, fontSize: 10 }}
+                  style={{ backgroundColor: "#0B2545" }}
                   size="small"
                 >
-                  <span style={{ cursor: "pointer", marginRight: 20 }}>
-                    <NotificationOutlined style={{ fontSize: 18 }} />
-                  </span>
+                  <Button
+                    type="text"
+                    shape="circle"
+                    icon={<NotificationOutlined style={{ fontSize: 18, color: "#475569" }} />}
+                  />
                 </Badge>
               </Popover>
             )}
-            {/* Removed default office display - now showing department-specific branch name */}
-            <Text style={{ fontWeight: 500 }}>
+
+            <Text style={{ fontWeight: 600, color: "#64748B", fontSize: 13 }}>
               {currentTime.toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
               })}
             </Text>
 
-            {/* <Text style={{ fontWeight: 500 }}>
-              {currentBranchName || "Loading..."}
-            </Text> */}
-            <Avatar
-              onClick={handleSettingsClick}
-              style={{
-                backgroundColor: "var(--primary-400)",
-                color: "#fff",
-                fontWeight: 700,
-                boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
-                fontSize: 18,
-                borderRadius: "50%",
-                cursor: "pointer",
-              }}
-              size={40}
-            >
-              {initials}
-            </Avatar>
+            {/* Profile Avatar Trigger */}
+            <Tooltip title="User Profile & Settings">
+              <Avatar
+                onClick={handleSettingsClick}
+                style={{
+                  background: "linear-gradient(135deg, #0B2545 0%, #134074 100%)",
+                  color: "#ffffff",
+                  fontWeight: 700,
+                  boxShadow: "0 2px 8px rgba(11, 37, 69, 0.25)",
+                  fontSize: 15,
+                  cursor: "pointer",
+                  border: "2px solid #ffffff",
+                }}
+                size={38}
+              >
+                {initials}
+              </Avatar>
+            </Tooltip>
           </Space>
         </Header>
         <Content
           style={{
             margin: 0,
-            padding: 16,
-            background: "#f5f5f5",
-            fontFamily: "Noto Sans, sans-serif",
+            padding: "24px 28px",
+            background: "#f8fafc",
+            minHeight: "calc(100vh - 70px)",
           }}
         >
           {children}
         </Content>
       </Layout>
-      <style jsx global>{`
-        @import url("https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700&display=swap");
-        body,
-        html,
-        * {
-          font-family: "Noto Sans", sans-serif !important;
-        }
-        :root {
-          --ant-primary-color: var(--primary-800);
-        }
-        .ant-btn-primary {
-          background: var(--primary-800) !important;
-          border-color: var(--primary-800) !important;
-        }
-        .ant-btn-primary:hover,
-        .ant-btn-primary:focus {
-          background: var(--primary-700) !important;
-          border-color: var(--primary-700) !important;
+      <style>{`
+        .ant-menu-item {
+          border-radius: 8px !important;
+          margin: 4px 0 !important;
+          padding: 0 16px !important;
+          transition: all 0.2s ease !important;
         }
         .ant-menu-item-selected {
-          background: var(--primary-50) !important;
-          color: var(--primary-800) !important;
-        }
-        .ant-menu-item:hover {
-          color: var(--primary-700) !important;
+          background: #f0f7ff !important;
+          color: #0B2545 !important;
+          font-weight: 600 !important;
         }
         .ant-menu-item-selected .anticon {
-          color: var(--primary-800) !important;
+          color: #0B2545 !important;
+        }
+        .ant-menu-item:hover {
+          background: #f8fafc !important;
+          color: #0B2545 !important;
         }
         .ant-layout-sider-trigger {
-          background: var(--primary-50) !important;
-          color: var(--primary-800) !important;
-          font-size: 20px !important;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          transition: background 0.3s;
+          background: #ffffff !important;
+          border-top: 1px solid #f1f5f9 !important;
+          border-right: 1px solid #eef2f6 !important;
+          color: #64748b !important;
+          font-size: 16px !important;
         }
-
         .ant-layout-sider-trigger:hover {
-          background: var(--primary-100) !important;
-          color: var(--primary-700) !important;
+          background: #f8fafc !important;
+          color: #0B2545 !important;
         }
       `}</style>
 

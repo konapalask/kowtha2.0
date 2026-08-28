@@ -1,8 +1,7 @@
+import React, { useState, useEffect, useRef } from "react";
 import { Radio, Card, Button, Select, Row, Col, message } from "antd";
 import { EditOutlined } from "@ant-design/icons";
-import dynamic from "next/dynamic";
-import { useState, useEffect, useRef } from "react";
-const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
+import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
 const customStyles = `
@@ -37,7 +36,7 @@ import {
   submitFinancialAnalysis,
   updateSynopsis,
 } from "@/services/verifier.services";
-import { useRouter } from "next/router";
+import { useRouter } from "@/utils/router";
 import { getItem } from "@/helpers/localStorage";
 import { USER_DETAILS } from "@/constants/defaultKeys";
 

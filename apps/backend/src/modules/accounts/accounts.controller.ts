@@ -17,10 +17,48 @@ import { CreateDepartmentRoleDto } from './dto/create-department-role.dto';
 import { UpdateDepartmentRoleDto } from './dto/update-department-role.dto';
 import { UpdateUserDepartmentRolesDto } from './dto/update-user-department-roles.dto';
 
+import { LoginWithPasswordDto } from './dto/login-with-password.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
+
 @ApiTags('accounts')
 @Controller('accounts')
 export class AccountsController {
   constructor(private readonly accountsService: AccountsService) {}
+
+  @Post('login')
+  @ApiOperation({ summary: 'Login with mobile/email and password' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'User successfully logged in',
+  })
+  async loginWithPassword(@Body() body: LoginWithPasswordDto) {
+    const result = await this.accountsService.loginWithPassword(
+      body.username,
+      body.password,
+      body.deviceId,
+      body.isMobile
+    );
+    return result;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('change-password')
+  @ApiOperation({ summary: 'Change current user password' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Password successfully changed',
+  })
+  async changePassword(
+    @Request() req: AuthenticatedRequest,
+    @Body() body: ChangePasswordDto
+  ) {
+    const result = await this.accountsService.changePassword(
+      req.user.id,
+      body.newPassword,
+      body.currentPassword
+    );
+    return result;
+  }
 
   @Post('otp/generate')
   @ApiOperation({ summary: 'Generate OTP for login' })

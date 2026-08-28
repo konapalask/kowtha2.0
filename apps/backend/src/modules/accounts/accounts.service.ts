@@ -1,5 +1,6 @@
 import axios from 'axios';
 import * as crypto from 'crypto';
+import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ListUsersDto } from './dto/list-users.dto';
 import { PrismaService } from '../../prisma.service';
@@ -386,6 +387,150 @@ export class AccountsService {
         mobile, 
         error: error.message,
         stack: error.stack 
+      });
+      throw error;
+    }
+  }
+
+  async loginWithPassword(
+    username: string,
+    pass: string,
+    deviceId?: string,
+    isMobile?: boolean
+  ): Promise<{ accessToken: string; refreshToken: string; isPasswordChanged: boolean; message: string }> {
+    try {
+      const cleanUsername = username.trim();
+      const user = await this.prisma.user.findFirst({
+        where: {
+          OR: [
+            { mobile: cleanUsername },
+            { email: cleanUsername }
+          ],
+          status: UserStatus.Active,
+        },
+      });
+
+      if (!user) {
+        throw new NotFoundException('Invalid credentials: User not found or inactive');
+      }
+
+      // Verify password
+      let isMatch = false;
+      if (user.password) {
+        isMatch = await bcrypt.compare(pass, user.password);
+      } else {
+        // Fallback default password if not migrated yet
+        if (pass === 'Kowtha@123') {
+          isMatch = true;
+        }
+      }
+
+      if (!isMatch) {
+        throw new UnauthorizedException('Invalid mobile/email or password');
+      }
+
+      const userRoles = await getUserWithDepartmentRoles(this.prisma, user.id);
+      const hasAnyActiveDepartment = userRoles?.departmentRoles?.some(r => r.status === UserStatus.Active);
+      if (!hasAnyActiveDepartment) {
+        throw new UnauthorizedException('Access denied: Your account is not active in any department');
+      }
+
+      // Check if user has FieldExecutive role in PD and FI (both)
+      const hasFieldExecutiveInPD = userRoles.departmentRoles.some(
+        r => r.role === UserRole.FieldExecutive && r.department === Department.PD && r.status === UserStatus.Active
+      );
+      const hasFieldExecutiveInFI = userRoles.departmentRoles.some(
+        r => r.role === UserRole.FieldExecutive && r.department === Department.FI && r.status === UserStatus.Active
+      );
+      const hasFieldExecutiveRole = hasFieldExecutiveInPD || hasFieldExecutiveInFI;
+
+      // Block password login for web only if user has FieldExecutive in both FI and PD
+      if (!isMobile && hasFieldExecutiveInPD && hasFieldExecutiveInFI) {
+        throw new BadRequestException(
+          'Field Executive cannot login here. Please contact admin.'
+        );
+      }
+
+      if (isMobile && !hasFieldExecutiveRole) {
+        throw new BadRequestException('Access denied: You are not authorized to login via mobile app');
+      }
+
+      if (deviceId) {
+        await this.prisma.user.update({
+          where: { id: user.id },
+          data: { deviceId },
+        });
+      }
+
+      const tokens = this.generateTokens(user.id);
+
+      await this.loggingService.info('Password login successful', {
+        userId: user.id,
+        mobile: user.mobile,
+      });
+
+      return {
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        isPasswordChanged: user.isPasswordChanged,
+        message: 'Login successful',
+      };
+    } catch (error) {
+      if (error instanceof UnauthorizedException || error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+      await this.loggingService.error('Failed password login', {
+        username,
+        error: error.message,
+      });
+      throw error;
+    }
+  }
+
+  async changePassword(
+    userId: number,
+    newPassword: string,
+    currentPassword?: string
+  ): Promise<{ message: string }> {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      // If user has existing password, verify currentPassword
+      if (user.password && currentPassword) {
+        const isCurrentMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isCurrentMatch) {
+          throw new BadRequestException('Incorrect current password');
+        }
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          password: hashedPassword,
+          isPasswordChanged: true,
+          passwordChangedAt: new Date(),
+        },
+      });
+
+      await this.loggingService.info('Password changed successfully', { userId });
+
+      return { message: 'Password updated successfully' };
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+      await this.loggingService.error('Failed to change password', {
+        userId,
+        error: error.message,
       });
       throw error;
     }

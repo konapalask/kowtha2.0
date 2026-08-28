@@ -1,6 +1,6 @@
-const isBrowser = typeof window !== 'undefined';
+import { DOMAIN, DOMAIN_BASE_URL } from "@/config/env";
 
-// console.log(isBrowser)
+const isBrowser = typeof window !== 'undefined';
 
 export const setItem = (key: string, value: string | object, isObject = false): void => {
   if (!isBrowser) return;
@@ -31,50 +31,43 @@ export function getCookie(cookieName: string): string | null {
   const cookies = document.cookie.split("; ");
   for (const cookie of cookies) {
     const [name, value] = cookie.split("=");
-    if (name === cookieName) {
+    if (name === cookieName && value !== undefined) {
       return decodeURIComponent(value);
     }
   }
-  return null; // Return null if the cookie is not found
+  return null;
+}
+
+export function setCookie(name: string, value: string, domain?: string, path = '/'): void {
+  if (!isBrowser) return;
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  const domainPart = isLocal ? '' : (domain ? `; domain=${domain}` : (DOMAIN ? `; domain=.${DOMAIN.replace(/^\./, '')}` : ''));
+  document.cookie = `${name}=${encodeURIComponent(value)}; path=${path}${domainPart}; max-age=2592000; SameSite=Lax`;
 }
 
 export function clearAllCookies(): void {
   if (!isBrowser) return;
   const cookies = document.cookie.split("; ");
-  const mainDomainUrl = process.env.NEXT_PUBLIC_DOMAIN_BASE_URL || '';
-  const mainDomain = extractDomainFromUrl(mainDomainUrl);
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  const domain = DOMAIN ? `.${DOMAIN.replace(/^\./, '')}` : '';
   for (const cookie of cookies) {
-    const [name, _] = cookie.split("=");
-    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC;domain=.${process.env.NEXT_PUBLIC_DOMAIN}; path=/`;
+    const [name] = cookie.split("=");
+    if (name) {
+      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+      if (!isLocal && domain) {
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=${domain}; path=/;`;
+      }
+    }
   }
 }
 
 export function extractDomainFromUrl(url: string): string | null {
-  // Use a regular expression to match and extract the domain
+  if (!url) return null;
   const match = url.match(
     /^(?:https?:\/\/)?(?:[^@/\n]+@)?(?:www\.)?([^:/\n]+)/i
   );
-
-  // Check if there was a match and return the domain
   if (match) {
     return match[1];
-  } else {
-    return null; // Return null if the URL is invalid or doesn't contain a domain
   }
-}
-
-export function setCookie(cookieName: string, cookieValue: string, domain: string, path: string): void {
-  if (!isBrowser) return;
-  document.cookie = `${cookieName}=${cookieValue}; domain=${domain}; path=${path}`;
-}
-
-export function deleteCookie(name: string, domain?: string): void {
-  if (!isBrowser) return;
-  const currentDomain = domain ? domain : window.location.hostname;
-  if (document.cookie.includes(name + "=")) {
-    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC;domain=.${currentDomain}; path=/`;
-    console.log("Cookie with name " + name + " has been removed.");
-  } else {
-    console.log("Cookie with name " + name + " does not exist.");
-  }
+  return null;
 }

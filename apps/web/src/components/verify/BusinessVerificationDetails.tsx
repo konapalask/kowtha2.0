@@ -80,7 +80,7 @@ const isCoordinateField = (fieldId: string): boolean => {
 import EditRequestLogs from "./EditRequestLogs";
 import Footer from "./Footer";
 import AssistantVerifierFooter from "./AssistantVerifierFooter";
-import { useRouter } from "next/router";
+import { useRouter } from "@/utils/router";
 import dayjs from "dayjs";
 
 import FinalVerdict from "./FinalVerdict";
@@ -108,7 +108,6 @@ import ExistingLoansDescription from "./Descriptions/ExistingLoansDescription";
 import ThirdPartyCheckDescription from "./Descriptions/ThirdPartyCheckDescription";
 import { USER_DETAILS } from "@/constants/defaultKeys";
 import { getItem } from "@/helpers/localStorage";
-import dynamic from "next/dynamic";
 
 // Date format conversion utilities
 const convertDDMMYYYYToYYYYMMDD = (dateString: string): string => {
@@ -5283,23 +5282,6 @@ export const BusinessVerificationDetails: React.FC<
                 autoSize={{ minRows: 1 }}
                 style={readonlyItemFieldStyle}
               />
-            </Form.Item>
-          );
-
-        case "boolean":
-          return (
-            <Form.Item
-              key={itemFieldId}
-              name={fieldKey}
-              label={itemField.label}
-            >
-              <Radio.Group
-                disabled={itemFieldReadOnly}
-                style={readonlyItemFieldStyle}
-              >
-                <Radio value={true}>Yes</Radio>
-                <Radio value={false}>No</Radio>
-              </Radio.Group>
             </Form.Item>
           );
 

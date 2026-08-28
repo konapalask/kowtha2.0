@@ -18,7 +18,9 @@
     "migrate-user": "npx ts-node --project tsconfig.json src/scripts/migration/export-user.ts",
     "load-data": "npx ts-node --project tsconfig.json src/scripts/deployment/load_data.ts",
     "add-users-pd": "npx ts-node --project tsconfig.json src/scripts/add-users-pd-prisma.ts",
-    "convert-csv": "npx ts-node --project tsconfig.json src/scripts/convert_csv_to_json.ts"
+    "convert-csv": "npx ts-node --project tsconfig.json src/scripts/convert_csv_to_json.ts",
+    "set-passwords": "npx ts-node --project tsconfig.json src/scripts/set-default-passwords.ts",
+    "generate-passwords-excel": "npx ts-node --project tsconfig.json src/scripts/generate-user-passwords-excel.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.810.0",

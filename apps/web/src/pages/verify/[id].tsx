@@ -1,6 +1,6 @@
 "use client";
 import { Drawer, Modal } from "antd";
-import { useRouter } from "next/router";
+import { useRouter } from "@/utils/router";
 import { useEffect, useState, createContext, useContext, useRef } from "react";
 import { Typography, message, Tabs } from "antd";
 // import DashboardLayout from "@/components/layout/DashboardLayout";

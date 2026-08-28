@@ -1,10 +1,10 @@
 import React from "react";
-import Image from "next/image";
+import { Image } from "@/utils/router";
 import { toast } from "react-toastify";
-import errorOutlined from "../../public/images/svgIcons/errorOutlined.svg";
-import successOutlined from "../../public/images/svgIcons/successOutlined.svg";
-import infoOutlined from "../../public/images/svgIcons/infoOutlined.svg";
-import warningOutlined from "../../public/images/svgIcons/warningOutlined.svg";
+const errorOutlined = "/images/svgIcons/errorOutlined.svg";
+const successOutlined = "/images/svgIcons/successOutlined.svg";
+const infoOutlined = "/images/svgIcons/infoOutlined.svg";
+const warningOutlined = "/images/svgIcons/warningOutlined.svg";
 
 type ToastType = "success" | "info" | "error" | "warning";
 

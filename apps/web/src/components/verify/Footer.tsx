@@ -9,7 +9,7 @@ import { sendPdEmailReplyApi, getLoansByIdApi, returnToVeApi, closeLoanApi } fro
 import { EyeOutlined, DownloadOutlined, MailOutlined, RollbackOutlined, CheckCircleOutlined } from "@ant-design/icons";
 import { Button, message, Modal, Popconfirm, Spin } from "antd";
 import dayjs from "dayjs";
-import { useRouter } from "next/router";
+import { useRouter } from "@/utils/router";
 import React, { useEffect, useState } from "react";
 import { getCurrentDepartment, getCurrentDepartmentRole } from "@/utils/utility";
 import DownloadAnimation from "./DownloadAnimation";

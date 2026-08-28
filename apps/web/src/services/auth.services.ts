@@ -17,21 +17,29 @@ interface VerifyOtpPayload {
 
 interface VerifyOtpResponse {
   [key: string]: any;
-  // data: {
-  //   accessToken: string;
-  //   refreshToken: string;
-  //   message?: string;
-  // };
-  // status: number;
-  // statusText: string;
-  // headers: {
-  //   "content-length": string;
-  //   "content-type": string;
-  // };
-  // config: any;
-  // request: {
-  //   url: string;
-  // };
+}
+
+export interface LoginWithPasswordPayload {
+  username: string;
+  password: string;
+  deviceId?: string;
+  isMobile?: boolean;
+}
+
+export interface LoginWithPasswordResponse {
+  accessToken: string;
+  refreshToken: string;
+  isPasswordChanged: boolean;
+  message?: string;
+}
+
+export interface ChangePasswordPayload {
+  currentPassword?: string;
+  newPassword: string;
+}
+
+export interface ChangePasswordResponse {
+  message: string;
 }
 
 export const generateOtpApi = (payload: GenerateOtpPayload) => {
@@ -43,6 +51,14 @@ export const generateOtpApi = (payload: GenerateOtpPayload) => {
 
 export const verifyOtpApi = (payload: VerifyOtpPayload) => {
   return axiosInstance.post<VerifyOtpResponse>("/accounts/otp/verify", payload);
+};
+
+export const loginWithPasswordApi = (payload: LoginWithPasswordPayload) => {
+  return axiosInstance.post<LoginWithPasswordResponse>("/accounts/login", payload);
+};
+
+export const changePasswordApi = (payload: ChangePasswordPayload) => {
+  return axiosInstance.post<ChangePasswordResponse>("/accounts/change-password", payload);
 };
 
 export const getUserDetailsApi = () => {

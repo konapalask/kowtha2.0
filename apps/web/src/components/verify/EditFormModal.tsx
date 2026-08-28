@@ -1,7 +1,7 @@
 import { useTabContext } from "@/pages/verify/[id]";
 import { EditFormModalProps } from "@/utils/verifierInterface";
 import { Form, message, Modal, Row } from "antd";
-import { useRouter } from "next/router";
+import { useRouter } from "@/utils/router";
 import { useEffect, useState, useRef } from "react";
 import { FormSelector } from "./VerificationEditForms";
 import { updateFinancialAnalysis } from "@/services/verifier.services";

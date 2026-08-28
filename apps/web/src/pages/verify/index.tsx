@@ -1,4 +1,3 @@
-import dynamic from "next/dynamic";
 import { useEffect, useState, useRef, useCallback } from "react";
 import {
   Table,
@@ -17,24 +16,17 @@ import {
   EyeOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
-// import DashboardLayout from "@/components/layout/DashboardLayout";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import type { ColumnsType } from "antd/es/table";
-import { useRouter } from "next/router";
+import { useRouter } from "@/utils/router";
 import {
   getFieldExecutivesApi,
   getVerifierLoansApi,
 } from "@/services/loans.services";
 import { useDepartmentChange, getCurrentDepartmentRole } from "@/utils/utility";
 
-dayjs.extend(relativeTime);
-
-// const { Title } = Typography;
-// const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
-// import "react-quill/dist/quill.snow.css";
-
-// Define a generic type for our loan data
 type LoanData = {
   id?: string | number;
   applicationNumber?: string;
@@ -42,30 +34,45 @@ type LoanData = {
   status?: string;
   uploadedAt?: string;
   updatedAt?: string;
-  [key: string]: any; // Allow for additional properties
+  [key: string]: any;
 };
-
-const DashboardLayout = dynamic(
-  () => import("@/components/layout/DashboardLayout"),
-  { ssr: false }
-);
 
 export default function Verify() {
   const [loading, setLoading] = useState(false);
-  // const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
   const [loans, setLoans] = useState<LoanData[]>([]);
   const router = useRouter();
   const currentDepartment = useDepartmentChange();
 
   // Search state
-  const [searchApplicationNumber, setSearchApplicationNumber] =
-    useState<string>("");
+  const [searchApplicationNumber, setSearchApplicationNumber] = useState<string>("");
   const [searchApplicantName, setSearchApplicantName] = useState<string>("");
   const [activeSearchField, setActiveSearchField] = useState<string | null>(null);
 
-  // Pagination state - similar to loans page approach
+  // Debounced search filters
+  const [debouncedAppNumber, setDebouncedAppNumber] = useState<string>("");
+  const [debouncedApplicantName, setDebouncedApplicantName] = useState<string>("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedAppNumber(searchApplicationNumber);
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [searchApplicationNumber]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedApplicantName(searchApplicantName);
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [searchApplicantName]);
+
+  // Pagination state
   const pageSize = 10;
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(() => {
+    const p = parseInt(router.query.page as string, 10);
+    return !isNaN(p) && p > 0 ? p : 1;
+  });
+
   const [paginationMeta, setPaginationMeta] = useState({
     total: 0,
     page: 1,
@@ -73,57 +80,40 @@ export default function Verify() {
     totalPages: 0,
   });
 
+  // Synchronize currentPage with query parameter
   useEffect(() => {
-    if (router.isReady) {
-      if (router.query.page) {
-        const page = parseInt(router.query.page as string, 10);
-        if (!isNaN(page) && page > 0) {
-          setCurrentPage((prevPage) => {
-            return prevPage !== page ? page : prevPage;
-          });
-        }
-      } else {
-        setCurrentPage((prevPage) => {
-          return prevPage !== 1 ? 1 : prevPage;
-        });
+    if (router.isReady && router.query.page) {
+      const pageFromQuery = parseInt(router.query.page as string, 10);
+      if (!isNaN(pageFromQuery) && pageFromQuery > 0 && pageFromQuery !== currentPage) {
+        setCurrentPage(pageFromQuery);
       }
     }
   }, [router.isReady, router.query.page]);
 
-  const fetchLoans = useCallback(async (page?: number) => {
+  // Primary optimized data fetcher
+  const fetchLoans = useCallback(async (pageToFetch: number) => {
     if (!router.isReady) return;
-
-    let pageToUse = 1;
-    
-    if (page !== undefined) {
-      pageToUse = page;
-    } else if (router.query.page) {
-      const pageFromQuery = parseInt(router.query.page as string, 10);
-      if (!isNaN(pageFromQuery) && pageFromQuery > 0) {
-        pageToUse = pageFromQuery;
-      }
-    }
 
     setLoading(true);
     try {
-      const res = await getVerifierLoansApi(pageToUse, pageSize, {
-        applicationNumber: searchApplicationNumber,
-        applicantName: searchApplicantName,
+      const res = await getVerifierLoansApi(pageToFetch, pageSize, {
+        applicationNumber: debouncedAppNumber,
+        applicantName: debouncedApplicantName,
       });
+
       const responseData = res?.data?.data || res?.data || res;
       const items = responseData?.items || responseData?.data || [];
       const meta = responseData?.meta || {
         total: items.length,
-        page: pageToUse,
+        page: pageToFetch,
         limit: pageSize,
         totalPages: Math.ceil(items.length / pageSize),
       };
 
       setLoans(Array.isArray(items) ? items : []);
       setPaginationMeta(meta);
-      setCurrentPage(pageToUse);
     } catch (err) {
-      console.log(err);
+      console.error("Error fetching verifier loans:", err);
       setLoans([]);
       setPaginationMeta({
         total: 0,
@@ -131,30 +121,21 @@ export default function Verify() {
         limit: pageSize,
         totalPages: 0,
       });
-      setCurrentPage(1);
     } finally {
       setLoading(false);
     }
   }, [
     router.isReady,
-    router.query.page,
     currentDepartment,
     pageSize,
-    searchApplicationNumber,
-    searchApplicantName,
+    debouncedAppNumber,
+    debouncedApplicantName,
   ]);
 
+  // Execute fetch when page, department, or debounced search changes
   useEffect(() => {
-    fetchLoans();
-  }, [
-    router.isReady,
-    router.query.page,
-    currentDepartment,
-    pageSize,
-    searchApplicationNumber,
-    searchApplicantName,
-    fetchLoans,
-  ]);
+    fetchLoans(currentPage);
+  }, [currentPage, currentDepartment, debouncedAppNumber, debouncedApplicantName, fetchLoans]);
 
   const getStatusTags = (record: any) => {
     const types = [
@@ -178,15 +159,48 @@ export default function Verify() {
           }
           const isCompleted = verification?.status === "Completed";
           const approvedStatus = verification?.approvedStatus;
+          const isPositive = approvedStatus === "Positive";
+          const isNegative = approvedStatus === "Negative" || approvedStatus === "Mismatch";
+          
           return (
-            <Tag key={type.key} color={isCompleted ? "geekblue" : "orange"}>
+            <Tag
+              key={type.key}
+              style={{
+                borderRadius: "9999px",
+                padding: "3px 10px",
+                fontSize: "11.5px",
+                fontWeight: 600,
+                border: "1px solid",
+                background: isCompleted
+                  ? isPositive
+                    ? "#ecfdf5"
+                    : isNegative
+                    ? "#fef2f2"
+                    : "#f0f7ff"
+                  : "#fffbeb",
+                borderColor: isCompleted
+                  ? isPositive
+                    ? "#a7f3d0"
+                    : isNegative
+                    ? "#fecaca"
+                    : "#bfdbfe"
+                  : "#fde68a",
+                color: isCompleted
+                  ? isPositive
+                    ? "#065f46"
+                    : isNegative
+                    ? "#991b1b"
+                    : "#1e40af"
+                  : "#92400e",
+              }}
+            >
               {type.label}{" "}
               {approvedStatus ? (
                 <CheckOutlined
                   style={{
-                    color: approvedStatus === "Positive" ? "green" : "red",
+                    color: isPositive ? "#059669" : "#dc2626",
+                    marginLeft: 4,
                   }}
-                  // color={approvedStatus === "Positive" ? "green" : "red"}
                 />
               ) : null}
             </Tag>
@@ -236,7 +250,7 @@ export default function Verify() {
               <span>Application Number</span>
               <SearchOutlined
                 style={{
-                  color: searchApplicationNumber ? "#1890ff" : undefined,
+                  color: searchApplicationNumber ? "#0B2545" : undefined,
                   cursor: "pointer",
                 }}
                 onClick={() => setActiveSearchField("applicationNumber")}
@@ -248,7 +262,11 @@ export default function Verify() {
       dataIndex: "applicationNumber",
       key: "applicationNumber",
       width: 200,
-      render: (text) => text ?? "-",
+      render: (text) => (
+        <span style={{ fontWeight: 600, color: "#0B2545" }}>
+          {text ?? "-"}
+        </span>
+      ),
     },
     {
       title: (
@@ -261,7 +279,6 @@ export default function Verify() {
               value={searchApplicantName}
               onChange={(e) => setSearchApplicantName(e.target.value)}
               onBlur={() => {
-
                 if (!searchApplicantName) {
                   setActiveSearchField(null);
                 }
@@ -275,7 +292,7 @@ export default function Verify() {
               <span>Applicant Name</span>
               <SearchOutlined
                 style={{
-                  color: searchApplicantName ? "#1890ff" : undefined,
+                  color: searchApplicantName ? "#0B2545" : undefined,
                   cursor: "pointer",
                 }}
                 onClick={() => setActiveSearchField("applicantName")}
@@ -290,162 +307,128 @@ export default function Verify() {
       render: (text) => text ?? "-",
     },
     {
-      title: "Investigations",
-      dataIndex: "status",
-      key: "status",
-      render: (_, record) => getStatusTags(record),
-      width: 200,
+      title: "Bank Name",
+      dataIndex: "bankName",
+      key: "bankName",
+      width: 150,
+      render: (text) => text ?? "-",
     },
     {
-      title: "Updated At",
-      key: "updatedAt",
-      render: (_, record) => {
-        const latest =
-          record?.verifications?.[0]?.updatedAt ?? record?.updatedAt;
-        return latest ? dayjs(latest).fromNow() : "-";
-      },
+      title: "Loan Type",
+      dataIndex: "loanType",
+      key: "loanType",
       width: 150,
+      render: (text) => text ?? "-",
+    },
+    {
+      title: "Applicant Type",
+      dataIndex: "applicantType",
+      key: "applicantType",
+      width: 120,
+      render: (text) => text ?? "-",
+    },
+    {
+      title: "Last Updated",
+      dataIndex: "updatedAt",
+      key: "updatedAt",
+      width: 150,
+      render: (date: string) => {
+        if (!date) return "-";
+        return (
+          <Space direction="vertical" size={0}>
+            <span style={{ fontWeight: 500 }}>{dayjs(date).format("DD/MM/YYYY")}</span>
+            <span style={{ fontSize: "11.5px", color: "#94a3b8" }}>
+              {dayjs(date).format("hh:mm A")}
+            </span>
+          </Space>
+        );
+      },
+    },
+    {
+      title: "Ops Executive",
+      dataIndex: ["operationsExecutive", "name"],
+      key: "operationsExecutive",
+      width: 150,
+      render: (text) => text ?? "-",
+    },
+    {
+      title: "Status",
+      key: "status",
+      width: 220,
+      render: (_, record) => getStatusTags(record),
     },
     {
       title: "Actions",
       key: "actions",
-      align: "center",
-      render: (_, record) => {
-        const enabledStatuses = ["FVCompleted", "BackendCompleted", "Completed"];
-        const verifications = record?.verifications || [];
-        const hasFeSubmission = verifications.some(
-          (v: any) =>
-            v?.initialSubmitted === true ||
-            v?.status === "Completed" ||
-            v?.status === "FVCompleted"
-        );
-
-        const isEnabled =
-          record?.department === "FI"
-            ? hasFeSubmission
-            : hasFeSubmission || enabledStatuses.includes(record?.status ?? "");
-
-        return (
-          <Button
-            type="link"
-            icon={<EyeOutlined />}
-            onClick={() => {
-              if (isEnabled) {
-                record?.id &&
-                  router?.push?.(`/verify/${record.id}?page=${currentPage}`);
-              }
-            }}
-            disabled={!isEnabled}
-          >
-            View
-          </Button>
-        );
-      },
-      width: 100,
+      width: 110,
       fixed: "right",
+      render: (_, record) => (
+        <Button
+          type="primary"
+          icon={<EyeOutlined />}
+          size="small"
+          style={{
+            background: "#0B2545",
+            borderRadius: "6px",
+            fontWeight: 600,
+            fontSize: "12px",
+            height: "30px",
+            padding: "0 12px",
+          }}
+          onClick={() => {
+            router.push(`/verify/${record.id}`);
+          }}
+        >
+          Verify
+        </Button>
+      ),
     },
   ];
 
-  // Table pagination config
-  const paginationConfig =
-    paginationMeta.totalPages > 0
-      ? {
-          current: currentPage,
-          pageSize: paginationMeta.limit,
-          total: paginationMeta.total,
-          showSizeChanger: false,
-          showTotal: (total: number, range: [number, number]) =>
-            `${range[0]}-${range[1]} of ${total} items`,
-          position: ["bottomCenter" as "bottomCenter"],
-          onChange: (page: number) => {
-            setCurrentPage(page);
-            router.replace(
-              {
-                pathname: router.pathname,
-                query: { ...router.query, page },
-              },
-              undefined,
-              { shallow: true }
-            );
-            fetchLoans(page);
-          },
-        }
-      : false;
-
-  // Reset to first page when search changes
-  useEffect(() => {
-    setCurrentPage(1);
-    router.replace(
-      {
-        pathname: router.pathname,
-        query: { ...router.query, page: 1 },
-      },
-      undefined,
-      { shallow: true }
-    );
-  }, [searchApplicationNumber, searchApplicantName]);
+  const handleTableChange = (pagination: any) => {
+    const newPage = pagination.current;
+    setCurrentPage(newPage);
+    router.replace({
+      pathname: router.pathname,
+      query: { ...router.query, page: newPage },
+    });
+  };
 
   return (
     <DashboardLayout>
-      <Card>
-        <div
-          style={{
-            marginTop: 16,
-            marginBottom: 16,
-            display: "flex",
-            gap: 16,
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-          }}
-        >
-          <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
-            {/* <Badge color="green" text="Completed - Positive" /> */}
-            <div style={{ gap: 2 }}>
-              <CheckOutlined style={{ color: "green" }} /> Completed - Positive
-            </div>
-            {/* <Badge color="red" text="Completed - Negative" /> */}
-            <div style={{ gap: 2 }}>
-              <CheckOutlined style={{ color: "red" }} /> Completed - Negative
-            </div>
+      <div style={{ marginBottom: 20 }}>
+        <Typography.Title level={3} style={{ margin: 0, color: "#0B2545", fontWeight: 700, letterSpacing: "-0.02em" }}>
+          Verification Queue
+        </Typography.Title>
+        <Typography.Text type="secondary" style={{ fontSize: 13, color: "#64748B" }}>
+          Pending and completed loan verifications assigned to your desk
+        </Typography.Text>
+      </div>
 
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                backgroundColor: "#f6ffed",
-                borderLeft: "3px solid #52c41a",
-                padding: "4px 10px",
-                borderRadius: 2,
-              }}
-            >
-              Closed Loan
-            </div>
-
-            {/* <Badge color="green" text="Investigations completed" /> */}
-            {/* <Tag color="green">Investigations Completed</Tag> */}
-            {/* <Badge color="orange" text="In Progress" />
-            <Badge color="default" text="Pending" /> */}
-          </div>
-        </div>
+      <Card
+        style={{
+          background: "#ffffff",
+          borderRadius: "16px",
+          border: "1px solid #eef2f6",
+          boxShadow: "0 1px 3px 0 rgba(15, 23, 42, 0.03), 0 6px 16px -4px rgba(15, 23, 42, 0.04)",
+          padding: "8px",
+        }}
+      >
         <Table
-          className="striped-table"
-          // rowClassName={(_,index)=>index%2===0?"":"striped-row"}
           columns={columns}
           dataSource={loans}
-          rowKey={(record) =>
-            record?.id?.toString() ?? Math.random().toString()
-          }
-          rowClassName={(record) =>
-            record?.closedAt ? "closed-loan-row" : ""
-          }
+          rowKey="id"
           loading={loading}
-          pagination={paginationConfig}
-          // size="small"
-          // scroll={{ y: 400 }}
-          sticky
-          bordered
+          scroll={{ x: 1200 }}
+          onChange={handleTableChange}
+          pagination={{
+            current: currentPage,
+            pageSize: pageSize,
+            total: paginationMeta.total,
+            showSizeChanger: false,
+            showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} cases`,
+            position: ["bottomCenter"],
+          }}
         />
       </Card>
     </DashboardLayout>

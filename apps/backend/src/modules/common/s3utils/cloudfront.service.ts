@@ -18,23 +18,32 @@ export class CloudFrontService {
     if (!this.keyPairId) missing.push('CLOUDFRONT_KEY_PAIR_ID');
     if (!keyPath) missing.push('CLOUDFRONT_PRIVATE_KEY_PATH');
     if (missing.length > 0) {
-      throw new Error(
-        `CloudFront configuration missing required env var(s): ${missing.join(', ')}`,
+      console.warn(
+        `[CloudFrontService] Missing CloudFront env var(s): ${missing.join(', ')}. CloudFront signed URLs will be disabled.`,
       );
+      this.privateKey = '';
+      return;
     }
 
-    const pem = fs.readFileSync(keyPath, 'utf8').trim();
-    if (!pem.includes('BEGIN') || !pem.includes('PRIVATE KEY')) {
-      throw new Error(
-        `CloudFront private key at ${keyPath} is not a valid PEM`,
-      );
+    try {
+      const pem = fs.readFileSync(keyPath, 'utf8').trim();
+      if (!pem.includes('BEGIN') || !pem.includes('PRIVATE KEY')) {
+        console.warn(`[CloudFrontService] CloudFront private key at ${keyPath} is not a valid PEM`);
+        this.privateKey = '';
+        return;
+      }
+      this.privateKey = pem;
+    } catch (e: any) {
+      console.warn(`[CloudFrontService] Failed to read private key at ${keyPath}: ${e.message}`);
+      this.privateKey = '';
     }
-
-    this.privateKey = pem;
   }
 
   getSignedImageUrl(key: string, expiresInSeconds = 3600): string {
     const cleanKey = key.replace(/^\/+/, '');
+    if (!this.domain || !this.keyPairId || !this.privateKey) {
+      return `https://${this.domain || 'localhost'}/${cleanKey}`;
+    }
     const url = `https://${this.domain}/${cleanKey}`;
     const dateLessThan = new Date(Date.now() + expiresInSeconds * 1000).toISOString();
 

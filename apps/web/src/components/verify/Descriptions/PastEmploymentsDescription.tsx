@@ -145,7 +145,7 @@ const PastEmploymentsDescription: React.FC<{
           />
         </Card>
       </section>
-      <style jsx global>{`
+      <style>{`
         .changed-row td {
           background: #f6ffed !important;
         }

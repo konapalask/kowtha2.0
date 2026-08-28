@@ -20,7 +20,7 @@ import WorkEmploymentDetailsDescription from "./Descriptions/WorkEmploymentDetai
 import BusinessDetailsDescription from "./Descriptions/BusinessDetailsDescription";
 import BusinessMiscellaneousDescription from "./Descriptions/BusinessMiscellaneousDescription";
 import ApplicantDetailsDescription from "./Descriptions/ApplicantDetailsDescription";
-import { useRouter } from "next/router";
+import { useRouter } from "@/utils/router";
 import { useTabContext } from "@/pages/verify/[id]";
 import {
   getUserDetails,

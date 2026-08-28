@@ -10,7 +10,7 @@ import {
   getVerificationData,
 } from "@/services/verifier.services";
 import { message, Typography } from "antd";
-import { useRouter } from "next/router";
+import { useRouter } from "@/utils/router";
 import React, { useEffect, useState } from "react";
 
 const { Text } = Typography;

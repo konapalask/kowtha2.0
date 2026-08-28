@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Drawer, Descriptions, Typography, Card, Space, Tag, Divider, Button, Form, Input, message, Tooltip, Select, Spin } from "antd";
-import { UserOutlined, MailOutlined, PhoneOutlined, EnvironmentOutlined, IdcardOutlined, BankOutlined, TeamOutlined, ApartmentOutlined, EditOutlined, SaveOutlined, CloseOutlined, SwapOutlined, LogoutOutlined } from "@ant-design/icons";
-import Link from "next/link";
+import { UserOutlined, MailOutlined, PhoneOutlined, EnvironmentOutlined, IdcardOutlined, BankOutlined, TeamOutlined, ApartmentOutlined, EditOutlined, SaveOutlined, CloseOutlined, SwapOutlined, LogoutOutlined, KeyOutlined } from "@ant-design/icons";
+import { Link } from "@/utils/router";
 import { getCurrentDepartment, getCurrentDepartmentRole } from "@/utils/utility";
+import ChangePasswordModal from "@/components/ChangePasswordModal";
 
 const { Title } = Typography;
 
@@ -44,6 +45,7 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
   loading = false,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showDepartmentModal, setShowDepartmentModal] = useState(false);
   const [showCurrentDepartmentModal, setShowCurrentDepartmentModal] = useState(false);
   const [selectedDepartment, setSelectedDepartment] = useState<string>('');
@@ -460,15 +462,30 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
         </Descriptions>
       </Card>
 
-      {/* Logout Button - Fixed at bottom right */}
+      {/* Security Section / Bottom Actions */}
       <div
         style={{
           position: "absolute",
           bottom: 24,
           right: 24,
           zIndex: 1000,
+          display: "flex",
+          gap: 12,
         }}
       >
+        <Button
+          icon={<KeyOutlined />}
+          size="large"
+          onClick={() => setShowPasswordModal(true)}
+          style={{
+            borderRadius: "8px",
+            borderColor: "#00396e",
+            color: "#00396e",
+            fontWeight: 500,
+          }}
+        >
+          Change Password
+        </Button>
         <Tooltip title="Logout">
           <Link href="/logout">
             <Button
@@ -478,8 +495,8 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
               style={{
                 borderRadius: "8px",
                 boxShadow: "0 4px 12px rgba(255, 77, 79, 0.3)",
-                background: "var(--primary-800)",
-                borderColor: "var(--primary-800)"
+                background: "#00396e",
+                borderColor: "#00396e",
               }}
             >
               Logout
@@ -487,6 +504,13 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
           </Link>
         </Tooltip>
       </div>
+
+      <ChangePasswordModal
+        open={showPasswordModal}
+        hasExistingPassword={true}
+        onClose={() => setShowPasswordModal(false)}
+        onSuccess={() => setShowPasswordModal(false)}
+      />
 
       {/* Department Change Modal */}
       <Drawer
@@ -584,7 +608,7 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
         </Select>
       </Drawer>
 
-      <style jsx>{`
+      <style>{`
         .ant-descriptions-item-label {
           font-family: "Noto Sans", sans-serif !important;
         }

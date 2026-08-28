@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 import "react-quill/dist/quill.snow.css";
 import EditRequestLogs from "./EditRequestLogs";
 import FinalVerdict from "./FinalVerdict";
-import { useRouter } from "next/router";
+import { useRouter } from "@/utils/router";
 import BasicDetailsDescription from "./Descriptions/BasicDetailsDescription";
 import AddressVerificationDescription from "./Descriptions/AddressVerificationDescription";
 import ResidenceDetailsDescription from "./Descriptions/ResidenceDetailsDescription";

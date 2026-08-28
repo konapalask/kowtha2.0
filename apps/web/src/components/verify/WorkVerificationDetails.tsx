@@ -14,7 +14,7 @@ import { useEffect, useState } from "react";
 import "react-quill/dist/quill.snow.css";
 import EditRequestLogs from "./EditRequestLogs";
 import Footer from "./Footer";
-import { useRouter } from "next/router";
+import { useRouter } from "@/utils/router";
 import WorkBasicDetailsDescription from "./Descriptions/WorkBasicDetailsDescription";
 import WorkEmploymentDetailsDescription from "./Descriptions/WorkEmploymentDetailsDescription";
 // import PdfPreview from "./PdfPreview";

@@ -48,7 +48,7 @@ import LoanEditDrawer from "@/components/loans/LoanEditDrawer";
 import BulkImportDrawer from "@/components/loans/BulkImportDrawer";
 import ImportCsvModal from "@/components/loans/ImportCsvModal";
 import FilterOverlay, { FilterValue } from "@/components/loans/FilterOverlay";
-import dynamic from "next/dynamic";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 import {
   getUserDetails,
   getCurrentDepartment,
@@ -61,11 +61,6 @@ import {
   getPdBanksApi,
   getTemplateOptionsApi,
 } from "@/services/schema.service";
-
-const DashboardLayout = dynamic(
-  () => import("@/components/layout/DashboardLayout"),
-  { ssr: false },
-);
 
 dayjs.extend(relativeTime);
 dayjs.extend(utc);

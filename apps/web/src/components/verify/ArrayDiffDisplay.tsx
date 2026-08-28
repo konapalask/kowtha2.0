@@ -543,7 +543,7 @@ export const ArrayDiffDisplay: React.FC<ArrayDiffDisplayProps> = ({
         />
       )}
 
-      <style jsx>{`
+      <style>{`
         .array-diff-table .array-diff-row-added {
           background-color: #f6ffed;
         }

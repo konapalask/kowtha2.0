@@ -979,9 +979,25 @@ export class LoanService implements OnModuleDestroy {
 
       const verifications = await this.prisma.verification.findMany({
         where: where,
-        include: {
+        select: {
+          id: true,
+          loanId: true,
+          status: true,
+          addressType: true,
+          approvedStatus: true,
+          updatedAt: true,
           loan: {
-            include: {
+            select: {
+              id: true,
+              applicationNumber: true,
+              applicantName: true,
+              bankName: true,
+              loanType: true,
+              status: true,
+              applicantType: true,
+              templateName: true,
+              createdAt: true,
+              updatedAt: true,
               operationsExecutive: {
                 select: {
                   id: true,

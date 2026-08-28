@@ -17,7 +17,7 @@ import {
   FormInstance,
 } from "antd";
 import { PlusOutlined, EditOutlined } from "@ant-design/icons";
-// import DashboardLayout from "@/components/layout/DashboardLayout";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 import { ColumnsType } from "antd/es/table";
 import {
   createUserApi,
@@ -31,7 +31,6 @@ import {
   getOfficesApi,
   getOfficesByDepartmentApi,
 } from "@/services/settings.services";
-import dynamic from "next/dynamic";
 import {
   getUserDetails,
   getCurrentDepartment,
@@ -71,10 +70,7 @@ interface Office {
   name: string;
 }
 
-const DashboardLayout = dynamic(
-  () => import("@/components/layout/DashboardLayout"),
-  { ssr: false }
-);
+
 
 const RoleOptions = [
   { label: "Admin", value: "Admin" },

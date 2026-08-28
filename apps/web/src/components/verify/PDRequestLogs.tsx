@@ -18,7 +18,7 @@ import {
   postEditRequestApi,
   updateEditRequestApi,
 } from "@/services/verifier.services";
-import { useRouter } from "next/router";
+import { useRouter } from "@/utils/router";
 import { useTabContext } from "@/pages/verify/[id]";
 import {
   getUserDetails,
