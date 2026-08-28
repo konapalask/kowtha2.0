@@ -38,11 +38,11 @@ export default function Dashboard() {
     try {
       setLoading(true);
       const params = {
-        startDate: dateRange[0] ? dateRange[0].toISOString() : undefined,
-        endDate: dateRange[1] ? dateRange[1].toISOString() : undefined,
+        fromDate: dateRange[0] ? dateRange[0].format("YYYY-MM-DD") : null,
+        toDate: dateRange[1] ? dateRange[1].format("YYYY-MM-DD") : null,
       };
       const data = await getDashboardMetrics(params);
-      setMetrics(data);
+      setMetrics(data || {});
     } catch (error) {
       console.error("Error fetching dashboard metrics:", error);
     } finally {

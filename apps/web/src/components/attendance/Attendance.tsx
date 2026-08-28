@@ -60,7 +60,12 @@ export default function Attendance({ dateRange }: AttendanceProps) {
         endDate: dateRange[1] ? dateRange[1].format("YYYY-MM-DD") : undefined,
       };
       const response = await getAttendanceRecodsApi(params);
-      setData(response?.data || []);
+      const records = Array.isArray(response?.data)
+        ? response.data
+        : (Array.isArray(response?.data?.data)
+          ? response.data.data
+          : (Array.isArray(response) ? response : []));
+      setData(records);
     } catch (error) {
       message.error("Failed to fetch attendance records");
       console.error(error);
@@ -74,15 +79,15 @@ export default function Attendance({ dateRange }: AttendanceProps) {
   }, [currentDepartment, dateRange]);
 
   const filteredData = useMemo(() => {
-    let result = data;
+    let result = Array.isArray(data) ? data : [];
     if (filters.name) {
       result = result.filter((rec) =>
-        (rec.user?.name || "").toLowerCase().includes(filters.name.toLowerCase())
+        (rec?.user?.name || "").toLowerCase().includes(filters.name.toLowerCase())
       );
     }
     if (filters.employeeCode) {
       result = result.filter((rec) =>
-        (rec.user?.employeeCode || "")
+        (rec?.user?.employeeCode || "")
           .toLowerCase()
           .includes(filters.employeeCode.toLowerCase())
       );
