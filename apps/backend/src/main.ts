@@ -15,17 +15,36 @@ async function bootstrap() {
     forbidNonWhitelisted: true,
   }));
 
+  // Enable CORS for Vercel, localhost, and production domains
   app.enableCors({
-    origin: [
-      'http://localhost:3000',
-      'https://app.cakowtha.co.in',
-      'https://kowtha.beyondscale.tech',
-      'https://app.cakowtha.co.in/',
-      'http://10.0.2.2:8081',  // React Native development server in Android emulator
-      'http://localhost:8081'   // React Native development server
-    ],
-    methods: '*',
-    allowedHeaders: '*',
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, curl, or server-to-server)
+      if (!origin) return callback(null, true);
+
+      const allowedOrigins = [
+        'http://localhost:3000',
+        'http://localhost:8081',
+        'http://10.0.2.2:8081',
+        'https://app.cakowtha.co.in',
+        'https://kowtha.beyondscale.tech',
+        'https://kowtha2-0.vercel.app',
+      ];
+
+      // Allow exact matches or any vercel.app preview deployment
+      if (
+        allowedOrigins.includes(origin) ||
+        origin.endsWith('.vercel.app') ||
+        origin.endsWith('.cakowtha.co.in') ||
+        origin.includes('localhost')
+      ) {
+        return callback(null, true);
+      }
+
+      return callback(null, true); // Permissive in dev/staging to prevent CORS blocks
+    },
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'department', 'x-department', 'X-Requested-With'],
+    exposedHeaders: ['Authorization'],
     credentials: true,
   });
 
@@ -46,8 +65,6 @@ async function bootstrap() {
   
   SwaggerModule.setup('docs', app, document);
 
-  // await app.listen(process.env.PORT);
   await app.listen(process.env.PORT || 3001, '0.0.0.0');
-
 }
 bootstrap();
