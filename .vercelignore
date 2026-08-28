@@ -1,0 +1,5 @@
+apps/backend
+apps/mobile
+packages
+docker-compose.yml
+dev-*.sh
