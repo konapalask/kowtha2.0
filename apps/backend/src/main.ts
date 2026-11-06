@@ -28,6 +28,7 @@ async function bootstrap() {
         'https://app.cakowtha.co.in',
         'https://kowtha.beyondscale.tech',
         'https://kowtha2-0.vercel.app',
+        'https://kowtha-one.vercel.app',
       ];
 
       // Allow exact matches or any vercel.app preview deployment

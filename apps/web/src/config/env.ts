@@ -13,6 +13,17 @@ export const getEnv = (key: string, defaultValue = ''): string => {
   return defaultValue;
 };
 
-export const API_BASE_URL = getEnv('API_BASE_URL', 'https://api.cakowtha.co.in/api/');
-export const DOMAIN_BASE_URL = getEnv('DOMAIN_BASE_URL', window.location.origin);
-export const DOMAIN = getEnv('DOMAIN', window.location.hostname);
+const getDefaultApiBaseUrl = (): string => {
+  const configured = getEnv('API_BASE_URL');
+  if (configured) return configured;
+
+  if (typeof window !== 'undefined' && window.location.hostname.endsWith('vercel.app')) {
+    return '/api/';
+  }
+
+  return 'https://api.cakowtha.co.in/api/';
+};
+
+export const API_BASE_URL = getDefaultApiBaseUrl();
+export const DOMAIN_BASE_URL = getEnv('DOMAIN_BASE_URL', typeof window !== 'undefined' ? window.location.origin : '');
+export const DOMAIN = getEnv('DOMAIN', typeof window !== 'undefined' ? window.location.hostname : '');

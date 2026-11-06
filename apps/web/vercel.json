@@ -5,6 +5,10 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
+      "source": "/api/:path*",
+      "destination": "https://api.cakowtha.co.in/api/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

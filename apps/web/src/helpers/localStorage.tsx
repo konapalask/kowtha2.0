@@ -40,22 +40,34 @@ export function getCookie(cookieName: string): string | null {
 
 export function setCookie(name: string, value: string, domain?: string, path = '/'): void {
   if (!isBrowser) return;
-  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-  const domainPart = isLocal ? '' : (domain ? `; domain=${domain}` : (DOMAIN ? `; domain=.${DOMAIN.replace(/^\./, '')}` : ''));
+  const hostname = window.location.hostname;
+  const isLocal = hostname === 'localhost' || hostname === '127.0.0.1';
+  let domainPart = '';
+  if (!isLocal) {
+    const targetDomain = (domain || DOMAIN || '').replace(/^\./, '');
+    if (targetDomain && hostname.endsWith(targetDomain) && !targetDomain.endsWith('vercel.app')) {
+      domainPart = `; domain=.${targetDomain}`;
+    }
+  }
   document.cookie = `${name}=${encodeURIComponent(value)}; path=${path}${domainPart}; max-age=2592000; SameSite=Lax`;
 }
 
 export function clearAllCookies(): void {
   if (!isBrowser) return;
   const cookies = document.cookie.split("; ");
-  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-  const domain = DOMAIN ? `.${DOMAIN.replace(/^\./, '')}` : '';
+  const hostname = window.location.hostname;
+  const isLocal = hostname === 'localhost' || hostname === '127.0.0.1';
+  const targetDomain = (DOMAIN || '').replace(/^\./, '');
+  const domainPart = (!isLocal && targetDomain && hostname.endsWith(targetDomain) && !targetDomain.endsWith('vercel.app'))
+    ? `; domain=.${targetDomain}`
+    : '';
+
   for (const cookie of cookies) {
     const [name] = cookie.split("=");
     if (name) {
       document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-      if (!isLocal && domain) {
-        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=${domain}; path=/;`;
+      if (domainPart) {
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC${domainPart}; path=/;`;
       }
     }
   }

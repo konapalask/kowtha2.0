@@ -33,7 +33,7 @@ export default function ImportLoans() {
 
     try {
       setLoading(true);
-      const response = await axiosInstance.post('/api/loans/import', formData, {
+      const response = await axiosInstance.post('/loans/import', formData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'multipart/form-data',
@@ -55,7 +55,7 @@ export default function ImportLoans() {
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await axiosInstance.post('/api/loans/preview', formData, {
+      const response = await axiosInstance.post('/loans/preview', formData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'multipart/form-data',
